@@ -1,0 +1,30 @@
+{% extends "layouts/base.html" %}
+{% block title %}PubMed Articles{% endblock %}
+{% block description %}The page where curators can view all or a subset of PubMed articles in the HLA curation interface.{% endblock %}
+{% block content %}
+    <div class="block">
+        <h1 class="title">PubMed Articles</h1>
+        <div class="block">
+            <label class="label" for="active-search-input">Search for PubMed articles</label>
+            <input class="input column is-half"
+                   id="active-search-input"
+                   type="search"
+                   name="q"
+                   placeholder="Search by PubMed ID or title"
+                   hx-get="{% url "all_pubmed" %}"
+                   hx-trigger="input changed delay:300ms, keyup[key=='Enter'], load"
+                   hx-target="#pubmed-table"
+                   hx-swap="innerHTML"
+                   hx-params="*"
+                   autocomplete="off"
+            />
+        </div>
+        <div class="block">
+            <p class="mb-2">Don't see the PubMed article you're looking for?</p>
+            <a class="button is-responsive" href="{% url "new_pubmed" %}">Add PubMed Article</a>
+        </div>
+        <div class="block" id="pubmed-table">
+            {% include "publications/includes/pubmed_table.html" %}
+        </div>
+    </div>
+{% endblock %}

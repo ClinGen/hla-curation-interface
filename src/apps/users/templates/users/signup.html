@@ -1,0 +1,24 @@
+{% extends "layouts/base.html" %}
+{% block title %}Signup{% endblock %}
+{% block description %}The signup page for the HLA curation interface.{% endblock %}
+{% block content %}
+    <div class="block">
+        <h1 class="title">HCI Signup</h1>
+        <div class="block">
+            <form method="post">
+                {% csrf_token %}
+                <p class="has-text-danger">{{ form.non_field_errors }}</p>
+                {% include "includes/form_input.html" with field=form.username placeholder="Username" autocomplete="username" %}
+                {% include "includes/form_input.html" with field=form.email placeholder="Email" autocomplete="email" %}
+                {% include "includes/form_input.html" with field=form.first_name placeholder="First name" autocomplete="given-name" %}
+                {% include "includes/form_input.html" with field=form.last_name placeholder="Last name" autocomplete="family-name" %}
+                {% include "includes/form_input.html" with field=form.password1 type="password" placeholder="Password" autocomplete="current-password" %}
+                {% include "includes/form_input.html" with field=form.password2 type="password" placeholder="Password confirmation" autocomplete="current-password" %}
+                {% include "includes/form_submit_button.html" with text="Sign Up" %}
+            </form>
+        </div>
+        <div class="block">
+            <p>Already have an account? <a href="#">Log In</a></p>
+        </div>
+    </div>
+{% endblock %}

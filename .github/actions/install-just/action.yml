@@ -1,0 +1,18 @@
+name: "Install just"
+description: "Install the just task runner to run command line tasks"
+outputs:
+  just-path:
+    description: "The path to the installed just executable"
+    value: ${{ steps.install.outputs.just-path }}
+runs:
+  using: "composite"
+  steps:
+    - name: "Install just"
+      id: "install"
+      shell: "bash"
+      run: |
+        JUST_PATH=$(curl -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin)
+        echo "just-path=$JUST_PATH" >> $GITHUB_OUTPUT
+    - name: "Verify installation"
+      shell: "bash"
+      run: "just --version"

@@ -1,0 +1,14 @@
+{% extends "layouts/base.html" %}
+{% block title %}Add PubMed Article{% endblock %}
+{% block description %}The form for adding a new PubMed article to the HLA curation interface.{% endblock %}
+{% block content %}
+    <div>
+        <h1 class="title">Add PubMed Article</h1>
+        <form method="post">
+            {% csrf_token %}
+            {% include "includes/external_link.html" with prompt="Need to look up the ID of your PubMed article?" url=pubmed_search_url text="Search PubMed" %}
+            {% include "includes/form_input.html" with field=form.pubmed_id placeholder="PubMed ID" %}
+            {% include "includes/form_submit_button.html" %}
+        </form>
+    </div>
+{% endblock %}
