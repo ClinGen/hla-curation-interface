@@ -1,6 +1,7 @@
 .coverage
 .env
 .mypy_cache
+.terraform
 .venv
 __pycache__
 build

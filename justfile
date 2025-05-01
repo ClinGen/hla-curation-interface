@@ -28,16 +28,19 @@ alias qal := qual-all
 # Format the code.
 qual-format:
     uv run ruff format
+    cd infra/terraform && terraform fmt
 alias qfm := qual-format
 
 # Check the code for formatting issues.
 qual-format-check:
     uv run ruff format --check
+    cd infra/terraform && terraform fmt -check
 alias qfc := qual-format-check
 
 # Check the code for lint errors.
 qual-lint:
     uv run ruff check
+    cd infra/terraform && terraform validate
 alias qlt := qual-lint
 
 # Try to fix lint errors.

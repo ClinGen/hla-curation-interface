@@ -13,6 +13,7 @@ jobs:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"
       - uses: "./.github/actions/install-just"
+      - uses: "hashicorp/setup-terraform@v3"
       - name: "Make sure the code is properly formatted"
         run: "just qual-format-check"
   check_2_code_is_linted:
@@ -21,6 +22,7 @@ jobs:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"
       - uses: "./.github/actions/install-just"
+      - uses: "hashicorp/setup-terraform@v3"
       - name: "Make sure the code is free of lint errors"
         run: "just qual-lint"
   check_3_type_check_passes:
