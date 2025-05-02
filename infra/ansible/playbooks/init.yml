@@ -1,0 +1,12 @@
+- name: Deploy
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Admin | update
+      ansible.builtin.include_tasks: ../tasks/admin/update.yml
+    - name: Admin | upgrade
+      ansible.builtin.include_tasks: ../tasks/admin/upgrade.yml
+    - name: Install | uv
+      ansible.builtin.include_tasks: ../tasks/install/uv.yml
+    - name: Install | project
+      ansible.builtin.include_tasks: ../tasks/install/project.yml

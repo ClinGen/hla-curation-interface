@@ -163,12 +163,12 @@ alias djsh := django-shell
 # Deploy Recipes
 #=======================================================================================
 
-# Deploy to the test server.
-deploy-test:
-    cd infra/ansible && uv run ansible-playbook -i inventory.ini main.yml --limit test_server
-alias dete := deploy-test
+# Set up the test server for the first time.
+server-test-init:
+    cd infra/ansible && uv run ansible-playbook -i inventory.ini playbooks/init.yml --limit test_server
+alias stei := server-test-init
 
-# Deploy to the production server.
-deploy-prod:
-    cd infra/ansible && uv run ansible-playbook -i inventory.ini main.yml --limit prod_server
-alias depr := deploy-prod
+# Set up the production server for the first time.
+server-prod-init:
+    cd infra/ansible && uv run ansible-playbook -i inventory.ini playbooks/init.yml --limit prod_server
+alias spri := server-prod-init
