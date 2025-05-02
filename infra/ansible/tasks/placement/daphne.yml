@@ -1,0 +1,12 @@
+- name: Place the daphne socket systemd file
+  become: true
+  ansible.builtin.copy:
+    src: "files/daphne.socket"
+    dest: /etc/systemd/system/daphne.socket
+    mode: "640"
+- name: Place the daphne service systemd file
+  become: true
+  ansible.builtin.copy:
+    src: "files/daphne.service"
+    dest: /etc/systemd/system/daphne.service
+    mode: "640"

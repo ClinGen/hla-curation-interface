@@ -1,0 +1,6 @@
+- name: Place the Caddyfile for the test server
+  become: true
+  ansible.builtin.copy:
+    src: "files/{{ caddyfile }}"
+    dest: /etc/caddy/Caddyfile
+    mode: "640"

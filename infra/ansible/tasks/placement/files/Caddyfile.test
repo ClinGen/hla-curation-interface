@@ -1,0 +1,3 @@
+hci-test.clinicalgenome.org {
+        reverse_proxy localhost:8000
+}
