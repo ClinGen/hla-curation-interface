@@ -1,5 +1,6 @@
+---
 name: "CI"
-on:
+on:  # yamllint disable-line rule:truthy
   pull_request:
     branches:
       - "reorg"
@@ -12,8 +13,8 @@ jobs:
     steps:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"
-      - uses: "./.github/actions/install-just"
       - uses: "hashicorp/setup-terraform@v3"
+      - uses: "yk-lab/yamlfmt-action@v1"
       - name: "Make sure the code is properly formatted"
         run: "just qual-format-check"
   check_2_code_is_linted:
@@ -21,7 +22,6 @@ jobs:
     steps:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"
-      - uses: "./.github/actions/install-just"
       - uses: "hashicorp/setup-terraform@v3"
       - name: "Make sure the code is free of lint errors"
         run: "just qual-lint"
@@ -30,7 +30,6 @@ jobs:
     steps:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"
-      - uses: "./.github/actions/install-just"
       - name: "Run the type checker on the code"
         working-directory: ./src
         run: "just qual-type-check"
@@ -39,7 +38,6 @@ jobs:
     steps:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"
-      - uses: "./.github/actions/install-just"
       - name: "Run the Django check utility"
         working-directory: ./src
         run: "just django-check"
@@ -48,7 +46,6 @@ jobs:
     steps:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"
-      - uses: "./.github/actions/install-just"
       - name: "Run unit tests"
         working-directory: ./src
         run: "just test-unit"
@@ -57,7 +54,6 @@ jobs:
     steps:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"
-      - uses: "./.github/actions/install-just"
       - name: "Run component tests"
         working-directory: ./src
         run: "just test-component"
@@ -66,7 +62,6 @@ jobs:
     steps:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"
-      - uses: "./.github/actions/install-just"
       - name: "Run integration tests"
         working-directory: ./src
         run: "just test-integration"
@@ -75,7 +70,6 @@ jobs:
     steps:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"
-      - uses: "./.github/actions/install-just"
       - name: "Run contract tests"
         working-directory: ./src
         run: "just test-contract"
@@ -84,7 +78,6 @@ jobs:
     steps:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"
-      - uses: "./.github/actions/install-just"
       - name: "Run end-to-end tests"
         working-directory: ./src
         run: "just test-e2e"
@@ -93,7 +86,6 @@ jobs:
     steps:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"
-      - uses: "./.github/actions/install-just"
       - name: "Build the developer documentation site"
         working-directory: ./docs
         run: "just docs-build-html"
@@ -102,7 +94,6 @@ jobs:
     steps:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"
-      - uses: "./.github/actions/install-just"
       - name: "Collect test coverage stats"
         working-directory: ./src
         run: "uv run coverage run -m pytest"

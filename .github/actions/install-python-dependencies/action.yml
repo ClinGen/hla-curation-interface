@@ -1,5 +1,6 @@
+---
 name: "Install Python dependencies"
-description: "Install uv, and then use uv to install Python dependencies for the project"
+description: "Use uv to install Python dependencies for the project"
 runs:
   using: "composite"
   steps:

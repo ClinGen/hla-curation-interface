@@ -29,23 +29,28 @@ alias qal := qual-all
 qual-format:
     uv run ruff format
     cd infra/terraform && terraform fmt
+    yamlfmt
 alias qfm := qual-format
 
 # Check the code for formatting issues.
 qual-format-check:
     uv run ruff format --check
     cd infra/terraform && terraform fmt -check
+    yamlfmt -lint
 alias qfc := qual-format-check
 
 # Check the code for lint errors.
 qual-lint:
     uv run ruff check
     cd infra/terraform && terraform validate
+    cd infra/ansible && ansible-lint
+    cd .github && uv run yamllint .
 alias qlt := qual-lint
 
 # Try to fix lint errors.
 qual-lint-fix:
     uv run ruff check --fix
+    cd infra/ansible && ansible-lint --fix
 alias qlf := qual-lint-fix
 
 # Check Python type hints.
@@ -153,3 +158,17 @@ alias djru := django-runserver
 django-shell:
     cd src && uv run manage.py shell
 alias djsh := django-shell
+
+#=======================================================================================
+# Deploy Recipes
+#=======================================================================================
+
+# Deploy to the test server.
+deploy-test:
+    cd infra/ansible && uv run ansible-playbook -i inventory.ini main.yml --limit test_server
+alias dete := deploy-test
+
+# Deploy to the production server.
+deploy-prod:
+    cd infra/ansible && uv run ansible-playbook -i inventory.ini main.yml --limit prod_server
+alias depr := deploy-prod

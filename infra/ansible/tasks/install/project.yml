@@ -1,0 +1,11 @@
+- name: Ensure the source code is downloaded
+  ansible.builtin.git:
+    repo: "https://github.com/ClinGen/hla-curation-interface.git"
+    version: main
+    dest: hla-curation-interface
+- name: Ensure the Python dependencies are installed
+  ansible.builtin.command:
+    chdir: hla-curation-interface
+    cmd: "~/.local/bin/uv sync"
+  args:
+    creates: hla-curation-interface/.venv

@@ -13,13 +13,17 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "ansible>=11.5.0",
+    "ansible-dev-tools>=25.4.4",
     "coverage>=7.8.0",
     "django-stubs>=5.2.0",
     "pyright[nodejs]>=1.1.400",
     "pytest-django>=4.11.1",
     "ruff>=0.11.5",
+    "rust-just>=1.40.0",
     "sphinx>=8.2.3",
     "types-requests>=2.32.0.20250328",
+    "yamllint>=1.37.0",
 ]
 
 [tool.ruff]
