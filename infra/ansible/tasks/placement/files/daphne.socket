@@ -1,5 +1,5 @@
 [Unit]
-Description=daphne socket
+Description=Daphne socket
 
 [Socket]
 ListenStream=/run/daphne.sock

@@ -1,10 +1,10 @@
-- name: Place the daphne socket systemd file
+- name: Place the Daphne socket systemd file
   become: true
   ansible.builtin.copy:
     src: "files/daphne.socket"
     dest: /etc/systemd/system/daphne.socket
     mode: "640"
-- name: Place the daphne service systemd file
+- name: Place the Daphne service systemd file
   become: true
   ansible.builtin.copy:
     src: "files/daphne.service"

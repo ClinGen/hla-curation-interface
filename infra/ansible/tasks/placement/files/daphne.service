@@ -1,5 +1,5 @@
 [Unit]
-Description=daphne service
+Description=Daphne service
 Requires=daphne.socket
 After=network.target
 

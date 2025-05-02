@@ -14,5 +14,5 @@
       ansible.builtin.include_tasks: ../tasks/install/caddy.yml
     - name: Placement | Caddyfile
       ansible.builtin.include_tasks: ../tasks/placement/caddy.yml
-    - name: Placement | daphne files
+    - name: Placement | Daphne files
       ansible.builtin.include_tasks: ../tasks/placement/daphne.yml
