@@ -1,0 +1,10 @@
+- name: Deploy the latest changes to the server
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Admin | update
+      ansible.builtin.include_tasks: ../tasks/admin/update.yml
+    - name: Admin | upgrade
+      ansible.builtin.include_tasks: ../tasks/admin/upgrade.yml
+    - name: Admin | Git pull
+      ansible.builtin.include_tasks: ../tasks/admin/git_pull.yml

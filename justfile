@@ -160,7 +160,7 @@ django-shell:
 alias djsh := django-shell
 
 #=======================================================================================
-# Deploy Recipes
+# Server Recipes
 #=======================================================================================
 
 # Set up the test server for the first time.
@@ -172,3 +172,13 @@ alias stei := server-test-init
 server-prod-init:
     cd infra/ansible && uv run ansible-playbook -i inventory.ini playbooks/init.yml --limit prod_server
 alias spri := server-prod-init
+
+# Deploy latest changes to the test server.
+server-test-deploy:
+    cd infra/ansible && uv run ansible-playbook -i inventory.ini playbooks/deploy.yml --limit test_server
+alias sted := server-test-deploy
+
+# Deploy latest changes to the production server.
+server-prod-deploy:
+    cd infra/ansible && uv run ansible-playbook -i inventory.ini playbooks/deploy.yml --limit prod_server
+alias sprd := server-prod-deploy
