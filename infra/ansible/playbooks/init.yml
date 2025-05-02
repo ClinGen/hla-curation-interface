@@ -10,3 +10,5 @@
       ansible.builtin.include_tasks: ../tasks/install/uv.yml
     - name: Install | project
       ansible.builtin.include_tasks: ../tasks/install/project.yml
+    - name: Install | Caddy
+      ansible.builtin.include_tasks: ../tasks/install/caddy.yml
