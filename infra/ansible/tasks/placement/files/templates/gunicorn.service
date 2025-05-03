@@ -1,6 +1,6 @@
 [Unit]
 Description=Gunicorn service
-Requires=gnuicorn.socket
+Requires=gunicorn.socket
 After=network.target
 
 [Service]
