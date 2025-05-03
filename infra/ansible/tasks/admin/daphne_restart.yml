@@ -1,8 +1,3 @@
-- name: Ensure the Daphne systemd socket is restarted
-  become: true
-  ansible.builtin.systemd:
-    name: daphne.socket
-    state: restarted
 - name: Ensure the Daphne systemd service is restarted
   become: true
   ansible.builtin.systemd:
