@@ -1,9 +1,7 @@
 """Provide the settings for the prod environment.
 
 The prod environment should be used for both the test server and the production
-server. The only significant difference between the prod environment and the
-dev environment is that the prod environment uses a Postgres database instead of
-an SQLite database.
+server.
 """
 
 from .base import (  # noqa: F401 (We don't care about unused imports in this context.)
