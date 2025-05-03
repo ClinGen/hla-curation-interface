@@ -2,10 +2,10 @@
   hosts: all
   gather_facts: true
   tasks:
-    - name: Admin | update
-      ansible.builtin.include_tasks: ../tasks/admin/update.yml
-    - name: Admin | upgrade
-      ansible.builtin.include_tasks: ../tasks/admin/upgrade.yml
+    - name: Admin | apt update
+      ansible.builtin.include_tasks: ../tasks/admin/apt_update.yml
+    - name: Admin | apt upgrade
+      ansible.builtin.include_tasks: ../tasks/admin/apt_upgrade.yml
     - name: Admin | Git pull
       ansible.builtin.include_tasks: ../tasks/admin/git_pull.yml
     - name: Admin | Django migrate
