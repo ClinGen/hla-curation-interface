@@ -28,7 +28,7 @@
                             Profile
                         </a>
                     {% else %}
-                        <a href="#" class="button">
+                        <a href="{% url 'login' %}" class="button">
                             {% include "includes/icon.html" with name="log-in" %}
                             Log In
                         </a>

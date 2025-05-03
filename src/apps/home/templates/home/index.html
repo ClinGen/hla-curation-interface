@@ -13,7 +13,7 @@
                     If you need to change your affiliation, you can do so <a href="#">here</a>.
                 </p>
                 {% else %}
-                    <p class="subtitle">Welcome. To curate as part of an affiliation, please <a href="#">log in</a>.</p>
+                    <p class="subtitle">Welcome. To curate as part of an affiliation, please <a href="{% url 'login' %}">log in</a>.</p>
                 {% endif %}
             </div>
         </section>
