@@ -1,4 +1,4 @@
-- name: Ensure our Python dependencies are up-to-date
+- name: Ensure our Python dependencies are updated
   ansible.builtin.command:
     chdir: "{{ repo_dir }}/src"
     cmd: "~/.local/bin/uv sync"
