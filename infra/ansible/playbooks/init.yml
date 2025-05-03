@@ -10,10 +10,10 @@
       ansible.builtin.include_tasks: ../tasks/install/uv.yml
     - name: Install | project
       ansible.builtin.include_tasks: ../tasks/install/project.yml
-    - name: Placement | Daphne files
-      ansible.builtin.include_tasks: ../tasks/placement/daphne.yml
-    - name: Admin | Daphne start
-      ansible.builtin.include_tasks: ../tasks/admin/daphne_start.yml
+    - name: Placement | Gunicorn files
+      ansible.builtin.include_tasks: ../tasks/placement/gunicorn.yml
+    - name: Admin | Gunicorn start
+      ansible.builtin.include_tasks: ../tasks/admin/gunicorn_start.yml
     - name: Install | Caddy
       ansible.builtin.include_tasks: ../tasks/install/caddy.yml
     - name: Placement | Caddy files

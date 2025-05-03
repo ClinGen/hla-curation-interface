@@ -1,5 +1,0 @@
-- name: Ensure the Daphne systemd service is restarted
-  become: true
-  ansible.builtin.systemd:
-    name: daphne.service
-    state: restarted

@@ -5,12 +5,13 @@ description = "The HLA Curation Interface is a web application that biocurators 
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "daphne>=4.1.2",
     "django>=5.2",
     "django-htmx>=1.23.0",
+    "gunicorn>=23.0.0",
     "pydantic>=2.11.3",
     "python-dotenv>=1.1.0",
     "requests>=2.32.3",
+    "whitenoise[brotli]>=6.9.0",
 ]
 
 [dependency-groups]

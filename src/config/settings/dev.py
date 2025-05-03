@@ -20,6 +20,7 @@ from .base import (  # noqa: F401 (We don't care about unused imports in this co
     STATIC_ROOT,
     STATIC_URL,
     STATICFILES_DIRS,
+    STORAGES,
     TEMPLATES,
     TIME_ZONE,
     USE_I18N,

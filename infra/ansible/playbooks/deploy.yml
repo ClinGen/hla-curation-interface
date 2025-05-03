@@ -12,5 +12,5 @@
       ansible.builtin.include_tasks: ../tasks/admin/django_migrate.yml
     - name: Admin | Django collectstatic
       ansible.builtin.include_tasks: ../tasks/admin/django_collectstatic.yml
-    - name: Admin | Daphne restart
-      ansible.builtin.include_tasks: ../tasks/admin/daphne_restart.yml
+    - name: Admin | Gunicorn restart
+      ansible.builtin.include_tasks: ../tasks/admin/gunicorn_restart.yml
