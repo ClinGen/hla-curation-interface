@@ -3,10 +3,10 @@
   ansible.builtin.copy:
     src: "files/daphne.socket"
     dest: /etc/systemd/system/daphne.socket
-    mode: "640"
+    mode: "644"
 - name: Place the Daphne service systemd file
   become: true
-  ansible.builtin.copy:
-    src: "files/daphne.service"
+  ansible.builtin.template:
+    src: "files/templates/daphne.service"
     dest: /etc/systemd/system/daphne.service
-    mode: "640"
+    mode: "644"

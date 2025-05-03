@@ -1,0 +1,9 @@
+{{ subdomain }}.clinicalgenome.org {
+    root * {{ repo_dir }}/src/public
+    handle_path /static/* {
+        uri strip_prefix /static
+        file_server
+    }
+
+    reverse_proxy / localhost:8000
+}

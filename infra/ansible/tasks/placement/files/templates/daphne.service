@@ -6,8 +6,8 @@ After=network.target
 [Service]
 Type=simple
 User={{ ansible_user }}
-WorkingDirectory={{ working_dir }}
-ExecStart={{ venv_dir }}/bin/daphne -b 0.0.0.0 -p 8000 config.asgi:application
+WorkingDirectory={{ repo_dir }}/src
+ExecStart={{ repo_dir }}/.venv/bin/daphne -b 0.0.0.0 -p 8000 config.asgi:application
 
 [Install]
 WantedBy=multi-user.target

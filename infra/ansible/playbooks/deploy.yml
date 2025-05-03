@@ -8,3 +8,9 @@
       ansible.builtin.include_tasks: ../tasks/admin/upgrade.yml
     - name: Admin | Git pull
       ansible.builtin.include_tasks: ../tasks/admin/git_pull.yml
+    - name: Admin | Django migrate
+      ansible.builtin.include_tasks: ../tasks/admin/django_migrate.yml
+    - name: Admin | Django collectstatic
+      ansible.builtin.include_tasks: ../tasks/admin/django_collectstatic.yml
+    - name: Admin | Daphne restart
+      ansible.builtin.include_tasks: ../tasks/admin/daphne_restart.yml
