@@ -6,12 +6,11 @@ dev environment is that the prod environment uses a Postgres database instead of
 an SQLite database.
 """
 
-import os
-
 from .base import (  # noqa: F401 (We don't care about unused imports in this context.)
     ASGI_APPLICATION,
     AUTH_PASSWORD_VALIDATORS,
     BASE_DIR,
+    DATABASES,
     DEFAULT_AUTO_FIELD,
     INSTALLED_APPS,
     LANGUAGE_CODE,
@@ -33,14 +32,3 @@ ALLOWED_HOSTS = [
     "hci-test.clinicalgenome.org",
     "hci.clinicalgenome.org",
 ]
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("RDS_DB_NAME"),
-        "USER": os.getenv("RDS_USERNAME"),
-        "PASSWORD": os.getenv("RDS_PASSWORD"),
-        "HOST": os.getenv("RDS_HOSTNAME"),
-        "PORT": os.getenv("RDS_PORT"),
-    },
-}

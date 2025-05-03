@@ -3,11 +3,6 @@
 import os
 from pathlib import Path
 
-from dotenv import load_dotenv
-
-# Load environment variables from the `.env` file.
-load_dotenv()
-
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
@@ -99,3 +94,10 @@ STATICFILES_DIRS = [
 
 # Set the default primary key field type.
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    },
+}

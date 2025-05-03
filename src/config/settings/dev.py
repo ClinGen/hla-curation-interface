@@ -10,6 +10,7 @@ from .base import (  # noqa: F401 (We don't care about unused imports in this co
     ASGI_APPLICATION,
     AUTH_PASSWORD_VALIDATORS,
     BASE_DIR,
+    DATABASES,
     DEFAULT_AUTO_FIELD,
     INSTALLED_APPS,
     LANGUAGE_CODE,
@@ -28,10 +29,3 @@ from .base import (  # noqa: F401 (We don't care about unused imports in this co
 DEBUG = True
 
 ALLOWED_HOSTS: list[str] = []
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    },
-}
