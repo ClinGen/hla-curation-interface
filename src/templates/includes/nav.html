@@ -23,7 +23,7 @@
                             {% include "includes/icon.html" with name="log-out" %}
                             Log Out
                         </a>
-                        <a href="#" class="button">
+                        <a href="{% url 'profile' username=user.username %}" class="button">
                             {% include "includes/icon.html" with name="user" %}
                             Profile
                         </a>
