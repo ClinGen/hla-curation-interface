@@ -6,8 +6,8 @@
         <section class="hero is-light">
             <div class="hero-body">
                 <h2 class="title">HLA Curation Interface</h2>
-                {% if is_authenticated %}
-                <p class="subtitle">Welcome, {{ first_name }}. You are curating as part of the {{ affiliation }} affiliation.</p>
+                {% if user.is_authenticated %}
+                <p class="subtitle">Welcome, {{ user.first_name }}. You are curating as part of the {{ affiliation }} affiliation.</p>
                 <p class="helptext">
                     {% include "includes/icon.html" with name="info" %}
                     If you need to change your affiliation, you can do so <a href="#">here</a>.
@@ -19,7 +19,7 @@
         </section>
     </div>
     {% include "home/includes/add_buttons.html" %}
-    {% if is_authenticated %}
+    {% if user.is_authenticated %}
     <div class="block">
         <h3 class="title is-4">Your Curations</h3>
         {% include "home/includes/dummy_table_your_curations.html" %}

@@ -1,6 +1,5 @@
 """Provide the home view for the HCI."""
 
-from django.contrib.auth.models import User
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
@@ -15,15 +14,7 @@ def home(request: HttpRequest) -> HttpResponse:
     Returns:
         The rendered home page.
     """
-    if request.user.is_authenticated and isinstance(request.user, User):
-        context = {
-            "is_authenticated": True,
-            "email": request.user.email,
-            "affiliation": "HLA Expert Panel",
-            "first_name": request.user.first_name,
-        }
-    else:
-        context = {
-            "is_authenticated": False,
-        }
+    context = {
+        "affiliation": "HLA Expert Panel",
+    }
     return render(request, "home/index.html", context)
