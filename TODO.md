@@ -1,4 +1,4 @@
-# Things That Need to Be Done Before User Testing on May 5th
+# MVP TODOs
 
 ## We are using the new repo.
 
@@ -7,7 +7,7 @@
 - [x] We've made the new repo.
 - [ ] We've documented using Conventional Commits.
 - [ ] We've documented our commit message conventions.
-- [ ] We've added our code to the new repo using Conventional Commits.
+- [x] We've added our code to the new repo using Conventional Commits.
 - [ ] We've set up CI in the new repo.
 - [ ] We've set up a PR template.
 - [ ] We've documented how we process issues.
@@ -16,8 +16,8 @@
 
 ## The app test deployed to the test server and the prod server.
 
-- [ ] The test server is running the HCI with all MVP functionality.
-- [ ] The prod server is running the HCI with all MVP functionality.
+- [x] The test server is running the HCI.
+- [ ] The prod server is running the HCI.
 - [ ] We have the following CI workflow: PR opened → checks pass → deploy to test.
 - [ ] We have the following CI workflow: PR approved and merged → deploy to prod.
 - [ ] We have the following CI workflow: PR approved and merged → deploy dev docs site.
