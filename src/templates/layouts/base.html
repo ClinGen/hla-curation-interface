@@ -13,8 +13,8 @@
         <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon-16x16.png' %}">
         <link rel="manifest" href="{% static 'site.webmanifest' %}">
         <link rel="stylesheet" href="{% static 'bulma_1.0.2_min.css' %}">
-        <script src="{% static 'htmx_2.0.3_min.js' %}"></script>
         <script src="{% static 'feather_icons_4.29.2_min.js' %}"></script>
+        {% htmx_script %}
     </head>
     <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' hx-boost="true">
         {% include "includes/nav.html" %}
