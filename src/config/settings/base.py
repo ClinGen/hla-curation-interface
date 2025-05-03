@@ -82,7 +82,7 @@ USE_I18N = True
 USE_TZ = True
 
 # URL to use when referring to static files located in `STATIC_ROOT`.
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 
 # Set where production static files are served from.
 STATIC_ROOT = BASE_DIR / "public"
