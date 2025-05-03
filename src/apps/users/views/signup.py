@@ -7,7 +7,7 @@ from django.shortcuts import redirect, render
 from apps.users.forms.signup import SignupForm
 
 
-def signup(request: HttpRequest) -> HttpResponse:
+def custom_signup(request: HttpRequest) -> HttpResponse:
     """Return the signup form."""
     if request.method == "POST":
         form = SignupForm(request.POST)

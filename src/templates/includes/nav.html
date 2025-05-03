@@ -19,7 +19,7 @@
             <div class="navbar-item">
                 <div class="buttons">
                     {% if is_authenticated %}
-                        <a href="#" class="button">
+                        <a href="{% url 'logout' %}" class="button">
                             {% include "includes/icon.html" with name="log-out" %}
                             Log Out
                         </a>
