@@ -127,9 +127,9 @@
 
 - [ ] The basic workflow for the app is in place.
     - [x] The user can sign up.
+        - [ ] When the user signs up, their curator object is created.
     - [ ] The user can log in.
     - [x] The user can log out.
-        - [ ] When the user signs up, their curator object is created.
     - [ ] The user can view their curations on the home page.
     - [ ] The user can add a curation.
     - [x] The user can add a disease.
