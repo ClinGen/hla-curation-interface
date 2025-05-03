@@ -6,6 +6,9 @@
 # NOTE: For the sake of simplicity, we assume the user of this justfile is invoking the
 # recipes from the root of the repository.
 
+# Make sure we load the `.env` file before we run commands.
+set dotenv-load := true
+
 #=======================================================================================
 # Pre-Commit Recipe
 #=======================================================================================
