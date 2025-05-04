@@ -78,7 +78,7 @@
 
 - [ ] We've renamed things that need to be renamed.
     - [x] We've replaced instances of "all" with "list."
-    - [ ] We've replaced instances of "overview" with "details."
+    - [x] We've replaced instances of "overview" with "details."
     - [ ] We've replaced instances of "allele" with "HLA allele."
 
 ## We're handling errors as best we can.

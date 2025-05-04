@@ -7,8 +7,8 @@ from typing import Any
 class EntitySelector(ABC):
     """Get a specific entity or get a list of entities from the database.
 
-    Here an entity refers to a model in the HCI that has a new page, an all page,
-    and an overview page. Some examples include: curations, diseases, markers (alleles
+    Here an entity refers to a model in the HCI that has a new page, a list page,
+    and a details page. Some examples include: curations, diseases, markers (alleles
     and haplotypes), and publications.
     """
 
