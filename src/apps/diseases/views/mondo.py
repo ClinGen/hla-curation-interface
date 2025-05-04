@@ -1,5 +1,6 @@
 """Provide views for Mondo diseases."""
 
+from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 
@@ -13,7 +14,9 @@ from constants import MondoConstants
 class MondoView(EntityView):
     """Create, view all, or view a Mondo disease."""
 
-    def new(self, request: HttpRequest) -> HttpResponse:
+    @staticmethod
+    @login_required
+    def new(request: HttpRequest) -> HttpResponse:
         """Return the view that provides a form that creates a Mondo disease."""
         if request.method == "POST":
             form = MondoDiseaseForm(request.POST)
@@ -34,11 +37,13 @@ class MondoView(EntityView):
     # TODO(Liam): Do the following tasks.  # noqa: FIX002, TD003
     # - Implement the method below.
     # - Remove the pyright ignore directive.
-    def list(self, request: HttpRequest) -> HttpResponse:  # type: ignore
+    @staticmethod
+    def list(request: HttpRequest) -> HttpResponse:  # type: ignore
         """Return the searchable table page for a Mondo disease."""
 
     # TODO(Liam): Do the following tasks.  # noqa: FIX002, TD003
     # - Implement the method below.
     # - Remove the pyright ignore directive.
-    def details(self, request: HttpRequest, human_readable_id: str) -> HttpResponse:  # type: ignore
+    @staticmethod
+    def details(request: HttpRequest, human_readable_id: str) -> HttpResponse:  # type: ignore
         """Return the details page for a Mondo disease."""

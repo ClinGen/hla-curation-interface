@@ -12,6 +12,7 @@ from .base import (  # noqa: F401 (We don't care about unused imports in this co
     DEFAULT_AUTO_FIELD,
     INSTALLED_APPS,
     LANGUAGE_CODE,
+    LOGIN_URL,
     MIDDLEWARE,
     ROOT_URLCONF,
     SECRET_KEY,

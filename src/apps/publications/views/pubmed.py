@@ -1,5 +1,6 @@
 """Provide views for PubMed publications."""
 
+from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 
@@ -14,7 +15,9 @@ from constants import PubMedConstants
 class PubMedView(EntityView):
     """Create, view all, or view a PubMed publication."""
 
-    def new(self, request: HttpRequest) -> HttpResponse:
+    @staticmethod
+    @login_required
+    def new(request: HttpRequest) -> HttpResponse:
         """Return the view that provides a form that creates a PubMed publication."""
         if request.method == "POST":
             form = PubMedArticleForm(request.POST)
@@ -32,7 +35,8 @@ class PubMedView(EntityView):
             {"form": form, "pubmed_search_url": PubMedConstants.SEARCH_URL},
         )
 
-    def list(self, request: HttpRequest) -> HttpResponse:
+    @staticmethod
+    def list(request: HttpRequest) -> HttpResponse:
         """Return the searchable table page for a PubMed publication."""
         query = request.GET.get("q", None)
         selector = PubMedArticleSelector()
@@ -48,5 +52,6 @@ class PubMedView(EntityView):
     # TODO(Liam): Do the following tasks.  # noqa: FIX002, TD003
     # - Implement the method below.
     # - Remove the pyright ignore directive.
-    def details(self, request: HttpRequest, human_readable_id: str) -> HttpResponse:  # type: ignore
+    @staticmethod
+    def details(request: HttpRequest, human_readable_id: str) -> HttpResponse:  # type: ignore
         """Return the details page for a PubMed publication."""

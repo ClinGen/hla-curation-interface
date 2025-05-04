@@ -13,24 +13,27 @@ class EntityView(ABC):
     and haplotypes), and publications.
     """
 
+    @staticmethod
     @abstractmethod
-    def new(self, request: HttpRequest) -> HttpResponse:  # noqa: ANN401 (We don't care about this for abstract methods.)
+    def new(request: HttpRequest) -> HttpResponse:  # noqa: ANN401 (We don't care about this for abstract methods.)
         """Return the page that provides a form that creates a new entity.
 
         Args:
              request: The Django HTTP request object.
         """
 
+    @staticmethod
     @abstractmethod
-    def list(self, request: HttpRequest) -> HttpResponse:  # noqa: ANN401 (We don't care about this for abstract methods.)
+    def list(request: HttpRequest) -> HttpResponse:  # noqa: ANN401 (We don't care about this for abstract methods.)
         """Return the searchable table page for an entity.
 
         Args:
              request: The Django HTTP request object.
         """
 
+    @staticmethod
     @abstractmethod
-    def details(self, request: HttpRequest, human_readable_id: str) -> HttpResponse:  # noqa: ANN401 (We don't care about this for abstract methods.)
+    def details(request: HttpRequest, human_readable_id: str) -> HttpResponse:  # noqa: ANN401 (We don't care about this for abstract methods.)
         """Return the details page for an entity.
 
         Args:

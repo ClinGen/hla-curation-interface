@@ -14,7 +14,7 @@ def custom_login(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect("home")
+            return redirect(request.GET.get("next", "home"))
     else:
         form = LoginForm()
     return render(request, "users/login.html", {"form": form})
