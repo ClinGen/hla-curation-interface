@@ -15,7 +15,8 @@ class Allele(models.Model):
         help_text="A unique identifier for the HLA allele, e.g., CAHLA1449130330.",
     )
     car_url: models.URLField = models.URLField(
-        verbose_name="ClinGen Allele Registry URL for the HLA Allele",
+        verbose_name="ClinGen Allele Registry URL",
+        help_text="The URL for the HLA allele's CAR info page.",
     )
 
     class Meta:
