@@ -77,7 +77,7 @@
     - [x] Services implement their ABC.
 
 - [ ] We've renamed things that need to be renamed.
-    - [ ] We've replaced instances of "all" with "list."
+    - [x] We've replaced instances of "all" with "list."
     - [ ] We've replaced instances of "overview" with "details."
     - [ ] We've replaced instances of "allele" with "HLA allele."
 

@@ -14,7 +14,7 @@
         We don't boost this link because it goes to a view that will render a
         partial template if it sees the HTMX `HX-Request` header set to `true`.
         -->
-        <a hx-boost="false" href="{% url "all_pubmed" %}" {% if request.resolver_match.view_name == 'all_pubmed' %}class="navbar-item has-text-weight-bold"{% endif %} class="navbar-item">Publications</a>
+        <a hx-boost="false" href="{% url 'list_pubmed' %}" {% if request.resolver_match.view_name == 'list_pubmed' %}class="navbar-item has-text-weight-bold"{% endif %} class="navbar-item">Publications</a>
         <div class="navbar-end">
             <div class="navbar-item">
                 <div class="buttons">

@@ -11,7 +11,7 @@
                    type="search"
                    name="q"
                    placeholder="Search by PubMed ID or title"
-                   hx-get="{% url "all_pubmed" %}"
+                   hx-get="{% url 'list_pubmed' %}"
                    hx-trigger="input changed delay:300ms, keyup[key=='Enter'], load"
                    hx-target="#pubmed-table"
                    hx-swap="innerHTML"
