@@ -136,7 +136,7 @@
     - [x] The user can add a publication.
     - [ ] The user can view all curations.
     - [x] The user can view all diseases.
-    - [ ] The user can view all markers.
+    - [x] The user can view all markers.
     - [x] The user can view all publications.
     - [ ] The user can curate.
 
