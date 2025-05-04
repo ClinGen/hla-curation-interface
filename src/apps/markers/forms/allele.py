@@ -12,4 +12,4 @@ class AlleleForm(ModelForm):
         """Define metadata options."""
 
         model = Allele
-        fields = ["descriptor", "car_id"]
+        fields = ["descriptor"]

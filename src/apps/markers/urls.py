@@ -8,4 +8,5 @@ view = AlleleView()
 
 urlpatterns = [
     path("allele/new", view.new, name="new_allele"),
+    path("allele/list", view.list, name="list_allele"),
 ]

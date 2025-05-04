@@ -1,0 +1,30 @@
+{% extends "layouts/base.html" %}
+{% block title %}HLA Alleles{% endblock %}
+{% block description %}The page where curators can view all or a subset of HLA alleles in the HLA curation interface.{% endblock %}
+{% block content %}
+    <div class="block">
+        <h1 class="title">HLA Alleles</h1>
+        <div class="block">
+            <label class="label" for="active-search-input">Search for HLA alleles</label>
+            <input class="input column is-half"
+                   id="active-search-input"
+                   type="search"
+                   name="q"
+                   placeholder="Search by descriptor or ClinGen Allele Registry ID"
+                   hx-get="{% url 'list_allele' %}"
+                   hx-trigger="input changed delay:300ms, keyup[key=='Enter'], load"
+                   hx-target="#allele-table"
+                   hx-swap="innerHTML"
+                   hx-params="*"
+                   autocomplete="off"
+            />
+        </div>
+        <div class="block">
+            <p class="mb-2">Don't see the HLA allele you're looking for?</p>
+            <a class="button is-responsive" href="{% url "new_allele" %}">Add Allele</a>
+        </div>
+        <div class="block" id="allele-table">
+            {% include "markers/includes/allele_table.html" %}
+        </div>
+    </div>
+{% endblock %}

@@ -66,11 +66,13 @@ class HLADescriptorField(BaseModel):
     )
     f3_synon_dna_sub: str | None = Field(
         alias="synonDnaSub",
-        description="Used to show a synonymous DNA substitution within the coding region."  # noqa: E501 (I'd like to preserve the structure of this block.)
+        description="Used to show a synonymous DNA substitution within the coding region.",  # noqa: E501 (I'd like to preserve the structure of this block.)
+        default=None,
     )
     f4_non_coding: str | None = Field(
         alias="nonCoding",
-        description="Used to show differences in a non-coding region."
+        description="Used to show differences in a non-coding region.",
+        default=None,
     )
     # fmt: on
 

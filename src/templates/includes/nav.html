@@ -13,7 +13,7 @@
         -->
         <a href="/curations/all" {% if request.resolver_match.view_name == 'all_curations' %}class="navbar-item has-text-weight-bold"{% endif %} class="navbar-item">Curations</a>
         <a hx-boost="false" href="{% url 'list_mondo' %}" {% if request.resolver_match.view_name == 'list_mondo' %}class="navbar-item has-text-weight-bold"{% endif %} class="navbar-item">Diseases</a>
-        <a href="/markers/all" {% if request.resolver_match.view_name == 'all_markers' %}class="navbar-item has-text-weight-bold"{% endif %} class="navbar-item">Alleles/Haplotypes</a>
+        <a hx-boost="false" href="{% url 'list_allele' %}" {% if request.resolver_match.view_name == 'list_allele' %}class="navbar-item has-text-weight-bold"{% endif %} class="navbar-item">Alleles/Haplotypes</a>
         <a hx-boost="false" href="{% url 'list_pubmed' %}" {% if request.resolver_match.view_name == 'list_pubmed' %}class="navbar-item has-text-weight-bold"{% endif %} class="navbar-item">Publications</a>
         <div class="navbar-end">
             <div class="navbar-item">

@@ -67,13 +67,13 @@ class AlleleClient(EntityClient):
             AlleleClientJSONError: If the JSON can't be decoded.
         """
         try:
-            endpoint = f"{self.base_url}/desc/{self.descriptor}"
+            endpoint = f"desc/{self.descriptor}"
             json_data = self.get_json(endpoint)
             if "errCode" in json_data:
                 raise AlleleClientDescriptorNotFoundError(
                     self._get_car_error_message(json_data)
                 )
-            descriptor_data = self.schema.model_validate(**json_data)
+            descriptor_data = self.schema.model_validate(json_data)
             # As part of the validation, Pydantic checks to make sure the list of HLA
             # allele records is of length 1.
             descriptor_record = descriptor_data[0]
