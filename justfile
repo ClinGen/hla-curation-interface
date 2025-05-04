@@ -59,7 +59,7 @@ alias qstc := qual-src-type-check
 #=====================================================================
 
 # Run all infrastructure code quality checks. ------------------------
-qual-infra-all:
+qual-infra-all: qual-infra-format-check qual-infra-lint
 alias qial := qual-infra-all
 
 # Format the infrastructure code. ------------------------------------
