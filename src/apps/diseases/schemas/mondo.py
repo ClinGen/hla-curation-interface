@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict
 
 
 class TermsSchema(BaseModel):
-    """Represent the response from the Mondo API's terms endpoint."""
+    """Represent the response from the Mondo API's `terms` endpoint."""
 
     # There are many fields in the response. We only care about a small subset of the
     # fields.

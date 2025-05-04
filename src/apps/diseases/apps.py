@@ -1,10 +1,10 @@
-"""Provide the configuration for the diseases app."""
+"""Provide the configuration for the `diseases` app."""
 
 from django.apps import AppConfig
 
 
 class DiseasesAppConfig(AppConfig):
-    """Configure the diseases app."""
+    """Configure the `diseases` app."""
 
     name = "apps.diseases"
     verbose_name = "Diseases Management"
