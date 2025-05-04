@@ -45,7 +45,7 @@ class PubMedView(EntityView):
         if request.htmx:  # type: ignore (This attribute is added by the django-htmx app.)
             template_name = "publications/includes/pubmed_table.html"
         else:
-            template_name = "publications/pubmed/all.html"
+            template_name = "publications/pubmed/list.html"
 
         return render(request, template_name, {"articles": articles})
 

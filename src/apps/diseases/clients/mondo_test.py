@@ -19,7 +19,18 @@ def json_data_valid() -> dict:
 
     This is the expected format of the JSON data returned by the Mondo API.
     """
-    return {"label": "disease label", "other": "info"}
+    # fmt: off
+    return {
+        "_embedded": {
+            "terms": [{
+                "label": "disease label",
+                "description": ["disease description"],
+                "other": "info"
+            }]
+        },
+        "other": "info"
+    }
+    # fmt: on
 
 
 @pytest.fixture

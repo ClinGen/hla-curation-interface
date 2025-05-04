@@ -7,7 +7,7 @@ from base.selectors import EntitySelector
 
 
 class PubMedArticleSelector(EntitySelector):
-    """Get a specific PubMed publication or get a list of all PubMed publications."""
+    """Get a specific PubMed publication or get a list of PubMed publications."""
 
     def get(self, human_readable_id: str) -> PubMedArticle | None:
         """Return a specific PubMed publication.

@@ -1,10 +1,8 @@
 """Provide a client for getting data from the Mondo Disease Ontology API."""
 
-from urllib.parse import quote
-
 from pydantic import ValidationError
 
-from apps.diseases.schemas.mondo import TermsSchema
+from apps.diseases.schemas.mondo import MondoAPIResponse
 from base.clients import EntityClient, EntityClientError
 from constants import MondoConstants
 
@@ -16,7 +14,9 @@ class MondoClientError(Exception):
 class MondoClient(EntityClient):
     """Get data from the Mondo Disease Ontology API."""
 
-    def __init__(self, mondo_id: str, schema: type[TermsSchema] = TermsSchema) -> None:
+    def __init__(
+        self, mondo_id: str, schema: type[MondoAPIResponse] = MondoAPIResponse
+    ) -> None:
         """Set up the Mondo client."""
         super().__init__(base_url=MondoConstants.API_URL)
         self.mondo_id = mondo_id
@@ -31,11 +31,10 @@ class MondoClient(EntityClient):
                  the response.
         """
         try:
-            double_quoted_iri = quote(quote(MondoConstants.IRI))
-            endpoint = f"{self.base_url}/{double_quoted_iri}{self.mondo_id}"
+            endpoint = f"?iri={MondoConstants.IRI}/{self.mondo_id}"
             json_data = self.get_json(endpoint)
             valid_data = self.schema.model_validate(json_data)
-            self.label = valid_data.label
+            self.label = valid_data.embedded.terms[0].label
         except ValidationError as exc:
             error_message = f"Error validating data for {self.mondo_id}: {exc}"
             raise MondoClientError(error_message) from exc
