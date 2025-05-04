@@ -76,7 +76,7 @@
     - [x] Selectors implement their ABC.
     - [x] Services implement their ABC.
 
-- [ ] We've renamed things that need to be renamed.
+- [x] We've renamed things that need to be renamed.
     - [x] We've replaced instances of "all" with "list."
     - [x] We've replaced instances of "overview" with "details."
 
