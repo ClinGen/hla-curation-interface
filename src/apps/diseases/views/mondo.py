@@ -36,11 +36,8 @@ class MondoView(EntityView):
             {"form": form, "mondo_search_url": MondoConstants.SEARCH_URL},
         )
 
-    # TODO(Liam): Do the following tasks.  # noqa: FIX002, TD003
-    # - Implement the method below.
-    # - Remove the pyright ignore directive.
     @staticmethod
-    def list(request: HttpRequest) -> HttpResponse:  # type: ignore
+    def list(request: HttpRequest) -> HttpResponse:
         """Return the searchable table page for a Mondo disease."""
         query = request.GET.get("q", None)
         selector = MondoSelector()
