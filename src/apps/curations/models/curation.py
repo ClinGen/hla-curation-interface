@@ -25,11 +25,6 @@ class Curation(models.Model):
     allele: models.ForeignKey = models.ForeignKey(
         Allele, on_delete=models.CASCADE, null=True
     )
-    curation_id: models.CharField = models.CharField(
-        verbose_name="Curation ID",
-        help_text="A unique identifier for the curation.",
-        primary_key=True,
-    )
     status: models.CharField = models.CharField(
         max_length=ModelsConstants.MAX_LENGTH_NAME,
         verbose_name="Status",
@@ -46,4 +41,4 @@ class Curation(models.Model):
 
     def __str__(self) -> str:
         """Return a string representation of the curation."""
-        return f"{self.status} {self.curation_type} curation ({self.curation_id})"
+        return f"{self.status} {self.curation_type} curation ({self.id})"

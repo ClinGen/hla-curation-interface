@@ -6,6 +6,8 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 
 from apps.curations.forms.curation import CurationForm
+from apps.curations.services.curation import CurationService
+from apps.users.selectors.curator import get_curator
 from base.views import EntityView
 
 
@@ -19,6 +21,12 @@ class CurationView(EntityView):
         if request.method == "POST":
             form = CurationForm(request.POST)
             if form.is_valid():
+                data = form.cleaned_data
+                service = CurationService()
+                curator = get_curator(request.user.username)
+                service.create(
+                    data["curation_type"], data["disease"], data["allele"], curator
+                )
                 messages.success(request, "Curation created successfully.")
                 return redirect("home")
         else:
