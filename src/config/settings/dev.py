@@ -6,6 +6,8 @@ the prod environment is that the dev environment uses an SQLite database instead
 of a Postgres database.
 """
 
+from django.contrib import messages
+
 from .base import (  # noqa: F401 (We don't care about unused imports in this context.)
     ASGI_APPLICATION,
     AUTH_PASSWORD_VALIDATORS,
@@ -31,3 +33,5 @@ from .base import (  # noqa: F401 (We don't care about unused imports in this co
 DEBUG = True
 
 ALLOWED_HOSTS: list[str] = []
+
+MESSAGE_LEVEL = messages.DEBUG

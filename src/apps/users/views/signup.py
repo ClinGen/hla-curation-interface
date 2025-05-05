@@ -1,5 +1,6 @@
 """Provide a signup view for first-time users."""
 
+from django.contrib import messages
 from django.contrib.auth import login
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
@@ -11,6 +12,7 @@ from apps.users.services.curator import new_curator
 def custom_signup(request: HttpRequest) -> HttpResponse:
     """Return the signup form."""
     if request.user.is_authenticated:
+        messages.warning(request, "You are already logged in.")
         return redirect("home")
     if request.method == "POST":
         form = SignupForm(request.POST)
