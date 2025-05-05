@@ -1,9 +1,11 @@
-"""Define the URLs for the curations app."""
+"""Define the URLs for the `curations` app."""
 
 from django.urls import path
 
-from apps.curations.views.curation import edit
+from apps.curations.views.curation import CurationView
+
+view = CurationView()
 
 urlpatterns = [
-    path("curation/edit", edit, name="edit"),
+    path("curation/new", view.new, name="new_curation"),
 ]

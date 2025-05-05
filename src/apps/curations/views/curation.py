@@ -1,38 +1,44 @@
-"""Provide a view for editing a curation."""
+"""Provide views for curations."""
 
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
-from apps.curations.forms.step_1 import Step1Form
-from apps.curations.forms.step_2 import Step2Form
-from apps.curations.forms.step_3 import Step3Form
+from apps.curations.forms.curation import CurationForm
+from base.views import EntityView
 
 
-def edit(request: HttpRequest) -> HttpResponse:
-    """Return the edit curation forms."""
-    step_1_form = Step1Form()
-    step_2_form = Step2Form()
-    step_3_form = Step3Form()
-    if request.method == "POST":
-        if "step_1" in request.POST:
-            step_1_form = Step1Form(request.POST)
-            if step_1_form.is_valid():
-                step_1_form.save()
-        if "step_2" in request.POST:
-            step_2_form = Step2Form(request.POST)
-            if step_2_form.is_valid():
-                step_2_form.save()
-        if "step_3" in request.POST:
-            step_3_form = Step3Form(request.POST)
-            if step_3_form.is_valid():
-                step_3_form.save()
-    else:
-        step_1_form = Step1Form()
-        step_2_form = Step2Form()
-        step_3_form = Step3Form()
-    context = {
-        "step_1_form": step_1_form,
-        "step_2_form": step_2_form,
-        "step_3_form": step_3_form,
-    }
-    return render(request, "curations/allele/edit.html", context)
+class CurationView(EntityView):
+    """Create, view all, or view a curation."""
+
+    @staticmethod
+    @login_required
+    def new(request: HttpRequest) -> HttpResponse:
+        """Return the view that provides a form that creates a curation."""
+        if request.method == "POST":
+            form = CurationForm(request.POST)
+            if form.is_valid():
+                messages.success(request, "Curation created successfully.")
+                return redirect("home")
+        else:
+            form = CurationForm()
+        return render(
+            request,
+            "curations/new.html",
+            {"form": form},
+        )
+
+    # TODO(Liam): Do the following tasks.  # noqa: FIX002, TD003
+    # - Implement the method below.
+    # - Remove the pyright ignore directive.
+    @staticmethod
+    def list(request: HttpRequest) -> HttpResponse:
+        """Return the searchable table page for a PubMed publication."""
+
+    # TODO(Liam): Do the following tasks.  # noqa: FIX002, TD003
+    # - Implement the method below.
+    # - Remove the pyright ignore directive.
+    @staticmethod
+    def details(request: HttpRequest, human_readable_id: str) -> HttpResponse:  # type: ignore
+        """Return the details page for a PubMed publication."""

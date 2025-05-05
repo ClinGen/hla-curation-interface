@@ -20,6 +20,7 @@
         {% include "includes/nav.html" %}
         <section class="section">
             <div class="container">
+                {% include "includes/messages.html" %}
                 {% block content %}{% endblock %}
             </div>
         </section>
@@ -27,5 +28,6 @@
             // This is required for the icons to work.
             feather.replace();
         </script>
+
     </body>
 </html>

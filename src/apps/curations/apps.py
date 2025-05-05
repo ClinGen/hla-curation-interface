@@ -1,10 +1,10 @@
-"""Provide the configuration for the curations app."""
+"""Provide the configuration for the `curations` app."""
 
 from django.apps import AppConfig
 
 
 class CurationsAppConfig(AppConfig):
-    """Configure the curations app."""
+    """Configure the `curations` app."""
 
     name = "apps.curations"
     verbose_name = "Curations Management"
