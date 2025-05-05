@@ -1,6 +1,6 @@
-"""Provide Mondo data for testing."""
+"""Provide disease data for testing."""
 
-diseases = [
+data = [
     {
         "id": "MONDO_0005052",
         "label": "irritable bowel syndrome",
