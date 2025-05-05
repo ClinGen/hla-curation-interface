@@ -4,7 +4,6 @@ from django.db import models
 
 from apps.diseases.models import Mondo
 from apps.markers.models import Allele
-from apps.users.models import Curator
 from constants import ModelsConstants
 
 
@@ -31,7 +30,6 @@ class Curation(models.Model):
         help_text="The status of the curation, e.g., 'new', 'in progress', 'done'.",
         default="new",
     )
-    created_by: models.ForeignKey = models.ForeignKey(Curator, on_delete=models.CASCADE)
     created_at: models.DateTimeField = models.DateTimeField(
         verbose_name="Created At", auto_now_add=True
     )
@@ -41,4 +39,4 @@ class Curation(models.Model):
 
     def __str__(self) -> str:
         """Return a string representation of the curation."""
-        return f"{self.status} {self.curation_type} curation ({self.id})"
+        return f"{self.status} {self.curation_type} curation"

@@ -1,4 +1,4 @@
-""" "Configure the admin page for the `Curation` model."""
+"""Configure the admin page for the `Curation` model."""
 
 from django.contrib import admin
 

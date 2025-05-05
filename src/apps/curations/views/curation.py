@@ -7,7 +7,6 @@ from django.shortcuts import redirect, render
 
 from apps.curations.forms.curation import CurationForm
 from apps.curations.services.curation import CurationService
-from apps.users.selectors.curator import get_curator
 from base.views import EntityView
 
 
@@ -23,10 +22,7 @@ class CurationView(EntityView):
             if form.is_valid():
                 data = form.cleaned_data
                 service = CurationService()
-                curator = get_curator(request.user.username)
-                service.create(
-                    data["curation_type"], data["disease"], data["allele"], curator
-                )
+                service.create(data["curation_type"], data["disease"], data["allele"])
                 messages.success(request, "Curation created successfully.")
                 return redirect("home")
         else:
@@ -41,7 +37,7 @@ class CurationView(EntityView):
     # - Implement the method below.
     # - Remove the pyright ignore directive.
     @staticmethod
-    def list(request: HttpRequest) -> HttpResponse:
+    def list(request: HttpRequest) -> HttpResponse:  # type: ignore
         """Return the searchable table page for a PubMed publication."""
 
     # TODO(Liam): Do the following tasks.  # noqa: FIX002, TD003
