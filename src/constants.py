@@ -20,6 +20,16 @@ class CARConstants:
     API_URL = "https://reg.genome.network/allele/hla"
 
 
+class HumanReadableIDPrefixConstants:
+    """Define human-readable ID prefixes to be used in the HCI.
+
+    This class should be imported as `HRIDPrefixes`.
+    """
+
+    ALLELE_CURATION = "ALC"
+    HAPLOTYPE_CURATION = "HPC"
+
+
 class IPDConstants:
     """Define constants related to IPD-IMGT/HLA database."""
 
@@ -30,6 +40,7 @@ class ModelsConstants:
     """Define constants related to models."""
 
     MAX_LENGTH_NAME = 255
+    MAX_LENGTH_HUMAN_READABLE_ID = 3
 
 
 class MondoConstants:
