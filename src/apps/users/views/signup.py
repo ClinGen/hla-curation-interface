@@ -10,6 +10,8 @@ from apps.users.services.curator import new_curator
 
 def custom_signup(request: HttpRequest) -> HttpResponse:
     """Return the signup form."""
+    if request.user.is_authenticated:
+        return redirect("home")
     if request.method == "POST":
         form = SignupForm(request.POST)
         if form.is_valid():
