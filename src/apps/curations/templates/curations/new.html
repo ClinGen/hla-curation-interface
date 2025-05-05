@@ -6,8 +6,10 @@
         <h1 class="title">Add Curation</h1>
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Save Curation</button>
+            {% include 'includes/radio_buttons.html' with field=form.curation_type %}
+            {% include 'includes/form_select.html' with field=form.disease %}
+            {% include 'includes/form_select.html' with field=form.allele %}
+            {% include "includes/form_submit_button.html" %}
         </form>
     </div>
 {% endblock %}

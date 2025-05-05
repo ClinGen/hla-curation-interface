@@ -13,20 +13,4 @@ class CurationForm(forms.ModelForm):
 
         model = Curation
         fields = ["curation_type", "disease", "allele"]
-
-    def __init__(self, *args, **kwargs) -> None:
-        """Add more."""
-        super().__init__(*args, **kwargs)
-        self.fields["curation_type"].widget = forms.RadioSelect(
-            choices=[
-                ("allele", "Allele Curation"),
-                ("haplotype", "Haplotype Curation"),
-            ]
-        )
-        self.fields["curation_type"].label = "Type of Curation"
-        self.fields["allele"].queryset = self.fields["allele"].queryset.order_by(
-            "descriptor"
-        )
-        self.fields["disease"].queryset = self.fields["disease"].queryset.order_by(
-            "mondo_id"
-        )
+        widgets = {"curation_type": forms.RadioSelect()}

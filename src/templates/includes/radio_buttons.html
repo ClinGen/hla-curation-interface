@@ -1,0 +1,13 @@
+<label class="label">{{ field.label }}</label>
+<div class="field">
+    <div class="has-text-danger">{{ field.errors }}</div>
+    <div class="control">
+        {% for radio in field %}
+            <div>
+                <label class="radio">
+                    {{ radio }}
+                </label>
+            </div>
+        {% endfor %}
+    </div>
+</div>

@@ -11,7 +11,12 @@ from constants import ModelsConstants
 class Curation(models.Model):
     """A curation is the basic information about a classification."""
 
+    CURATION_TYPES = [
+        ("allele", "Allele"),
+    ]
     curation_type: models.CharField = models.CharField(
+        choices=CURATION_TYPES,
+        default="allele",
         max_length=ModelsConstants.MAX_LENGTH_NAME,
         verbose_name="Curation Type",
         help_text="The type of curation, e.g., 'allele' or 'haplotype'.",
