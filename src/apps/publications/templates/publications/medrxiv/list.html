@@ -1,0 +1,14 @@
+{% extends "layouts/base.html" %}
+{% block title %}Search medRxiv Papers{% endblock %}
+{% block description %}The page where curators can view all or a subset of medRxiv papers in the HLA curation interface.{% endblock %}
+{% block content %}
+    <div>
+        <h1 class="title">Search Publications</h1>
+        {% component "tabs" tabs=tabs / %}
+        <article class="message is-warning">
+            <div class="message-body">
+                Not implemented.
+            </div>
+        </article>
+    </div>
+{% endblock %}

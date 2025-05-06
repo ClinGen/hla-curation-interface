@@ -6,6 +6,10 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
 from apps.publications.clients.pubmed import PubMedArticleClient
+from apps.publications.components.params.tabs import (
+    new_pubmed_publication_tabs,
+    search_pubmed_publication_tabs,
+)
 from apps.publications.forms.pubmed import PubMedArticleForm
 from apps.publications.selectors.pubmed import PubMedArticleSelector
 from apps.publications.services.pubmed import PubMedArticleService
@@ -34,7 +38,11 @@ class PubMedView(EntityView):
         return render(
             request,
             "publications/pubmed/new.html",
-            {"form": form, "pubmed_search_url": PubMedConstants.SEARCH_URL},
+            {
+                "form": form,
+                "tabs": new_pubmed_publication_tabs,
+                "pubmed_search_url": PubMedConstants.SEARCH_URL,
+            },
         )
 
     @staticmethod
@@ -49,7 +57,11 @@ class PubMedView(EntityView):
         else:
             template_name = "publications/pubmed/list.html"
 
-        return render(request, template_name, {"articles": articles})
+        return render(
+            request,
+            template_name,
+            {"articles": articles, "tabs": search_pubmed_publication_tabs},
+        )
 
     # TODO(Liam): Do the following tasks.  # noqa: FIX002, TD003
     # - Implement the method below.

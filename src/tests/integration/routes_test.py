@@ -35,13 +35,13 @@ ROUTES = [
     # "/publications/pubmed/<str:pubmed_id>",
 
     # bioRxiv publications: Create, view a list, or view specific.
-    # "/publications/biorxiv/new",
-    # "/publications/biorxiv/list",
+    "/publications/biorxiv/new",
+    "/publications/biorxiv/list",
     # "/publications/biorxiv/<str:doi>",
 
     # medRxiv publications: Create, view a list, or view specific.
-    # "/publications/medrxiv/new",
-    # "/publications/medrxiv/list",
+    "/publications/medrxiv/new",
+    "/publications/medrxiv/list",
     # "/publications/medrxiv/<str:doi>",
 
     # Curations: Create, view a list, or view specific.

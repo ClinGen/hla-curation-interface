@@ -4,6 +4,7 @@
 {% block content %}
     <div>
         <h1 class="title">New Publication</h1>
+        {% component "tabs" tabs=tabs / %}
         <form method="post">
             {% csrf_token %}
             {% include "includes/external_link.html" with prompt="Need to look up the ID of your PubMed article?" url=pubmed_search_url text="Search PubMed" %}
