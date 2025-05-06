@@ -6,6 +6,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 
 from apps.curations.forms.curation import CurationForm
+from apps.curations.selectors.curation import CurationSelector
 from apps.curations.services.curation import CurationService
 from base.views import EntityView
 
@@ -39,6 +40,16 @@ class CurationView(EntityView):
     @staticmethod
     def list(request: HttpRequest) -> HttpResponse:  # type: ignore
         """Return the searchable table page for a PubMed publication."""
+        query = request.GET.get("q", None)
+        selector = CurationSelector()
+        curations = selector.list(query)
+
+        if request.htmx:  # type: ignore (This attribute is added by the django-htmx app.)
+            template_name = "curations/includes/curation_table.html"
+        else:
+            template_name = "curations/list.html"
+
+        return render(request, template_name, {"curations": curations})
 
     # TODO(Liam): Do the following tasks.  # noqa: FIX002, TD003
     # - Implement the method below.

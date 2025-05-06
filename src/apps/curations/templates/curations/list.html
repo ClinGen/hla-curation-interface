@@ -1,0 +1,30 @@
+{% extends "layouts/base.html" %}
+{% block title %}Curations{% endblock %}
+{% block description %}The page where curators can view all or a subset of curations in the HLA curation interface.{% endblock %}
+{% block content %}
+    <div class="block">
+        <h1 class="title">Curations</h1>
+        <div class="block">
+            <label class="label" for="active-search-input">Search for curations</label>
+            <input class="input column is-half"
+                   id="active-search-input"
+                   type="search"
+                   name="q"
+                   placeholder="Search by curation ID"
+                   hx-get="{% url 'list_curation' %}"
+                   hx-trigger="input changed delay:300ms, keyup[key=='Enter'], load"
+                   hx-target="#curation-table"
+                   hx-swap="innerHTML"
+                   hx-params="*"
+                   autocomplete="off"
+            />
+        </div>
+        <div class="block">
+            <p class="mb-2">Need to start a new curation?</p>
+            <a class="button is-responsive" href="{% url "new_curation" %}">Add Curation</a>
+        </div>
+        <div class="block" id="curation-table">
+            {% include "curations/includes/curation_table.html" %}
+        </div>
+    </div>
+{% endblock %}

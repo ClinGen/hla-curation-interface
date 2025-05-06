@@ -7,5 +7,6 @@ from apps.curations.views.curation import CurationView
 view = CurationView()
 
 urlpatterns = [
-    path("curation/new", view.new, name="new_curation"),
+    path("new", view.new, name="new_curation"),
+    path("list", view.list, name="list_curation"),
 ]
