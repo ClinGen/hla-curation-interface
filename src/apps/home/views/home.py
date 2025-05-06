@@ -3,8 +3,6 @@
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
-from constants import LogoColorConstants
-
 
 def home(request: HttpRequest) -> HttpResponse:
     """View the home page of the HCI.
@@ -18,8 +16,5 @@ def home(request: HttpRequest) -> HttpResponse:
     """
     context = {
         "affiliation": "HLA Expert Panel",
-        "hero_bg_color": LogoColorConstants.PURPLE,
-        "hero_link_color": LogoColorConstants.ORANGE,
-        "hero_text_color": "white",
     }
     return render(request, "home/index.html", context)

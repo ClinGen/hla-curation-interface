@@ -36,20 +36,6 @@ class IPDConstants:
     SEARCH_URL = "https://www.ebi.ac.uk/ipd/imgt/hla/alleles/"
 
 
-class LogoColorConstants:
-    """Define the logo colors.
-
-    These are the colors used in the HCI DNA helix logo.
-    """
-
-    BLUE = "#55acee"
-    GREEN = "#77b255"
-    ORANGE = "#ffac33"
-    PURPLE = "#9266cc"
-    RED = "#ea596e"
-    YELLOW = "#ffd983"
-
-
 class ModelsConstants:
     """Define constants related to models."""
 
