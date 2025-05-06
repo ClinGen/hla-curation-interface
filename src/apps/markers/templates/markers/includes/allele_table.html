@@ -18,20 +18,6 @@
         </tr>
     {% endfor %}
 </table>
-<div class="block">
-    <article class="message is-info">
-        <div class="message-header">
-            <p>{% include "includes/icon.html" with name="info" %}CAR ID Links</p>
-        </div>
-        <div class="message-body">
-            <p>
-                Right now, the CAR ID links point to the API response for the
-                HLA allele. In the future, these will link to the CAR UI page for the
-                HLA allele. (The CAR hasn't published the UI pages yet.)
-            </p>
-        </div>
-    </article>
-</div>
 <script>
     // This makes the external link icon work. It's necessary because this table is a
     // partial that gets swapped in via HTMX.
