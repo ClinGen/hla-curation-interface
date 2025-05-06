@@ -1,9 +1,9 @@
 {% extends "layouts/base.html" %}
-{% block title %}Add Allele{% endblock %}
+{% block title %}New Allele{% endblock %}
 {% block description %}The form for adding a new allele to the HLA curation interface.{% endblock %}
 {% block content %}
     <div>
-        <h1 class="title">Add Allele</h1>
+        <h1 class="title">New Allele</h1>
         <form method="post">
             {% csrf_token %}
             {% include "includes/external_link.html" with prompt="Need to look up the full descriptor?" url=ipd_search_url text="Search the IPD-IMGT/HLA HLA Database" %}

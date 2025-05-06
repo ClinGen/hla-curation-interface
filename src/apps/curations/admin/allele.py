@@ -2,6 +2,6 @@
 
 from django.contrib import admin
 
-from apps.curations.models.curation import Curation
+from apps.curations.models.allele import AlleleCuration
 
-admin.site.register(Curation)
+admin.site.register(AlleleCuration)

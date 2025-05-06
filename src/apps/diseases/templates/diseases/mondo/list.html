@@ -3,7 +3,7 @@
 {% block description %}The page where curators can view all or a subset of Mondo diseases in the HLA curation interface.{% endblock %}
 {% block content %}
     <div class="block">
-        <h1 class="title">Mondo Diseases</h1>
+        <h1 class="title">Search Diseases</h1>
         <div class="block">
             <label class="label" for="active-search-input">Search for Mondo diseases</label>
             <input class="input column is-half"
@@ -21,7 +21,7 @@
         </div>
         <div class="block">
             <p class="mb-2">Don't see the Mondo disease you're looking for?</p>
-            <a class="button is-responsive" href="{% url "new_mondo" %}">Add Mondo Disease</a>
+            <a class="button is-responsive" href="{% url "new_mondo" %}">New Mondo Disease</a>
         </div>
         <div class="block" id="mondo-table">
             {% include "diseases/includes/mondo_table.html" %}

@@ -1,9 +1,9 @@
 {% extends "layouts/base.html" %}
-{% block title %}Add Disease{% endblock %}
+{% block title %}New Disease{% endblock %}
 {% block description %}The form for adding a new disease to the HLA curation interface.{% endblock %}
 {% block content %}
     <div>
-        <h1 class="title">Add Disease</h1>
+        <h1 class="title">New Disease</h1>
         <form method="post">
             {% csrf_token %}
             {% include "includes/external_link.html" with prompt="Need to look up a disease's Mondo ID?" url=mondo_search_url text="Search Mondo" %}

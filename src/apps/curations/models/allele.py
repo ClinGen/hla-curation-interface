@@ -1,4 +1,4 @@
-"""Provide a model for curations."""
+"""Provide a model for allele curations."""
 
 from django.db import models
 
@@ -8,7 +8,7 @@ from constants import HumanReadableIDPrefixConstants as HRIDPrefixes
 from constants import ModelsConstants
 
 
-class Curation(models.Model):
+class AlleleCuration(models.Model):
     """A curation is the basic information about a classification."""
 
     curation_id: models.CharField = models.CharField(
@@ -19,16 +19,6 @@ class Curation(models.Model):
         null=True,
         verbose_name="Curation ID",
         help_text="A unique identifier for the curation for use in the HCI.",
-    )
-    CURATION_TYPES = [
-        ("allele", "Allele"),
-    ]
-    curation_type: models.CharField = models.CharField(
-        choices=CURATION_TYPES,
-        default="allele",
-        max_length=ModelsConstants.MAX_LENGTH_NAME,
-        verbose_name="Curation Type",
-        help_text="The type of curation, e.g., 'allele' or 'haplotype'.",
     )
     disease: models.ForeignKey = models.ForeignKey(Mondo, on_delete=models.CASCADE)
     allele: models.ForeignKey = models.ForeignKey(
@@ -56,7 +46,5 @@ class Curation(models.Model):
         super().save(*args, **kwargs)
         if not self.curation_id:
             prefix = HRIDPrefixes.ALLELE_CURATION
-            if self.curation_type == "haplotype":
-                prefix = HRIDPrefixes.HAPLOTYPE_CURATION
             self.curation_id = f"{prefix}-{self.id:06d}"  # type: ignore (Django and Pyright aren't playing together nicely here.)
             self.save(update_fields=["curation_id"])

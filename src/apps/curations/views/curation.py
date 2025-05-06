@@ -10,8 +10,8 @@ from apps.curations.components.params.tabs import (
     search_allele_curation_tabs,
 )
 from apps.curations.forms.curation import CurationForm
-from apps.curations.selectors.curation import CurationSelector
-from apps.curations.services.curation import CurationService
+from apps.curations.selectors.curation import AlleleCurationSelector
+from apps.curations.services.curation import AlleleCurationService
 from base.views import EntityView
 
 
@@ -26,8 +26,8 @@ class CurationView(EntityView):
             form = CurationForm(request.POST)
             if form.is_valid():
                 data = form.cleaned_data
-                service = CurationService()
-                service.create(data["curation_type"], data["disease"], data["allele"])
+                service = AlleleCurationService()
+                service.create(data["disease"], data["allele"])
                 messages.success(request, "Curation created.")
                 form = CurationForm()
         else:
@@ -45,7 +45,7 @@ class CurationView(EntityView):
     def list(request: HttpRequest) -> HttpResponse:  # type: ignore
         """Return the searchable table page for a PubMed publication."""
         query = request.GET.get("q", None)
-        selector = CurationSelector()
+        selector = AlleleCurationSelector()
         curations = selector.list(query)
 
         if request.htmx:  # type: ignore (This attribute is added by the django-htmx app.)

@@ -1,3 +1,3 @@
 """Register admin models."""
 
-from apps.curations.admin import curation
+from apps.curations.admin import allele

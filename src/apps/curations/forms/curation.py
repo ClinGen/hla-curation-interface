@@ -2,7 +2,7 @@
 
 from django import forms
 
-from apps.curations.models.curation import Curation
+from apps.curations.models.allele import AlleleCuration
 
 
 class CurationForm(forms.ModelForm):
@@ -11,6 +11,5 @@ class CurationForm(forms.ModelForm):
     class Meta:
         """Add more."""
 
-        model = Curation
-        fields = ["curation_type", "disease", "allele"]
-        widgets = {"curation_type": forms.RadioSelect()}
+        model = AlleleCuration
+        fields = ["disease", "allele"]

@@ -1,12 +1,12 @@
 {% extends "layouts/base.html" %}
-{% block title %}Add Curation{% endblock %}
+{% block title %}New Curation{% endblock %}
 {% block description %}The form for adding a new curation to the HLA curation interface.{% endblock %}
 {% block content %}
     <div>
-        <h1 class="title">Add Curation</h1>
+        <h1 class="title">New Curation</h1>
+        {% component "tabs" tabs=tabs / %}
         <form method="post">
             {% csrf_token %}
-            {% include 'includes/radio_buttons.html' with field=form.curation_type %}
             {% include 'includes/form_select.html' with field=form.disease %}
             {% include 'includes/form_select.html' with field=form.allele %}
             {% include "includes/form_submit_button.html" %}
