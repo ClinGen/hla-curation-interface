@@ -13,6 +13,7 @@
         <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon-16x16.png' %}">
         <link rel="manifest" href="{% static 'site.webmanifest' %}">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+        {% component_css_dependencies %}
         <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
         {% htmx_script %}
     </head>
@@ -28,7 +29,7 @@
             // This is required for the icons to work.
             feather.replace();
         </script>
-
+        {% component_js_dependencies %}
     </body>
     {% include "includes/footer.html" %}
 </html>

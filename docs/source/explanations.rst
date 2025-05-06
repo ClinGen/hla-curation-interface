@@ -13,6 +13,7 @@ App Structure
    .
    ├── admin       # Configure admin site pages.
    ├── clients     # Interact with external data sources like APIs.
+   ├── components  # House UI components.
    ├── forms       # House form classes.
    ├── migrations  # House generated database migrations.
    ├── models      # House database models

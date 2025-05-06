@@ -9,9 +9,9 @@ of a Postgres database.
 from django.contrib import messages
 
 from .base import (  # noqa: F401 (We don't care about unused imports in this context.)
-    ASGI_APPLICATION,
     AUTH_PASSWORD_VALIDATORS,
     BASE_DIR,
+    COMPONENTS,
     DATABASES,
     DEFAULT_AUTO_FIELD,
     INSTALLED_APPS,
@@ -23,11 +23,13 @@ from .base import (  # noqa: F401 (We don't care about unused imports in this co
     STATIC_ROOT,
     STATIC_URL,
     STATICFILES_DIRS,
+    STATICFILES_FINDERS,
     STORAGES,
     TEMPLATES,
     TIME_ZONE,
     USE_I18N,
     USE_TZ,
+    WSGI_APPLICATION,
 )
 
 DEBUG = True

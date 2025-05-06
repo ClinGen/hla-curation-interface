@@ -5,6 +5,10 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
+from apps.curations.components.params.tabs import (
+    new_allele_curation_tabs,
+    search_allele_curation_tabs,
+)
 from apps.curations.forms.curation import CurationForm
 from apps.curations.selectors.curation import CurationSelector
 from apps.curations.services.curation import CurationService
@@ -31,7 +35,7 @@ class CurationView(EntityView):
         return render(
             request,
             "curations/new.html",
-            {"form": form},
+            {"form": form, "tabs": new_allele_curation_tabs},
         )
 
     # TODO(Liam): Do the following tasks.  # noqa: FIX002, TD003
@@ -49,7 +53,11 @@ class CurationView(EntityView):
         else:
             template_name = "curations/list.html"
 
-        return render(request, template_name, {"curations": curations})
+        return render(
+            request,
+            template_name,
+            {"curations": curations, "tabs": search_allele_curation_tabs},
+        )
 
     # TODO(Liam): Do the following tasks.  # noqa: FIX002, TD003
     # - Implement the method below.

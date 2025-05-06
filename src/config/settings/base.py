@@ -3,6 +3,8 @@
 import os
 from pathlib import Path
 
+from django_components import ComponentsSettings
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
@@ -16,6 +18,7 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "django_htmx",
+    "django_components",
     "apps.home.apps.HomeAppConfig",
     "apps.curations.apps.CurationsAppConfig",
     "apps.diseases.apps.DiseasesAppConfig",
@@ -34,9 +37,21 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
+    "django_components.middleware.ComponentDependencyMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
+
+COMPONENTS = ComponentsSettings(
+    dirs=[
+        BASE_DIR / "components",
+        BASE_DIR / "apps" / "home" / "components",
+        BASE_DIR / "apps" / "curations" / "components",
+        BASE_DIR / "apps" / "markers" / "components",
+        BASE_DIR / "apps" / "publications" / "components",
+        BASE_DIR / "apps" / "users" / "components",
+    ],
+)
 
 TEMPLATES = [
     {
@@ -49,19 +64,35 @@ TEMPLATES = [
             BASE_DIR / "apps" / "publications" / "templates",
             BASE_DIR / "apps" / "users" / "templates",
         ],
-        "APP_DIRS": True,
         "OPTIONS": {
+            "builtins": ["django_components.templatetags.component_tags"],
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
+            "loaders": [
+                (
+                    "django.template.loaders.cached.Loader",
+                    [
+                        "django.template.loaders.filesystem.Loader",
+                        "django.template.loaders.app_directories.Loader",
+                        "django_components.template_loader.Loader",
+                    ],
+                )
+            ],
         },
     },
 ]
 
-ASGI_APPLICATION = "config.asgi.application"
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "django_components.finders.ComponentsFileSystemFinder",
+]
+
+WSGI_APPLICATION = "config.wsgi.application"
 
 AUTH_PASSWORD_VALIDATORS = [
     {

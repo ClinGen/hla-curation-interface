@@ -3,7 +3,8 @@
 {% block description %}The page where curators can view all or a subset of curations in the HLA curation interface.{% endblock %}
 {% block content %}
     <div class="block">
-        <h1 class="title">Curations</h1>
+        <h1 class="title">Search Curations</h1>
+        {% component "tabs" tabs=tabs / %}
         <div class="block">
             <label class="label" for="active-search-input">Search for curations</label>
             <input class="input column is-half"
