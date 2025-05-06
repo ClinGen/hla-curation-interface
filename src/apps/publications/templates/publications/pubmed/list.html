@@ -19,10 +19,6 @@
                    autocomplete="off"
             />
         </div>
-        <div class="block">
-            <p class="mb-2">Don't see the PubMed article you're looking for?</p>
-            <a class="button is-responsive" href="{% url "new_pubmed" %}">New PubMed Article</a>
-        </div>
         <div class="block" id="pubmed-table">
             {% include "publications/includes/pubmed_table.html" %}
         </div>
