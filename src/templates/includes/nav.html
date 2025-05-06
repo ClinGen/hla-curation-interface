@@ -11,26 +11,62 @@
         We don't boost these links because they go to views that will render a
         partial template if they see the HTMX `HX-Request` header set to `true`.
         -->
-        <a hx-boost="false"
-           href="{% url 'list_curation' %}"
-           {% if request.resolver_match.view_name == 'list_curation' %}class="navbar-item has-text-weight-bold"{% endif %}
-           class="navbar-item">Curations
-        </a>
-        <a hx-boost="false"
-           href="{% url 'list_mondo' %}"
-           {% if request.resolver_match.view_name == 'list_mondo' %}class="navbar-item has-text-weight-bold"{% endif %}
-           class="navbar-item">Diseases
-        </a>
-        <a hx-boost="false"
-           href="{% url 'list_allele' %}"
-           {% if request.resolver_match.view_name == 'list_allele' %}class="navbar-item has-text-weight-bold"{% endif %}
-           class="navbar-item">Alleles/Haplotypes
-        </a>
-        <a hx-boost="false"
-           href="{% url 'list_pubmed' %}"
-           {% if request.resolver_match.view_name == 'list_pubmed' %}class="navbar-item has-text-weight-bold"{% endif %}
-           class="navbar-item">Publications
-        </a>
+        <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">Curations</a>
+            <div class="navbar-dropdown">
+                <a href="{% url 'list_curation' %}"
+                   hx-boost="false"
+                   {% if request.resolver_match.view_name == 'list_curation' %}class="navbar-item has-text-weight-bold"{% endif %}
+                   class="navbar-item">Search
+                </a>
+                <a href="{% url 'new_curation' %}"
+                   {% if request.resolver_match.view_name == 'new_curation' %}class="navbar-item has-text-weight-bold"{% endif %}
+                   class="navbar-item">New
+                </a>
+            </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">Diseases</a>
+            <div class="navbar-dropdown">
+                <a href="{% url 'list_mondo' %}"
+                   hx-boost="false"
+                   {% if request.resolver_match.view_name == 'list_mondo' %}class="navbar-item has-text-weight-bold"{% endif %}
+                   class="navbar-item">Search
+                </a>
+                <a href="{% url 'new_mondo' %}"
+                   {% if request.resolver_match.view_name == 'new_mondo' %}class="navbar-item has-text-weight-bold"{% endif %}
+                   class="navbar-item">New
+                </a>
+            </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">Alleles/Haplotypes</a>
+            <div class="navbar-dropdown">
+                <a href="{% url 'list_allele' %}"
+                   hx-boost="false"
+                   {% if request.resolver_match.view_name == 'list_allele' %}class="navbar-item has-text-weight-bold"{% endif %}
+                   class="navbar-item">Search
+                </a>
+                <a href="{% url 'new_allele' %}"
+                   {% if request.resolver_match.view_name == 'new_allele' %}class="navbar-item has-text-weight-bold"{% endif %}
+                   class="navbar-item">New
+                </a>
+            </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">Publications</a>
+            <div class="navbar-dropdown">
+                <a href="{% url 'list_pubmed' %}"
+                   hx-boost="false"
+                   {% if request.resolver_match.view_name == 'list_pubmed' %}class="navbar-item has-text-weight-bold"{% endif %}
+                   class="navbar-item">Search
+                </a>
+                <a href="{% url 'new_pubmed' %}"
+                   {% if request.resolver_match.view_name == 'new_pubmed' %}class="navbar-item has-text-weight-bold"{% endif %}
+                   class="navbar-item">New
+                </a>
+            </div>
+        </div>
         <div class="navbar-end">
             <div class="navbar-item">
                 <div class="buttons">
