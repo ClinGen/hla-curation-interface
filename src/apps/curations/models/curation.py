@@ -58,5 +58,5 @@ class Curation(models.Model):
             prefix = HRIDPrefixes.ALLELE_CURATION
             if self.curation_type == "haplotype":
                 prefix = HRIDPrefixes.HAPLOTYPE_CURATION
-            self.curation_id = f"{prefix}-{self.id:06d}"
+            self.curation_id = f"{prefix}-{self.id:06d}"  # type: ignore (Django and Pyright aren't playing together nicely here.)
             self.save(update_fields=["curation_id"])

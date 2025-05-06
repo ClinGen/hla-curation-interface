@@ -3,7 +3,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 
 from apps.curations.forms.curation import CurationForm
 from apps.curations.selectors.curation import CurationSelector
@@ -24,8 +24,8 @@ class CurationView(EntityView):
                 data = form.cleaned_data
                 service = CurationService()
                 service.create(data["curation_type"], data["disease"], data["allele"])
-                messages.success(request, "Curation created successfully.")
-                return redirect("home")
+                messages.success(request, "Curation created.")
+                form = CurationForm()
         else:
             form = CurationForm()
         return render(

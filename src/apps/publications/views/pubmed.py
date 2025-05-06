@@ -1,8 +1,9 @@
 """Provide views for PubMed publications."""
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 
 from apps.publications.clients.pubmed import PubMedArticleClient
 from apps.publications.forms.pubmed import PubMedArticleForm
@@ -26,7 +27,8 @@ class PubMedView(EntityView):
                 client = PubMedArticleClient(pubmed_id)
                 service = PubMedArticleService(client)
                 service.create(pubmed_id)
-                return redirect("home")
+                messages.success(request, "PubMed article created.")
+                form = PubMedArticleForm()
         else:
             form = PubMedArticleForm()
         return render(

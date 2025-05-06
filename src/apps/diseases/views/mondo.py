@@ -1,8 +1,9 @@
 """Provide views for Mondo diseases."""
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 
 from apps.diseases.clients.mondo import MondoClient
 from apps.diseases.forms.mondo import MondoDiseaseForm
@@ -27,7 +28,8 @@ class MondoView(EntityView):
                 client.fetch()  # Fetch the data from the Mondo API.
                 service = MondoService(client)
                 service.create(mondo_id)
-                return redirect("home")
+                messages.success(request, "Disease created.")
+                form = MondoDiseaseForm()
         else:
             form = MondoDiseaseForm()
         return render(
