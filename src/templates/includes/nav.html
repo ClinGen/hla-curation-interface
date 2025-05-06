@@ -14,13 +14,13 @@
         <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">Curations</a>
             <div class="navbar-dropdown">
-                <a href="{% url 'list_curation' %}"
+                <a href="{% url 'list_allele_curation' %}"
                    hx-boost="false"
-                   {% if request.resolver_match.view_name == 'list_curation' %}class="navbar-item has-text-weight-bold"{% endif %}
+                   {% if request.resolver_match.view_name == 'list_allele_curation' %}class="navbar-item has-text-weight-bold"{% endif %}
                    class="navbar-item">Search
                 </a>
-                <a href="{% url 'new_curation' %}"
-                   {% if request.resolver_match.view_name == 'new_curation' %}class="navbar-item has-text-weight-bold"{% endif %}
+                <a href="{% url 'new_allele_curation' %}"
+                   {% if request.resolver_match.view_name == 'new_allele_curation' %}class="navbar-item has-text-weight-bold"{% endif %}
                    class="navbar-item">New
                 </a>
             </div>

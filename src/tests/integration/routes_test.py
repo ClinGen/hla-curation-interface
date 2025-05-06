@@ -16,12 +16,12 @@ ROUTES = [
 
     # Mondo diseases: Create, view a list, or view specific.
     "/diseases/mondo/new",
-    # "/diseases/mondo/list",
+    "/diseases/mondo/list",
     # "/diseases/mondo/<str:mondo_id>",
 
     # Alleles: Create, view a list, or view specific.
     "/markers/allele/new",
-    # "/markers/allele/list",
+    "/markers/allele/list",
     # "/markers/allele/<str:car_id>",
 
     # Haplotypes: Create, view a list, or view specific.
@@ -45,8 +45,8 @@ ROUTES = [
     # "/publications/medrxiv/<str:doi>",
 
     # Curations: Create, view a list, or view specific.
-    # "/curations/allele/new",
-    # "/curations/allele/list",
+    "/curations/allele/new",
+    "/curations/allele/list",
     # "/curations/allele/<str:curation_id>",
 
     # Curations: Edit an allele classification.

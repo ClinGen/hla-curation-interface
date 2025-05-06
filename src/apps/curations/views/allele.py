@@ -1,4 +1,4 @@
-"""Provide views for curations."""
+"""Provide views for allele curations."""
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -9,32 +9,32 @@ from apps.curations.components.params.tabs import (
     new_allele_curation_tabs,
     search_allele_curation_tabs,
 )
-from apps.curations.forms.curation import CurationForm
-from apps.curations.selectors.curation import AlleleCurationSelector
-from apps.curations.services.curation import AlleleCurationService
+from apps.curations.forms.allele import AlleleCurationForm
+from apps.curations.selectors.allele import AlleleCurationSelector
+from apps.curations.services.allele import AlleleCurationService
 from base.views import EntityView
 
 
-class CurationView(EntityView):
-    """Create, view all, or view a curation."""
+class AlleleCurationView(EntityView):
+    """Create, view all, or view an allele curation."""
 
     @staticmethod
     @login_required
     def new(request: HttpRequest) -> HttpResponse:
-        """Return the view that provides a form that creates a curation."""
+        """Return the view that provides a form that creates an allele curation."""
         if request.method == "POST":
-            form = CurationForm(request.POST)
+            form = AlleleCurationForm(request.POST)
             if form.is_valid():
                 data = form.cleaned_data
                 service = AlleleCurationService()
                 service.create(data["disease"], data["allele"])
                 messages.success(request, "Curation created.")
-                form = CurationForm()
+                form = AlleleCurationForm()
         else:
-            form = CurationForm()
+            form = AlleleCurationForm()
         return render(
             request,
-            "curations/new.html",
+            "curations/allele/new.html",
             {"form": form, "tabs": new_allele_curation_tabs},
         )
 
@@ -43,7 +43,7 @@ class CurationView(EntityView):
     # - Remove the pyright ignore directive.
     @staticmethod
     def list(request: HttpRequest) -> HttpResponse:  # type: ignore
-        """Return the searchable table page for a PubMed publication."""
+        """Return the searchable table page for an allele curation."""
         query = request.GET.get("q", None)
         selector = AlleleCurationSelector()
         curations = selector.list(query)
@@ -51,7 +51,7 @@ class CurationView(EntityView):
         if request.htmx:  # type: ignore (This attribute is added by the django-htmx app.)
             template_name = "curations/includes/curation_table.html"
         else:
-            template_name = "curations/list.html"
+            template_name = "curations/allele/list.html"
 
         return render(
             request,
@@ -64,4 +64,4 @@ class CurationView(EntityView):
     # - Remove the pyright ignore directive.
     @staticmethod
     def details(request: HttpRequest, human_readable_id: str) -> HttpResponse:  # type: ignore
-        """Return the details page for a PubMed publication."""
+        """Return the details page for an allele curation."""

@@ -2,11 +2,15 @@
 
 from django.urls import path
 
-from apps.curations.views.curation import CurationView
+from apps.curations.views.allele import AlleleCurationView
+from apps.curations.views.haplotype import HaplotypeCurationView
 
-view = CurationView()
+allele = AlleleCurationView()
+haplotype = HaplotypeCurationView()
 
 urlpatterns = [
-    path("new", view.new, name="new_curation"),
-    path("list", view.list, name="list_curation"),
+    path("allele/new", allele.new, name="new_allele_curation"),
+    path("allele/list", allele.list, name="list_allele_curation"),
+    path("haplotype/new", haplotype.new, name="new_haplotype_curation"),
+    path("haplotype/list", haplotype.list, name="list_haplotype_curation"),
 ]
