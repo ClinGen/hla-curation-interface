@@ -1,16 +1,21 @@
 """Define the parameters for the tabs in the curation views."""
 
+ALLELE_NEW_URL = "/curations/allele/new"
+ALLELE_SEARCH_URL = "/curations/allele/list"
+HAPLOTYPE_NEW_URL = "/curations/haplotype/new"
+HAPLOTYPE_SEARCH_URL = "/curations/haplotype/list"
+
 new_allele_curation_tabs = [
     {
         "text": "New Allele Curation",
         "is_active": True,
-        "url": "/curations/allele/new",
+        "url": ALLELE_NEW_URL,
         "url_is_boosted": True,
     },
     {
         "text": "New Haplotype Curation",
         "is_active": False,
-        "url": "/curations/haplotype/new",
+        "url": HAPLOTYPE_NEW_URL,
         "url_is_boosted": True,
     },
 ]
@@ -19,13 +24,13 @@ new_haplotype_curation_tabs = [
     {
         "text": "New Allele Curation",
         "is_active": False,
-        "url": "/curations/allele/new",
+        "url": ALLELE_NEW_URL,
         "url_is_boosted": True,
     },
     {
         "text": "New Haplotype Curation",
         "is_active": True,
-        "url": "/curations/haplotype/new",
+        "url": HAPLOTYPE_NEW_URL,
         "url_is_boosted": True,
     },
 ]
@@ -34,13 +39,13 @@ search_allele_curation_tabs = [
     {
         "text": "Search Allele Curations",
         "is_active": True,
-        "url": "/curations/allele/list",
+        "url": ALLELE_SEARCH_URL,
         "url_is_boosted": False,
     },
     {
         "text": "Search Haplotype Curations",
         "is_active": False,
-        "url": "/curations/haplotype/list",
+        "url": HAPLOTYPE_SEARCH_URL,
         "url_is_boosted": False,
     },
 ]
@@ -49,13 +54,13 @@ search_haplotype_curation_tabs = [
     {
         "text": "Search Allele Curations",
         "is_active": False,
-        "url": "/curations/allele/list",
+        "url": ALLELE_SEARCH_URL,
         "url_is_boosted": False,
     },
     {
         "text": "Search Haplotype Curations",
         "is_active": True,
-        "url": "/curations/haplotype/list",
+        "url": HAPLOTYPE_SEARCH_URL,
         "url_is_boosted": False,
     },
 ]
