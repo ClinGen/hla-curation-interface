@@ -40,7 +40,7 @@
             </div>
         </div>
         <div class="navbar-item has-dropdown is-hoverable">
-            <a class="navbar-link">Alleles/Haplotypes</a>
+            <a class="navbar-link">Alleles</a>
             <div class="navbar-dropdown">
                 <a href="{% url 'list_allele' %}"
                    hx-boost="false"
@@ -49,6 +49,20 @@
                 </a>
                 <a href="{% url 'new_allele' %}"
                    {% if request.resolver_match.view_name == 'new_allele' %}class="navbar-item has-text-weight-bold"{% endif %}
+                   class="navbar-item">New
+                </a>
+            </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">Haplotypes</a>
+            <div class="navbar-dropdown">
+                <a href="{% url 'list_haplotype' %}"
+                   hx-boost="false"
+                   {% if request.resolver_match.view_name == 'list_haplotype' %}class="navbar-item has-text-weight-bold"{% endif %}
+                   class="navbar-item">Search
+                </a>
+                <a href="{% url 'new_haplotype' %}"
+                   {% if request.resolver_match.view_name == 'new_haplotype' %}class="navbar-item has-text-weight-bold"{% endif %}
                    class="navbar-item">New
                 </a>
             </div>

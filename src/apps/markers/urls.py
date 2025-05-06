@@ -3,10 +3,14 @@
 from django.urls import path
 
 from apps.markers.views.allele import AlleleView
+from apps.markers.views.haplotype import HaplotypeView
 
-view = AlleleView()
+allele = AlleleView()
+haplotype = HaplotypeView()
 
 urlpatterns = [
-    path("allele/new", view.new, name="new_allele"),
-    path("allele/list", view.list, name="list_allele"),
+    path("allele/new", allele.new, name="new_allele"),
+    path("allele/list", allele.list, name="list_allele"),
+    path("haplotype/new", haplotype.new, name="new_haplotype"),
+    path("haplotype/list", haplotype.list, name="list_haplotype"),
 ]

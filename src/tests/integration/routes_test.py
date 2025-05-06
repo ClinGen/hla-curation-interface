@@ -25,8 +25,8 @@ ROUTES = [
     # "/markers/allele/<str:car_id>",
 
     # Haplotypes: Create, view a list, or view specific.
-    # "/markers/haplotype/new",
-    # "/markers/haplotype/list",
+    "/markers/haplotype/new",
+    "/markers/haplotype/list",
     # "/markers/haplotype/<str:car_id>",
 
     # PubMed publications: Create, view a list, or view specific.
