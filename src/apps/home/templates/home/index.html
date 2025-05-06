@@ -3,13 +3,19 @@
 {% block description %}The home page for the HLA curation interface.{% endblock %}
 {% block content %}
     <div class="block">
-        <section class="hero is-light">
+        <section id="home-hero" class="hero is-light" style="background-color: {{ hero_bg_color }}">
             <div class="hero-body">
-                <h2 class="title">HLA Curation Interface</h2>
+                <h2 class="title" style="color: white;">HLA Curation Interface</h2>
                 {% if user.is_authenticated %}
-                    <p class="subtitle">Welcome, {{ user.first_name }}. You are curating as part of the {{ affiliation }} affiliation.</p>
+                    <p class="subtitle" style="color: {{ hero_text_color }}">
+                        Welcome, {{ user.first_name }}. You are curating as part of the
+                        {{ affiliation }} affiliation.
+                    </p>
                 {% else %}
-                    <p class="subtitle">Welcome. To curate as part of an affiliation, please <a href="{% url 'login' %}">log in</a>.</p>
+                    <p class="subtitle" style="color: {{ hero_text_color }}">
+                        Welcome. To curate as part of an affiliation, please
+                        <a href="{% url 'login' %}" style="color: {{ hero_link_color }}">log in</a>.
+                    </p>
                 {% endif %}
             </div>
         </section>

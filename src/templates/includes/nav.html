@@ -1,12 +1,12 @@
 {% load static %}
 <nav class="navbar block" role="navigation" aria-label="main navigation">
     <div class="navbar-start container">
-        <div class="navbar-item">
-            <a href="/">
-                <img src="{% static 'clingen.svg' %}"  alt="The ClinGen logo."/>
-            </a>
-        </div>
-        <a href="/" {% if request.resolver_match.view_name == 'home' %}class="navbar-item has-text-weight-bold"{% endif %} class="navbar-item">Home</a>
+        <a href="/"
+           {% if request.resolver_match.view_name == 'home' %}class="navbar-item has-text-weight-bold"{% endif %}
+           class="navbar-item">
+            <img src="{% static 'hci-logo.png' %}"  alt="The HCI logo. It looks conspicuously similar to the DNA emoji."/>
+            Home
+        </a>
         <!--
         We don't boost these links because they go to views that will render a
         partial template if they see the HTMX `HX-Request` header set to `true`.

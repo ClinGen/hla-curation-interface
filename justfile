@@ -167,6 +167,11 @@ django-check:
     cd src && uv run manage.py check
 alias djch := django-check
 
+# Collect static files. ----------------------------------------------
+django-collectstatic:
+    cd src && uv run manage.py collectstatic
+alias djcs := django-collectstatic
+
 # Make migrations. ---------------------------------------------------
 django-makemigrations:
     cd src && uv run manage.py makemigrations
