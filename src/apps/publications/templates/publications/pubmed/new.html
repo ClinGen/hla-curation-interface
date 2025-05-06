@@ -3,7 +3,7 @@
 {% block description %}The form for adding a new PubMed article to the HLA curation interface.{% endblock %}
 {% block content %}
     <div>
-        <h1 class="title">New PubMed Article</h1>
+        <h1 class="title">New Publication</h1>
         <form method="post">
             {% csrf_token %}
             {% include "includes/external_link.html" with prompt="Need to look up the ID of your PubMed article?" url=pubmed_search_url text="Search PubMed" %}
