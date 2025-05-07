@@ -1,4 +1,4 @@
-"""Define the URLs for the `curations` app."""
+"""Defines the URLs for the `curations` app."""
 
 from django.urls import path
 

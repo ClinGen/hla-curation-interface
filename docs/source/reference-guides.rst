@@ -12,14 +12,34 @@ there are still some conventions to be aware of.
 Comments
 --------
 
-- Prefer the `imperative mood <https://en.wikipedia.org/wiki/Imperative_mood>`_ for
-  comments.
+- Don't write obvious comments. The image below shows what not to do.
+
+.. image:: _static/stop-sign.jpg
+   :width: 200px
+   :alt: A picture of a stop sign with another sign pointing to it with the text: "This is a stop sign"
 
 Docstring Comments
 ^^^^^^^^^^^^^^^^^^
 
+When you're reading code, whether the code is part of a module, class, or function, the
+question you usually ask yourself is: "What does this code do?" The answer to that
+question should be in the docstring.
+
 The "top-level" docstring for a module, class, or function should almost always
-be in the `imperative mood <https://en.wikipedia.org/wiki/Imperative_mood>`_.
+be something along the lines of:
+
+- "Provides a way to..."
+- "Enables the..."
+- "Configures a..."
+
+Here are some general rules for docstrings:
+
+- **Explain the purpose:** Instead of just saying what a function or class is, explain
+  why it exists and what problem it solves.
+- **Describe the behavior:** For functions and methods, detail what they do. What are
+  the inputs, what processing occurs, and what are the outputs or side effects?
+- **Clarify assumptions and constraints:** Are there any prerequisites for using this
+  code? Are there limitations on the input or output?
 
 TODO Comments
 ^^^^^^^^^^^^^

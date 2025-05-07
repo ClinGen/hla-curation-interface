@@ -1,4 +1,15 @@
-"""Provide views for allele curations."""
+"""Provides HTTP views for managing allele curations within the application.
+
+This module is meant to handle primarily HTTP logic. Read logic should be delegated to
+the relevant selectors module. Create and update logic should be delegated to the
+relevant services module.
+
+This module defines views for creating new allele curations, listing existing ones
+with search functionality, and displaying detailed information for a specific
+allele curation. These views handle user interactions, form processing,
+data retrieval via selectors, and data manipulation via services related to
+allele curations.
+"""
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -16,12 +27,28 @@ from base.views import EntityView
 
 
 class AlleleCurationView(EntityView):
-    """Create, view all, or view an allele curation."""
+    """Encapsulates the primary interactions for allele curations.
+
+    This class provides methods for:
+        - Creating new allele curations based on user input.
+        - Displaying a searchable list of existing allele curations.
+        - Showing detailed information for a specific allele curation.
+    """
 
     @staticmethod
     @login_required
     def new(request: HttpRequest) -> HttpResponse:
-        """Return the view that provides a form that creates an allele curation."""
+        """Renders the new allele curation form and handles the form's submission.
+
+        The view uses the `new_allele_curation_tabs` context variable to render
+        navigation tabs on the page.
+
+        Args:
+            request: The Django `HttpRequest` object.
+
+        Returns:
+            A Django `HttpResponse` object rendering the form.
+        """
         if request.method == "POST":
             form = AlleleCurationForm(request.POST)
             if form.is_valid():
@@ -43,11 +70,25 @@ class AlleleCurationView(EntityView):
     # - Remove the pyright ignore directive.
     @staticmethod
     def list(request: HttpRequest) -> HttpResponse:  # type: ignore
-        """Return the searchable table page for an allele curation."""
+        """Renders a searchable list of allele curations.
+
+        The view uses the `search_allele_curation_tabs` context variable to render
+        navigation tabs on the page.
+
+        Args:
+            request: The Django `HttpRequest` object. The GET parameters may include `q`
+                for filtering the curations.
+
+        Returns:
+            A Django `HttpResponse` object that renders the list of allele curations.
+        """
         query = request.GET.get("q", None)
         selector = AlleleCurationSelector()
         curations = selector.list(query)
 
+        # If a user has entered a search query, HTMX will issue a GET request to the
+        # URL for this view. We simply return the newly filtered table of allele
+        # curations. HTMX will swap in this new table.
         if request.htmx:  # type: ignore (This attribute is added by the django-htmx app.)
             template_name = "curations/includes/curation_table.html"
         else:
@@ -64,4 +105,14 @@ class AlleleCurationView(EntityView):
     # - Remove the pyright ignore directive.
     @staticmethod
     def details(request: HttpRequest, human_readable_id: str) -> HttpResponse:  # type: ignore
-        """Return the details page for an allele curation."""
+        """Renders the details page for a specific allele curation.
+
+        Args:
+            request: The Django `HttpRequest` object.
+            human_readable_id: A string that uniquely identifies the allele
+                curation for display, AKA the curation ID.
+
+        Returns:
+            A Django `HttpResponse` object that renders the allele curation's details
+                page.
+        """

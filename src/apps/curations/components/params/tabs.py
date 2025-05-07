@@ -1,4 +1,7 @@
-"""Define the parameters for the tabs in the curation views."""
+"""Defines the parameters for the tabs in the curation views.
+
+These parameters are used in the `Tabs` component. See `src/components/tabs`.
+"""
 
 ALLELE_NEW_URL = "/curations/allele/new"
 ALLELE_SEARCH_URL = "/curations/allele/list"

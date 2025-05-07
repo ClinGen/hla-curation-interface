@@ -1,4 +1,7 @@
-"""Provide services for PubMed articles."""
+"""Provides services for creating and managing allele curations.
+
+This module is meant to handle create and update logic.
+"""
 
 from apps.curations.models.allele import AlleleCuration
 from apps.diseases.models.mondo import Mondo
@@ -6,7 +9,7 @@ from apps.markers.models.allele import Allele
 
 
 class AlleleCurationServiceError(Exception):
-    """Raise when the `AlleleCuration` service encounters an error."""
+    """Provides methods for creating and updating allele curations."""
 
 
 class AlleleCurationService:
@@ -17,18 +20,30 @@ class AlleleCurationService:
         disease: Mondo,
         allele: Allele,
     ) -> AlleleCuration:
-        """Create a new curation.
+        """Creates a new allele curation linking a specific disease and allele.
+
+        This method takes a `Mondo` disease object and an `Allele` object and
+        creates a new `AlleleCuration` instance in the database, associating
+        the given disease with the given allele.
 
         Args:
-            disease: The disease for the curation.
-            allele: The allele for the curation.
+            disease: The `Mondo` disease object to associate with the allele.
+            allele: The `Allele` object to associate with the disease.
 
         Returns:
-            The newly created curation.
+            The newly created `AlleleCuration` object.
         """
         return AlleleCuration.objects.create(disease=disease, allele=allele)
 
     # TODO(Liam): Implement the method below.  # noqa: FIX002, TD003
     @staticmethod
     def update() -> None:
-        """Implement the method below."""
+        """Updates an existing allele curation.
+
+        This method will likely take an `AlleleCuration` object (or its identifier)
+        and allow for modifications to its associated data. The specific
+        updatable fields and their behavior will be defined in the implementation.
+
+        Returns:
+            `None`.
+        """

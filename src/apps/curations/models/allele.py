@@ -1,4 +1,8 @@
-"""Provide a model for allele curations."""
+"""Defines the model for an allele curation.
+
+An allele curation is the top-level set of information about an allele-disease pair
+that a curator will try to classify.
+"""
 
 from django.db import models
 
@@ -9,7 +13,12 @@ from constants import ModelsConstants
 
 
 class AlleleCuration(models.Model):
-    """A curation is the basic information about a classification."""
+    """Contains the top-level information about an allele curation.
+
+    An allele curation focuses on a single disease and a single allele. A
+    curator will try to classify the relationship of the disease-allele pair using
+    evidence from various publications.
+    """
 
     curation_id: models.CharField = models.CharField(
         max_length=ModelsConstants.MAX_LENGTH_HUMAN_READABLE_ID,
@@ -38,11 +47,15 @@ class AlleleCuration(models.Model):
     )
 
     def __str__(self) -> str:
-        """Return a string representation of the curation."""
+        """Returns the human-readable ID of the curation."""
         return self.curation_id
 
     def save(self, *args, **kwargs) -> None:  # noqa: ANN002, ANN003 (Since we're overriding the method, I don't think type hints matter.)
-        """Save the curation. Add the human-readable ID if it doesn't exist."""
+        """Saves the curation.
+
+        If a human-readable ID hasn't been created for this curation, this method will
+        create one.
+        """
         super().save(*args, **kwargs)
         if not self.curation_id:
             prefix = HRIDPrefixes.ALLELE_CURATION
