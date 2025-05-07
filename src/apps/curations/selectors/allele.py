@@ -25,9 +25,7 @@ class AlleleCurationSelector(EntitySelector):
         """
         return AlleleCuration.objects.filter(curation_id=human_readable_id).first()
 
-    def list(
-        self, query: str | None = None
-    ) -> QuerySet[AlleleCuration] | QuerySet[None]:
+    def list(self, query: str | None = None) -> QuerySet[AlleleCuration] | None:
         """Retrieves a list of allele curations, optionally filtered based on the query.
 
         Args:
@@ -40,7 +38,7 @@ class AlleleCurationSelector(EntitySelector):
             A `QuerySet` containing the `AlleleCuration` objects that match the optional
             query. If no query is provided, all `AlleleCuration` objects are returned
             in the `QuerySet`. If no matching curations are found with a query, an empty
-            `QuerySet` will be returned.
+            `QuerySet` (which we type as `None`) will be returned.
         """
         if query is None:
             return AlleleCuration.objects.all()
