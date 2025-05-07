@@ -11,6 +11,11 @@ haplotype = HaplotypeCurationView()
 urlpatterns = [
     path("allele/new", allele.new, name="new_allele_curation"),
     path("allele/list", allele.list, name="list_allele_curation"),
+    path(
+        "allele/<str:curation_id>",
+        allele.details,
+        name="details_allele_curation",
+    ),
     path("haplotype/new", haplotype.new, name="new_haplotype_curation"),
     path("haplotype/list", haplotype.list, name="list_haplotype_curation"),
 ]

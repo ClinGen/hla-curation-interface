@@ -1,0 +1,43 @@
+{% extends "layouts/base.html" %}
+{% block title %}Allele Curation {{ curation.curation_id }}{% endblock %}
+{% block description %}The details page for allele curation {{ curation.curation_id }} in the HLA curation interface.{% endblock %}
+{% block content %}
+    <h1 class="title is-3">Curation {{ curation.curation_id }}</h1>
+    <div class="block">
+        <table class="table">
+            <tbody>
+            <tr>
+                <td>Disease</td>
+                <td><a href="#">{{ curation.disease.label }} ({{ curation.disease.mondo_id }})</a></td>
+            </tr>
+            <tr>
+                <td>Allele</td>
+                <td><a href="#">{{ curation.allele.descriptor }} ({{ curation.allele.car_id }})</a></td>
+            </tr>
+            <tr>
+                <td>Status</td>
+                <td>{{ curation.status }}</td>
+            </tr>
+            </tbody>
+        </table>
+        <h2 class="title is-4">Score Summary</h2>
+        <div class="block">
+            {% if curation.score %}
+                The score table goes here.
+            {% else %}
+                This curation doesn't have a score yet.
+            {% endif %}
+        </div>
+        <h2 class="title is-4">Associations</h2>
+        <div class="block">
+            {% if curation.associations %}
+                The associations table goes here.
+            {% else %}
+                This curation doesn't have any associations yet.
+            {% endif %}
+        </div>
+        <div class="block">
+            <a class="button">New Association</a>
+        </div>
+    </div>
+{% endblock %}

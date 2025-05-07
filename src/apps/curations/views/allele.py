@@ -14,7 +14,8 @@ allele curations.
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.urls import reverse
 
 from apps.curations.components.params.tabs import (
     new_allele_curation_tabs,
@@ -54,9 +55,13 @@ class AlleleCurationView(EntityView):
             if form.is_valid():
                 data = form.cleaned_data
                 service = AlleleCurationService()
-                service.create(data["disease"], data["allele"])
+                curation = service.create(data["disease"], data["allele"])
                 messages.success(request, "Curation created.")
-                form = AlleleCurationForm()
+                curation_details_url = reverse(
+                    "details_allele_curation",
+                    kwargs={"curation_id": curation.curation_id},
+                )
+                return redirect(curation_details_url)
         else:
             form = AlleleCurationForm()
         return render(
@@ -104,15 +109,19 @@ class AlleleCurationView(EntityView):
     # - Implement the method below.
     # - Remove the pyright ignore directive.
     @staticmethod
-    def details(request: HttpRequest, human_readable_id: str) -> HttpResponse:  # type: ignore
+    def details(request: HttpRequest, curation_id: str) -> HttpResponse:  # pyright: ignore[reportIncompatibleMethodOverride] (Pyright doesn't understand ABCs.)
         """Renders the details page for a specific allele curation.
 
         Args:
             request: The Django `HttpRequest` object.
-            human_readable_id: A string that uniquely identifies the allele
-                curation for display, AKA the curation ID.
+            curation_id: A string that uniquely identifies the allele curation for
+                display.
 
         Returns:
             A Django `HttpResponse` object that renders the allele curation's details
                 page.
         """
+        selector = AlleleCurationSelector()
+        curation = selector.get(curation_id)
+        context = {"curation": curation}
+        return render(request, "curations/allele/details.html", context)
