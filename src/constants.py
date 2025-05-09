@@ -27,7 +27,9 @@ class HumanReadableIDPrefixConstants:
     """
 
     ALLELE_CURATION = "ALC"
+    ALLELE_ASSOCIATION = "ALA"
     HAPLOTYPE_CURATION = "HPC"
+    HAPLOTYPE_ASSOCIATION = "HPA"
 
 
 class IPDConstants:

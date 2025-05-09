@@ -142,3 +142,7 @@ markers = [
     "contract: Make sure an external data source works.",
     "e2e: Make sure a workflow from the frontend to the database works.",
 ]
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"

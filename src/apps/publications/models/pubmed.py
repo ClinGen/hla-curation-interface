@@ -20,4 +20,7 @@ class PubMedArticle(models.Model):
 
     def __str__(self) -> str:
         """Return a string representation of the PubMed article."""
+        max_title_length = 50
+        if len(self.title) > max_title_length:
+            return f"{self.title[:max_title_length]}... ({self.pubmed_id})"
         return f"{self.title} ({self.pubmed_id})"

@@ -46,6 +46,12 @@ class AlleleCuration(models.Model):
         verbose_name="Updated At", auto_now=True
     )
 
+    class Meta:
+        """Defines metadata options."""
+
+        verbose_name = "Allele Curation"
+        verbose_name_plural = "Allele Curations"
+
     def __str__(self) -> str:
         """Returns the human-readable ID of the curation."""
         return self.curation_id

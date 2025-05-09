@@ -3,7 +3,7 @@
 This module is meant to handle create and update logic.
 """
 
-from apps.curations.models.allele import AlleleCuration
+from apps.curations.models.allele.curation import AlleleCuration
 from apps.diseases.models.mondo import Mondo
 from apps.markers.models.allele import Allele
 

@@ -1,0 +1,13 @@
+{% extends "layouts/base.html" %}
+{% block title %}New Allele Association{% endblock %}
+{% block description %}The form for adding a new allele association to the HLA curation interface.{% endblock %}
+{% block content %}
+    <div>
+        <h1 class="title">New Association</h1>
+        <form method="post">
+            {% csrf_token %}
+            {% include 'includes/form_select.html' with field=form.publication_type %}
+            {% include "includes/form_submit_button.html" %}
+        </form>
+    </div>
+{% endblock %}

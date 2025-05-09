@@ -21,9 +21,9 @@ from apps.curations.components.params.tabs import (
     new_allele_curation_tabs,
     search_allele_curation_tabs,
 )
-from apps.curations.forms.allele import AlleleCurationForm
-from apps.curations.selectors.allele import AlleleCurationSelector
-from apps.curations.services.allele import AlleleCurationService
+from apps.curations.forms.allele.curation import AlleleCurationForm
+from apps.curations.selectors.allele.curation import AlleleCurationSelector
+from apps.curations.services.allele.curation import AlleleCurationService
 from base.views import EntityView
 
 

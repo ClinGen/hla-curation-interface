@@ -1,12 +1,11 @@
 """Provides a form for adding an allele curation to the database.
 
-This form allows curators to associate a specific HLA allele with a particular disease
-at the initial stage of the curation workflow.
+This form allows curators to create a new curation for an allele-disease pair.
 """
 
 from django import forms
 
-from apps.curations.models.allele import AlleleCuration
+from apps.curations.models.allele.curation import AlleleCuration
 
 
 class AlleleCurationForm(forms.ModelForm):

@@ -37,7 +37,7 @@
             {% endif %}
         </div>
         <div class="block">
-            <a class="button">New Association</a>
+            <a href="{% url 'new_allele_association' curation_id=curation.curation_id %}" class="button">New Association</a>
         </div>
     </div>
 {% endblock %}

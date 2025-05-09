@@ -11,11 +11,15 @@ class EntityView(ABC):
     Here an entity refers to a model in the HCI that has a new page, a list page,
     and a details page. Some examples include: curations, diseases, markers (alleles
     and haplotypes), and publications.
+
+    We ignore the type hints and docstring docs for the `*args` and `**kwargs`
+    parameters because we don't know what they will be or whether the child class will
+    use them. They are there to provide flexibility to the child class.
     """
 
     @staticmethod
     @abstractmethod
-    def new(request: HttpRequest) -> HttpResponse:  # noqa: ANN401 (We don't care about this for abstract methods.)
+    def new(request: HttpRequest, *args, **kwargs) -> HttpResponse:  # noqa: ANN002, ANN003, D417
         """Return the page that provides a form that creates a new entity.
 
         Args:
@@ -24,7 +28,7 @@ class EntityView(ABC):
 
     @staticmethod
     @abstractmethod
-    def list(request: HttpRequest) -> HttpResponse:  # noqa: ANN401 (We don't care about this for abstract methods.)
+    def list(request: HttpRequest, *args, **kwargs) -> HttpResponse:  # noqa: ANN002, ANN003, D417
         """Return the searchable table page for an entity.
 
         Args:
@@ -33,10 +37,9 @@ class EntityView(ABC):
 
     @staticmethod
     @abstractmethod
-    def details(request: HttpRequest, human_readable_id: str) -> HttpResponse:  # noqa: ANN401 (We don't care about this for abstract methods.)
+    def details(request: HttpRequest, *args, **kwargs) -> HttpResponse:  # noqa: ANN002, ANN003, D417
         """Return the details page for an entity.
 
         Args:
             request: The Django HTTP request object.
-            human_readable_id: The human-readable ID of the model for the entity.
         """

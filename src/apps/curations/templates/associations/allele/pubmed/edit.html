@@ -1,0 +1,31 @@
+{% extends "layouts/base.html" %}
+{% block title %}Edit Association {{ association.association_id }}{% endblock %}
+{% block description %}The form for editing association {{ association.association_id }} in the HLA curation interface.{% endblock %}
+{% block content %}
+    <div class="block">
+        <a href="{% url 'details_allele_curation' curation_id=association.curation.curation_id %}">&larr; Back to Curation</a>
+    </div>
+    <h1 class="title">Edit Association</h1>
+    <h1 class="subtitle">{{ association.association_id }}</h1>
+    <div class="columns">
+        <div class="column is-one-fifth">
+            <aside class="menu">
+                <ul class="menu-list">
+                    <li><a href="#basic-information">Basic Information</a></li>
+                </ul>
+            </aside>
+        </div>
+        <div class="column">
+            <div class="box">
+                <h2 id="basic-information" class="title is-4">Basic Information</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    {% include "includes/form_select.html" with field=form.pubmed_article %}
+                    {% include "includes/form_checkbox.html" with field=form.is_included_for_scoring %}
+                    {% include "includes/form_checkbox.html" with field=form.is_conflicting_evidence %}
+                    {% include "includes/form_submit_button.html" with text="Save" %}
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

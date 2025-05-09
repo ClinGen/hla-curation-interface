@@ -5,7 +5,7 @@ This module is meant to handle read logic.
 
 from django.db.models import Q, QuerySet
 
-from apps.curations.models.allele import AlleleCuration
+from apps.curations.models.allele.curation import AlleleCuration
 from base.selectors import EntitySelector
 
 
