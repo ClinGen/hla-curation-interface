@@ -26,18 +26,10 @@
             <h3 class="title is-4">Your Allele Curations</h3>
             {% include "curations/includes/curation_table.html" with curations=allele_curations %}
         </div>
-        <div class="block">
-            <h3 class="title is-4">Your Haplotype Curations</h3>
-            {% include "curations/includes/curation_table.html" with curations=haplotype_curations %}
-        </div>
     {% else %}
         <div class="block">
             <h3 class="title is-4">All Allele Curations</h3>
             {% include "curations/includes/curation_table.html" with curations=allele_curations %}
-        </div>
-        <div class="block">
-            <h3 class="title is-4">All Haplotype Curations</h3>
-            {% include "curations/includes/curation_table.html" with curations=haplotype_curations %}
         </div>
     {% endif %}
 {% endblock %}

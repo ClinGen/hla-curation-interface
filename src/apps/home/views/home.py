@@ -19,7 +19,6 @@ def home(request: HttpRequest) -> HttpResponse:
     """
     # TODO(Liam): Use selectors.  # noqa: FIX002, TD003
     curator = None
-    haplotype_curations = None
     if request.user.is_authenticated:
         curator = Curator.objects.get(user=request.user)
         allele_curations = AlleleCuration.objects.filter(created_by=curator)
@@ -28,6 +27,5 @@ def home(request: HttpRequest) -> HttpResponse:
     context = {
         "curator": curator,
         "allele_curations": allele_curations,
-        "haplotype_curations": haplotype_curations,
     }
     return render(request, "home/index.html", context)
