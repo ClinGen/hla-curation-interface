@@ -11,6 +11,7 @@ haplotype = HaplotypeView()
 urlpatterns = [
     path("allele/new", allele.new, name="new_allele"),
     path("allele/list", allele.list, name="list_allele"),
+    path("allele/<str:car_id>/details", allele.details, name="details_allele"),
     path("haplotype/new", haplotype.new, name="new_haplotype"),
     path("haplotype/list", haplotype.list, name="list_haplotype"),
 ]

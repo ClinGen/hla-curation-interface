@@ -52,9 +52,10 @@ class AlleleView(EntityView):
 
         return render(request, template_name, {"alleles": alleles})
 
-    # TODO(Liam): Do the following tasks.  # noqa: FIX002, TD003
-    # - Implement the method below.
-    # - Remove the pyright ignore directive.
     @staticmethod
-    def details(request: HttpRequest, human_readable_id: str) -> None:  # type: ignore
+    def details(request: HttpRequest, car_id: str) -> HttpResponse:
         """Return the details page for an allele."""
+        selector = AlleleSelector()
+        allele = selector.get(car_id=car_id)
+        context = {"allele": allele}
+        return render(request, "markers/allele/details.html", context)

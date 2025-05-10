@@ -12,7 +12,7 @@
             </tr>
             <tr>
                 <td>Allele</td>
-                <td><a href="#">{{ curation.allele.descriptor }} ({{ curation.allele.car_id }})</a></td>
+                <td><a href="{% url 'details_allele' car_id=curation.allele.car_id %}">{{ curation.allele.descriptor }} ({{ curation.allele.car_id }})</a></td>
             </tr>
             <tr>
                 <td>Status</td>

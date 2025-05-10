@@ -5,7 +5,7 @@
     </tr>
     {% for allele in alleles %}
         <tr>
-            <td><a href="#">{{ allele.descriptor }}</a></td>
+            <td><a href="{% url 'details_allele' car_id=allele.car_id %}">{{ allele.descriptor }}</a></td>
             <td>
                 <a href="{{ allele.car_url }}" target="_blank" rel="noopener noreferrer">
                     {% include 'includes/icon.html' with name='external-link' %}{{ allele.car_id }}

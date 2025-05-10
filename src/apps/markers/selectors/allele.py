@@ -9,16 +9,16 @@ from base.selectors import EntitySelector
 class AlleleSelector(EntitySelector):
     """Get a specific HLA allele or get a list of HLA alleles."""
 
-    def get(self, human_readable_id: str) -> Allele | None:
+    def get(self, car_id: str) -> Allele | None:
         """Return a specific HLA allele.
 
         Args:
-             human_readable_id: The descriptor of the HLA allele.
+             car_id: The ClinGen Allele Registry ID of the allele.
 
         Returns:
-            The HLA allele object or `None` if the descriptor is not found.
+            The HLA allele object or `None` if the CAR ID is not found.
         """
-        return Allele.objects.filter(descriptor=human_readable_id).first()
+        return Allele.objects.filter(car_id=car_id).first()
 
     def list(self, query: str | None = None) -> QuerySet[Allele] | None:
         """Return a list of all HLA alleles, optionally filtered.
