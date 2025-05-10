@@ -5,7 +5,7 @@
     </tr>
     {% for article in articles %}
     <tr>
-        <td><a href="#">{{ article.pubmed_id }}</a></td>
+        <td><a href="{% url 'details_pubmed' pubmed_id=article.pubmed_id %}">{{ article.pubmed_id }}</a></td>
         <td>{{ article.title }}</td>
     </tr>
     {% empty %}

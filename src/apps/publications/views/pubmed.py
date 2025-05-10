@@ -63,9 +63,10 @@ class PubMedView(EntityView):
             {"articles": articles, "tabs": search_pubmed_publication_tabs},
         )
 
-    # TODO(Liam): Do the following tasks.  # noqa: FIX002, TD003
-    # - Implement the method below.
-    # - Remove the pyright ignore directive.
     @staticmethod
-    def details(request: HttpRequest, human_readable_id: str) -> HttpResponse:  # type: ignore
+    def details(request: HttpRequest, pubmed_id: str) -> HttpResponse:
         """Return the details page for a PubMed publication."""
+        selector = PubMedArticleSelector()
+        article = selector.get(pubmed_id=pubmed_id)
+        context = {"article": article}
+        return render(request, "publications/pubmed/details.html", context)

@@ -12,7 +12,7 @@ def test_get_existing_pubmed_article() -> None:
     """Make sure we can get an existing PubMed article."""
     PubMedArticle.objects.create(pubmed_id="123456789", title="Test Article")
     selector = PubMedArticleSelector()
-    retrieved_article = selector.get(human_readable_id="123456789")
+    retrieved_article = selector.get(pubmed_id="123456789")
     assert retrieved_article is not None
     assert retrieved_article.pubmed_id == "123456789"
     assert retrieved_article.title == "Test Article"
@@ -23,7 +23,7 @@ def test_get_existing_pubmed_article() -> None:
 def test_get_non_existent_pubmed_article() -> None:
     """Make sure we can't get a non-existing PubMed article."""
     selector = PubMedArticleSelector()
-    retrieved_article = selector.get(human_readable_id="999")
+    retrieved_article = selector.get(pubmed_id="999")
     assert retrieved_article is None
 
 

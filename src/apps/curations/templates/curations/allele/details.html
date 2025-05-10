@@ -45,7 +45,7 @@
                 <table class="table">
                     <thead>
                     <tr>
-                        <th>Association ID</th>
+                        <th>Association</th>
                         <th>PubMed Article</th>
                         <th>Included</th>
                         <th>Conflicting</th>
@@ -56,7 +56,11 @@
                         {% for association in curation.pubmed_associations.all %}
                             <tr>
                                 <td><a href="{% url 'edit_allele_association' curation_id=curation.curation_id association_id=association.association_id %}">{{ association.association_id }}</a></td>
-                                <td>{{ association.pubmed_article|default:"(Article not selected.)" }}</td>
+                                {% if association.pubmed_article %}
+                                    <td><a href="{% url 'details_pubmed' pubmed_id=association.pubmed_article.pubmed_id %}">{{ association.pubmed_article }}</a></td>
+                                {% else %}
+                                    <td>(Article not selected.)</td>
+                                {% endif %}
                                 <td>{{ association.is_included_for_scoring }}</td>
                                 <td>{{ association.is_conflicting_evidence }}</td>
                             </tr>
