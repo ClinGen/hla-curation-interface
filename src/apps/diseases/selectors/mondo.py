@@ -9,16 +9,16 @@ from base.selectors import EntitySelector
 class MondoSelector(EntitySelector):
     """Get a specific Mondo disease or get a list of Mondo diseases."""
 
-    def get(self, human_readable_id: str) -> Mondo | None:
+    def get(self, mondo_id: str) -> Mondo | None:
         """Return a specific Mondo disease.
 
         Args:
-             human_readable_id: The Mondo ID of the publication.
+             mondo_id: The Mondo ID of the disease.
 
         Returns:
-            The Mondo disease object or `None` if the PubMed ID is not found.
+            The Mondo disease object or `None` if the Mondo ID is not found.
         """
-        return Mondo.objects.filter(pubmed_id=human_readable_id).first()
+        return Mondo.objects.filter(mondo_id=mondo_id).first()
 
     def list(self, query: str | None = None) -> QuerySet[Mondo] | None:
         """Return a list of all Mondo diseases, optionally filtered.

@@ -6,6 +6,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
 from apps.diseases.clients.mondo import MondoClient
+from apps.diseases.clients.mondo_test import mondo_id
 from apps.diseases.forms.mondo import MondoDiseaseForm
 from apps.diseases.selectors.mondo import MondoSelector
 from apps.diseases.services.mondo import MondoService
@@ -52,9 +53,10 @@ class MondoView(EntityView):
 
         return render(request, template_name, {"diseases": diseases})
 
-    # TODO(Liam): Do the following tasks.  # noqa: FIX002, TD003
-    # - Implement the method below.
-    # - Remove the pyright ignore directive.
     @staticmethod
-    def details(request: HttpRequest, human_readable_id: str) -> HttpResponse:  # type: ignore
+    def details(request: HttpRequest, mondo_id: str) -> HttpResponse:
         """Return the details page for a Mondo disease."""
+        selector = MondoSelector()
+        disease = selector.get(mondo_id=mondo_id)
+        context = {"disease": disease}
+        return render(request, "diseases/mondo/details.html", context)

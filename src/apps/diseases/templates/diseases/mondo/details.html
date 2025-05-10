@@ -1,0 +1,23 @@
+{% extends "layouts/base.html" %}
+{% block title %}{{ disease.mondo_id }} Disease Details{% endblock %}
+{% block description %}The details page for {{ disease.mondo_id }} in the HLA curation interface.{% endblock %}
+{% block content %}
+    <div class="block">
+        <h1 class="title">Disease Details</h1>
+        <h2 class="subtitle">{{ disease.label }}</h2>
+        <div class="block">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <td>Mondo ID</td>
+                        <td>{{ disease.mondo_id }}</td>
+                    </tr>
+                    <tr>
+                        <td>Label</td>
+                        <td>{{ disease.label }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

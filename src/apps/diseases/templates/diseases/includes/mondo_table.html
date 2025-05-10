@@ -5,7 +5,7 @@
     </tr>
     {% for disease in diseases %}
         <tr>
-            <td><a href="#">{{ disease.mondo_id }}</a></td>
+            <td><a href="{% url 'details_mondo' mondo_id=disease.mondo_id %}">{{ disease.mondo_id }}</a></td>
             <td>{{ disease.label }}</td>
         </tr>
     {% empty %}

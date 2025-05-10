@@ -8,7 +8,7 @@
             <tbody>
             <tr>
                 <td>Disease</td>
-                <td><a href="#">{{ curation.disease.label }} ({{ curation.disease.mondo_id }})</a></td>
+                <td><a href="{% url 'details_mondo' mondo_id=curation.disease.mondo_id %}">{{ curation.disease.label }} ({{ curation.disease.mondo_id }})</a></td>
             </tr>
             <tr>
                 <td>Allele</td>
