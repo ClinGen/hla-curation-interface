@@ -55,7 +55,11 @@
                     {% if curation.pubmed_associations.all %}
                         {% for association in curation.pubmed_associations.all %}
                             <tr>
-                                <td><a href="{% url 'edit_allele_association' curation_id=curation.curation_id association_id=association.association_id %}">{{ association.association_id }}</a></td>
+                                <td>
+                                    <a href="{% url 'edit_allele_association' curation_id=curation.curation_id association_id=association.association_id %}">
+                                        {% include "includes/icon.html" with name="edit" %} {{ association.association_id }}
+                                    </a>
+                                </td>
                                 {% if association.pubmed_article %}
                                     <td><a href="{% url 'details_pubmed' pubmed_id=association.pubmed_article.pubmed_id %}">{{ association.pubmed_article }}</a></td>
                                 {% else %}
@@ -96,7 +100,11 @@
                     {% if curation.biorxiv_associations.all %}
                         {% for association in curation.biorxiv_associations.all %}
                             <tr>
-                                <td><a href="{% url 'edit_allele_association' curation_id=curation.curation_id association_id=association.association_id %}">{{ association.association_id }}</a></td>
+                                <td>
+                                    <a href="{% url 'edit_allele_association' curation_id=curation.curation_id association_id=association.association_id %}">
+                                        {% include "includes/icon.html" with name="edit" %} {{ association.association_id }}
+                                    </a>
+                                </td>
                                 <td>{{ association.biorxiv_paper|default:"(Paper not selected.)" }}</td>
                                 <td>{{ association.is_included_for_scoring }}</td>
                                 <td>{{ association.is_conflicting_evidence }}</td>
@@ -133,7 +141,11 @@
                     {% if curation.medrxiv_associations.all %}
                         {% for association in curation.medrxiv_associations.all %}
                             <tr>
-                                <td><a href="{% url 'edit_allele_association' curation_id=curation.curation_id association_id=association.association_id %}">{{ association.association_id }}</a></td>
+                                <td>
+                                    <a href="{% url 'edit_allele_association' curation_id=curation.curation_id association_id=association.association_id %}">
+                                        {% include "includes/icon.html" with name="edit" %} {{ association.association_id }}
+                                    </a>
+                                </td>
                                 <td>{{ association.medrxiv_paper|default:"(Paper not selected.)" }}</td>
                                 <td>{{ association.is_included_for_scoring }}</td>
                                 <td>{{ association.is_conflicting_evidence }}</td>
