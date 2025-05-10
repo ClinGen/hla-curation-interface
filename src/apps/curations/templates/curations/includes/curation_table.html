@@ -4,6 +4,7 @@
         <th>Curation ID</th>
         <th>Disease</th>
         <th>Allele</th>
+        <th>Status</th>
         <th>Modified</th>
         <th>Created</th>
     </tr>
@@ -12,6 +13,7 @@
             <td><a href="{% url 'details_allele_curation' curation_id=curation.curation_id %}">{{ curation.curation_id }}</a></td>
             <td><a href="#">{{ curation.disease.label }}</a></td>
             <td><a href="#">{{ curation.allele.descriptor }}</a></td>
+            <td>{{ curation.status }}</td>
             <td>{{ curation.updated_at }} UTC</td>
             <td>{{ curation.created_at }} UTC</td>
         </tr>
