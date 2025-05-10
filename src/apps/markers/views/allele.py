@@ -1,5 +1,6 @@
 """Provide a views for alleles."""
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
@@ -27,6 +28,7 @@ class AlleleView(EntityView):
                 client.fetch()
                 service = AlleleService(client)
                 service.create(descriptor)
+                messages.success(request, "Allele created.")
                 form = AlleleForm()
         else:
             form = AlleleForm()

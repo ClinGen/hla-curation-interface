@@ -25,10 +25,6 @@ class AlleleAssociation(models.Model):
         help_text="A unique identifier for the association for use in the HCI.",
     )
 
-    curation: models.ForeignKey = models.ForeignKey(
-        AlleleCuration, on_delete=models.CASCADE, related_name="associations"
-    )
-
     is_included_for_scoring: models.BooleanField = models.BooleanField(
         default=False,
         verbose_name="Include",
@@ -74,6 +70,10 @@ class PubMedAlleleAssociation(AlleleAssociation):
         null=True,
         blank=True,
         verbose_name="PubMed Article",
+    )
+
+    curation: models.ForeignKey = models.ForeignKey(
+        AlleleCuration, on_delete=models.CASCADE, related_name="pubmed_associations"
     )
 
     class Meta:  # pyright: ignore[reportIncompatibleVariableOverride] (We want to override the parent's `Meta` class.)

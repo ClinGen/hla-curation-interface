@@ -6,7 +6,7 @@
     </tr>
     {% for curation in curations %}
         <tr>
-            <td><a href="#">{{ curation.curation_id }}</a></td>
+            <td><a href="{% url 'details_allele_curation' curation_id=curation.curation_id %}">{{ curation.curation_id }}</a></td>
             <td><a href="#">{{ curation.disease.label }}</a></td>
             <td><a href="#">{{ curation.allele.descriptor }}</a></td>
         </tr>

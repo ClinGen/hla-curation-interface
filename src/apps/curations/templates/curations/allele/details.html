@@ -30,14 +30,96 @@
         </div>
         <h2 class="title is-4">Associations</h2>
         <div class="block">
-            {% if curation.associations %}
-                The associations table goes here.
-            {% else %}
-                This curation doesn't have any associations yet.
-            {% endif %}
-        </div>
-        <div class="block">
-            <a href="{% url 'new_allele_association' curation_id=curation.curation_id %}" class="button">New Association</a>
+            <div class="box">
+                <h3 class="title is-5">PubMed Article Associations</h3>
+                <div class="block">
+                    <a href="{% url 'new_allele_association' curation_id=curation.curation_id %}" class="button is-small">New PubMed Association</a>
+                </div>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Association ID</th>
+                        <th>PubMed Article</th>
+                        <th>Included</th>
+                        <th>Conflicting</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% if curation.pubmed_associations.all %}
+                        {% for association in curation.pubmed_associations.all %}
+                            <tr>
+                                <td><a href="{% url 'edit_allele_association' curation_id=curation.curation_id association_id=association.association_id %}">{{ association.association_id }}</a></td>
+                                <td>{{ association.pubmed_article|default:"(Article not selected.)" }}</td>
+                                <td>{{ association.is_included_for_scoring }}</td>
+                                <td>{{ association.is_conflicting_evidence }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <td colspan="4">This curation doesn't have any PubMed article associations yet.</td>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="box">
+                <h3 class="title is-5">bioRxiv Paper Associations</h3>
+                <div class="block">
+                    <a href="{% url 'new_allele_association' curation_id=curation.curation_id %}" class="button is-small">New bioRxiv Association</a>
+                </div>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Association ID</th>
+                        <th>bioRxiv Paper</th>
+                        <th>Included</th>
+                        <th>Conflicting</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% if curation.biorxiv_associations.all %}
+                        {% for association in curation.biorxiv_associations.all %}
+                            <tr>
+                                <td><a href="{% url 'edit_allele_association' curation_id=curation.curation_id association_id=association.association_id %}">{{ association.association_id }}</a></td>
+                                <td>{{ association.biorxiv_paper|default:"(Paper not selected.)" }}</td>
+                                <td>{{ association.is_included_for_scoring }}</td>
+                                <td>{{ association.is_conflicting_evidence }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <td colspan="4">This curation doesn't have any bioRxiv paper associations yet.</td>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="box">
+                <h3 class="title is-5">medRxiv Paper Associations</h3>
+                <div class="block">
+                    <a href="{% url 'new_allele_association' curation_id=curation.curation_id %}" class="button is-small">New medRxiv Association</a>
+                </div>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Association ID</th>
+                        <th>medRxiv Paper</th>
+                        <th>Included</th>
+                        <th>Conflicting</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% if curation.medrxiv_associations.all %}
+                        {% for association in curation.medrxiv_associations.all %}
+                            <tr>
+                                <td><a href="{% url 'edit_allele_association' curation_id=curation.curation_id association_id=association.association_id %}">{{ association.association_id }}</a></td>
+                                <td>{{ association.medrxiv_paper|default:"(Paper not selected.)" }}</td>
+                                <td>{{ association.is_included_for_scoring }}</td>
+                                <td>{{ association.is_conflicting_evidence }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <td colspan="4">This curation doesn't have any medRxiv paper associations yet.</td>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 {% endblock %}
