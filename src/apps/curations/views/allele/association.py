@@ -50,28 +50,26 @@ class PubMedAlleleAssociationView(EntityView):
             A Django `HttpResponse` object rendering the form.
         """
         if request.method == "POST":
-            form = AlleleAssociationForm(request.POST)
-            if form.is_valid():
-                data = form.cleaned_data
-                service = AlleleAssociationService()
-                association = service.create(curation_id, data["publication_type"])
-                if association:
-                    messages.success(request, "Association created.")
-                    association_edit_url = reverse(
-                        "edit_allele_association",
-                        kwargs={
-                            "curation_id": curation_id,
-                            "association_id": association.association_id,
-                        },
-                    )
-                    return redirect(association_edit_url)
-        else:
-            form = AlleleAssociationForm()
-        return render(
-            request,
-            "associations/allele/new.html",
-            {"form": form},
+            service = AlleleAssociationService()
+            publication_type = request.POST.get("publication_type")
+            association = service.create(curation_id, publication_type)
+            if association:
+                messages.success(request, "Association created.")
+                association_edit_url = reverse(
+                    "edit_allele_association",
+                    kwargs={
+                        "curation_id": curation_id,
+                        "association_id": association.association_id,
+                    },
+                )
+                response = HttpResponse(status=204)
+                response["HX-Redirect"] = association_edit_url
+                return response
+        messages.error(request, "Unable to create association.")
+        curation_details_url = reverse(
+            "details_allele_curation", kwargs={"curation_id": curation_id}
         )
+        return redirect(curation_details_url)
 
     # TODO(Liam): Do the following tasks.  # noqa: FIX002, TD003
     # - Implement the method below.

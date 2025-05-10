@@ -33,7 +33,14 @@
             <div class="box">
                 <h3 class="title is-5">PubMed Article Associations</h3>
                 <div class="block">
-                    <a href="{% url 'new_allele_association' curation_id=curation.curation_id %}" class="button is-small">New PubMed Association</a>
+                    <button hx-post="{% url 'new_allele_association' curation_id=curation.curation_id %}"
+                            hx-target="body"
+                            hx-swap="outerHTML"
+                            hx-vals='{"publication_type": "pubmed"}'
+                            class="button is-small"
+                    >
+                        New PubMed Association
+                    </button>
                 </div>
                 <table class="table">
                     <thead>
@@ -63,7 +70,14 @@
             <div class="box">
                 <h3 class="title is-5">bioRxiv Paper Associations</h3>
                 <div class="block">
-                    <a href="{% url 'new_allele_association' curation_id=curation.curation_id %}" class="button is-small">New bioRxiv Association</a>
+                    <button hx-post="{% url 'new_allele_association' curation_id=curation.curation_id %}"
+                            hx-target="body"
+                            hx-swap="outerHTML"
+                            hx-vals='{"publication_type": "biorxiv"}'
+                            class="button is-small"
+                    >
+                        New bioRxiv Association
+                    </button>
                 </div>
                 <table class="table">
                     <thead>
@@ -93,7 +107,14 @@
             <div class="box">
                 <h3 class="title is-5">medRxiv Paper Associations</h3>
                 <div class="block">
-                    <a href="{% url 'new_allele_association' curation_id=curation.curation_id %}" class="button is-small">New medRxiv Association</a>
+                    <button hx-post="{% url 'new_allele_association' curation_id=curation.curation_id %}"
+                            hx-target="body"
+                            hx-swap="outerHTML"
+                            hx-vals='{"publication_type": "medrxiv"}'
+                            class="button is-small"
+                    >
+                        New medRxiv Association
+                    </button>
                 </div>
                 <table class="table">
                     <thead>
