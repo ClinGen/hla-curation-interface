@@ -9,26 +9,35 @@
                 {% if user.is_authenticated %}
                     <p class="subtitle">
                         Welcome, {{ user.first_name }}. You are curating as part of the
-                        {{ affiliation }} affiliation.
+                        {{ curator.active_affiliation.affiliation_name }} affiliation.
                     </p>
                 {% else %}
                     <p class="subtitle" style="color: {{ hero_text_color }}">
-                        Welcome. To curate as part of an affiliation, please
-                        <a href="{% url 'login' %}">log in</a>.
+                        Welcome. To curate, please
+                        <a href="{% url 'login' %}">log in</a> or
+                        <a href="{% url 'signup' %}">sign up</a>.
                     </p>
                 {% endif %}
             </div>
         </section>
     </div>
-    {% if user.is_authenticated %}
+    {% if curator %}
         <div class="block">
-            <h3 class="title is-4">Your Curations</h3>
-            {% include "home/includes/dummy_table_your_curations.html" %}
+            <h3 class="title is-4">Your Allele Curations</h3>
+            {% include "curations/includes/curation_table.html" with curations=allele_curations %}
+        </div>
+        <div class="block">
+            <h3 class="title is-4">Your Haplotype Curations</h3>
+            {% include "curations/includes/curation_table.html" with curations=haplotype_curations %}
         </div>
     {% else %}
         <div class="block">
-            <h3 class="title is-4">All Curations</h3>
-            {% include "home/includes/dummy_table_all_curations.html" %}
+            <h3 class="title is-4">All Allele Curations</h3>
+            {% include "curations/includes/curation_table.html" with curations=allele_curations %}
+        </div>
+        <div class="block">
+            <h3 class="title is-4">All Haplotype Curations</h3>
+            {% include "curations/includes/curation_table.html" with curations=haplotype_curations %}
         </div>
     {% endif %}
 {% endblock %}

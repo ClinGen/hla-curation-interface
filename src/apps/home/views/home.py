@@ -3,6 +3,9 @@
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
+from apps.curations.models.allele.curation import AlleleCuration
+from apps.users.models.curator import Curator
+
 
 def home(request: HttpRequest) -> HttpResponse:
     """View the home page of the HCI.
@@ -14,7 +17,17 @@ def home(request: HttpRequest) -> HttpResponse:
     Returns:
         The rendered home page.
     """
+    # TODO(Liam): Use selectors.  # noqa: FIX002, TD003
+    curator = None
+    haplotype_curations = None
+    if request.user.is_authenticated:
+        curator = Curator.objects.get(user=request.user)
+        allele_curations = AlleleCuration.objects.filter(created_by=curator)
+    else:
+        allele_curations = AlleleCuration.objects.all()
     context = {
-        "affiliation": "HLA Expert Panel",
+        "curator": curator,
+        "allele_curations": allele_curations,
+        "haplotype_curations": haplotype_curations,
     }
     return render(request, "home/index.html", context)

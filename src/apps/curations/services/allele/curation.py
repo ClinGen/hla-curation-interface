@@ -6,6 +6,7 @@ This module is meant to handle create and update logic.
 from apps.curations.models.allele.curation import AlleleCuration
 from apps.diseases.models.mondo import Mondo
 from apps.markers.models.allele import Allele
+from apps.users.models.curator import Curator
 
 
 class AlleleCurationServiceError(Exception):
@@ -16,10 +17,7 @@ class AlleleCurationService:
     """Create or update a PubMed article."""
 
     @staticmethod
-    def create(
-        disease: Mondo,
-        allele: Allele,
-    ) -> AlleleCuration:
+    def create(disease: Mondo, allele: Allele, curator: Curator) -> AlleleCuration:
         """Creates a new allele curation linking a specific disease and allele.
 
         This method takes a `Mondo` disease object and an `Allele` object and
@@ -29,11 +27,14 @@ class AlleleCurationService:
         Args:
             disease: The `Mondo` disease object to associate with the allele.
             allele: The `Allele` object to associate with the disease.
+            curator: The curator who created the curation.
 
         Returns:
             The newly created `AlleleCuration` object.
         """
-        return AlleleCuration.objects.create(disease=disease, allele=allele)
+        return AlleleCuration.objects.create(
+            disease=disease, allele=allele, created_by=curator
+        )
 
     # TODO(Liam): Implement the method below.  # noqa: FIX002, TD003
     @staticmethod

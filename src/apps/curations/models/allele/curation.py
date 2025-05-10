@@ -8,6 +8,7 @@ from django.db import models
 
 from apps.diseases.models import Mondo
 from apps.markers.models import Allele
+from apps.users.models.curator import Curator
 from constants import HumanReadableIDPrefixConstants as HRIDPrefixes
 from constants import ModelsConstants
 
@@ -38,6 +39,9 @@ class AlleleCuration(models.Model):
         verbose_name="Status",
         help_text="The status of the curation, e.g., 'new', 'in progress', 'done'.",
         default="new",
+    )
+    created_by: models.ForeignKey = models.ForeignKey(
+        Curator, on_delete=models.CASCADE, verbose_name="Created By"
     )
     created_at: models.DateTimeField = models.DateTimeField(
         verbose_name="Created At", auto_now_add=True

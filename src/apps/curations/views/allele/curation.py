@@ -24,6 +24,7 @@ from apps.curations.components.params.tabs import (
 from apps.curations.forms.allele.curation import AlleleCurationForm
 from apps.curations.selectors.allele.curation import AlleleCurationSelector
 from apps.curations.services.allele.curation import AlleleCurationService
+from apps.users.models.curator import Curator
 from base.views import EntityView
 
 
@@ -54,8 +55,10 @@ class AlleleCurationView(EntityView):
             form = AlleleCurationForm(request.POST)
             if form.is_valid():
                 data = form.cleaned_data
+                # TODO(Liam): Use a selector here.  # noqa: FIX002, TD003
+                curator = Curator.objects.get(user=request.user)
                 service = AlleleCurationService()
-                curation = service.create(data["disease"], data["allele"])
+                curation = service.create(data["disease"], data["allele"], curator)
                 messages.success(request, "Curation created.")
                 curation_details_url = reverse(
                     "details_allele_curation",
