@@ -1,0 +1,54 @@
+{% load static %}
+<button class="js-modal-trigger button is-danger" data-target="delete-association-modal">
+    Delete Association
+</button>
+<div id="delete-association-modal" class="modal">
+    <div class="modal-background"></div>
+    <div class="modal-content">
+        <div class="box">
+            <div class="block">
+                <p>Are you sure you want to delete this association?</p>
+            </div>
+            <div class="block">
+                <table class="table">
+                <tbody>
+                    <tbody>
+                        <tr>
+                            <td>Association ID</td>
+                            <td>{{ association.association_id }}</td>
+                        </tr>
+                        <tr>
+                            <td>PubMed Article</td>
+                            <td>{{ association.pubmed_article|default:"(Article not selected.)" }}</td>
+                        </tr>
+                        <tr>
+                            <td>Curation ID</td>
+                            <td>{{ association.curation.curation_id }}</td>
+                        </tr>
+                        <tr>
+                            <td>Disease</td>
+                            <td>{{ association.curation.disease.label }}</td>
+                        </tr>
+                        <tr>
+                            <td>Allele</td>
+                            <td>{{ association.curation.allele.descriptor }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="block">
+                <button class="button is-danger"
+                        hx-delete="{% url 'delete_allele_association' curation_id=association.curation.curation_id association_id=association.association_id %}"
+                        hx-target="body"
+                        hx-swap="outerHTML"
+                        hx-boost="true"
+                        hx-history="false"
+                >
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+    <button class="modal-close is-large" aria-label="close"></button>
+</div>
+<script src="{% static 'modal.js' %}"></script>

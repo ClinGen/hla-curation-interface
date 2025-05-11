@@ -20,7 +20,9 @@ from django.urls import reverse
 from apps.curations.forms.allele.association import PubMedAlleleAssociationForm
 from apps.curations.selectors.allele.association import PubMedAlleleAssociationSelector
 from apps.curations.services.allele.association import AlleleAssociationService
+from apps.users.permissions.crud import can_delete
 from base.views import EntityView
+from constants import PublicationTypeConstants
 
 
 class PubMedAlleleAssociationView(EntityView):
@@ -59,6 +61,7 @@ class PubMedAlleleAssociationView(EntityView):
                 )
                 response = HttpResponse(status=204)
                 response["HX-Redirect"] = association_edit_url
+                response["HX-Replace-Url"] = "true"
                 return response
         messages.error(request, "Unable to create association.")
         curation_details_url = reverse(
@@ -115,3 +118,38 @@ class PubMedAlleleAssociationView(EntityView):
             form = PubMedAlleleAssociationForm(instance=association)
         context = {"form": form, "association": association}
         return render(request, "associations/allele/pubmed/edit.html", context)
+
+    @staticmethod
+    def delete(
+        request: HttpRequest, curation_id: str, association_id: str
+    ) -> HttpResponse:
+        """Deletes the PubMed allele association.
+
+        Args:
+            request: The Django `HttpRequest` object.
+            curation_id: The human-readable ID of the curation for the association.
+            association_id: The human-readable ID of the association.
+
+        Returns:
+            A Django `HttpResponse` object.
+        """
+        if request.method == "DELETE" and can_delete(request.user):
+            service = AlleleAssociationService()
+            service.delete(association_id, PublicationTypeConstants.PUBMED)
+            messages.success(request, "Association deleted.")
+            allele_curation_details_url = reverse(
+                "details_allele_curation", kwargs={"curation_id": curation_id}
+            )
+            response = HttpResponse(status=204)
+            # Reset the user's scroll position.
+            response["HX-Redirect"] = allele_curation_details_url
+            response["HX-Replace-Url"] = "true"
+            return response
+        messages.warning(
+            request, "You do not have the correct permissions to delete an association."
+        )
+        return redirect(
+            "edit_allele_association",
+            curation_id=curation_id,
+            association_id=association_id,
+        )

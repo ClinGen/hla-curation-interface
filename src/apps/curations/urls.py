@@ -28,6 +28,11 @@ urlpatterns = [
         allele_association.edit,
         name="edit_allele_association",
     ),
+    path(
+        "allele/<str:curation_id>/association/<str:association_id>/delete",
+        allele_association.delete,
+        name="delete_allele_association",
+    ),
     path("haplotype/new", haplotype_curation.new, name="new_haplotype_curation"),
     path("haplotype/list", haplotype_curation.list, name="list_haplotype_curation"),
 ]

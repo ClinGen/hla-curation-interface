@@ -53,6 +53,14 @@ class MondoConstants:
     SEARCH_URL = "https://www.ebi.ac.uk/ols4/ontologies/mondo"
 
 
+class PublicationTypeConstants:
+    """Define the string values for the publication types."""
+
+    BIORXIV = "biorxiv"
+    MEDRXIV = "medrxiv"
+    PUBMED = "pubmed"
+
+
 class PubMedConstants:
     """Define constants related to PubMed."""
 

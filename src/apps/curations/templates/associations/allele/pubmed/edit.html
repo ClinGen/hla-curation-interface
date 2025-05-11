@@ -12,6 +12,7 @@
             <aside class="menu">
                 <ul class="menu-list">
                     <li><a href="#basic-information">Basic Information</a></li>
+                    <li><a href="#danger-zone">Danger Zone</a></li>
                 </ul>
             </aside>
         </div>
@@ -25,6 +26,10 @@
                     {% include "includes/form_checkbox.html" with field=form.is_conflicting_evidence %}
                     {% include "includes/form_submit_button.html" with text="Save" %}
                 </form>
+            </div>
+            <div class="box">
+                <h2 id="danger-zone" class="title is-4">Danger Zone</h2>
+                {% include "associations/allele/pubmed/includes/delete_association.html" with association=association %}
             </div>
         </div>
     </div>
