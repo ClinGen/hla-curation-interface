@@ -26,7 +26,7 @@ alias pre := pre-commit
 #=====================================================================
 
 # Run all source code quality checks. --------------------------------
-qual-src-all: qual-infra-format-check qual-src-lint qual-src-type-check
+qual-src-all: qual-src-format-check qual-src-lint qual-src-type-check
 alias qsal := qual-src-all
 
 # Format the source code. --------------------------------------------

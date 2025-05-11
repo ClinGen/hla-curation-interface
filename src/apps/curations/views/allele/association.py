@@ -17,14 +17,9 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
-from apps.curations.forms.allele.association import (
-    AlleleAssociationForm,
-    PubMedAlleleAssociationForm,
-)
+from apps.curations.forms.allele.association import PubMedAlleleAssociationForm
 from apps.curations.selectors.allele.association import PubMedAlleleAssociationSelector
-from apps.curations.services.allele.association import (
-    AlleleAssociationService,
-)
+from apps.curations.services.allele.association import AlleleAssociationService
 from base.views import EntityView
 
 

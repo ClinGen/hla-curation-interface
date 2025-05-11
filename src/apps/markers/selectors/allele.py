@@ -9,7 +9,7 @@ from base.selectors import EntitySelector
 class AlleleSelector(EntitySelector):
     """Get a specific HLA allele or get a list of HLA alleles."""
 
-    def get(self, car_id: str) -> Allele | None:
+    def get(self, car_id: str) -> Allele | None:  # pyright: ignore[reportIncompatibleMethodOverride] (We want to change the param name.)
         """Return a specific HLA allele.
 
         Args:

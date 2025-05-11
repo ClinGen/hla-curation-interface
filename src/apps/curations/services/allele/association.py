@@ -19,7 +19,7 @@ class AlleleAssociationService(EntityService):
     @staticmethod
     def create(
         curation_id: str,
-        publication_type: str,
+        publication_type: str | None,
     ) -> PubMedAlleleAssociation | None:
         """Creates a new allele association based on the given publication type.
 

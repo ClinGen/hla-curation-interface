@@ -6,7 +6,6 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
 from apps.diseases.clients.mondo import MondoClient
-from apps.diseases.clients.mondo_test import mondo_id
 from apps.diseases.forms.mondo import MondoDiseaseForm
 from apps.diseases.selectors.mondo import MondoSelector
 from apps.diseases.services.mondo import MondoService

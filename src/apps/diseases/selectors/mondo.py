@@ -9,7 +9,7 @@ from base.selectors import EntitySelector
 class MondoSelector(EntitySelector):
     """Get a specific Mondo disease or get a list of Mondo diseases."""
 
-    def get(self, mondo_id: str) -> Mondo | None:
+    def get(self, mondo_id: str) -> Mondo | None:  # pyright: ignore[reportIncompatibleMethodOverride] (We want to change the param name.)
         """Return a specific Mondo disease.
 
         Args:

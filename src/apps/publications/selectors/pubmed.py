@@ -9,7 +9,7 @@ from base.selectors import EntitySelector
 class PubMedArticleSelector(EntitySelector):
     """Get a specific PubMed publication or get a list of PubMed publications."""
 
-    def get(self, pubmed_id: str) -> PubMedArticle | None:
+    def get(self, pubmed_id: str) -> PubMedArticle | None:  # pyright: ignore[reportIncompatibleMethodOverride] (We want to change the param name.)
         """Return a specific PubMed publication.
 
         Args:
