@@ -48,6 +48,16 @@ class AlleleAssociation(models.Model):
         help_text="Was the HLA allele phased?",
     )
 
+    typing_methods: models.CharField = models.CharField(
+        default=None,
+        blank=True,
+        null=True,
+        verbose_name="Typing Method",
+        help_text="What HLA typing methodology was used?",
+        max_length=ModelsConstants.MAX_LENGTH_TYPING_METHODS,
+        choices=ModelsConstants.CHOICES_TYPING_METHODS,
+    )
+
     class Meta:
         """Defines metadata options."""
 

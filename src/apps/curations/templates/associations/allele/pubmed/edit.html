@@ -14,6 +14,7 @@
                     <li><a href="#basic-information">Basic Information</a></li>
                     <li><a href="#zygosity">Zygosity</a></li>
                     <li><a href="#phase-confirmed">Phase Confirmed</a></li>
+                    <li><a href="#typing-method">Typing Method</a></li>
                     <li><a href="#danger-zone">Danger Zone</a></li>
                 </ul>
             </aside>
@@ -31,12 +32,17 @@
                     </div>
                     <div class="box">
                         <h2 id="zygosity" class="title is-4">Zygosity</h2>
-                        {% include "includes/form_radio_buttons.html" with field=form.zygosity %}
+                        {% include "includes/form_radio_buttons.html" with field=form.zygosity hide_label=True %}
                         {% include "includes/form_submit_button.html" with text="Save" %}
                     </div>
                     <div class="box">
                         <h2 id="phase-confirmed" class="title is-4">Phase Confirmed</h2>
                         {% include "includes/form_checkbox.html" with field=form.phase_is_confirmed %}
+                        {% include "includes/form_submit_button.html" with text="Save" %}
+                    </div>
+                    <div class="box">
+                        <h2 id="typing-method" class="title is-4">Typing Method</h2>
+                        {% include "includes/form_select.html" with field=form.typing_methods hide_label=True %}
                         {% include "includes/form_submit_button.html" with text="Save" %}
                     </div>
                 </form>

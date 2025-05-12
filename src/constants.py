@@ -45,8 +45,23 @@ class ModelsConstants:
         ("mo", "Monoallelic (heterozygous)"),
         ("bi", "Biallelic (homozygous)"),
     ]
+    CHOICES_TYPING_METHODS = [
+        ("tag", "Tag SNPs"),
+        ("mic", "Microarrays"),
+        ("ser", "Serological"),
+        ("imp", "Imputation"),
+        ("lrt", "Low Resolution Typing"),
+        ("hrt", "High Resolution Typing"),
+        ("wes", "Whole Exome Sequencing"),
+        ("san", "Sanger Sequencing-Based Typing"),
+        ("gen", "Whole Gene Sequencing"),
+        ("nom", "Whole Genome Sequencing"),
+        ("pbn", "Panel-Based NGS (>50x coverage)"),
+        ("nop", "Whole Genome Sequencing and Panel-Based NGS (>50x coverage)"),
+    ]
     MAX_LENGTH_NAME = 255
     MAX_LENGTH_HUMAN_READABLE_ID = 3
+    MAX_LENGTH_TYPING_METHODS = 3
     MAX_LENGTH_ZYGOSITY = 2
 
 

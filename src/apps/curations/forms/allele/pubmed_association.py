@@ -23,7 +23,8 @@ class PubMedAlleleAssociationForm(forms.ModelForm):
             "is_conflicting_evidence",
             "zygosity",
             "phase_is_confirmed",
+            "typing_methods",
         ]
         widgets = {
-            "zygosity": forms.RadioSelect(choices=ModelsConstants.CHOICES_ZYGOSITY)
+            "zygosity": forms.RadioSelect(choices=ModelsConstants.CHOICES_ZYGOSITY),
         }
