@@ -60,6 +60,7 @@ class AlleleAssociationService(EntityService):
         if publication_type == PublicationTypeConstants.PUBMED:
             selector = PubMedAlleleAssociationSelector()
             association = selector.get(association_id)
-            association.delete()
-            deleted = True
+            if association:
+                association.delete()
+                deleted = True
         return deleted
