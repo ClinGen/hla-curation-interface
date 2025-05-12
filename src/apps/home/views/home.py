@@ -5,6 +5,7 @@ from django.shortcuts import render
 
 from apps.curations.models.allele.curation import AlleleCuration
 from apps.users.models.curator import Curator
+from apps.users.selectors.curator import get_curator
 
 
 def home(request: HttpRequest) -> HttpResponse:
@@ -17,10 +18,9 @@ def home(request: HttpRequest) -> HttpResponse:
     Returns:
         The rendered home page.
     """
-    # TODO(Liam): Use selectors.  # noqa: FIX002, TD003
     curator = None
     if request.user.is_authenticated:
-        curator = Curator.objects.get(user=request.user)
+        curator = get_curator(request.user.username)
         allele_curations = AlleleCuration.objects.filter(created_by=curator)
     else:
         allele_curations = AlleleCuration.objects.all()
