@@ -39,8 +39,13 @@ class AlleleAssociation(models.Model):
     zygosity: models.CharField = models.CharField(
         max_length=ModelsConstants.MAX_LENGTH_ZYGOSITY,
         choices=ModelsConstants.CHOICES_ZYGOSITY,
-        verbose_name="Zygosity",
         default=ModelsConstants.CHOICES_ZYGOSITY[0][0],
+    )
+
+    phase_is_confirmed: models.BooleanField = models.BooleanField(
+        default=False,
+        verbose_name="Phase confirmed",
+        help_text="Was the HLA allele phased?",
     )
 
     class Meta:
