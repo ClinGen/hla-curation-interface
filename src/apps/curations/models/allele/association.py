@@ -36,6 +36,13 @@ class AlleleAssociation(models.Model):
         help_text="Is the evidence in this association conflicting?",
     )
 
+    zygosity: models.CharField = models.CharField(
+        max_length=ModelsConstants.MAX_LENGTH_ZYGOSITY,
+        choices=ModelsConstants.CHOICES_ZYGOSITY,
+        verbose_name="Zygosity",
+        default=ModelsConstants.CHOICES_ZYGOSITY[0][0],
+    )
+
     class Meta:
         """Defines metadata options."""
 

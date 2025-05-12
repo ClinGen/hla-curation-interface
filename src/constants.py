@@ -41,8 +41,13 @@ class IPDConstants:
 class ModelsConstants:
     """Define constants related to models."""
 
+    CHOICES_ZYGOSITY = [
+        ("mo", "Monoallelic (heterozygous)"),
+        ("bi", "Biallelic (homozygous)"),
+    ]
     MAX_LENGTH_NAME = 255
     MAX_LENGTH_HUMAN_READABLE_ID = 3
+    MAX_LENGTH_ZYGOSITY = 2
 
 
 class MondoConstants:
