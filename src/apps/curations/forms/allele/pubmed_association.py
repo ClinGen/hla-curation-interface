@@ -10,8 +10,8 @@ from apps.curations.models.allele.association import PubMedAlleleAssociation
 from constants import ModelsConstants
 
 
-class BasicInfoForm(forms.ModelForm):
-    """Collects basic info for the PubMed allele association."""
+class PubMedAlleleAssociationForm(forms.ModelForm):
+    """Collects all information for the PubMed allele association."""
 
     class Meta:
         """Configures the fields for the form."""
@@ -21,17 +21,8 @@ class BasicInfoForm(forms.ModelForm):
             "pubmed_article",
             "is_included_for_scoring",
             "is_conflicting_evidence",
+            "zygosity",
         ]
-
-
-class ZygosityForm(forms.ModelForm):
-    """Collects zygosity info for the PubMed allele association."""
-
-    class Meta:
-        """Configures the field for the form."""
-
-        model = PubMedAlleleAssociation
-        fields = ["zygosity"]
         widgets = {
             "zygosity": forms.RadioSelect(choices=ModelsConstants.CHOICES_ZYGOSITY)
         }

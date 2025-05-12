@@ -18,7 +18,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
 
-from apps.curations.forms.allele.pubmed_association import BasicInfoForm, ZygosityForm
+from apps.curations.forms.allele.pubmed_association import PubMedAlleleAssociationForm
 from apps.curations.selectors.allele.association import PubMedAlleleAssociationSelector
 from apps.curations.services.allele.association import AlleleAssociationService
 from apps.users.permissions.crud import can_delete
@@ -106,41 +106,21 @@ class PubMedAlleleAssociationView(EntityView):
         if not association:
             return redirect("details_allele_curation", curation_id=curation_id)
 
-        # Initialize forms dictionary to track the form that was submitted
-        forms = {
-            "basic_info": BasicInfoForm(instance=association),
-            "zygosity": ZygosityForm(instance=association),
-        }
-
-        # Process form submission if this is a POST request
+        form = PubMedAlleleAssociationForm(instance=association)
         if request.method == "POST":
-            form_type = request.POST.get("form_type")
+            form = PubMedAlleleAssociationForm(request.POST, instance=association)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "All information saved.")
+                return redirect(
+                    "edit_allele_association",
+                    curation_id=curation_id,
+                    association_id=association_id,
+                )
 
-            if form_type == "basic_info":
-                forms["basic_info"] = BasicInfoForm(request.POST, instance=association)
-                if forms["basic_info"].is_valid():
-                    forms["basic_info"].save()
-                    messages.success(request, "Basic information saved.")
-                    return redirect(
-                        "edit_allele_association",
-                        curation_id=curation_id,
-                        association_id=association_id,
-                    )
-
-            elif form_type == "zygosity":
-                forms["zygosity"] = ZygosityForm(request.POST, instance=association)
-                if forms["zygosity"].is_valid():
-                    forms["zygosity"].save()
-                    messages.success(request, "Zygosity information saved.")
-                    return redirect(
-                        "edit_allele_association",
-                        curation_id=curation_id,
-                        association_id=association_id,
-                    )
-
-        # Prepare the context with all forms
+        # Prepare the context with the form
         context = {
-            "forms": forms,
+            "form": form,
             "association": association,
             "curation_id": curation_id,
         }
