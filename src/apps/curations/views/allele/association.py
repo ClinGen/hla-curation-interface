@@ -16,6 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.views.decorators.cache import never_cache
 
 from apps.curations.forms.allele.association import PubMedAlleleAssociationForm
 from apps.curations.selectors.allele.association import PubMedAlleleAssociationSelector
@@ -86,6 +87,7 @@ class PubMedAlleleAssociationView(EntityView):
         """Renders the details page for a specific PubMed allele association."""
 
     @staticmethod
+    @never_cache
     def edit(
         request: HttpRequest, curation_id: str, association_id: str
     ) -> HttpResponse:
@@ -101,23 +103,25 @@ class PubMedAlleleAssociationView(EntityView):
         """
         selector = PubMedAlleleAssociationSelector()
         association = selector.get(human_readable_id=association_id)
-        if request.method == "POST":
-            form = PubMedAlleleAssociationForm(request.POST, instance=association)
-            if form.is_valid():
-                form.save()
-                messages.success(
-                    request,
-                    "Changes saved.",
-                )
-                return redirect(
-                    "edit_allele_association",
-                    curation_id=curation_id,
-                    association_id=association_id,
-                )
-        else:
-            form = PubMedAlleleAssociationForm(instance=association)
-        context = {"form": form, "association": association}
-        return render(request, "associations/allele/pubmed/edit.html", context)
+        if association:
+            if request.method == "POST":
+                form = PubMedAlleleAssociationForm(request.POST, instance=association)
+                if form.is_valid():
+                    form.save()
+                    messages.success(
+                        request,
+                        "Changes saved.",
+                    )
+                    return redirect(
+                        "edit_allele_association",
+                        curation_id=curation_id,
+                        association_id=association_id,
+                    )
+            else:
+                form = PubMedAlleleAssociationForm(instance=association)
+            context = {"form": form, "association": association}
+            return render(request, "associations/allele/pubmed/edit.html", context)
+        return redirect("details_allele_curation", curation_id=curation_id)
 
     @staticmethod
     def delete(
