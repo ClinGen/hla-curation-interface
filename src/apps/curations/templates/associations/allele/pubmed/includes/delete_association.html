@@ -1,5 +1,6 @@
 {% load static %}
 <button class="js-modal-trigger button is-danger" data-target="delete-association-modal">
+    {% include "includes/icon.html" with name="trash-2" %}
     Delete Association
 </button>
 <div id="delete-association-modal" class="modal">
@@ -44,6 +45,7 @@
                         hx-boost="true"
                         hx-history="false"
                 >
+                    {% include "includes/icon.html" with name="trash-2" %}
                     Delete
                 </button>
             </div>
