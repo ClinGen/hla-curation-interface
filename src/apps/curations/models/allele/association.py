@@ -65,6 +65,8 @@ class AlleleAssociation(models.Model):
     )
 
     # TODO(Liam): Figure out how to store the number representation of the p-value.  # noqa: FIX002, TD003, E501
+    # If you use a `DecimalField`, the result is displayed without being normalized,
+    # which would look like too many significant digits to the curator.
     p_value_text: models.CharField = models.CharField(
         default=None,
         blank=True,
@@ -79,6 +81,17 @@ class AlleleAssociation(models.Model):
         null=True,
         max_length=ModelsConstants.MAX_LENGTH_MULTIPLE_TESTING_CORRECTIONS,
         choices=ModelsConstants.CHOICES_MULTIPLE_TESTING_CORRECTIONS,
+    )
+
+    # TODO(Liam): Figure out how to store the number representation of the odds ratio.  # noqa: FIX002, TD003, E501
+    # If you use a `DecimalField`, the result is displayed without being normalized,
+    # which would look like too many significant digits to the curator.
+    odds_ratio: models.CharField = models.CharField(
+        default=None,
+        blank=True,
+        null=True,
+        verbose_name="Odds Ratio",
+        help_text="The odds ratio as a decimal number, e.g., 0.54.",
     )
 
     class Meta:

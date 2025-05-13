@@ -17,6 +17,7 @@
                     <li><a href="#typing-method">Typing Method</a></li>
                     <li><a href="#statistics-p-value">Statistics p-value</a></li>
                     <li><a href="#multiple-testing-correction">Multiple Testing Correction</a></li>
+                    <li><a href="#statistics-effect-size">Statistics (Effect Size)</a></li>
                     <li><a href="#danger-zone">Danger Zone</a></li>
                 </ul>
             </aside>
@@ -56,6 +57,11 @@
                     <div class="box">
                         <h2 id="multiple-testing-correction" class="title is-4">Multiple Testing Correction</h2>
                         {% include "includes/form_select.html" with field=form.multiple_testing_correction hide_label=True %}
+                        {% include "includes/form_submit_button.html" with text="Save" %}
+                    </div>
+                    <div class="box">
+                        <h2 id="statistics-effect-size" class="title is-4">Statistics (Effect Size)</h2>
+                        {% include "includes/form_input.html" with field=form.odds_ratio %}
                         {% include "includes/form_submit_button.html" with text="Save" %}
                     </div>
                 </form>
