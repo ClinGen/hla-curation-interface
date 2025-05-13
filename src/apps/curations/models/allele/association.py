@@ -162,6 +162,12 @@ class AlleleAssociation(models.Model):
         verbose_name="Has Disease-Related Phenotype",
     )
 
+    is_significant: models.BooleanField = models.BooleanField(
+        default=False,
+        verbose_name="Significant association",
+        help_text="Does this allele have a significant association with the disease?",
+    )
+
     class Meta:
         """Defines metadata options."""
 

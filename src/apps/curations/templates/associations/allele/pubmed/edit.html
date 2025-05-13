@@ -20,6 +20,7 @@
                     <li><a href="#statistics-effect-size">Statistics (Effect Size)</a></li>
                     <li><a href="#statistics-effect-size">Cohort Size</a></li>
                     <li><a href="#additional-phenotypes">Additional Phenotypes</a></li>
+                    <li><a href="#additional-phenotypes">Significance</a></li>
                     <li><a href="#danger-zone">Danger Zone</a></li>
                 </ul>
             </aside>
@@ -79,6 +80,11 @@
                     <div class="box">
                         <h2 id="additional-phenotypes" class="title is-4">Additional Phenotypes</h2>
                         {% include "includes/form_radio_buttons.html" with field=form.has_phenotype hide_label=True %}
+                        {% include "includes/form_submit_button.html" with text="Save" %}
+                    </div>
+                    <div class="box">
+                        <h2 id="significance" class="title is-4">Significance</h2>
+                        {% include "includes/form_checkbox.html" with field=form.is_significant %}
                         {% include "includes/form_submit_button.html" with text="Save" %}
                     </div>
                 </form>
