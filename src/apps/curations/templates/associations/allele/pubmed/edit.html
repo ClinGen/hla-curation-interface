@@ -22,13 +22,14 @@
                     <li><a href="#additional-phenotypes">Additional Phenotypes</a></li>
                     <li><a href="#additional-phenotypes">Significance</a></li>
                     <li><a href="#directionality">Directionality</a></li>
+                    <li><a href="#save">Save</a></li>
                     <li><a href="#danger-zone">Danger Zone</a></li>
                 </ul>
             </aside>
         </div>
         <div class="column">
             <div class="block">
-                <form method="post">
+                <form method="post" hx-boost="true">
                     {% csrf_token %}
                     <div class="box">
                         <h2 id="basic-information" class="title is-4">Basic Information</h2>
@@ -36,32 +37,26 @@
                         {% include "includes/form_checkbox.html" with field=form.is_included_for_scoring %}
                         {% include "includes/form_checkbox.html" with field=form.is_conflicting_evidence %}
                         {% include "includes/form_checkbox.html" with field=form.is_gwas hide_label=True %}
-                        {% include "includes/form_submit_button.html" with text="Save" %}
                     </div>
                     <div class="box">
                         <h2 id="zygosity" class="title is-4">Zygosity</h2>
                         {% include "includes/form_radio_buttons.html" with field=form.zygosity hide_label=True %}
-                        {% include "includes/form_submit_button.html" with text="Save" %}
                     </div>
                     <div class="box">
                         <h2 id="phase-confirmed" class="title is-4">Phase Confirmed</h2>
                         {% include "includes/form_checkbox.html" with field=form.phase_is_confirmed %}
-                        {% include "includes/form_submit_button.html" with text="Save" %}
                     </div>
                     <div class="box">
                         <h2 id="typing-method" class="title is-4">Typing Method</h2>
                         {% include "includes/form_select.html" with field=form.typing_methods hide_label=True %}
-                        {% include "includes/form_submit_button.html" with text="Save" %}
                     </div>
                     <div class="box">
                         <h2 id="statistics-p-value" class="title is-4">Statistics (p-value)</h2>
                         {% include "includes/form_input.html" with field=form.p_value_text hide_label=True %}
-                        {% include "includes/form_submit_button.html" with text="Save" %}
                     </div>
                     <div class="box">
                         <h2 id="multiple-testing-correction" class="title is-4">Multiple Testing Correction</h2>
                         {% include "includes/form_select.html" with field=form.multiple_testing_correction hide_label=True %}
-                        {% include "includes/form_submit_button.html" with text="Save" %}
                     </div>
                     <div class="box">
                         <h2 id="statistics-effect-size" class="title is-4">Statistics (Effect Size)</h2>
@@ -70,28 +65,27 @@
                         {% include "includes/form_input.html" with field=form.beta %}
                         {% include "includes/form_input.html" with field=form.confidence_interval_start %}
                         {% include "includes/form_input.html" with field=form.confidence_interval_end %}
-                        {% include "includes/form_submit_button.html" with text="Save" %}
                     </div>
                     <div class="box">
                         <h2 id="cohort-size" class="title is-4">Cohort Size</h2>
                         {% include "includes/form_input.html" with field=form.num_cases %}
                         {% include "includes/form_input.html" with field=form.num_controls %}
-                        {% include "includes/form_submit_button.html" with text="Save" %}
                     </div>
                     <div class="box">
                         <h2 id="additional-phenotypes" class="title is-4">Additional Phenotypes</h2>
                         {% include "includes/form_radio_buttons.html" with field=form.has_phenotype hide_label=True %}
-                        {% include "includes/form_submit_button.html" with text="Save" %}
                     </div>
                     <div class="box">
                         <h2 id="significance" class="title is-4">Significance</h2>
                         {% include "includes/form_checkbox.html" with field=form.is_significant %}
-                        {% include "includes/form_submit_button.html" with text="Save" %}
                     </div>
                     <div class="box">
                         <h2 id="directionality" class="title is-4">Directionality</h2>
                         {% include "includes/form_checkbox.html" with field=form.decreases_risk %}
-                        {% include "includes/form_submit_button.html" with text="Save" %}
+                    </div>
+                    <div class="box">
+                        <h2 id="save" class="title is-4">Save</h2>
+                        {% include "includes/form_submit_button.html" with text="Save All Changes" %}
                     </div>
                 </form>
             </div>

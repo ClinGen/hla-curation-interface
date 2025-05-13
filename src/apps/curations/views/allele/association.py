@@ -111,12 +111,19 @@ class PubMedAlleleAssociationView(EntityView):
             form = PubMedAlleleAssociationForm(request.POST, instance=association)
             if form.is_valid():
                 form.save()
-                messages.success(request, "All information saved.")
-                return redirect(
+                messages.success(request, "All changes saved.")
+                edit_allele_curation_url = reverse(
                     "edit_allele_association",
-                    curation_id=curation_id,
-                    association_id=association_id,
+                    kwargs={
+                        "curation_id": curation_id,
+                        "association_id": association_id,
+                    },
                 )
+                response = HttpResponse(status=204)
+                # Reset the user's scroll position.
+                response["HX-Redirect"] = edit_allele_curation_url
+                response["HX-Replace-Url"] = "true"
+                return response
             messages.error(request, "Please fix the errors in the form.")
 
         # Prepare the context with the form
