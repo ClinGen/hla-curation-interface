@@ -124,7 +124,7 @@ class AlleleAssociation(models.Model):
         default=None,
         blank=True,
         null=True,
-        verbose_name="Start of the Confidence Interval",
+        verbose_name="Start of Confidence Interval",
         help_text="The relative risk as a decimal number, e.g., 0.001.",
     )
 
@@ -135,7 +135,7 @@ class AlleleAssociation(models.Model):
         default=None,
         blank=True,
         null=True,
-        verbose_name="End of the Confidence Interval",
+        verbose_name="End of Confidence Interval",
         help_text="The relative risk as a decimal number, e.g., 0.38.",
     )
 
