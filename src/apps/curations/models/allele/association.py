@@ -58,6 +58,21 @@ class AlleleAssociation(models.Model):
         choices=ModelsConstants.CHOICES_TYPING_METHODS,
     )
 
+    is_gwas: models.BooleanField = models.BooleanField(
+        default=False,
+        verbose_name="GWAS",
+        help_text="Whether the study was a genome-wide association study (GWAS).",
+    )
+
+    # TODO(Liam): Figure out how to store the number representation of the p-value.  # noqa: FIX002, TD003, E501
+    p_value_text: models.CharField = models.CharField(
+        default=None,
+        blank=True,
+        null=True,
+        verbose_name="p-value",
+        help_text="The p-value as a decimal or in scientific notation, e.g., 5e-8.",
+    )
+
     class Meta:
         """Defines metadata options."""
 

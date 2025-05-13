@@ -24,6 +24,8 @@ class PubMedAlleleAssociationForm(forms.ModelForm):
             "zygosity",
             "phase_is_confirmed",
             "typing_methods",
+            "is_gwas",
+            "p_value_text",
         ]
         widgets = {
             "zygosity": forms.RadioSelect(choices=ModelsConstants.CHOICES_ZYGOSITY),

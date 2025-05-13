@@ -1,6 +1,10 @@
 <div class="field">
     <div class="has-text-danger">{{ field.errors }}</div>
-    <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {% if hide_label %}
+        <label class="label is-hidden" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {% else %}
+        <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {% endif %}
     <div class="control">
         <input class="input column is-half"
                id="{{ field.id_for_label }}"

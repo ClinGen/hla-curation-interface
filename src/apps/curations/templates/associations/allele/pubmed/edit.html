@@ -45,6 +45,12 @@
                         {% include "includes/form_select.html" with field=form.typing_methods hide_label=True %}
                         {% include "includes/form_submit_button.html" with text="Save" %}
                     </div>
+                    <div class="box">
+                        <h2 id="statistics-p-value" class="title is-4">Statistics (p-value)</h2>
+                        {% include "includes/form_checkbox.html" with field=form.is_gwas hide_label=True %}
+                        {% include "includes/form_input.html" with field=form.p_value_text hide_label=True %}
+                        {% include "includes/form_submit_button.html" with text="Save" %}
+                    </div>
                 </form>
             </div>
             <div class="block">
