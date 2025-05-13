@@ -155,6 +155,13 @@ class AlleleAssociation(models.Model):
         help_text="The number of controls.",
     )
 
+    has_phenotype: models.BooleanField = models.BooleanField(
+        max_length=ModelsConstants.MAX_LENGTH_HAS_PHENOTYPE,
+        choices=ModelsConstants.CHOICES_HAS_PHENOTYPE,
+        default=ModelsConstants.CHOICES_HAS_PHENOTYPE[0][0],
+        verbose_name="Has Disease-Related Phenotype",
+    )
+
     class Meta:
         """Defines metadata options."""
 

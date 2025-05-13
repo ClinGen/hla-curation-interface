@@ -19,6 +19,7 @@
                     <li><a href="#multiple-testing-correction">Multiple Testing Correction</a></li>
                     <li><a href="#statistics-effect-size">Statistics (Effect Size)</a></li>
                     <li><a href="#statistics-effect-size">Cohort Size</a></li>
+                    <li><a href="#additional-phenotypes">Additional Phenotypes</a></li>
                     <li><a href="#danger-zone">Danger Zone</a></li>
                 </ul>
             </aside>
@@ -73,6 +74,12 @@
                         <h2 id="cohort-size" class="title is-4">Cohort Size</h2>
                         {% include "includes/form_input.html" with field=form.num_cases %}
                         {% include "includes/form_input.html" with field=form.num_controls %}
+                        {% include "includes/form_submit_button.html" with text="Save" %}
+                    </div>
+                    <div class="box">
+                        <h2 id="additional-phenotypes" class="title is-4">Additional Phenotypes</h2>
+                        {% include "includes/form_radio_buttons.html" with field=form.has_phenotype hide_label=True %}
+                        {% include "includes/form_submit_button.html" with text="Save" %}
                     </div>
                 </form>
             </div>

@@ -41,9 +41,9 @@ class IPDConstants:
 class ModelsConstants:
     """Define constants related to models."""
 
-    CHOICES_ZYGOSITY = [
-        ("mo", "Monoallelic (heterozygous)"),
-        ("bi", "Biallelic (homozygous)"),
+    CHOICES_HAS_PHENOTYPE = [
+        (True, "Has disease-related phenotype"),
+        (False, "Only disease tested"),
     ]
     CHOICES_MULTIPLE_TESTING_CORRECTIONS = [
         ("ov", "Overall correction for multiple testing"),
@@ -63,8 +63,13 @@ class ModelsConstants:
         ("pbn", "Panel-Based NGS (>50x coverage)"),
         ("nop", "Whole Genome Sequencing and Panel-Based NGS (>50x coverage)"),
     ]
+    CHOICES_ZYGOSITY = [
+        ("mo", "Monoallelic (heterozygous)"),
+        ("bi", "Biallelic (homozygous)"),
+    ]
     DECIMAL_PLACES_P_VALUE = 30
     MAX_DIGITS_P_VALUE = 31
+    MAX_LENGTH_HAS_PHENOTYPE = 1
     MAX_LENGTH_HUMAN_READABLE_ID = 3
     MAX_LENGTH_MULTIPLE_TESTING_CORRECTIONS = 2
     MAX_LENGTH_NAME = 255
