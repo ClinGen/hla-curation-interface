@@ -30,10 +30,17 @@ class AlleleAssociation(models.Model):
         verbose_name="Include",
         help_text="Should this association be included for scoring?",
     )
+
     is_conflicting_evidence: models.BooleanField = models.BooleanField(
         default=False,
         verbose_name="Conflicts",
         help_text="Is the evidence in this association conflicting?",
+    )
+
+    is_gwas: models.BooleanField = models.BooleanField(
+        default=False,
+        verbose_name="GWAS",
+        help_text="Was the study a genome-wide association study?",
     )
 
     zygosity: models.CharField = models.CharField(
@@ -56,12 +63,6 @@ class AlleleAssociation(models.Model):
         help_text="What HLA typing methodology was used?",
         max_length=ModelsConstants.MAX_LENGTH_TYPING_METHODS,
         choices=ModelsConstants.CHOICES_TYPING_METHODS,
-    )
-
-    is_gwas: models.BooleanField = models.BooleanField(
-        default=False,
-        verbose_name="GWAS",
-        help_text="Whether the study was a genome-wide association study (GWAS).",
     )
 
     # TODO(Liam): Figure out how to store the number representation of the p-value.  # noqa: FIX002, TD003, E501
