@@ -73,6 +73,14 @@ class AlleleAssociation(models.Model):
         help_text="The p-value as a decimal or in scientific notation, e.g., 5e-8.",
     )
 
+    multiple_testing_correction: models.CharField = models.CharField(
+        default=None,
+        blank=True,
+        null=True,
+        max_length=ModelsConstants.MAX_LENGTH_MULTIPLE_TESTING_CORRECTIONS,
+        choices=ModelsConstants.CHOICES_MULTIPLE_TESTING_CORRECTIONS,
+    )
+
     class Meta:
         """Defines metadata options."""
 

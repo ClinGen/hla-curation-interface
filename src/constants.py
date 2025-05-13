@@ -45,6 +45,10 @@ class ModelsConstants:
         ("mo", "Monoallelic (heterozygous)"),
         ("bi", "Biallelic (homozygous)"),
     ]
+    CHOICES_MULTIPLE_TESTING_CORRECTIONS = [
+        ("ov", "Overall correction for multiple testing"),
+        ("2s", "2-step p-value correction"),
+    ]
     CHOICES_TYPING_METHODS = [
         ("tag", "Tag SNPs"),
         ("mic", "Microarrays"),
@@ -61,8 +65,9 @@ class ModelsConstants:
     ]
     DECIMAL_PLACES_P_VALUE = 30
     MAX_DIGITS_P_VALUE = 31
-    MAX_LENGTH_NAME = 255
     MAX_LENGTH_HUMAN_READABLE_ID = 3
+    MAX_LENGTH_MULTIPLE_TESTING_CORRECTIONS = 2
+    MAX_LENGTH_NAME = 255
     MAX_LENGTH_TYPING_METHODS = 3
     MAX_LENGTH_ZYGOSITY = 2
 

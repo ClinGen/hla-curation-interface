@@ -16,6 +16,7 @@
                     <li><a href="#phase-confirmed">Phase Confirmed</a></li>
                     <li><a href="#typing-method">Typing Method</a></li>
                     <li><a href="#statistics-p-value">Statistics p-value</a></li>
+                    <li><a href="#multiple-testing-correction">Multiple Testing Correction</a></li>
                     <li><a href="#danger-zone">Danger Zone</a></li>
                 </ul>
             </aside>
@@ -50,6 +51,11 @@
                         <h2 id="statistics-p-value" class="title is-4">Statistics (p-value)</h2>
                         {% include "includes/form_checkbox.html" with field=form.is_gwas hide_label=True %}
                         {% include "includes/form_input.html" with field=form.p_value_text hide_label=True %}
+                        {% include "includes/form_submit_button.html" with text="Save" %}
+                    </div>
+                    <div class="box">
+                        <h2 id="multiple-testing-correction" class="title is-4">Multiple Testing Correction</h2>
+                        {% include "includes/form_select.html" with field=form.multiple_testing_correction hide_label=True %}
                         {% include "includes/form_submit_button.html" with text="Save" %}
                     </div>
                 </form>
