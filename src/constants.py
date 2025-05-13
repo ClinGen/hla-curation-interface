@@ -91,6 +91,6 @@ class PubMedConstants:
 
 
 class RequestsConstants:
-    """Define constants related to the requests library."""
+    """Define constants related to the Requests library."""
 
     DEFAULT_TIMEOUT = 5  # In seconds.

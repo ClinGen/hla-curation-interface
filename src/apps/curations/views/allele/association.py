@@ -117,6 +117,7 @@ class PubMedAlleleAssociationView(EntityView):
                     curation_id=curation_id,
                     association_id=association_id,
                 )
+            messages.error(request, "Please fix the errors in the form.")
 
         # Prepare the context with the form
         context = {
