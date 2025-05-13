@@ -94,6 +94,50 @@ class AlleleAssociation(models.Model):
         help_text="The odds ratio as a decimal number, e.g., 0.54.",
     )
 
+    # TODO(Liam): Figure out how to store the number representation of the relative risk.  # noqa: FIX002, TD003, E501
+    # If you use a `DecimalField`, the result is displayed without being normalized,
+    # which would look like too many significant digits to the curator.
+    relative_risk: models.CharField = models.CharField(
+        default=None,
+        blank=True,
+        null=True,
+        verbose_name="Relative Risk",
+        help_text="The relative risk as a decimal number, e.g., 0.73.",
+    )
+
+    # TODO(Liam): Figure out how to store the number representation of the relative risk.  # noqa: FIX002, TD003, E501
+    # If you use a `DecimalField`, the result is displayed without being normalized,
+    # which would look like too many significant digits to the curator.
+    beta: models.CharField = models.CharField(
+        default=None,
+        blank=True,
+        null=True,
+        verbose_name="Beta",
+        help_text="The beta as a decimal number, e.g., 0.22.",
+    )
+
+    # TODO(Liam): Figure out how to store the number representation of the CI start.  # noqa: FIX002, TD003, E501
+    # If you use a `DecimalField`, the result is displayed without being normalized,
+    # which would look like too many significant digits to the curator.
+    confidence_interval_start: models.CharField = models.CharField(
+        default=None,
+        blank=True,
+        null=True,
+        verbose_name="Start of the Confidence Interval",
+        help_text="The relative risk as a decimal number, e.g., 0.001.",
+    )
+
+    # TODO(Liam): Figure out how to store the number representation of the CI end.  # noqa: FIX002, TD003, E501
+    # If you use a `DecimalField`, the result is displayed without being normalized,
+    # which would look like too many significant digits to the curator.
+    confidence_interval_end: models.CharField = models.CharField(
+        default=None,
+        blank=True,
+        null=True,
+        verbose_name="End of the Confidence Interval",
+        help_text="The relative risk as a decimal number, e.g., 0.38.",
+    )
+
     class Meta:
         """Defines metadata options."""
 

@@ -28,6 +28,10 @@ class PubMedAlleleAssociationForm(forms.ModelForm):
             "p_value_text",
             "multiple_testing_correction",
             "odds_ratio",
+            "relative_risk",
+            "beta",
+            "confidence_interval_start",
+            "confidence_interval_end",
         ]
         widgets = {
             "zygosity": forms.RadioSelect(choices=ModelsConstants.CHOICES_ZYGOSITY),

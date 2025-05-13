@@ -62,6 +62,10 @@
                     <div class="box">
                         <h2 id="statistics-effect-size" class="title is-4">Statistics (Effect Size)</h2>
                         {% include "includes/form_input.html" with field=form.odds_ratio %}
+                        {% include "includes/form_input.html" with field=form.relative_risk %}
+                        {% include "includes/form_input.html" with field=form.beta %}
+                        {% include "includes/form_input.html" with field=form.confidence_interval_start %}
+                        {% include "includes/form_input.html" with field=form.confidence_interval_end %}
                         {% include "includes/form_submit_button.html" with text="Save" %}
                     </div>
                 </form>
