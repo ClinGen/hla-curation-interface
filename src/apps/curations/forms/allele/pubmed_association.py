@@ -36,6 +36,7 @@ class PubMedAlleleAssociationForm(forms.ModelForm):
             "num_controls",
             "has_phenotype",
             "is_significant",
+            "decreases_risk",
         ]
         widgets = {
             "zygosity": forms.RadioSelect(choices=ModelsConstants.CHOICES_ZYGOSITY),

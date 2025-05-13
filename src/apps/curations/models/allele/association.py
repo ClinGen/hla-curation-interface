@@ -168,6 +168,12 @@ class AlleleAssociation(models.Model):
         help_text="Does this allele have a significant association with the disease?",
     )
 
+    decreases_risk: models.BooleanField = models.BooleanField(
+        default=False,
+        verbose_name="Decreases risk",
+        help_text="Does this allele decrease the risk of getting the disease?",
+    )
+
     class Meta:
         """Defines metadata options."""
 
