@@ -20,6 +20,12 @@ class CARConstants:
     API_URL = "https://reg.genome.network/allele/hla"
 
 
+class HPOConstants:
+    """Define constants related to the Human Phenotype Ontology project."""
+
+    SEARCH_URL = "https://hpo.jax.org/"
+
+
 class HumanReadableIDPrefixConstants:
     """Define human-readable ID prefixes to be used in the HCI.
 

@@ -162,6 +162,15 @@ class AlleleAssociation(models.Model):
         verbose_name="Has Disease-Related Phenotype",
     )
 
+    hpo_ids: models.CharField = models.CharField(
+        default=None,
+        blank=True,
+        null=True,
+        max_length=ModelsConstants.MAX_LENGTH_NAME,
+        verbose_name="Human Phenotype Ontology IDs",
+        help_text="Comma-separated list of HPO IDs.",
+    )
+
     is_significant: models.BooleanField = models.BooleanField(
         default=False,
         verbose_name="Significant association",

@@ -23,7 +23,7 @@ from apps.curations.selectors.allele.association import PubMedAlleleAssociationS
 from apps.curations.services.allele.association import AlleleAssociationService
 from apps.users.permissions.crud import can_delete
 from base.views import EntityView
-from constants import PublicationTypeConstants
+from constants import HPOConstants, PublicationTypeConstants
 
 
 class PubMedAlleleAssociationView(EntityView):
@@ -131,6 +131,7 @@ class PubMedAlleleAssociationView(EntityView):
             "form": form,
             "association": association,
             "curation_id": curation_id,
+            "hpo_search_url": HPOConstants.SEARCH_URL,
         }
         return render(request, "associations/allele/pubmed/edit.html", context)
 

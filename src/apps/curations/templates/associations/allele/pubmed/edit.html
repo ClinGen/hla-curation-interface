@@ -74,6 +74,8 @@
                     <div class="box">
                         <h2 id="additional-phenotypes" class="title is-4">Additional Phenotypes</h2>
                         {% include "includes/form_radio_buttons.html" with field=form.has_phenotype hide_label=True %}
+                        {% include "includes/form_input.html" with field=form.hpo_ids %}
+                        {% include "includes/external_link.html" with prompt="Need to look up a phenotype's HPO ID?" url=hpo_search_url text="Search HPO" %}
                     </div>
                     <div class="box">
                         <h2 id="significance" class="title is-4">Significance</h2>

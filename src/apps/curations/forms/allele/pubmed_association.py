@@ -35,6 +35,7 @@ class PubMedAlleleAssociationForm(forms.ModelForm):
             "num_cases",
             "num_controls",
             "has_phenotype",
+            "hpo_ids",
             "is_significant",
             "decreases_risk",
         ]
