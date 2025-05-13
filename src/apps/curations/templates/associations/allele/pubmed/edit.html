@@ -18,6 +18,7 @@
                     <li><a href="#statistics-p-value">Statistics p-value</a></li>
                     <li><a href="#multiple-testing-correction">Multiple Testing Correction</a></li>
                     <li><a href="#statistics-effect-size">Statistics (Effect Size)</a></li>
+                    <li><a href="#statistics-effect-size">Cohort Size</a></li>
                     <li><a href="#danger-zone">Danger Zone</a></li>
                 </ul>
             </aside>
@@ -67,6 +68,11 @@
                         {% include "includes/form_input.html" with field=form.confidence_interval_start %}
                         {% include "includes/form_input.html" with field=form.confidence_interval_end %}
                         {% include "includes/form_submit_button.html" with text="Save" %}
+                    </div>
+                    <div class="box">
+                        <h2 id="cohort-size" class="title is-4">Cohort Size</h2>
+                        {% include "includes/form_input.html" with field=form.num_cases %}
+                        {% include "includes/form_input.html" with field=form.num_controls %}
                     </div>
                 </form>
             </div>

@@ -139,6 +139,22 @@ class AlleleAssociation(models.Model):
         help_text="The relative risk as a decimal number, e.g., 0.38.",
     )
 
+    num_cases: models.IntegerField = models.IntegerField(
+        default=None,
+        blank=True,
+        null=True,
+        verbose_name="Cases",
+        help_text="The number of cases.",
+    )
+
+    num_controls: models.IntegerField = models.IntegerField(
+        default=None,
+        blank=True,
+        null=True,
+        verbose_name="Controls",
+        help_text="The number of controls.",
+    )
+
     class Meta:
         """Defines metadata options."""
 
