@@ -1,4 +1,0 @@
-- name: Ensure packages are upgraded
-  become: true
-  ansible.builtin.apt:
-    upgrade: true

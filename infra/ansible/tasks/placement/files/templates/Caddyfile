@@ -1,3 +1,0 @@
-{{ subdomain }}.clinicalgenome.org {
-        reverse_proxy unix//run/gunicorn.sock
-}
