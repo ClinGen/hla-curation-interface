@@ -18,12 +18,12 @@ specific end. They are wholly **goal-oriented**.
 :doc:`explanations` discuss key topics and concepts at a fairly high level and
 provide useful background information.
 
-:doc:`reference-guides` contain technical reference for APIs and other aspects
-of the HCI's machinery. Reference material is **information-oriented**.
+:doc:`reference-guides` contain code conventions, technical reference for APIs, and
+technical reference for other aspects of the HCI's machinery. Reference material is
+**information-oriented**.
 
 .. toctree::
    :caption: Table of Contents
-   :maxdepth: 3
 
    tutorials
    how-to-guides
