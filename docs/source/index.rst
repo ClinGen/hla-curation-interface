@@ -16,7 +16,7 @@ problem they are facing with the HCI. They are recipes, directions to achieve a
 specific end. They are wholly **goal-oriented**.
 
 :doc:`explanations` discuss key topics and concepts at a fairly high level and
-provide useful background information.
+provide useful background information. They are **understanding-oriented**.
 
 :doc:`reference-guides` contain code conventions, technical reference for APIs, and
 technical reference for other aspects of the HCI's machinery. Reference material is
