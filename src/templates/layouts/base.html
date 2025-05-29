@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en" hx-headers='{"X-CSRF-TOKEN": "{{ csrf_token }}"}'>
+<head>
+    <title>HCI | {% block title %}{% endblock %}</title>
+    <meta name="description" content="{% block description %}{% endblock %}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="{{ static('css/bulma.css') }}">
+    <link rel="stylesheet" href="{{ static('css/custom.css') }}">
+    <script src="{{ static('js/htmx.js') }}"></script>
+</head>
+<body>
+<header>
+    <div class="container">
+        {% include "partials/header.html" %}
+    </div>
+</header>
+<main>
+    <div class="container">
+        {% block main %}{% endblock %}
+    </div>
+</main>
+<footer>
+    <div class="container">
+        {% include "partials/footer.html" %}
+    </div>
+</footer>
+</body>
+</html>

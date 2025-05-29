@@ -35,3 +35,14 @@ jobs:
       - name: "Run the Django check utility"
         working-directory: ./src
         run: "just django-check"
+  test:
+    runs-on: "ubuntu-latest"
+    env:
+      SECRET_KEY: "dummy"
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "./.github/actions/install-python-dependencies"
+      - uses: "extractions/setup-just@v3"
+      - name: "Run the test suite"
+        working-directory: ./src
+        run: "just test-all"

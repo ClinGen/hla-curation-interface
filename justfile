@@ -18,7 +18,7 @@ set dotenv-load := true
 #=====================================================================
 
 # Run all checks and tests that are run in CI. -----------------------
-continuous-integration: qual-src-format-check qual-src-lint django-check
+continuous-integration: qual-src-format-check qual-src-lint django-check test-all
 alias ci := continuous-integration
 
 #=====================================================================
@@ -48,6 +48,15 @@ alias qslt := qual-src-lint
 qual-src-lint-fix:
     uv run ruff check --fix
 alias qslf := qual-src-lint-fix
+
+#=====================================================================
+# Test Recipes
+#=====================================================================
+
+# Run all tests. -----------------------------------------------------
+test-all:
+    cd src && uv run manage.py test --shuffle
+alias tal := test-all
 
 #=====================================================================
 # Django Recipes
