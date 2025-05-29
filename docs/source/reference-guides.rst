@@ -13,7 +13,7 @@ there are still some conventions to be aware of.
 Comments
 ========
 
-- Don't write obvious comments. The image below shows what not to do.
+Don't write obvious comments. The image below shows what not to do.
 
 .. image:: _static/stop-sign.jpg
    :width: 200px
