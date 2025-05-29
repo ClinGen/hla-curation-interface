@@ -16,6 +16,7 @@ The HCI is maintained by the Stanford contingent of
 - Clone the repository.
 - Install dependencies: `uv sync`.
 - Install [just](https://github.com/casey/just).
+- Create and populate a `.env` file in the root of the repository.
 - Run the development server: `just django-runserver`.
 
 ## Documentation
