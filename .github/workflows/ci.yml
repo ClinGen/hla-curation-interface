@@ -1,5 +1,5 @@
 ---
-name: "CI"
+name: "continuous integration"
 on:
   pull_request:
     branches:

@@ -1,6 +1,6 @@
 # HLA Curation Interface
 
-![CI](https://github.com/clingen/hla-curation-interface/actions/workflows/ci.yml/badge.svg)
+![continuous integration](https://github.com/clingen/hla-curation-interface/actions/workflows/ci.yml/badge.svg)
 
 The HLA Curation Interface (HCI) is a tool designed to facilitate the curation of
 information about HLA alleles and haplotypes.
