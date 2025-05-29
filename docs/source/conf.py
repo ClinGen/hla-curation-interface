@@ -1,4 +1,4 @@
-project = "HCI Dev Docs"
+project = "HCI"
 copyright = "Clinical Genome Resource"
 author = "The Stanford ClinGen Team"
 release = "0.1"
@@ -10,4 +10,5 @@ templates_path = ["_templates"]
 exclude_patterns = []
 
 html_theme = "furo"
+html_title = "HCI Dev Docs"
 html_static_path = ["_static"]
