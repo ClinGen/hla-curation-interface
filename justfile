@@ -59,6 +59,40 @@ test-all:
 alias tal := test-all
 
 #=====================================================================
+# Coverage Recipes
+#=====================================================================
+
+# Collect test coverage stats. ---------------------------------------
+coverage-collect:
+    cd src && uv run coverage run --rcfile=../pyproject.toml manage.py test
+alias cco := coverage-collect
+
+# Print test coverage stats. -----------------------------------------
+coverage-report:
+    cd src && uv run coverage report --rcfile=../pyproject.toml
+alias crp := coverage-report
+
+# Generate test coverage XML. ----------------------------------------
+coverage-xml:
+    cd src && uv run coverage xml --rcfile=../pyproject.toml
+alias cxm := coverage-xml
+
+# Build the test coverage site. --------------------------------------
+coverage-build-html:
+    cd src && uv run coverage html --rcfile=../pyproject.toml
+alias cbh := coverage-build-html
+
+# Open the test coverage site in your browser. -----------------------
+coverage-open-html:
+    open src/htmlcov/index.html
+alias coh := coverage-open-html
+
+# Clean test coverage artifacts. -------------------------------------
+coverage-clean:
+    cd src && rm -rf coverage*
+alias ccl := coverage-clean
+
+#=====================================================================
 # Django Recipes
 #=====================================================================
 

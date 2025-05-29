@@ -1,0 +1,27 @@
+---
+name: "coverage"
+on:
+  pull_request:
+    branches:
+      - "main"
+  push:
+    branches:
+      - "main"
+jobs:
+  collect_and_upload_coverage:
+    runs-on: "ubuntu-latest"
+    env:
+      SECRET_KEY: "dummy"
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "./.github/actions/install-python-dependencies"
+      - uses: "extractions/setup-just@v3"
+      - name: "Collect test coverage and generate test coverage report"
+        run: |
+          just coverage-collect
+          just coverage-xml
+      - name: "Upload test coverage report to Codecov"
+        uses: "codecov/codecov-action@v5"
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: "ClinGen/hla-curation-interface"
