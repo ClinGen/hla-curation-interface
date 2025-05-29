@@ -1,0 +1,37 @@
+---
+name: "CI"
+on:
+  pull_request:
+    branches:
+      - "main"
+  push:
+    branches:
+      - "main"
+jobs:
+  check_1_source_code_is_formatted:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "./.github/actions/install-python-dependencies"
+      - uses: "extractions/setup-just@v3"
+      - name: "Make sure the code is properly formatted"
+        run: "just qual-src-format-check"
+  check_2_source_code_is_linted:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "./.github/actions/install-python-dependencies"
+      - uses: "extractions/setup-just@v3"
+      - name: "Make sure the code is free of lint errors"
+        run: "just qual-src-lint"
+  check_3_django_check_passes:
+    runs-on: "ubuntu-latest"
+    env:
+      SECRET_KEY: "dummy"
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "./.github/actions/install-python-dependencies"
+      - uses: "extractions/setup-just@v3"
+      - name: "Run the Django check utility"
+        working-directory: ./src
+        run: "just django-check"
