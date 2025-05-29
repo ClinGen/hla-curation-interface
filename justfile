@@ -14,6 +14,14 @@
 set dotenv-load := true
 
 #=====================================================================
+# Continuous Integration Recipe
+#=====================================================================
+
+# Run all checks and tests that are run in CI. -----------------------
+continuous-integration: qual-src-format-check qual-src-lint django-check
+alias ci := continuous-integration
+
+#=====================================================================
 # Source Code Quality Recipes
 #=====================================================================
 
@@ -74,3 +82,17 @@ alias djru := django-runserver
 django-shell:
     cd src && uv run manage.py shell
 alias djsh := django-shell
+
+#=====================================================================
+# Docs Recipes
+#=====================================================================
+
+# Build the developer documentation site. ----------------------------
+docs-build-html:
+    cd docs && uv run sphinx-build source build
+alias dbh := docs-build-html
+
+# Open the developer documentation site in your browser. -------------
+docs-open-html:
+    open docs/build/html/index.html
+alias doh := docs-open-html
