@@ -137,5 +137,5 @@ alias dbh := docs-build-html
 
 # Open the developer documentation site in your browser. -------------
 docs-open-html:
-    open docs/build/html/index.html
+    open docs/build/index.html
 alias doh := docs-open-html
