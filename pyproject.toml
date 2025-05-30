@@ -6,6 +6,9 @@ readme = "README.rst"
 requires-python = ">=3.13"
 dependencies = [
     "django>=5.2.1",
+    "gunicorn>=23.0.0",
+    "python-dotenv>=1.1.0",
+    "whitenoise[brotli]>=6.9.0",
 ]
 
 [dependency-groups]
@@ -14,6 +17,7 @@ dev = [
     "ruff>=0.11.11",
     "coverage>=7.8.2",
     "furo>=2024.8.6",
+    "ansible>=11.6.0",
 ]
 
 [tool.ruff]

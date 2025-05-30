@@ -1,0 +1,6 @@
+- name: Ensure Caddy is running
+  become: true
+  ansible.builtin.command:
+    cmd: "caddy start --config /etc/caddy/Caddyfile"
+  tags:
+    - skip_ansible_lint

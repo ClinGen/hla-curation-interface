@@ -139,3 +139,59 @@ alias dbh := docs-build-html
 docs-open-html:
     open docs/build/index.html
 alias doh := docs-open-html
+
+#=====================================================================
+# Infrastructure Code Quality Recipes
+#=====================================================================
+
+# Run all infrastructure code quality checks. ------------------------
+qual-infra-all: qual-infra-format-check qual-infra-lint
+alias qial := qual-infra-all
+
+# Format the infrastructure code. ------------------------------------
+qual-infra-format:
+    cd infra/terraform && terraform fmt
+    yamlfmt
+alias qifm := qual-infra-format
+
+# Check the infrastructure code for formatting issues. ---------------
+qual-infra-format-check:
+    cd infra/terraform && terraform fmt -check
+    yamlfmt -lint
+alias qifc := qual-infra-format-check
+
+# Check the infrastructure code for lint errors. ---------------------
+qual-infra-lint:
+    cd infra/terraform && terraform validate
+    cd infra/ansible && ansible-lint
+    cd .github && uv run yamllint .
+alias qilt := qual-infra-lint
+
+# Try to fix lint errors in the infrastructure code. -----------------
+qual-infra-lint-fix:
+    cd infra/ansible && ansible-lint --fix
+alias qilf := qual-infra-lint-fix
+
+#=====================================================================
+# Server Recipes
+#=====================================================================
+
+# Set up the test server for the first time. -------------------------
+server-test-init:
+    cd infra/ansible && uv run ansible-playbook -i inventory.ini playbooks/init.yml --limit test_server
+alias stei := server-test-init
+
+# Set up the production server for the first time. -------------------
+server-prod-init:
+    cd infra/ansible && uv run ansible-playbook -i inventory.ini playbooks/init.yml --limit prod_server
+alias spri := server-prod-init
+
+# Deploy latest changes to the test server. --------------------------
+server-test-deploy:
+    cd infra/ansible && uv run ansible-playbook -i inventory.ini playbooks/deploy.yml --limit test_server
+alias sted := server-test-deploy
+
+# Deploy latest changes to the production server. --------------------
+server-prod-deploy:
+    cd infra/ansible && uv run ansible-playbook -i inventory.ini playbooks/deploy.yml --limit prod_server
+alias sprd := server-prod-deploy

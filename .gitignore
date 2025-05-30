@@ -1,7 +1,12 @@
 *.db
 .env
+coverage.xml
+inventory.ini
+
+.ansible/
+.terraform/
 .venv/
 __pycache__/
 build/
-coverage.xml
 coverage/
+public/

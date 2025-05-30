@@ -11,6 +11,7 @@ jobs:
   collect_and_upload_test_coverage:
     runs-on: "ubuntu-latest"
     env:
+      DJANGO_SETTINGS_MODULE: "config.settings.prod"
       SECRET_KEY: "dummy"
     steps:
       - uses: "actions/checkout@v4"
@@ -18,6 +19,7 @@ jobs:
       - uses: "extractions/setup-just@v3"
       - name: "Collect test coverage and generate test coverage report"
         run: |
+          just django-collectstatic
           just coverage-collect
           just coverage-xml
       - name: "Upload test coverage report to Codecov"
