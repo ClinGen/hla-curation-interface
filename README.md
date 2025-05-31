@@ -6,7 +6,8 @@
 [Developer Documentation](https://hla-curation-interface.readthedocs.io/latest/index.html) |
 [Status Page](https://stats.uptimerobot.com/fcfUfhnSRA)
 
-![continuous integration](https://github.com/clingen/hla-curation-interface/actions/workflows/ci.yml/badge.svg)
+[![continuous integration](https://github.com/ClinGen/hla-curation-interface/actions/workflows/ci.yml/badge.svg)](https://github.com/ClinGen/hla-curation-interface/actions/workflows/ci.yml)
+[![continuous deployment](https://github.com/ClinGen/hla-curation-interface/actions/workflows/cd.yml/badge.svg)](https://github.com/ClinGen/hla-curation-interface/actions/workflows/cd.yml)
 [![codecov](https://codecov.io/gh/ClinGen/hla-curation-interface/graph/badge.svg?token=23NGX9GT02)](https://codecov.io/gh/ClinGen/hla-curation-interface)
 ![docs](https://readthedocs.org/projects/hla-curation-interface/badge/?version=latest)
 ![production uptime](https://img.shields.io/uptimerobot/status/m800642420-9a8efef310bf567dfbec33a0)
