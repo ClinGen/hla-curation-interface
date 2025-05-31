@@ -2,15 +2,13 @@
 <h1>HLA Curation Interface</h1>
 
 [Production Site](https://hci.clinicalgenome.org/) |
-[Test Site](https://hci-test.clinicalgenome.org/) |
-[Developer Documentation](https://hla-curation-interface.readthedocs.io/latest/index.html) |
-[Status Page](https://stats.uptimerobot.com/fcfUfhnSRA)
+[Test Site](https://hci-test.clinicalgenome.org/)
 
 [![continuous integration](https://github.com/ClinGen/hla-curation-interface/actions/workflows/ci.yml/badge.svg)](https://github.com/ClinGen/hla-curation-interface/actions/workflows/ci.yml)
 [![continuous deployment](https://github.com/ClinGen/hla-curation-interface/actions/workflows/cd.yml/badge.svg)](https://github.com/ClinGen/hla-curation-interface/actions/workflows/cd.yml)
 [![codecov](https://codecov.io/gh/ClinGen/hla-curation-interface/graph/badge.svg?token=23NGX9GT02)](https://codecov.io/gh/ClinGen/hla-curation-interface)
-![docs](https://readthedocs.org/projects/hla-curation-interface/badge/?version=latest)
-![production uptime](https://img.shields.io/uptimerobot/status/m800642420-9a8efef310bf567dfbec33a0)
+[![docs](https://readthedocs.org/projects/hla-curation-interface/badge/?version=latest)](https://hla-curation-interface.readthedocs.io/latest/index.html)
+[![production uptime](https://img.shields.io/uptimerobot/status/m800642420-9a8efef310bf567dfbec33a0)](https://stats.uptimerobot.com/fcfUfhnSRA)
 </div>
 
 The HLA Curation Interface (HCI) is a tool designed to facilitate the curation of
