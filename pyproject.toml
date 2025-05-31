@@ -18,6 +18,7 @@ dev = [
     "coverage>=7.8.2",
     "furo>=2024.8.6",
     "ansible>=11.6.0",
+    "ansible-lint>=25.5.0",
 ]
 
 [tool.ruff]
