@@ -1,0 +1,64 @@
+---
+name: "continuous deployment"
+on:
+  workflow_run:
+    workflows: [ "continuous integration" ]
+    types:
+      - completed
+    branches:
+      - main
+jobs:
+  deploy_to_test:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request'
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "./.github/actions/install-python-dependencies"
+      - name: "Configure SSH for the test server"
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.TEST_SERVER_ANSIBLE_SSH_PRIVATE_KEY }}" > ~/.ssh/hci_ansible_test_ed25519
+          chmod 600 ~/.ssh/hci_ansible_test_ed25519
+          ssh-keyscan -H ${{ secrets.TEST_SERVER_IP }} >> ~/.ssh/known_hosts
+      - name: "Deploy the test site"
+        run: |
+          cd infra/ansible
+          uv run ansible-playbook \
+            -i "${{ secrets.TEST_SERVER_IP }}," \
+            playbooks/deploy.yml \
+            --limit test_server \
+            -e "ansible_ssh_private_key_file=~/.ssh/hci_ansible_test_ed25519" \
+            -e "ansible_user=${{ secrets.TEST_SERVER_ANSIBLE_USER }}" \
+            -e "repo_url=https://github.com/ClinGen/hla-curation-interface" \
+            -e "repo_dir=${{ secrets.TEST_SERVER_REPO_DIR }}" \
+            -e "repo_branch=main" \
+            -e "subdomain=hci-test"
+  deploy_to_prod:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "./.github/actions/install-python-dependencies"
+      - name: "Configure SSH for the production server"
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PROD_SERVER_ANSIBLE_SSH_PRIVATE_KEY }}" > ~/.ssh/hci_ansible_prod_ed25519
+          chmod 600 ~/.ssh/hci_ansible_prod_ed25519
+          ssh-keyscan -H ${{ secrets.PROD_SERVER_IP }} >> ~/.ssh/known_hosts
+      - name: "Deploy the production site"
+        run: |
+          cd infra/ansible
+          uv run ansible-playbook \
+            -i "${{ secrets.PROD_SERVER_IP }}," \
+            playbooks/deploy.yml \
+            -e "ansible_ssh_private_key_file=~/.ssh/hci_ansible_prod_ed25519" \
+            -e "ansible_user=${{ secrets.PROD_SERVER_ANSIBLE_USER }}" \
+            -e "repo_url=https://github.com/ClinGen/hla-curation-interface" \
+            -e "repo_dir=${{ secrets.PROD_SERVER_REPO_DIR }}" \
+            -e "repo_branch=main" \
+            -e "subdomain=hci"
