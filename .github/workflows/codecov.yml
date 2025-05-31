@@ -13,6 +13,8 @@ jobs:
     env:
       DJANGO_SETTINGS_MODULE: "config.settings.prod"
       SECRET_KEY: "dummy"
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      SENTRY_ENV: "ci"
     steps:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"

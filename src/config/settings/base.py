@@ -3,6 +3,16 @@
 import os
 from pathlib import Path
 
+import sentry_sdk
+
+# We use Sentry for error monitoring and tracing.
+sentry_sdk.init(
+    dsn=os.getenv("SENTRY_DSN"),
+    environment=os.getenv("SENTRY_ENV"),
+    send_default_pii=True,
+    traces_sample_rate=1.0,
+)
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY")
