@@ -26,6 +26,9 @@ jobs:
         run: "just qual-src-lint"
   check_3_django_check_passes:
     runs-on: "ubuntu-latest"
+    env:
+      DJANGO_SETTINGS_MODULE: "config.settings.prod"
+      SECRET_KEY: "dummy"
     steps:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"
