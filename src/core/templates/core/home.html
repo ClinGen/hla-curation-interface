@@ -1,6 +1,14 @@
 {% extends "layouts/base.html" %}
 {% block title %}Home{% endblock %}
-{% block description %}The home page of the HLA Curation Interface.{% endblock %}
+{% block description %}Curate information about HLA alleles and
+    haplotypes.{% endblock %}
 {% block main %}
-    <p>This is the home page for the HCI.</p>
+    <div class="block mt-6">
+        <section class="hero is-light">
+            <div class="hero-body">
+                <p class="title">HLA Curation Interface</p>
+                <p class="subtitle">You are not logged in.</p>
+            </div>
+        </section>
+    </div>
 {% endblock %}
