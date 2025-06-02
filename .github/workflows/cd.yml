@@ -6,7 +6,7 @@ on:
     types:
       - completed
     branches:
-      - main
+      - "*"
 jobs:
   deploy_to_test:
     runs-on: ubuntu-latest
