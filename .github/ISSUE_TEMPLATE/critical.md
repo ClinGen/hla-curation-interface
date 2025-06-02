@@ -1,7 +1,6 @@
 ---
 name: 🔥 Critical
 about: File a critical issue report
-title: '[CRITICAL] <title>'
 labels: critical
 assignees: 'liammulh'
 ---

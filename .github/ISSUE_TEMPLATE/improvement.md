@@ -1,7 +1,6 @@
 ---
 name: 🔧 Improvement
 about: Request an improvement to an existing feature
-title: '[IMPROVEMENT] <title>'
 labels: improvement
 assignees: 'liammulh'
 ---

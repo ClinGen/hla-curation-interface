@@ -1,7 +1,6 @@
 ---
 name: 🌟 Feature
 about: Request a new feature
-title: '[FEATURE] <title>'
 labels: feature
 assignees: 'liammulh'
 ---

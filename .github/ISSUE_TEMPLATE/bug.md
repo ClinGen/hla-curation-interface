@@ -1,7 +1,6 @@
 ---
 name: 🐞 Bug
 about: File a bug report
-title: '[BUG] <title>'
 labels: bug
 assignees: 'liammulh'
 ---
