@@ -1,0 +1,47 @@
+{% extends "core/layouts/page.html" %}
+{% block title %}Downloads{% endblock %}
+{% block description %}Download curation from the HLA Curation Interface.{% endblock %}
+{% block heading %}Downloads{% endblock %}
+{% block content %}
+    <div class="block">
+        <p>
+            HCI data are subject to the
+            <a href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons
+                CC BY-SA 4.0</a>
+            license.
+        </p>
+    </div>
+    <div class="block table-container">
+        <table class="table is-hoverable">
+            <thead>
+            <tr>
+                <th>Description</th>
+                <th>Download</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Allele and Haplotype Curations</td>
+                <td>
+                    <a href="#" class="button is-small">CSV</a>
+                    <a href="#" class="button is-small">JSON</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Allele Curations</td>
+                <td>
+                    <a href="#" class="button is-small">CSV</a>
+                    <a href="#" class="button is-small">JSON</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Haplotype Curations</td>
+                <td>
+                    <a href="#" class="button is-small">CSV</a>
+                    <a href="#" class="button is-small">JSON</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

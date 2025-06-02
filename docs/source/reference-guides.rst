@@ -2,6 +2,19 @@
 Reference Guides
 ================
 
+------------
+The Core App
+------------
+
+The core app is where the home page and the pages found in the HCI's footer are housed.
+It is also used to house modules that aren't app-specific.
+
+``core.views``
+==============
+
+.. automodule:: core.views
+   :members:
+
 ----------------
 Code Conventions
 ----------------

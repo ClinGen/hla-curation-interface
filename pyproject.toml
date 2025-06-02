@@ -101,6 +101,7 @@ convention = "google"
 ]
 "tests.py" = [
     "ANN201", # Tests should always return `None`.
+    "D101", # Tests should be obvious enough not to require docstrings.
     "D102", # Tests should be obvious enough not to require docstrings.
 ]
 
