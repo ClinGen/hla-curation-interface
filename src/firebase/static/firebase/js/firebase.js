@@ -4,6 +4,12 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
 
+/*
+========================================================================================
+Configure Firebase
+========================================================================================
+*/
+
 const firebaseConfig = {
     apiKey: "AIzaSyD_TLzPJT3IxX59b_7raOyLka11kLYGYg0",
     authDomain: "som-clingen-projects.firebaseapp.com",
@@ -14,9 +20,56 @@ const firebaseConfig = {
 };
 initializeApp(firebaseConfig);
 
+/*
+========================================================================================
+Configure Firebase UI
+========================================================================================
+*/
+
 const ui = new firebaseui.auth.AuthUI(firebase.auth());
 const uiConfig = {
     signInSuccessUrl: "/home",
     signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID],
 };
 ui.start("#firebaseui-auth-container", uiConfig);
+
+/*
+========================================================================================
+Helper Functions
+========================================================================================
+*/
+
+function getCsrfToken() {
+    return document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("csrftoken="))
+        ?.split("=")[1];
+}
+
+async function handleLogin(authResult) {
+    try {
+        const idToken = await authResult.user.getIdToken();
+        const url = "/firebase/login";
+        const options = {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCsrfToken(),
+            },
+            body: JSON.stringify({ idToken: idToken }),
+        };
+        const response = await fetch(url, options);
+        const data = await response.json();
+        if (data.success) {
+            window.location.href = "/home";
+        } else {
+            window.alert("Unable to log you in with Google.");
+        }
+    } catch (error) {
+        let errorMessage =
+            "Something went wrong trying to log you in with Google.\n\n";
+        errorMessage += `Error Code:\n${error.code}\n\n`;
+        errorMessage += `Error Message:\n${error.message}`;
+        window.alert(errorMessage);
+    }
+}
