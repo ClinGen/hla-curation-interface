@@ -4,6 +4,6 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
 
-def login_(request: HttpRequest) -> HttpResponse:
-    """Returns the login page."""
-    return render(request, "firebase/login.html")
+def sign_in(request: HttpRequest) -> HttpResponse:
+    """Returns the sign-in page."""
+    return render(request, "firebase/sign_in.html")
