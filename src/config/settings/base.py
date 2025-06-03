@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "core",
+    "firebase",
 ]
 
 MIDDLEWARE = [
@@ -57,6 +58,7 @@ TEMPLATES = [
         "DIRS": [
             BASE_DIR / "templates",
             BASE_DIR / "core" / "templates",
+            BASE_DIR / "firebase" / "templates",
         ],
         "OPTIONS": {"environment": "config.templates.environment"},
     },
@@ -96,7 +98,10 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+    BASE_DIR / "firebase" / "static",
+]
 
 STATIC_ROOT = BASE_DIR / "public"
 
