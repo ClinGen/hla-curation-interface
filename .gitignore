@@ -1,6 +1,7 @@
 *.db
 .env
 coverage.xml
+firebase-account-key.json
 inventory.ini
 
 .ansible/

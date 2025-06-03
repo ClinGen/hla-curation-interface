@@ -13,4 +13,5 @@ urlpatterns = [
     path("contact", views.contact, name="contact"),
     path("downloads", views.downloads, name="downloads"),
     path("help", views.help_, name="help"),
+    path("login", views.login, name="login"),
 ]

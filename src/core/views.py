@@ -42,3 +42,8 @@ def acknowledgements(request: HttpRequest) -> HttpResponse:
 def collaborators(request: HttpRequest) -> HttpResponse:
     """Returns the collaborators page."""
     return render(request, "core/collaborators.html")
+
+
+def login(request: HttpRequest) -> HttpResponse:
+    """Returns the login page."""
+    return render(request, "core/login.html")
