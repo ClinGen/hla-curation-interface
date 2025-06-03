@@ -37,7 +37,7 @@ alias qsfm := qual-src-format
 # Format the JavaScript code. ----------------------------------------
 qual-js-format:
     npx prettier --write src/firebase/static/firebase/js/firebase.js
-alias qsjf := qual-js-format
+alias qjfm := qual-js-format
 
 # Check the source code for formatting issues. -----------------------
 qual-src-format-check:

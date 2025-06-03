@@ -3,6 +3,10 @@
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+import {
+    getAuth,
+    GoogleAuthProvider,
+} from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
 
 /*
 ========================================================================================
@@ -18,7 +22,8 @@ const firebaseConfig = {
     messagingSenderId: "653902215137",
     appId: "1:653902215137:web:d054a272e88ab9ca2644a0",
 };
-initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 /*
 ========================================================================================
@@ -26,10 +31,10 @@ Configure Firebase UI
 ========================================================================================
 */
 
-const ui = new firebaseui.auth.AuthUI(firebase.auth());
+const ui = new firebaseui.auth.AuthUI(auth);
 const uiConfig = {
     signInSuccessUrl: "/home",
-    signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID],
+    signInOptions: [GoogleAuthProvider.PROVIDER_ID],
 };
 ui.start("#firebaseui-auth-container", uiConfig);
 
