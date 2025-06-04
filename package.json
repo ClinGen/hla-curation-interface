@@ -1,0 +1,10 @@
+{
+    "name": "hla-curation-interface",
+    "type": "module",
+    "dependencies": {
+        "firebaseui": "^6.1.0"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "1.9.4"
+    }
+}

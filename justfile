@@ -34,11 +34,6 @@ qual-src-format:
     uv run ruff format
 alias qsfm := qual-src-format
 
-# Format the JavaScript code. ----------------------------------------
-qual-js-format:
-    npx prettier --write src/firebase/static/firebase/js/firebase.js
-alias qjfm := qual-js-format
-
 # Check the source code for formatting issues. -----------------------
 qual-src-format-check:
     uv run ruff format --check
@@ -53,6 +48,34 @@ alias qslt := qual-src-lint
 qual-src-lint-fix:
     uv run ruff check --fix
 alias qslf := qual-src-lint-fix
+
+#=====================================================================
+# JavaScript Code Recipes
+#=====================================================================
+
+# Run all JavaScript checks. -----------------------------------------
+js-all: js-format-check js-lint
+alias jal := js-all
+
+# Format JavaScript code. --------------------------------------------
+js-format:
+    bunx biome format --write src/firebase/static/firebase/js
+alias jsfm := js-format
+
+# Check the JavaScript code for formatting issues. -------------------
+js-format-check:
+    bunx biome format src/firebase/static/firebase/js
+alias jsfc := js-format-check
+
+# Check the JavaScript code for lint errors. -------------------------
+js-lint:
+    bunx biome lint src/firebase/static/firebase/js
+alias jslt := js-lint
+
+# Try to fix lint errors in the JavaScript code. ---------------------
+js-lint-fix:
+    bunx biome lint --write src/firebase/static/firebase/js
+alias jslf := js-lint-fix
 
 #=====================================================================
 # Test Recipes

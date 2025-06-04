@@ -10,4 +10,5 @@ inventory.ini
 __pycache__/
 build/
 coverage/
+node_modules/
 public/
