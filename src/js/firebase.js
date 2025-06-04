@@ -2,11 +2,9 @@
  * Configures Firebase and Firebase UI.
  */
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-import {
-  GoogleAuthProvider,
-  getAuth,
-} from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+import { initializeApp } from "firebase/app";
+import { GoogleAuthProvider, getAuth } from "firebase/auth";
+import * as firebaseui from "firebaseui";
 
 /*
 ========================================================================================

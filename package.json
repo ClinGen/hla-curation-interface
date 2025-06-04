@@ -3,6 +3,7 @@
   "type": "module",
   "dependencies": {
     "bulma": "^1.0.4",
+    "firebase": "^11.8.1",
     "firebaseui": "^6.1.0",
     "htmx.org": "^2.0.4"
   },

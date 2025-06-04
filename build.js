@@ -24,3 +24,7 @@ await copyFile(htmxPath, `${JS_STATIC_DIR}/htmx.js`);
 // Copy Bulma into our Django static directory.
 const bulmaPath = "./node_modules/bulma/css/bulma.min.css";
 await copyFile(bulmaPath, `${CSS_STATIC_DIR}/bulma.css`);
+
+// Copy Firebase UI CSS into our Django static directory.
+const firebaseuiCssPath = "./node_modules/firebaseui/dist/firebaseui.css";
+await copyFile(firebaseuiCssPath, `${CSS_STATIC_DIR}/firebaseui.css`);
