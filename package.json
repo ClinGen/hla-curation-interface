@@ -1,10 +1,12 @@
 {
-    "name": "hla-curation-interface",
-    "type": "module",
-    "dependencies": {
-        "firebaseui": "^6.1.0"
-    },
-    "devDependencies": {
-        "@biomejs/biome": "1.9.4"
-    }
+  "name": "hla-curation-interface",
+  "type": "module",
+  "dependencies": {
+    "bulma": "^1.0.4",
+    "firebaseui": "^6.1.0",
+    "htmx.org": "^2.0.4"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4"
+  }
 }

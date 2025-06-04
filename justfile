@@ -59,23 +59,28 @@ alias jal := js-all
 
 # Format JavaScript code. --------------------------------------------
 js-format:
-    bunx biome format --write src/firebase/static/firebase/js
+    bunx biome format --write .
 alias jsfm := js-format
 
 # Check the JavaScript code for formatting issues. -------------------
 js-format-check:
-    bunx biome format src/firebase/static/firebase/js
+    bunx biome format .
 alias jsfc := js-format-check
 
 # Check the JavaScript code for lint errors. -------------------------
 js-lint:
-    bunx biome lint src/firebase/static/firebase/js
+    bunx biome lint .
 alias jslt := js-lint
 
 # Try to fix lint errors in the JavaScript code. ---------------------
 js-lint-fix:
-    bunx biome lint --write src/firebase/static/firebase/js
+    bunx biome lint --write .
 alias jslf := js-lint-fix
+
+# Build our JavaScript dependencies. ---------------------------------
+js-build:
+    bun build.js
+alias jsbl := js-build
 
 #=====================================================================
 # Test Recipes
