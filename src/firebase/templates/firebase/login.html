@@ -2,6 +2,7 @@
 {% block title %}Home{% endblock %}
 {% block description %}Log in to the HLA Curation Interface.{% endblock %}
 {% block head %}
+    <link type="text/css" rel="stylesheet" href="{{ static('hci/css/bootstrap-icons.css') }}">
     <script type="module" src="{{ static('hci/js/firebase.js') }}"></script>
 {% endblock %}
 {% block main %}
@@ -11,8 +12,18 @@
                 <div class="box">
                     <div class="has-text-centered">
                         <h1 class="title">Log In</h1>
-                        <button id="log-in-with-google-button" class="button">Continue With Google</button>
-                        <button id="log-in-with-microsoft-button" class="button">Continue With Microsoft</button>
+                        <button id="log-in-with-google-button" class="button">
+                            <span class="icon mr-1">
+                                <i class="bi bi-google"></i>
+                            </span>
+                            Continue With Google
+                        </button>
+                        <button id="log-in-with-microsoft-button" class="button">
+                            <span class="icon mr-1">
+                                <i class="bi bi-microsoft"></i>
+                            </span>
+                            Continue With Microsoft
+                        </button>
                     </div>
                 </div>
             </div>

@@ -7,6 +7,7 @@
 import { copyFile } from "node:fs/promises";
 
 const CSS_STATIC_DIR = "./src/static/hci/css";
+const IMG_STATIC_DIR = "./src/static/hci/img";
 const JS_STATIC_DIR = "./src/static/hci/js";
 const JS_SRC_DIR = "./src/js";
 
@@ -25,6 +26,25 @@ await copyFile(htmxPath, `${JS_STATIC_DIR}/htmx.js`);
 const bulmaPath = "./node_modules/bulma/css/bulma.min.css";
 await copyFile(bulmaPath, `${CSS_STATIC_DIR}/bulma.css`);
 
-// Copy Firebase UI CSS into our Django static directory.
-const firebaseuiCssPath = "./node_modules/firebaseui/dist/firebaseui.css";
-await copyFile(firebaseuiCssPath, `${CSS_STATIC_DIR}/firebaseui.css`);
+// Copy Boostrap Icons CSS into our Django static directory.
+const bootstrapIconsCssPath =
+  "./node_modules/bootstrap-icons/font/bootstrap-icons.min.css";
+await copyFile(bootstrapIconsCssPath, `${CSS_STATIC_DIR}/bootstrap-icons.css`);
+
+// Copy Boostrap Icons fonts into our Django static directory.
+const bootstrapIconsFontsPath = "./node_modules/bootstrap-icons/font/fonts";
+await copyFile(
+  `${bootstrapIconsFontsPath}/bootstrap-icons.woff`,
+  `${CSS_STATIC_DIR}/fonts/bootstrap-icons.woff`,
+);
+await copyFile(
+  `${bootstrapIconsFontsPath}/bootstrap-icons.woff2`,
+  `${CSS_STATIC_DIR}/fonts/bootstrap-icons.woff2`,
+);
+
+// Copy Boostrap icons into our Django static directory.
+const icons = ["google", "microsoft"];
+for (const icon of icons) {
+  const iconPath = `./node_modules/bootstrap-icons/icons/${icon}.svg`;
+  await copyFile(iconPath, `${IMG_STATIC_DIR}/${icon}.svg`);
+}
