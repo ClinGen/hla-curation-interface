@@ -5,5 +5,6 @@ from django.urls import path
 from firebase import views
 
 urlpatterns = [
-    path("sign-in", views.sign_in, name="sign-in"),
+    path("login", views.login, name="login"),
+    path("verify", views.verify, name="verify"),
 ]

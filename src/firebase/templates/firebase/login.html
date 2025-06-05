@@ -2,9 +2,6 @@
 {% block title %}Home{% endblock %}
 {% block description %}Log in to the HLA Curation Interface.{% endblock %}
 {% block head %}
-    <!-- The order of these Firebase items matters. -->
-    <!-- The library versions also matter. -->
-    <link type="text/css" rel="stylesheet" href="{{ static('hci/css/firebaseui.css') }}" />
     <script type="module" src="{{ static('hci/js/firebase.js') }}"></script>
 {% endblock %}
 {% block main %}
@@ -12,8 +9,11 @@
         <div class="columns is-centered">
             <div class="column is-narrow">
                 <div class="box">
-                    <h1 class="title has-text-centered">Sign In</h1>
-                    <div id="firebaseui-auth-container"></div>
+                    <div class="has-text-centered">
+                        <h1 class="title">Log In</h1>
+                        <button id="log-in-with-google-button" class="button">Continue With Google</button>
+                        <button id="log-in-with-microsoft-button" class="button">Continue With Microsoft</button>
+                    </div>
                 </div>
             </div>
         </div>

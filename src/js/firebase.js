@@ -1,10 +1,5 @@
-/**
- * Configures Firebase and Firebase UI.
- */
-
 import { initializeApp } from "firebase/app";
-import { GoogleAuthProvider, getAuth } from "firebase/auth";
-import * as firebaseui from "firebaseui";
+import { OAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 
 /*
 ========================================================================================
@@ -21,20 +16,6 @@ const firebaseConfig = {
   appId: "1:653902215137:web:d054a272e88ab9ca2644a0",
 };
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-/*
-========================================================================================
-Configure Firebase UI
-========================================================================================
-*/
-
-const ui = new firebaseui.auth.AuthUI(auth);
-const uiConfig = {
-  signInSuccessUrl: "/home",
-  signInOptions: [GoogleAuthProvider.PROVIDER_ID],
-};
-ui.start("#firebaseui-auth-container", uiConfig);
 
 /*
 ========================================================================================
@@ -49,30 +30,69 @@ function getCsrfToken() {
     ?.split("=")[1];
 }
 
-async function handleLogin(authResult) {
+async function getIdToken(providerString) {
+  const auth = getAuth(app);
+  const provider = new OAuthProvider(providerString);
+  const result = await signInWithPopup(auth, provider);
+  const credential = OAuthProvider.credentialFromResult(result);
+  return credential.idToken;
+}
+
+async function tokenIsValid(idToken) {
+  const url = "/firebase/verify";
+  const options = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCsrfToken(),
+    },
+    body: JSON.stringify({ idToken: idToken }),
+  };
+  const response = await fetch(url, options);
+  const data = await response.json();
+  return data.valid;
+}
+
+/*
+========================================================================================
+Log-In Functions
+========================================================================================
+*/
+
+async function logInWithProvider(providerString) {
   try {
-    const idToken = await authResult.user.getIdToken();
-    const url = "/firebase/login";
-    const options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCsrfToken(),
-      },
-      body: JSON.stringify({ idToken: idToken }),
-    };
-    const response = await fetch(url, options);
-    const data = await response.json();
-    if (data.success) {
-      window.location.href = "/home";
-    } else {
-      window.alert("Unable to log you in with Google.");
+    const idToken = await getIdToken(providerString);
+    if (await tokenIsValid(idToken)) {
+      window.location.href = "/";
     }
   } catch (error) {
-    let errorMessage =
-      "Something went wrong trying to log you in with Google.\n\n";
+    let errorMessage = `Something went wrong trying to log you in with ${providerString}.\n\n`;
     errorMessage += `Error Code:\n${error.code}\n\n`;
     errorMessage += `Error Message:\n${error.message}`;
     window.alert(errorMessage);
   }
 }
+
+async function logInWithGoogle() {
+  await logInWithProvider("google.com");
+}
+
+async function logInWithMicrosoft() {
+  await logInWithProvider("microsoft.com");
+}
+
+/*
+========================================================================================
+Event Listeners
+========================================================================================
+*/
+
+const logInWithGoogleButton = document.getElementById(
+  "log-in-with-google-button",
+);
+logInWithGoogleButton.addEventListener("click", logInWithGoogle);
+
+const logInWithMicrosoftButton = document.getElementById(
+  "log-in-with-microsoft-button",
+);
+logInWithMicrosoftButton.addEventListener("click", logInWithMicrosoft);
