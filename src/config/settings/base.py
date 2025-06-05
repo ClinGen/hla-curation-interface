@@ -3,9 +3,7 @@
 import os
 from pathlib import Path
 
-import firebase_admin
 import sentry_sdk
-from firebase_admin import credentials
 
 # We use Sentry for error monitoring and tracing.
 sentry_sdk.init(
@@ -16,12 +14,6 @@ sentry_sdk.init(
 )
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-
-# We use Firebase for authentication.
-SERVICE_ACCOUNT_KEY_PATH = Path(BASE_DIR / "firebase-account-key.json")
-if not firebase_admin._apps:  # noqa: SLF001 (Avoid initializing multiple times in development.)
-    cred = credentials.Certificate(SERVICE_ACCOUNT_KEY_PATH)
-    firebase_admin.initialize_app(cred)
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
