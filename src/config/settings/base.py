@@ -37,6 +37,10 @@ INSTALLED_APPS = [
     "firebase",
 ]
 
+# This needs to be set to "same-origin-allow-popups" for logging in with Google and
+# Microsoft via Firebase to work.
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
