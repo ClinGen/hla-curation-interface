@@ -13,7 +13,10 @@ const JS_SRC_DIR = "./src/js";
 
 // Build JavaScript dependencies.
 await Bun.build({
-  entrypoints: [`${JS_SRC_DIR}/firebase.js`],
+  entrypoints: [
+    `${JS_SRC_DIR}/firebase/login.js`,
+    `${JS_SRC_DIR}/firebase/signup.js`,
+  ],
   outdir: JS_STATIC_DIR,
   minify: true,
 });

@@ -2,9 +2,10 @@
 
 import json
 
+from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
 # The messages below are potentially user-facing.
@@ -20,11 +21,6 @@ INVALID_JSON = {
     "valid": False,
     "message": "The JSON sent to the backend to verify the ID token was not valid.",
 }
-
-
-def login_(request: HttpRequest) -> HttpResponse:
-    """Returns the login page."""
-    return render(request, "firebase/login.html")
 
 
 @require_http_methods(["POST"])
@@ -45,7 +41,27 @@ def verify(request: HttpRequest) -> JsonResponse:
         user = authenticate(request, id_token=id_token)
         if user is not None:
             message = VERIFICATION_SUCCESS
-            login(request, user)
+            login(request, user, backend="firebase.backends.FirebaseBackend")
     except json.JSONDecodeError:
         message = INVALID_JSON
     return JsonResponse(message)
+
+
+def login_(request: HttpRequest) -> HttpResponse:
+    """Returns the login page."""
+    if request.user.is_authenticated:
+        messages.add_message(
+            request, messages.INFO, f"You are logged in as {request.user.email}."
+        )
+        return redirect("home")
+    return render(request, "firebase/login.html")
+
+
+def signup(request: HttpRequest) -> HttpResponse:
+    """Returns the signup page."""
+    if request.user.is_authenticated:
+        messages.add_message(
+            request, messages.INFO, f"You are logged in as {request.user.email}."
+        )
+        return redirect("home")
+    return render(request, "firebase/signup.html")

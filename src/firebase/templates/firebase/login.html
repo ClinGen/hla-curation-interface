@@ -1,62 +1,13 @@
-{% extends "layouts/base.html" %}
-{% block title %}Home{% endblock %}
+{% extends "firebase/layouts/authenticate.html" %}
+{% block title %}Log In{% endblock %}
 {% block description %}Log in to the HLA Curation Interface.{% endblock %}
 {% block head %}
     <link type="text/css" rel="stylesheet" href="{{ static('hci/css/bootstrap-icons.css') }}">
-    <script type="module" src="{{ static('hci/js/firebase.js') }}"></script>
+    <script type="module" src="{{ static('hci/js/login.js') }}"></script>
 {% endblock %}
-{% block main %}
-    <div class="mt-6 mb-6">
-        <div class="columns is-centered">
-            <div class="column is-narrow">
-                <div class="box">
-                    <h1 class="title has-text-centered">Log In</h1>
-                    <form class="block">
-                        <div class="field">
-                            <label for="login-email-input" class="label">Email</label>
-                            <div class="control">
-                                <input id="login-email-input" class="input" type="text">
-                            </div>
-                        </div>
-                        <div class="field">
-                            <label for="login-password-input" class="label">Password</label>
-                            <div class="control">
-                                <input id="login-password-input" class="input" type="password">
-                            </div>
-                            <div class="content is-small">
-                                <a href="#">Forgot your password?</a>
-                            </div>
-                        </div>
-                        <div class="field">
-                            <div class="control">
-                                <button class="button is-link">Submit</button>
-                            </div>
-                        </div>
-                    </form>
-                    <hr>
-                    <div class="has-text-centered">
-                        <div class="block">
-                            <button id="log-in-with-google-button" class="button">
-                            <span class="icon mr-1">
-                                <i class="bi bi-google"></i>
-                            </span>
-                                Continue With Google
-                            </button>
-                        </div>
-                        <div class="block">
-                            <button id="log-in-with-microsoft-button" class="button">
-                        <span class="icon mr-1">
-                            <i class="bi bi-microsoft"></i>
-                        </span>
-                                Continue With Microsoft
-                            </button>
-                        </div>
-                        <div class="content">
-                            Need an account? <a href="#">Sign Up</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+{% block heading %}Log In{% endblock %}
+{% block signup %}
+    <div class="content">
+        Need an account? <a href="#">Sign Up</a>
     </div>
 {% endblock %}
