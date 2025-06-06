@@ -136,6 +136,7 @@ alias djch := django-check
 
 # Collect static files. ----------------------------------------------
 django-collectstatic: js-build
+    rm -rf src/public/
     cd src && uv run manage.py collectstatic
 alias djcs := django-collectstatic
 

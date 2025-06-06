@@ -34,11 +34,10 @@ async function getIdToken(providerString) {
   const auth = getAuth(app);
   const provider = new OAuthProvider(providerString);
   const result = await signInWithPopup(auth, provider);
-  const credential = OAuthProvider.credentialFromResult(result);
-  return credential.idToken;
+  return result.user.getIdToken();
 }
 
-async function tokenIsValid(idToken) {
+async function verifyIdToken(idToken) {
   const url = "/firebase/verify";
   const options = {
     method: "POST",
@@ -49,8 +48,7 @@ async function tokenIsValid(idToken) {
     body: JSON.stringify({ idToken: idToken }),
   };
   const response = await fetch(url, options);
-  const data = await response.json();
-  return data.valid;
+  return await response.json();
 }
 
 /*
@@ -62,8 +60,11 @@ Log-In Functions
 async function logInWithProvider(providerString) {
   try {
     const idToken = await getIdToken(providerString);
-    if (await tokenIsValid(idToken)) {
+    const data = await verifyIdToken(idToken);
+    if (data.valid) {
       window.location.href = "/";
+    } else {
+      window.alert(data.message);
     }
   } catch (error) {
     let errorMessage = `Something went wrong trying to log you in with ${providerString}.\n\n`;

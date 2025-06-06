@@ -48,16 +48,6 @@ ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    },
-    {
         "BACKEND": "django.template.backends.jinja2.Jinja2",
         "DIRS": [
             BASE_DIR / "templates",
@@ -65,6 +55,17 @@ TEMPLATES = [
             BASE_DIR / "firebase" / "templates",
         ],
         "OPTIONS": {"environment": "config.templates.environment"},
+    },
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
     },
 ]
 
@@ -90,6 +91,11 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
+]
+
+AUTHENTICATION_BACKENDS = [
+    "firebase.backends.FirebaseBackend",
+    "django.contrib.auth.backends.ModelBackend",
 ]
 
 LANGUAGE_CODE = "en-us"
