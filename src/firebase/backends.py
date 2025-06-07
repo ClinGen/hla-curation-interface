@@ -63,3 +63,10 @@ class FirebaseBackend(BaseBackend):
             error_message = f"Unable to authenticate user: {exc}"
             logger.exception(error_message)
         return user
+
+    def get_user(self, user_id: str) -> User | None:
+        """Returns a user based on the provided user_id."""
+        try:
+            return User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return None
