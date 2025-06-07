@@ -1,4 +1,7 @@
 {% extends "layouts/base.html" %}
+{% block head %}
+    <link type="text/css" rel="stylesheet" href="{{ static('hci/css/bootstrap-icons.css') }}">
+{% endblock %}
 {% block main %}
     <div class="mt-6 mb-6">
         <div class="columns is-centered">
@@ -31,17 +34,15 @@
                     <div class="has-text-centered">
                         <div class="block">
                             <button id="continue-with-google-button" class="button">
-                            <span class="icon mr-1">
-                                <i class="bi bi-google"></i>
-                            </span>
+                                {% set icon_name="google" %}
+                                {% include "partials/icon.html" %}
                                 Continue With Google
                             </button>
                         </div>
                         <div class="block">
                             <button id="continue-with-microsoft-button" class="button">
-                        <span class="icon mr-1">
-                            <i class="bi bi-microsoft"></i>
-                        </span>
+                                {% set icon_name="microsoft" %}
+                                {% include "partials/icon.html" %}
                                 Continue With Microsoft
                             </button>
                         </div>

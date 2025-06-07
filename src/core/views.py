@@ -1,17 +1,11 @@
 """Provides views for the core app."""
 
-from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
 
 def home(request: HttpRequest) -> HttpResponse:
     """Returns the home page."""
-    messages.debug(request, "Test")
-    messages.info(request, "Test")
-    messages.success(request, "Test")
-    messages.warning(request, "Test")
-    messages.error(request, "Test")
     return render(request, "core/home.html")
 
 
