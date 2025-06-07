@@ -50,7 +50,7 @@ def verify(request: HttpRequest) -> JsonResponse:
 def login_(request: HttpRequest) -> HttpResponse:
     """Returns the login page."""
     if request.user.is_authenticated:
-        messages.info(request, f"You are logged in as {request.user.email}.")
+        messages.info(request, "You are already logged in.")
         return redirect("home")
     return render(request, "firebase/login.html")
 
@@ -58,6 +58,6 @@ def login_(request: HttpRequest) -> HttpResponse:
 def signup(request: HttpRequest) -> HttpResponse:
     """Returns the signup page."""
     if request.user.is_authenticated:
-        messages.info(request, f"You are logged in as {request.user.email}.")
+        messages.info(request, "You are already logged in.")
         return redirect("home")
     return render(request, "firebase/signup.html")

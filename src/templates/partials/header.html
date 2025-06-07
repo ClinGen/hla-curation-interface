@@ -3,5 +3,34 @@
         <div class="navbar-start">
             <a href="{{ url('home') }}" class="navbar-item">Home</a>
         </div>
+        <div class="navbar-end">
+            <div class="navbar-item">
+                <div class="buttons">
+                    {% if request.user.is_authenticated %}
+                        <a href="#" class="button">
+                            {% set icon_name="box-arrow-right" %}
+                            {% include "partials/icon.html" %}
+                            Log Out
+                        </a>
+                        <a href="#" class="button">
+                            {% set icon_name="person-check" %}
+                            {% include "partials/icon.html" %}
+                            Profile
+                        </a>
+                    {% else %}
+                        <a href="{{ url('login') }}" class="button">
+                            {% set icon_name="box-arrow-in-right" %}
+                            {% include "partials/icon.html" %}
+                            Log In
+                        </a>
+                        <a href="{{ url('signup') }}" class="button">
+                            {% set icon_name="person" %}
+                            {% include "partials/icon.html" %}
+                            Sign Up
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
 </nav>

@@ -6,7 +6,11 @@
         <section class="hero is-light">
             <div class="hero-body">
                 <p class="title">HLA Curation Interface</p>
-                <p class="subtitle">You are not logged in.</p>
+                {% if request.user.is_authenticated %}
+                    <p class="subtitle">You are logged in as {{ request.user.email }}.</p>
+                {% else %}
+                    <p class="subtitle">You are not logged in.</p>
+                {% endif %}
             </div>
         </section>
     </div>
