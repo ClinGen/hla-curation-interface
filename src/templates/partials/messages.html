@@ -1,6 +1,3 @@
-{% block head %}
-    <link type="text/css" rel="stylesheet" href="{{ static('hci/css/bootstrap-icons.css') }}">
-{% endblock %}
 {% for message in get_messages(request) %}
     {% if "debug" in message.tags %}
         <div class="block">

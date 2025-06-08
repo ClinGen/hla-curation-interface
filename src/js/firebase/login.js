@@ -2,10 +2,6 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { continueWithProvider, verifyIdToken } from "./common.js";
 import { auth } from "./config.js";
 
-//======================================================================================
-// Log-In Functions
-//======================================================================================
-
 async function getIdTokenFromEmailLogIn() {
   const email = document.getElementById("email-input").value;
   const password = document.getElementById("password-input").value;
@@ -42,24 +38,17 @@ async function logInWithMicrosoft() {
   await continueWithProvider("microsoft.com");
 }
 
-//======================================================================================
-// Elements
-//======================================================================================
-
-const logInWithEmailButton = document.getElementById(
-  "continue-with-email-button",
-);
-const logInWithGoogleButton = document.getElementById(
-  "continue-with-google-button",
-);
-const logInWithMicrosoftButton = document.getElementById(
-  "continue-with-microsoft-button",
-);
-
-//======================================================================================
-// Event Listeners
-//======================================================================================
-
-logInWithEmailButton.addEventListener("click", logInWithEmail);
-logInWithGoogleButton.addEventListener("click", logInWithGoogle);
-logInWithMicrosoftButton.addEventListener("click", logInWithMicrosoft);
+document.addEventListener("DOMContentLoaded", () => {
+  const logInWithEmailButton = document.getElementById(
+    "continue-with-email-button",
+  );
+  const logInWithGoogleButton = document.getElementById(
+    "continue-with-google-button",
+  );
+  const logInWithMicrosoftButton = document.getElementById(
+    "continue-with-microsoft-button",
+  );
+  logInWithEmailButton.addEventListener("click", logInWithEmail);
+  logInWithGoogleButton.addEventListener("click", logInWithGoogle);
+  logInWithMicrosoftButton.addEventListener("click", logInWithMicrosoft);
+});

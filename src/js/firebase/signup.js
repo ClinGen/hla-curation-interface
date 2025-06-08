@@ -2,10 +2,6 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { continueWithProvider, verifyIdToken } from "./common.js";
 import { auth } from "./config.js";
 
-//======================================================================================
-// Sign-Up Functions
-//======================================================================================
-
 async function getIdTokenFromEmailSignUp() {
   const email = document.getElementById("email-input").value;
   const password = document.getElementById("password-input").value;
@@ -42,24 +38,17 @@ async function signUpWithMicrosoft() {
   await continueWithProvider("microsoft.com");
 }
 
-//======================================================================================
-// Elements
-//======================================================================================
-
-const signUpWithEmailButton = document.getElementById(
-  "continue-with-email-button",
-);
-const signUpWithGoogleButton = document.getElementById(
-  "continue-with-google-button",
-);
-const signUpWithMicrosoftButton = document.getElementById(
-  "continue-with-microsoft-button",
-);
-
-//======================================================================================
-// Event Listeners
-//======================================================================================
-
-signUpWithEmailButton.addEventListener("click", signUpWithEmail);
-signUpWithGoogleButton.addEventListener("click", signUpWithGoogle);
-signUpWithMicrosoftButton.addEventListener("click", signUpWithMicrosoft);
+document.addEventListener("DOMContentLoaded", () => {
+  const signUpWithEmailButton = document.getElementById(
+    "continue-with-email-button",
+  );
+  const signUpWithGoogleButton = document.getElementById(
+    "continue-with-google-button",
+  );
+  const signUpWithMicrosoftButton = document.getElementById(
+    "continue-with-microsoft-button",
+  );
+  signUpWithEmailButton.addEventListener("click", signUpWithEmail);
+  signUpWithGoogleButton.addEventListener("click", signUpWithGoogle);
+  signUpWithMicrosoftButton.addEventListener("click", signUpWithMicrosoft);
+});

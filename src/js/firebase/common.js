@@ -24,7 +24,7 @@ export async function continueWithProvider(providerString) {
   }
 }
 
-function getCsrfToken() {
+export function getCsrfToken() {
   return document.cookie
     .split("; ")
     .find((row) => row.startsWith("csrftoken="))

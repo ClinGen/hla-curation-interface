@@ -3,7 +3,7 @@
 import json
 
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
@@ -47,17 +47,27 @@ def verify(request: HttpRequest) -> JsonResponse:
     return JsonResponse(message)
 
 
+def signup(request: HttpRequest) -> HttpResponse:
+    """Returns the signup page."""
+    if request.user.is_authenticated:
+        messages.info(request, "Already logged in.")
+        return redirect("home")
+    return render(request, "firebase/signup.html")
+
+
 def login_(request: HttpRequest) -> HttpResponse:
     """Returns the login page."""
     if request.user.is_authenticated:
-        messages.info(request, "You are already logged in.")
+        messages.info(request, "Already logged in.")
         return redirect("home")
     return render(request, "firebase/login.html")
 
 
-def signup(request: HttpRequest) -> HttpResponse:
-    """Returns the signup page."""
+def logout_(request: HttpRequest) -> HttpResponse:
+    """Returns the home page after logging the user out."""
     if request.user.is_authenticated:
-        messages.info(request, "You are already logged in.")
+        logout(request)
+        messages.info(request, "Logged out.")
         return redirect("home")
-    return render(request, "firebase/signup.html")
+    messages.info(request, "Already logged out.")
+    return redirect("home")
