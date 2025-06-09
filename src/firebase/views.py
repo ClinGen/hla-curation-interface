@@ -8,6 +8,8 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
+from firebase.clients import get_user_info
+
 # The messages below are potentially user-facing.
 VERIFICATION_SUCCESS = {
     "valid": True,
@@ -52,7 +54,7 @@ def signup(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
         messages.info(request, "Already logged in.")
         return redirect("home")
-    return render(request, "firebase/signup.html")
+    return render(request, "firebase/auth/signup.html")
 
 
 def login_(request: HttpRequest) -> HttpResponse:
@@ -60,7 +62,7 @@ def login_(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
         messages.info(request, "Already logged in.")
         return redirect("home")
-    return render(request, "firebase/login.html")
+    return render(request, "firebase/auth/login.html")
 
 
 def logout_(request: HttpRequest) -> HttpResponse:
@@ -71,3 +73,23 @@ def logout_(request: HttpRequest) -> HttpResponse:
         return redirect("home")
     messages.info(request, "Already logged out.")
     return redirect("home")
+
+
+def profile_view(request: HttpRequest) -> HttpResponse:
+    """Returns the view profile page for the user."""
+    if request.user.is_authenticated:
+        user_info = get_user_info(request.user.username)
+        context = {"user_info": user_info}
+        return render(request, "firebase/profile/view.html", context)
+    messages.info(request, "Not logged in.")
+    return redirect("login")
+
+
+def profile_edit(request: HttpRequest) -> HttpResponse:
+    """Returns the edit profile page for the user."""
+    if request.user.is_authenticated:
+        user_info = get_user_info(request.user.username)
+        context = {"user_info": user_info}
+        return render(request, "firebase/profile/edit.html", context)
+    messages.info(request, "Not logged in.")
+    return redirect("login")

@@ -1,0 +1,39 @@
+{% extends "firebase/layouts/profile.html" %}
+{% block title %}View Profile{% endblock %}
+{% block description %}View your user profile in the HLA Curation Interface.{% endblock %}
+{% block heading %}User Profile{% endblock %}
+{% block buttons %}
+    <a href="{{ url('profile_edit') }}"
+       hx-boost="true"
+       class="button is-small"
+    >
+        {% set icon_name="pencil" %}
+        {% include "partials/icon.html" %}
+        Edit
+    </a>
+{% endblock %}
+{% block tbody %}
+    <tr>
+        <td>Display Name</td>
+        {% if user_info.display_name %}
+            <td>
+                <span class="has-text-success">
+                    {% set icon_name="check-circle" %}
+                    {% include "partials/icon.html" %}
+                    {{ user_info.display_name }}
+                </span>
+            </td>
+        {% else %}
+            <td>
+                <span class="has-text-warning">
+                    {% set icon_name="exclamation-triangle" %}
+                    {% include "partials/icon.html" %}
+                    (Display name not set.)
+                </span>
+            </td>
+        {% endif %}
+    </tr>
+    <tr>
+        {% include "firebase/partials/profile/email.html" %}
+    </tr>
+{% endblock %}

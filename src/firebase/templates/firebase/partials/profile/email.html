@@ -1,0 +1,25 @@
+<td>Email Verified</td>
+{% if user_info.email_verified %}
+    <td>
+        <span class="has-text-success">
+            {% set icon_name="check-circle" %}
+            {% include "partials/icon.html" %}
+            {{ user_info.email_verified }}
+        </span>
+    </td>
+{% else %}
+    <td>
+        <span class="has-text-danger">
+            {% set icon_name="x-circle" %}
+            {% include "partials/icon.html" %}
+            {{ user_info.email_verified }}
+        </span>
+    </td>
+    <td>
+        <button class="button is-small">
+            {% set icon_name="envelope" %}
+            {% include "partials/icon.html" %}
+            Send Verification Email
+        </button>
+    </td>
+{% endif %}
