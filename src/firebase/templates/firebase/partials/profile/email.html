@@ -9,17 +9,15 @@
     </td>
 {% else %}
     <td>
-        <span class="has-text-danger">
+        <span class="has-text-danger mr-3">
             {% set icon_name="x-circle" %}
             {% include "partials/icon.html" %}
             {{ user_info.email_verified }}
         </span>
-    </td>
-    <td>
         <button class="button is-small">
             {% set icon_name="envelope" %}
             {% include "partials/icon.html" %}
-            Send Verification Email
+            Resend Verification Email
         </button>
     </td>
 {% endif %}
