@@ -17,9 +17,8 @@ export async function continueWithProvider(providerString) {
       window.alert(data.message);
     }
   } catch (error) {
-    let errorMessage = `Something went wrong trying to log you in with ${providerString}.\n\n`;
-    errorMessage += `Error Code:\n${error.code}\n\n`;
-    errorMessage += `Error Message:\n${error.message}`;
+    let errorMessage = "Oops, something went wrong.\n\n";
+    errorMessage += "Please try again later.";
     window.alert(errorMessage);
   }
 }

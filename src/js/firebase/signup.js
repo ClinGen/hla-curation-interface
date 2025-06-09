@@ -23,9 +23,8 @@ async function signUpWithEmail() {
       window.alert(data.message);
     }
   } catch (error) {
-    let errorMessage = "Something went wrong trying to log you in.\n\n";
-    errorMessage += `Error Code:\n${error.code}\n\n`;
-    errorMessage += `Error Message:\n${error.message}`;
+    let errorMessage = "Oops, something went wrong trying to sign you up.\n\n";
+    errorMessage += "Please try again later.";
     window.alert(errorMessage);
   }
 }
