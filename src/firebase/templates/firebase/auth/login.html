@@ -5,8 +5,13 @@
     <script type="module" src="{{ static('hci/js/login.js') }}"></script>
 {% endblock %}
 {% block heading %}Log In{% endblock %}
+{% block forgot_password %}
+    <div class="content is-small">
+        <a href="#">Forgot your password?</a>
+    </div>
+{% endblock %}
 {% block signup %}
     <div class="content">
-        Need an account? <a href="#">Sign Up</a>
+        Need an account? <a href="{{ url('signup') }}">Sign Up</a>
     </div>
 {% endblock %}
