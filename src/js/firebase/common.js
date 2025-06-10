@@ -1,9 +1,10 @@
-import { OAuthProvider, signInWithPopup } from "firebase/auth";
+import { OAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 import { message } from "../common/message.js";
-import { auth } from "./config.js";
+import { app } from "./config.js";
 
 async function getIdTokenFromProvider(providerString) {
   const provider = new OAuthProvider(providerString);
+  const auth = getAuth(app);
   const result = await signInWithPopup(auth, provider);
   return result.user.getIdToken();
 }

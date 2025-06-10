@@ -1,10 +1,12 @@
 import { signOut } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { message } from "../common/message.js";
 import { getCsrfToken } from "./common.js";
-import { auth } from "./config.js";
+import { app } from "./config.js";
 
 async function logOut() {
   try {
+    const auth = getAuth(app);
     await signOut(auth);
     const url = "/firebase/logout";
     const options = {

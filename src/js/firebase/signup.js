@@ -1,11 +1,12 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import { message } from "../common/message.js";
 import { continueWithProvider, verifyIdToken } from "./common.js";
-import { auth } from "./config.js";
+import { app } from "./config.js";
 
 async function getIdTokenFromEmailSignUp() {
   const email = document.getElementById("email-input").value;
   const password = document.getElementById("password-input").value;
+  const auth = getAuth(app);
   const userCredential = await createUserWithEmailAndPassword(
     auth,
     email,
