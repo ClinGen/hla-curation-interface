@@ -1,10 +1,10 @@
 import { signOut } from "firebase/auth";
+import { message } from "../common/message.js";
 import { getCsrfToken } from "./common.js";
 import { auth } from "./config.js";
 
 async function logOut() {
   try {
-    console.log("Logging out...");
     await signOut(auth);
     const url = "/firebase/logout";
     const options = {
@@ -14,10 +14,9 @@ async function logOut() {
     };
     await fetch(url, options);
   } catch (error) {
-    let errorMessage = "Something went wrong trying to log you out.\n\n";
-    errorMessage += `Error Code:\n${error.code}\n\n`;
-    errorMessage += `Error Message:\n${error.message}`;
-    window.alert(errorMessage);
+    let errorMessage = "Oops, something went wrong trying to log you out.";
+    errorMessage += " Please try again later.";
+    message.error(errorMessage);
   }
 }
 

@@ -28,7 +28,9 @@
 </header>
 <main>
     <div class="container">
-        {% include "partials/messages.html" %}
+        <div id="message-container">
+            {% include "partials/messages.html" %}
+        </div>
         {% block main %}{% endblock %}
     </div>
 </main>

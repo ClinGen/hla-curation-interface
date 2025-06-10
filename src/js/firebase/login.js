@@ -1,4 +1,5 @@
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { message } from "../common/message.js";
 import { continueWithProvider, verifyIdToken } from "./common.js";
 import { auth } from "./config.js";
 
@@ -20,12 +21,12 @@ async function logInWithEmail() {
     if (data.valid) {
       window.location.href = "/";
     } else {
-      window.alert(data.message);
+      message.error(data.message);
     }
   } catch (error) {
-    let errorMessage = "Oops, something went wrong trying to log you in.\n\n";
-    errorMessage += "Please check your information and try again.";
-    window.alert(errorMessage);
+    let errorMessage = "Oops, something went wrong trying to log you in.";
+    errorMessage += " Please check your information and try again.";
+    message.error(errorMessage);
   }
 }
 

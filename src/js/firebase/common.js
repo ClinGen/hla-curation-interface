@@ -1,4 +1,5 @@
 import { OAuthProvider, signInWithPopup } from "firebase/auth";
+import { message } from "../common/message.js";
 import { auth } from "./config.js";
 
 async function getIdTokenFromProvider(providerString) {
@@ -14,12 +15,12 @@ export async function continueWithProvider(providerString) {
     if (data.valid) {
       window.location.href = "/";
     } else {
-      window.alert(data.message);
+      message.error(data.message);
     }
   } catch (error) {
-    let errorMessage = "Oops, something went wrong.\n\n";
+    let errorMessage = "Oops, something went wrong. ";
     errorMessage += "Please try again later.";
-    window.alert(errorMessage);
+    message.error(errorMessage);
   }
 }
 

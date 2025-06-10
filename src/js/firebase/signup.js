@@ -1,4 +1,5 @@
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { message } from "../common/message.js";
 import { continueWithProvider, verifyIdToken } from "./common.js";
 import { auth } from "./config.js";
 
@@ -20,12 +21,12 @@ async function signUpWithEmail() {
     if (data.valid) {
       window.location.href = "/";
     } else {
-      window.alert(data.message);
+      message.error(data.message);
     }
   } catch (error) {
-    let errorMessage = "Oops, something went wrong trying to sign you up.\n\n";
-    errorMessage += "Please try again later.";
-    window.alert(errorMessage);
+    let errorMessage = "Oops, something went wrong trying to sign you up.";
+    errorMessage += " Please try again later.";
+    message.error(errorMessage);
   }
 }
 
