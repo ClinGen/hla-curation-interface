@@ -5,14 +5,8 @@ import logging
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.models import User
 from django.http import HttpRequest
-from firebase_admin import auth
-from firebase_admin.auth import (
-    CertificateFetchError,
-    ExpiredIdTokenError,
-    InvalidIdTokenError,
-    RevokedIdTokenError,
-    UserDisabledError,
-)
+
+from firebase.clients import decode_token
 
 logger = logging.getLogger(__name__)
 
@@ -36,32 +30,12 @@ class FirebaseBackend(BaseBackend):
              The User object for the authenticated user or None if we were unable to
              authenticate the user.
         """
-        user = None
-        try:
-            decoded_token = auth.verify_id_token(id_token)
-            uid = decoded_token.get("uid")
-            email = decoded_token.get("email")
-            user, _ = User.objects.get_or_create(
-                username=uid, defaults={"email": email}
-            )
-        except ValueError as exc:
-            error_message = f"Unable to authenticate user: {exc}"
-            logger.exception(error_message)
-        except CertificateFetchError as exc:
-            error_message = f"Unable to authenticate user: {exc}"
-            logger.exception(error_message)
-        except ExpiredIdTokenError as exc:
-            error_message = f"Unable to authenticate user: {exc}"
-            logger.exception(error_message)
-        except RevokedIdTokenError as exc:
-            error_message = f"Unable to authenticate user: {exc}"
-            logger.exception(error_message)
-        except InvalidIdTokenError as exc:
-            error_message = f"Unable to authenticate user: {exc}"
-            logger.exception(error_message)
-        except UserDisabledError as exc:
-            error_message = f"Unable to authenticate user: {exc}"
-            logger.exception(error_message)
+        decoded_token = decode_token(id_token)
+        if decoded_token is None:
+            return None
+        uid = decoded_token.get("uid")
+        email = decoded_token.get("email")
+        user, _ = User.objects.get_or_create(username=uid, defaults={"email": email})
         return user
 
     def get_user(self, user_id: str) -> User | None:
