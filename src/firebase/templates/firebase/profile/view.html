@@ -15,12 +15,12 @@
 {% block tbody %}
     <tr>
         <td>Display Name</td>
-        {% if user_info.display_name %}
+        {% if user_profile.firebase_display_name %}
             <td>
                 <span class="has-text-success">
                     {% set icon_name="check-circle" %}
                     {% include "partials/icon.html" %}
-                    {{ user_info.display_name }}
+                    {{ user_profile.firebase_display_name }}
                 </span>
             </td>
         {% else %}

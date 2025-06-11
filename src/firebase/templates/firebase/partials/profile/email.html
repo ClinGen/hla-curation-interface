@@ -1,10 +1,10 @@
 <td>Email Verified</td>
-{% if user_info.email_verified %}
+{% if user_profile.firebase_email_verified %}
     <td>
         <span class="has-text-success">
             {% set icon_name="check-circle" %}
             {% include "partials/icon.html" %}
-            {{ user_info.email_verified }}
+            {{ user_profile.firebase_email_verified }}
         </span>
     </td>
 {% else %}
@@ -12,7 +12,7 @@
         <span class="has-text-danger mr-3">
             {% set icon_name="x-circle" %}
             {% include "partials/icon.html" %}
-            {{ user_info.email_verified }}
+            {{ user_profile.firebase_email_verified }}
         </span>
         <button class="button is-small">
             {% set icon_name="envelope" %}

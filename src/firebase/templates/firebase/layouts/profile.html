@@ -4,15 +4,15 @@
         <h1 class="title">{% block heading %}{% endblock %}</h1>
         <nav class="level">
             <div class="level-left">
-                {% if user_info.photo_url %}
+                {% if user_profile.firebase_photo_url %}
                     <div class="level-item">
                         <figure class="image is-32x32">
-                            <img class="is-rounded" src="{{ user_info.photo_url }}" alt="User photo.">
+                            <img class="is-rounded" src="{{ user_profile.firebase_photo_url }}" alt="User photo.">
                         </figure>
                     </div>
                 {% endif %}
                 <div class="level-left">
-                    <h2 class="subtitle">{{ user_info.email }}</h2>
+                    <h2 class="subtitle">{{ request.user.email }}</h2>
                 </div>
             </div>
         </nav>

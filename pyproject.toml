@@ -15,12 +15,14 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "sphinx>=8.2.3",
-    "ruff>=0.11.11",
-    "coverage>=7.8.2",
-    "furo>=2024.8.6",
-    "ansible>=11.6.0",
     "ansible-lint>=25.5.0",
+    "ansible>=11.6.0",
+    "coverage>=7.8.2",
+    "django-stubs[compatible-mypy]>=5.2.0",
+    "furo>=2024.8.6",
+    "mypy>=1.15.0",
+    "ruff>=0.11.11",
+    "sphinx>=8.2.3",
 ]
 
 [tool.ruff]
@@ -122,3 +124,14 @@ omit = [
 
 [tool.coverage.html]
 directory = "coverage"
+
+
+[tool.mypy]
+plugins = ["mypy_django_plugin.main"]
+
+[tool.django-stubs]
+django_settings_module = "config.settings.dev"
+
+[[tool.mypy.overrides]]
+module = ["firebase_admin", "firebase_admin.*"]
+ignore_missing_imports = true

@@ -25,8 +25,8 @@
                 <div class="control">
                     <input class="input is-small"
                            type="text"
-                           {% if user_info.display_name %}
-                               value="{{ user_info.display_name }}"
+                           {% if user_profile.firebase_display_name %}
+                               value="{{ user_profile.firebase_display_name }}"
                            {% endif %}
                     >
                 </div>

@@ -26,7 +26,7 @@ alias ci := continuous-integration
 #=====================================================================
 
 # Run all source code quality checks. --------------------------------
-qual-src-all: qual-src-format-check qual-src-lint
+qual-src-all: qual-src-format-check qual-src-lint qual-src-type-check
 alias qsal := qual-src-all
 
 # Format the source code. --------------------------------------------
@@ -48,6 +48,11 @@ alias qslt := qual-src-lint
 qual-src-lint-fix:
     uv run ruff check --fix
 alias qslf := qual-src-lint-fix
+
+# Check Python type hints. -------------------------------------------
+qual-src-type-check:
+    cd src && uv run mypy .
+alias qstc := qual-src-type-check
 
 #=====================================================================
 # JavaScript Code Recipes

@@ -9,26 +9,13 @@ from firebase_admin.auth import (
     InvalidIdTokenError,
     RevokedIdTokenError,
     UserDisabledError,
-    UserNotFoundError,
 )
-from firebase_admin.exceptions import FirebaseError
 
 logger = logging.getLogger(__name__)
 
 
-def get_user_info(uid: str) -> dict | None:
-    """Returns the Firebase user info given a Firebase uid."""
-    try:
-        info = auth.get_user(uid)
-    except (ValueError, UserNotFoundError, FirebaseError) as exc:
-        error_message = f"Unable to get user info: {exc}"
-        logger.exception(error_message)
-        info = None
-    return info
-
-
-def decode_token(id_token: str | None) -> dict | None:
-    """Returns the decoded id_token obtained from the frontend."""
+def get_token_info(id_token: str | None) -> dict | None:
+    """Returns the info from the ID token obtained from the frontend."""
     try:
         decoded_token = auth.verify_id_token(id_token)
     except (
@@ -41,5 +28,20 @@ def decode_token(id_token: str | None) -> dict | None:
     ) as exc:
         error_message = f"Unable to decode token: {exc}"
         logger.exception(error_message)
-        decoded_token = None
-    return decoded_token
+        info = None
+    else:
+        username = decoded_token.get("uid", None)
+        email = decoded_token.get("email", None)
+        if username is None or email is None:
+            return None
+        email_verified = decoded_token.get("email_verified", False)
+        photo_url = decoded_token.get("picture", "")
+        display_name = decoded_token.get("name", "")
+        info = {
+            "username": username,
+            "email": email,
+            "email_verified": email_verified,
+            "photo_url": photo_url,
+            "display_name": display_name,
+        }
+    return info

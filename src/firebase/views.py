@@ -8,7 +8,7 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
-from firebase.clients import get_user_info
+from core.crud import read_user_profile
 
 # The messages below are potentially user-facing.
 VERIFICATION_SUCCESS = {
@@ -78,8 +78,12 @@ def logout_(request: HttpRequest) -> HttpResponse:
 def profile_view(request: HttpRequest) -> HttpResponse:
     """Returns the view profile page for the user."""
     if request.user.is_authenticated:
-        user_info = get_user_info(request.user.username)
-        context = {"user_info": user_info}
+        read = read_user_profile(request.user.username)
+        if read is None:
+            messages.error(request, "Oops, something is wrong with your profile.")
+            return redirect("home")
+        user_profile, _ = read
+        context = {"user_profile": user_profile}
         return render(request, "firebase/profile/view.html", context)
     messages.info(request, "Not logged in.")
     return redirect("login")
@@ -88,8 +92,12 @@ def profile_view(request: HttpRequest) -> HttpResponse:
 def profile_edit(request: HttpRequest) -> HttpResponse:
     """Returns the edit profile page for the user."""
     if request.user.is_authenticated:
-        user_info = get_user_info(request.user.username)
-        context = {"user_info": user_info}
+        read = read_user_profile(request.user.username)
+        if read is None:
+            messages.error(request, "Oops, something is wrong with your profile.")
+            return redirect("home")
+        user_profile, _ = read
+        context = {"user_profile": user_profile}
         return render(request, "firebase/profile/edit.html", context)
     messages.info(request, "Not logged in.")
     return redirect("login")
