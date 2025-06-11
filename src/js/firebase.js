@@ -1,0 +1,264 @@
+/**
+ * Enables client-side signup, login, logout, and email verification via Google's
+ * Firebase service.
+ */
+
+import { initializeApp } from "firebase/app";
+import {
+  OAuthProvider,
+  createUserWithEmailAndPassword,
+  getAuth,
+  sendEmailVerification,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+} from "firebase/auth";
+import { message } from "./message.js";
+
+/*
+========================================================================================
+Configure Firebase
+========================================================================================
+*/
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD_TLzPJT3IxX59b_7raOyLka11kLYGYg0",
+  authDomain: "som-clingen-projects.firebaseapp.com",
+  projectId: "som-clingen-projects",
+  storageBucket: "som-clingen-projects.firebasestorage.app",
+  messagingSenderId: "653902215137",
+  appId: "1:653902215137:web:d054a272e88ab9ca2644a0",
+};
+const app = initializeApp(firebaseConfig);
+
+/*
+========================================================================================
+Common Functions
+========================================================================================
+*/
+
+async function getIdTokenFromProvider(providerString) {
+  const provider = new OAuthProvider(providerString);
+  const auth = getAuth(app);
+  const result = await signInWithPopup(auth, provider);
+  return result.user.getIdToken();
+}
+
+async function continueWithProvider(providerString) {
+  try {
+    const idToken = await getIdTokenFromProvider(providerString);
+    const data = await verifyIdToken(idToken);
+    if (data.valid) {
+      window.location.href = "/";
+    } else {
+      message.error(data.message);
+    }
+  } catch (error) {
+    let errorMessage = "Oops, something went wrong. ";
+    errorMessage += "Please try again later.";
+    message.error(errorMessage);
+  }
+}
+
+function getCsrfToken() {
+  return document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("csrftoken="))
+    ?.split("=")[1];
+}
+
+async function verifyIdToken(idToken) {
+  const url = "/firebase/verify";
+  const options = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCsrfToken(),
+    },
+    body: JSON.stringify({ idToken: idToken }),
+  };
+  const response = await fetch(url, options);
+  return await response.json();
+}
+
+/*
+========================================================================================
+Signup
+========================================================================================
+*/
+
+async function getIdTokenFromEmailSignUp() {
+  const email = document.getElementById("email-input").value;
+  const password = document.getElementById("password-input").value;
+  const auth = getAuth(app);
+  const userCredential = await createUserWithEmailAndPassword(
+    auth,
+    email,
+    password,
+  );
+  return userCredential.user.getIdToken();
+}
+
+async function signUpWithEmail() {
+  try {
+    const idToken = await getIdTokenFromEmailSignUp();
+    const data = await verifyIdToken(idToken);
+    if (data.valid) {
+      window.location.href = "/";
+    } else {
+      message.error(data.message);
+    }
+  } catch (error) {
+    let errorMessage = "Oops, something went wrong trying to sign you up.";
+    errorMessage += " Please try again later.";
+    message.error(errorMessage);
+  }
+}
+
+async function signUpWithGoogle() {
+  await continueWithProvider("google.com");
+}
+
+async function signUpWithMicrosoft() {
+  await continueWithProvider("microsoft.com");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const signUpWithEmailButton = document.getElementById(
+    "continue-with-email-button",
+  );
+  const signUpWithGoogleButton = document.getElementById(
+    "continue-with-google-button",
+  );
+  const signUpWithMicrosoftButton = document.getElementById(
+    "continue-with-microsoft-button",
+  );
+  if (signUpWithEmailButton) {
+    signUpWithEmailButton.addEventListener("click", signUpWithEmail);
+  }
+  if (signUpWithGoogleButton) {
+    signUpWithGoogleButton.addEventListener("click", signUpWithGoogle);
+  }
+  if (signUpWithMicrosoftButton) {
+    signUpWithMicrosoftButton.addEventListener("click", signUpWithMicrosoft);
+  }
+});
+
+/*
+========================================================================================
+Login
+========================================================================================
+*/
+
+async function getIdTokenFromEmailLogIn() {
+  const email = document.getElementById("email-input").value;
+  const password = document.getElementById("password-input").value;
+  const auth = getAuth(app);
+  const userCredential = await signInWithEmailAndPassword(
+    auth,
+    email,
+    password,
+  );
+  return userCredential.user.getIdToken();
+}
+
+async function logInWithEmail() {
+  try {
+    const idToken = await getIdTokenFromEmailLogIn();
+    const data = await verifyIdToken(idToken);
+    if (data.valid) {
+      window.location.href = "/";
+    } else {
+      message.error(data.message);
+    }
+  } catch (error) {
+    let errorMessage = "Oops, something went wrong trying to log you in.";
+    errorMessage += " Please check your information and try again.";
+    message.error(errorMessage);
+  }
+}
+
+async function logInWithGoogle() {
+  await continueWithProvider("google.com");
+}
+
+async function logInWithMicrosoft() {
+  await continueWithProvider("microsoft.com");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const logInWithEmailButton = document.getElementById(
+    "continue-with-email-button",
+  );
+  const logInWithGoogleButton = document.getElementById(
+    "continue-with-google-button",
+  );
+  const logInWithMicrosoftButton = document.getElementById(
+    "continue-with-microsoft-button",
+  );
+  if (logInWithEmailButton) {
+    logInWithEmailButton.addEventListener("click", logInWithEmail);
+  }
+  if (logInWithGoogleButton) {
+    logInWithGoogleButton.addEventListener("click", logInWithGoogle);
+  }
+  if (logInWithMicrosoftButton) {
+    logInWithMicrosoftButton.addEventListener("click", logInWithMicrosoft);
+  }
+});
+
+/*
+========================================================================================
+Logout
+========================================================================================
+*/
+
+async function logOut() {
+  try {
+    const auth = getAuth(app);
+    await signOut(auth);
+    const url = "/firebase/logout";
+    const options = {
+      headers: {
+        "X-CSRFToken": getCsrfToken(),
+      },
+    };
+    await fetch(url, options);
+  } catch (error) {
+    let errorMessage = "Oops, something went wrong trying to log you out.";
+    errorMessage += " Please try again later.";
+    message.error(errorMessage);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const logOutButton = document.getElementById("log-out-button");
+  if (logOutButton) {
+    logOutButton.addEventListener("click", logOut);
+  }
+});
+
+/*
+========================================================================================
+Verify Email
+========================================================================================
+*/
+
+async function verifyEmail() {
+  const auth = getAuth(app);
+  try {
+    await sendEmailVerification(auth.currentUser);
+  } catch (error) {
+    let errorMessage =
+      "Oops, something went wrong trying to send the email verification.";
+    errorMessage += " Please try again later.";
+    message.error(errorMessage);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const verifyEmailButton = document.getElementById("verify-email-button");
+  if (verifyEmailButton) {
+    verifyEmailButton.addEventListener("click", verifyEmail);
+  }
+});

@@ -14,7 +14,8 @@
             {% include "partials/icon.html" %}
             {{ user_profile.firebase_email_verified }}
         </span>
-        <button class="button is-small">
+        <button id="verify-email-button"
+                class="button is-small">
             {% set icon_name="envelope" %}
             {% include "partials/icon.html" %}
             Resend Verification Email

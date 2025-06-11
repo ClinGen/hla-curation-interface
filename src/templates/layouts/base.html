@@ -14,11 +14,7 @@
     <link rel="icon" type="image/x-icon" href="{{ static('hci/img/favicon.ico') }}">
     <link rel="manifest" href="{{ static('hci/site.webmanifest') }}">
     <script src="{{ static('hci/js/htmx.js') }}"></script>
-    {% if request.user.is_authenticated %}
-        <script src="{{ static('hci/js/logout.js') }}"></script>
-    {% endif %}
-    {# The following block is for extra head content. It's optional. #}
-    {% block head %}{% endblock %}
+    <script src="{{ static('hci/js/firebase.js') }}"></script>
 </head>
 <body>
 <header>
