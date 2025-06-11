@@ -54,7 +54,7 @@ def signup(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
         messages.info(request, "Already logged in.")
         return redirect("home")
-    return render(request, "firebase/auth/signup.html")
+    return render(request, "firebase/signup.html")
 
 
 def login_(request: HttpRequest) -> HttpResponse:
@@ -62,7 +62,7 @@ def login_(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
         messages.info(request, "Already logged in.")
         return redirect("home")
-    return render(request, "firebase/auth/login.html")
+    return render(request, "firebase/login.html")
 
 
 def logout_(request: HttpRequest) -> HttpResponse:
@@ -84,7 +84,7 @@ def profile_view(request: HttpRequest) -> HttpResponse:
             return redirect("home")
         user_profile, _ = read
         context = {"user_profile": user_profile}
-        return render(request, "firebase/profile/view.html", context)
+        return render(request, "firebase/profile_view.html", context)
     messages.info(request, "Not logged in.")
     return redirect("login")
 
@@ -98,6 +98,6 @@ def profile_edit(request: HttpRequest) -> HttpResponse:
             return redirect("home")
         user_profile, _ = read
         context = {"user_profile": user_profile}
-        return render(request, "firebase/profile/edit.html", context)
+        return render(request, "firebase/profile_edit.html", context)
     messages.info(request, "Not logged in.")
     return redirect("login")

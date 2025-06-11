@@ -1,0 +1,59 @@
+{% extends "layouts/base.html" %}
+{% block title %}View Profile{% endblock %}
+{% block description %}View your user profile in the HLA Curation Interface.{% endblock %}
+{% block main %}
+    <div class="block mt-6 mb-6">
+        <h1 class="title">User Profile</h1>
+        <nav class="level">
+            <div class="level-left">
+                {% if user_profile.firebase_photo_url %}
+                    <div class="level-item">
+                        <figure class="image is-32x32">
+                            <img class="is-rounded" src="{{ user_profile.firebase_photo_url }}" alt="User photo.">
+                        </figure>
+                    </div>
+                {% endif %}
+                <div class="level-left">
+                    <h2 class="subtitle">{{ request.user.email }}</h2>
+                </div>
+            </div>
+        </nav>
+        <div class="block">
+            <a href="{{ url('profile_edit') }}"
+               hx-boost="true"
+               class="button is-small"
+            >
+                {% set icon_name="pencil" %}
+                {% include "partials/icon.html" %}
+                Edit
+            </a>
+        </div>
+        <table class="table">
+            <tbody>
+                <tr>
+                    <td>Display Name</td>
+                    {% if user_profile.firebase_display_name %}
+                        <td>
+                            <span class="has-text-success">
+                                {% set icon_name="check-circle" %}
+                                {% include "partials/icon.html" %}
+                                {{ user_profile.firebase_display_name }}
+                            </span>
+                        </td>
+                    {% else %}
+                        <td>
+                            <span class="has-text-warning">
+                                {% set icon_name="exclamation-triangle" %}
+                                {% include "partials/icon.html" %}
+                                (Display name not set.)
+                            </span>
+                        </td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    {% include "firebase/partials/profile/email.html" %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

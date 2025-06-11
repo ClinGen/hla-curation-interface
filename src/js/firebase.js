@@ -1,6 +1,5 @@
 /**
- * Enables client-side signup, login, logout, and email verification via Google's
- * Firebase service.
+ * Enables signup, login, logout via Google's Firebase service.
  */
 
 import { initializeApp } from "firebase/app";
@@ -8,7 +7,6 @@ import {
   OAuthProvider,
   createUserWithEmailAndPassword,
   getAuth,
-  sendEmailVerification,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -41,7 +39,7 @@ async function getIdTokenFromProvider(providerString) {
   const provider = new OAuthProvider(providerString);
   const auth = getAuth(app);
   const result = await signInWithPopup(auth, provider);
-  return result.user.getIdToken();
+  return await result.user.getIdToken();
 }
 
 async function continueWithProvider(providerString) {
@@ -125,13 +123,13 @@ async function signUpWithMicrosoft() {
 
 document.addEventListener("DOMContentLoaded", () => {
   const signUpWithEmailButton = document.getElementById(
-    "continue-with-email-button",
+    "signup-with-email-button",
   );
   const signUpWithGoogleButton = document.getElementById(
-    "continue-with-google-button",
+    "signup-with-google-button",
   );
   const signUpWithMicrosoftButton = document.getElementById(
-    "continue-with-microsoft-button",
+    "signup-with-microsoft-button",
   );
   if (signUpWithEmailButton) {
     signUpWithEmailButton.addEventListener("click", signUpWithEmail);
@@ -188,13 +186,13 @@ async function logInWithMicrosoft() {
 
 document.addEventListener("DOMContentLoaded", () => {
   const logInWithEmailButton = document.getElementById(
-    "continue-with-email-button",
+    "login-with-email-button",
   );
   const logInWithGoogleButton = document.getElementById(
-    "continue-with-google-button",
+    "login-with-google-button",
   );
   const logInWithMicrosoftButton = document.getElementById(
-    "continue-with-microsoft-button",
+    "login-with-microsoft-button",
   );
   if (logInWithEmailButton) {
     logInWithEmailButton.addEventListener("click", logInWithEmail);
@@ -235,30 +233,5 @@ document.addEventListener("DOMContentLoaded", () => {
   const logOutButton = document.getElementById("log-out-button");
   if (logOutButton) {
     logOutButton.addEventListener("click", logOut);
-  }
-});
-
-/*
-========================================================================================
-Verify Email
-========================================================================================
-*/
-
-async function verifyEmail() {
-  const auth = getAuth(app);
-  try {
-    await sendEmailVerification(auth.currentUser);
-  } catch (error) {
-    let errorMessage =
-      "Oops, something went wrong trying to send the email verification.";
-    errorMessage += " Please try again later.";
-    message.error(errorMessage);
-  }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  const verifyEmailButton = document.getElementById("verify-email-button");
-  if (verifyEmailButton) {
-    verifyEmailButton.addEventListener("click", verifyEmail);
   }
 });
