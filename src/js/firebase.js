@@ -1,5 +1,6 @@
 /**
- * Enables signup, login, logout via Google's Firebase service.
+ * Enables signup, login, logout via Google's Firebase service. Also handles email
+ * verification.
  */
 
 import { initializeApp } from "firebase/app";
@@ -239,5 +240,49 @@ document.addEventListener("DOMContentLoaded", () => {
   const logOutButton = document.getElementById("log-out-button");
   if (logOutButton) {
     logOutButton.addEventListener("click", logOut);
+  }
+});
+
+/*
+========================================================================================
+Email Verification
+========================================================================================
+*/
+
+async function resendVerificationEmail() {
+  const auth = getAuth(app);
+  await auth.authStateReady();
+  const user = auth.currentUser;
+  if (user && !user.emailVerified) {
+    try {
+      await sendEmailVerification(user);
+      const successMessage =
+        "Verification email sent. Please check your inbox." +
+        " Click the link in the verification email, then log out." +
+        " The next time you log in, you should see that your email is verified.";
+      message.success(successMessage);
+    } catch (error) {
+      let errorMessage =
+        "Oops, something went wrong trying to send the verification email.";
+      errorMessage += " Please try again later.";
+      message.error(errorMessage);
+    }
+  } else {
+    let errorMessage =
+      "Oops, something went wrong trying to send the verification email.";
+    errorMessage += " Please log out, log back in, and try again.";
+    message.error(errorMessage);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const resendVerificationEmailButton = document.getElementById(
+    "resend-verification-email-button",
+  );
+  if (resendVerificationEmailButton) {
+    resendVerificationEmailButton.addEventListener(
+      "click",
+      resendVerificationEmail,
+    );
   }
 });
