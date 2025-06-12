@@ -21,7 +21,7 @@
         <div class="block">
             <div class="field is-grouped">
                 <div class="control">
-                    <button class="button is-link is-small">Save</button>
+                    <button class="button is-link is-small" id="save-profile-button">Save</button>
                 </div>
                 <div class="control">
                     <a href="{{ url('profile_view') }}"
@@ -42,6 +42,7 @@
                             <div class="control">
                                 <input class="input is-small"
                                        type="text"
+                                       id="display-name-input"
                                         {% if user_profile.firebase_display_name %}
                                             value="{{ user_profile.firebase_display_name }}"
                                         {% endif %}

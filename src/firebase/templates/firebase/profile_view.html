@@ -34,11 +34,7 @@
                     <td>Display Name</td>
                     {% if user_profile.firebase_display_name %}
                         <td>
-                            <span class="has-text-success">
-                                {% set icon_name="check-circle" %}
-                                {% include "partials/icon.html" %}
-                                {{ user_profile.firebase_display_name }}
-                            </span>
+                            {{ user_profile.firebase_display_name }}
                         </td>
                     {% else %}
                         <td>

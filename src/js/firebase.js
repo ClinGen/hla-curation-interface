@@ -1,6 +1,6 @@
 /**
  * Enables signup, login, logout via Google's Firebase service. Also handles email
- * verification.
+ * verification and user profile management.
  */
 
 import { initializeApp } from "firebase/app";
@@ -12,6 +12,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  updateProfile,
 } from "firebase/auth";
 import { message } from "./message.js";
 
@@ -284,5 +285,46 @@ document.addEventListener("DOMContentLoaded", () => {
       "click",
       resendVerificationEmail,
     );
+  }
+});
+
+/*
+========================================================================================
+User Profile Management
+========================================================================================
+*/
+
+async function changeDisplayName() {
+  try {
+    const displayNameInput = document.getElementById("display-name-input");
+    const newDisplayName = displayNameInput.value.trim();
+    const auth = getAuth(app);
+    await auth.authStateReady();
+    const user = auth.currentUser;
+    if (user.displayName !== newDisplayName) {
+      await updateProfile(user, {
+        displayName: newDisplayName,
+      });
+      message.success(
+        "Display name updated successfully!" +
+          " Please log out and log back in to see your changes.",
+      );
+    } else {
+      message.warning(
+        "The display name you entered is the same as what we have on file.",
+      );
+    }
+  } catch (error) {
+    message.error(
+      "Oops, something went wrong trying to update your display name." +
+        " Please try again later.",
+    );
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const saveProfileButton = document.getElementById("save-profile-button");
+  if (saveProfileButton) {
+    saveProfileButton.addEventListener("click", changeDisplayName);
   }
 });
