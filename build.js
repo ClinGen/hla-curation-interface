@@ -15,6 +15,7 @@ await Bun.build({
   entrypoints: [`${JS_SRC_DIR}/firebase.js`],
   outdir: JS_STATIC_DIR,
   minify: true,
+  sourcemap: "linked",
 });
 
 // Copy HTMX into our Django static directory.

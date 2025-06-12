@@ -7,6 +7,7 @@ import {
   OAuthProvider,
   createUserWithEmailAndPassword,
   getAuth,
+  sendEmailVerification,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -100,6 +101,11 @@ async function getIdTokenFromEmailSignUp() {
 async function signUpWithEmail() {
   try {
     const idToken = await getIdTokenFromEmailSignUp();
+    const auth = getAuth(app);
+    const user = auth.currentUser;
+    if (user) {
+      await sendEmailVerification(user);
+    }
     const data = await verifyIdToken(idToken);
     if (data.valid) {
       window.location.href = "/";
