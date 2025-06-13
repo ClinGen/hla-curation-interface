@@ -129,7 +129,7 @@ async function signUpWithMicrosoft() {
   await continueWithProvider("microsoft.com");
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function attachSignUpListener() {
   const signUpWithEmailButton = document.getElementById(
     "signup-with-email-button",
   );
@@ -148,7 +148,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (signUpWithMicrosoftButton) {
     signUpWithMicrosoftButton.addEventListener("click", signUpWithMicrosoft);
   }
-});
+}
+
+document.addEventListener("DOMContentLoaded", attachSignUpListener);
+document.addEventListener("htmx:load", attachSignUpListener);
 
 /*
 ========================================================================================
@@ -192,7 +195,7 @@ async function logInWithMicrosoft() {
   await continueWithProvider("microsoft.com");
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function attachLogInListeners() {
   const logInWithEmailButton = document.getElementById(
     "login-with-email-button",
   );
@@ -211,7 +214,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (logInWithMicrosoftButton) {
     logInWithMicrosoftButton.addEventListener("click", logInWithMicrosoft);
   }
-});
+}
+
+document.addEventListener("DOMContentLoaded", attachLogInListeners);
+document.addEventListener("htmx:load", attachLogInListeners);
 
 /*
 ========================================================================================
@@ -237,12 +243,15 @@ async function logOut() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function attachLogOutListener() {
   const logOutButton = document.getElementById("log-out-button");
   if (logOutButton) {
     logOutButton.addEventListener("click", logOut);
   }
-});
+}
+
+document.addEventListener("DOMContentLoaded", attachLogOutListener);
+document.addEventListener("htmx:load", attachLogOutListener);
 
 /*
 ========================================================================================
@@ -276,7 +285,7 @@ async function resendVerificationEmail() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function attachVerificationListener() {
   const resendVerificationEmailButton = document.getElementById(
     "resend-verification-email-button",
   );
@@ -286,7 +295,10 @@ document.addEventListener("DOMContentLoaded", () => {
       resendVerificationEmail,
     );
   }
-});
+}
+
+document.addEventListener("DOMContentLoaded", attachVerificationListener);
+document.addEventListener("htmx:load", attachVerificationListener);
 
 /*
 ========================================================================================
@@ -322,9 +334,12 @@ async function changeDisplayName() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function attachSaveProfileListener() {
   const saveProfileButton = document.getElementById("save-profile-button");
   if (saveProfileButton) {
     saveProfileButton.addEventListener("click", changeDisplayName);
   }
-});
+}
+
+document.addEventListener("DOMContentLoaded", attachSaveProfileListener);
+document.addEventListener("htmx:load", attachSaveProfileListener);
