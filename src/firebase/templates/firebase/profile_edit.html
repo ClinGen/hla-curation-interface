@@ -36,6 +36,9 @@
         <table class="table">
             <tbody>
                 <tr>
+                    {% include "firebase/partials/profile/email.html" %}
+                </tr>
+                <tr>
                     <td>Display Name</td>
                     <td>
                         <div class="field">
@@ -52,7 +55,21 @@
                     </td>
                 </tr>
                 <tr>
-                    {% include "firebase/partials/profile/email.html" %}
+                    <td>Profile Picture URL</td>
+                    <td>
+                        <div class="field">
+                            <div class="control">
+                                <input class="input is-small"
+                                       type="text"
+                                       id="photo-url-input"
+                                       {% if user_profile.firebase_photo_url %}
+                                            value="{{ user_profile.firebase_photo_url }}"
+                                       {% endif %}
+                                >
+                                <p class="help is-success">A publicly accessible URL, e.g., https://upload.wikimedia.org/image.jpg.</p>
+                            </div>
+                        </div>
+                    </td>
                 </tr>
             </tbody>
         </table>

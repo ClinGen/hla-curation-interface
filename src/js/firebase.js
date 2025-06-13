@@ -306,24 +306,29 @@ User Profile Management
 ========================================================================================
 */
 
-async function changeDisplayName() {
+async function editUserProfile() {
   try {
     const displayNameInput = document.getElementById("display-name-input");
     const newDisplayName = displayNameInput.value.trim();
+    const photoUrlInput = document.getElementById("photo-url-input");
+    const newPhotoUrl = photoUrlInput.value.trim();
     const auth = getAuth(app);
     await auth.authStateReady();
     const user = auth.currentUser;
-    if (user.displayName !== newDisplayName) {
+    const displayNameChanged = user.displayName !== newDisplayName;
+    const photoUrlChanged = user.photoURL !== newPhotoUrl;
+    if (displayNameChanged || photoUrlChanged) {
       await updateProfile(user, {
-        displayName: newDisplayName,
+        displayName: displayNameChanged ? newDisplayName : user.displayName,
+        photoURL: photoUrlChanged ? newPhotoUrl : user.photoURL,
       });
       message.success(
-        "Display name updated successfully!" +
+        "Profile updated successfully!" +
           " Please log out and log back in to see your changes.",
       );
     } else {
       message.warning(
-        "The display name you entered is the same as what we have on file.",
+        "The profile info you entered is the same as what we have on file.",
       );
     }
   } catch (error) {
@@ -337,7 +342,7 @@ async function changeDisplayName() {
 function attachSaveProfileListener() {
   const saveProfileButton = document.getElementById("save-profile-button");
   if (saveProfileButton) {
-    saveProfileButton.addEventListener("click", changeDisplayName);
+    saveProfileButton.addEventListener("click", editUserProfile);
   }
 }
 

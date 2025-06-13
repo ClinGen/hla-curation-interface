@@ -31,6 +31,9 @@
         <table class="table">
             <tbody>
                 <tr>
+                    {% include "firebase/partials/profile/email.html" %}
+                </tr>
+                <tr>
                     <td>Display Name</td>
                     {% if user_profile.firebase_display_name %}
                         <td>
@@ -41,13 +44,26 @@
                             <span class="has-text-warning">
                                 {% set icon_name="exclamation-triangle" %}
                                 {% include "partials/icon.html" %}
-                                (Display name not set.)
+                                (Display name isn't set.)
                             </span>
                         </td>
                     {% endif %}
                 </tr>
                 <tr>
-                    {% include "firebase/partials/profile/email.html" %}
+                    <td>Profile Picture URL</td>
+                    {% if user_profile.firebase_photo_url %}
+                        <td>
+                            {{ user_profile.firebase_photo_url }}
+                        </td>
+                    {% else %}
+                        <td>
+                            <span class="has-text-warning">
+                                {% set icon_name="exclamation-triangle" %}
+                                {% include "partials/icon.html" %}
+                                (Profile picture URL isn't set.)
+                            </span>
+                        </td>
+                    {% endif %}
                 </tr>
             </tbody>
         </table>
