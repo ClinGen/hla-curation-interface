@@ -1,6 +1,6 @@
 /**
  * Enables signup, login, logout via Google's Firebase service. Also handles email
- * verification and user profile management.
+ * verification, user profile management, and password resets.
  */
 
 import { initializeApp } from "firebase/app";
@@ -9,6 +9,7 @@ import {
   createUserWithEmailAndPassword,
   getAuth,
   sendEmailVerification,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -348,3 +349,34 @@ function attachSaveProfileListener() {
 
 document.addEventListener("DOMContentLoaded", attachSaveProfileListener);
 document.addEventListener("htmx:load", attachSaveProfileListener);
+
+/*
+========================================================================================
+Password Reset
+========================================================================================
+*/
+
+async function sendResetEmail() {
+  try {
+    const auth = getAuth(app);
+    await auth.authStateReady();
+    const user = auth.currentUser;
+    await sendPasswordResetEmail(auth, user.email);
+    message.success("Password reset email sent. Please check your inbox.");
+  } catch (error) {
+    message.error(
+      "Oops, something went wrong trying to send a password reset email." +
+        " Please try again later",
+    );
+  }
+}
+
+function attachResetListener() {
+  const resetPasswordButton = document.getElementById("reset-password-button");
+  if (resetPasswordButton) {
+    resetPasswordButton.addEventListener("click", sendResetEmail);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", attachResetListener);
+document.addEventListener("htmx:load", attachResetListener);

@@ -68,8 +68,10 @@
             </tbody>
         </table>
         <hr>
-        <div class="block">
-            <a hx-boost="true" class="button" href="{{ url('reset-password') }}">Reset Password</a>
-        </div>
+        {% if user_profile.firebase_sign_in_provider == "password" %}
+            <div class="block">
+                <button id="reset-password-button" class="button">Reset Password</button>
+            </div>
+        {% endif %}
     </div>
 {% endblock %}
