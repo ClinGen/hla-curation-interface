@@ -36,6 +36,13 @@ class UserProfile(models.Model):
         verbose_name="Firebase Display Name",
         help_text="The user's display name from Firebase.",
     )
+    firebase_sign_in_provider = models.CharField(
+        blank=True,
+        default="",
+        max_length=255,
+        verbose_name="Firebase Sign-In Provider",
+        help_text="The provider used to sign the user in.",
+    )
 
     class Meta:
         """Provides metadata."""

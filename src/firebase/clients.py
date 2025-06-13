@@ -37,11 +37,13 @@ def get_token_info(id_token: str | None) -> dict | None:
         email_verified = decoded_token.get("email_verified", False)
         photo_url = decoded_token.get("picture", "")
         display_name = decoded_token.get("name", "")
+        provider = decoded_token.get("firebase", {}).get("sign_in_provider", "")
         info = {
             "username": username,
             "email": email,
             "email_verified": email_verified,
             "photo_url": photo_url,
             "display_name": display_name,
+            "provider": provider,
         }
     return info

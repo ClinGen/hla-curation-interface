@@ -12,6 +12,7 @@ def create_user_profile(
     email_verified: bool,
     photo_url: str,
     display_name: str,
+    provider: str,
 ) -> tuple[UserProfile, User] | None:
     """Creates a UserProfile object in the database.
 
@@ -20,6 +21,7 @@ def create_user_profile(
          email_verified: Whether the user's email has been verified.
          photo_url: A URL for the user's profile picture.
          display_name: The user's display name.
+         provider: The method used to log the user in, e.g., Google.
 
     Returns:
         A tuple containing the UserProfile object and the User object in the database
@@ -34,6 +36,7 @@ def create_user_profile(
         firebase_email_verified=email_verified,
         firebase_photo_url=photo_url,
         firebase_display_name=display_name,
+        firebase_sign_in_provider=provider,
     )
     return user_profile, user
 
@@ -65,6 +68,7 @@ def update_user_profile(
     email_verified: bool,
     photo_url: str,
     display_name: str,
+    provider: str,
 ) -> tuple[UserProfile, User] | None:
     """Updates a UserProfile object in the database.
 
@@ -73,6 +77,7 @@ def update_user_profile(
          email_verified: Whether the user's email has been verified.
          photo_url: A URL for the user's profile picture.
          display_name: The user's display name.
+         provider: The method used to log the user in, e.g., Google.
 
     Returns:
         A tuple containing the newly updated UserProfile object and the User object in
@@ -92,6 +97,9 @@ def update_user_profile(
         changed = True
     if user_profile.firebase_display_name != display_name:
         user_profile.firebase_display_name = display_name
+        changed = True
+    if user_profile.firebase_sign_in_provider != provider:
+        user_profile.firebase_sign_in_provider = provider
         changed = True
     if changed:
         user_profile.save()

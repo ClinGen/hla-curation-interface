@@ -24,7 +24,7 @@
                     <button class="button is-link is-small" id="save-profile-button">Save</button>
                 </div>
                 <div class="control">
-                    <a href="{{ url('profile_view') }}"
+                    <a href="{{ url('view-profile') }}"
                        hx-boost="true"
                        class="button is-link is-light is-small"
                     >
@@ -73,5 +73,9 @@
                 </tr>
             </tbody>
         </table>
+        <hr>
+        <div class="block">
+            <a hx-boost="true" class="button" href="{{ url('reset-password') }}">Reset Password</a>
+        </div>
     </div>
 {% endblock %}

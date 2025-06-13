@@ -75,7 +75,7 @@ def logout_(request: HttpRequest) -> HttpResponse:
     return redirect("home")
 
 
-def profile_view(request: HttpRequest) -> HttpResponse:
+def view_profile(request: HttpRequest) -> HttpResponse:
     """Returns the view profile page for the user."""
     if request.user.is_authenticated:
         read = read_user_profile(request.user.username)
@@ -89,7 +89,7 @@ def profile_view(request: HttpRequest) -> HttpResponse:
     return redirect("login")
 
 
-def profile_edit(request: HttpRequest) -> HttpResponse:
+def edit_profile(request: HttpRequest) -> HttpResponse:
     """Returns the edit profile page for the user."""
     if request.user.is_authenticated:
         read = read_user_profile(request.user.username)
@@ -99,5 +99,22 @@ def profile_edit(request: HttpRequest) -> HttpResponse:
         user_profile, _ = read
         context = {"user_profile": user_profile}
         return render(request, "firebase/profile_edit.html", context)
+    messages.info(request, "Not logged in.")
+    return redirect("login")
+
+
+def reset_password(request: HttpRequest) -> HttpResponse:
+    """Returns the reset password page."""
+    if request.user.is_authenticated:
+        read = read_user_profile(request.user.username)
+        if read is None:
+            messages.error(request, "Oops, something is wrong with your profile.")
+            return redirect("home")
+        user_profile, _ = read
+        if user_profile.firebase_sign_in_provider == "password":
+            context = {"user_profile": user_profile}
+            return render(request, "firebase/reset_password.html", context)
+        messages.warning(request, "Your account is not password-based.")
+        return redirect("home")
     messages.info(request, "Not logged in.")
     return redirect("login")

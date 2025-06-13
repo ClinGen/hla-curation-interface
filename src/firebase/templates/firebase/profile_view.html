@@ -19,7 +19,7 @@
             </div>
         </nav>
         <div class="block">
-            <a href="{{ url('profile_edit') }}"
+            <a href="{{ url('edit-profile') }}"
                hx-boost="true"
                class="button is-small"
             >
@@ -67,5 +67,9 @@
                 </tr>
             </tbody>
         </table>
+        <hr>
+        <div class="block">
+            <a hx-boost="true" class="button" href="{{ url('reset-password') }}">Reset Password</a>
+        </div>
     </div>
 {% endblock %}

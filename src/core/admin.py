@@ -25,4 +25,5 @@ class UserProfileAdmin(admin.ModelAdmin):
         "firebase_email_verified",
         "firebase_photo_url",
         "firebase_display_name",
+        "firebase_sign_in_provider",
     )

@@ -47,6 +47,7 @@ class FirebaseBackend(BaseBackend):
                 email_verified=info.get("email_verified"),
                 photo_url=info.get("photo_url"),
                 display_name=info.get("display_name"),
+                provider=info.get("provider"),
             )
         else:
             user = update_firebase_user(info.get("username"), info.get("email"))
@@ -55,6 +56,7 @@ class FirebaseBackend(BaseBackend):
                 email_verified=info.get("email_verified"),
                 photo_url=info.get("photo_url"),
                 display_name=info.get("display_name"),
+                provider=info.get("provider"),
             )
         return user
 
