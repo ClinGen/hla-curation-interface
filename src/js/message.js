@@ -1,3 +1,13 @@
+/**
+ * Creates and inserts an article HTML element styled the same way we style our backend
+ * Django messages.
+ *
+ * @param class_ The class of the message. See the Bulma docs for more info.
+ * @param title The title of the message.
+ * @param body The body of the message.
+ * @param icon The icon to display next to the message's title.
+ * @private
+ */
 function _displayMessage(class_, title, body, icon) {
   const container = document.getElementById("message-container");
 
@@ -39,6 +49,9 @@ function _displayMessage(class_, title, body, icon) {
   }
 }
 
+/**
+ * Displays a message to the user. Uses the same styling as the backend messages.
+ */
 export const message = {
   debug: (messageBody) => {
     _displayMessage("debug", "Debug", messageBody, "bug");
