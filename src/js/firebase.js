@@ -39,6 +39,11 @@ Common Functions
 ========================================================================================
 */
 
+/**
+ * Gets the user's ID token from the OAuth provider.
+ * @param providerString {string} The specific provider: "google.com" or "microsoft.com".
+ * @returns {Promise<string>} The user's ID token.
+ */
 async function getIdTokenFromProvider(providerString) {
   const provider = new OAuthProvider(providerString);
   const auth = getAuth(app);
@@ -46,6 +51,11 @@ async function getIdTokenFromProvider(providerString) {
   return await result.user.getIdToken();
 }
 
+/**
+ * Allows a user to sign in or log in using an OAuth provider.
+ * @param providerString {string} The
+ * @returns {Promise<void>}
+ */
 async function continueWithProvider(providerString) {
   try {
     const idToken = await getIdTokenFromProvider(providerString);
@@ -62,6 +72,10 @@ async function continueWithProvider(providerString) {
   }
 }
 
+/**
+ * Gets the Django cross-site request forgery (CSRF) token to send to the backend.
+ * @returns {string}
+ */
 function getCsrfToken() {
   return document.cookie
     .split("; ")
@@ -69,6 +83,11 @@ function getCsrfToken() {
     ?.split("=")[1];
 }
 
+/**
+ * Verifies the user's ID on the backend.
+ * @param idToken {string}
+ * @returns {Promise<any>}
+ */
 async function verifyIdToken(idToken) {
   const url = "/firebase/verify";
   const options = {
@@ -89,6 +108,10 @@ Signup
 ========================================================================================
 */
 
+/**
+ * Gets the user's ID token from Firebase when they sign up with email and password.
+ * @returns {Promise<string>}
+ */
 async function getIdTokenFromEmailSignUp() {
   const email = document.getElementById("email-input").value;
   const password = document.getElementById("password-input").value;
@@ -101,6 +124,10 @@ async function getIdTokenFromEmailSignUp() {
   return userCredential.user.getIdToken();
 }
 
+/**
+ * Signs the user up using email and password.
+ * @returns {Promise<void>}
+ */
 async function signUpWithEmail() {
   try {
     const idToken = await getIdTokenFromEmailSignUp();
@@ -122,14 +149,25 @@ async function signUpWithEmail() {
   }
 }
 
+/**
+ * Signs the user up using Google as an OAuth provider.
+ * @returns {Promise<void>}
+ */
 async function signUpWithGoogle() {
   await continueWithProvider("google.com");
 }
 
+/**
+ * Signs the user up using Microsoft as an OAuth provider.
+ * @returns {Promise<void>}
+ */
 async function signUpWithMicrosoft() {
   await continueWithProvider("microsoft.com");
 }
 
+/**
+ * Attaches event listeners for the signup buttons.
+ */
 function attachSignUpListener() {
   const signUpWithEmailButton = document.getElementById(
     "signup-with-email-button",
@@ -160,6 +198,10 @@ Login
 ========================================================================================
 */
 
+/**
+ * Gets the user's ID token from Firebase when they log in with email and password.
+ * @returns {Promise<string>}
+ */
 async function getIdTokenFromEmailLogIn() {
   const email = document.getElementById("email-input").value;
   const password = document.getElementById("password-input").value;
@@ -172,6 +214,10 @@ async function getIdTokenFromEmailLogIn() {
   return userCredential.user.getIdToken();
 }
 
+/**
+ * Logs the user in with email and password.
+ * @returns {Promise<void>}
+ */
 async function logInWithEmail() {
   try {
     const idToken = await getIdTokenFromEmailLogIn();
@@ -188,14 +234,25 @@ async function logInWithEmail() {
   }
 }
 
+/**
+ * Signs the user up using Google as an OAuth provider.
+ * @returns {Promise<void>}
+ */
 async function logInWithGoogle() {
   await continueWithProvider("google.com");
 }
 
+/**
+ * Signs the user up using Google as an OAuth provider.
+ * @returns {Promise<void>}
+ */
 async function logInWithMicrosoft() {
   await continueWithProvider("microsoft.com");
 }
 
+/**
+ * Attaches event listeners for the login buttons.
+ */
 function attachLogInListeners() {
   const logInWithEmailButton = document.getElementById(
     "login-with-email-button",
@@ -226,6 +283,11 @@ Logout
 ========================================================================================
 */
 
+/**
+ * Logs the user out using Firebase on the frontend, and sends a request to log the user
+ * out on the backend.
+ * @returns {Promise<void>}
+ */
 async function logOut() {
   try {
     const auth = getAuth(app);
@@ -244,6 +306,9 @@ async function logOut() {
   }
 }
 
+/**
+ * Attaches an event listener for the logout button.
+ */
 function attachLogOutListener() {
   const logOutButton = document.getElementById("log-out-button");
   if (logOutButton) {
@@ -260,6 +325,12 @@ Email Verification
 ========================================================================================
 */
 
+/**
+ * Resends the verification email. The verification email should be sent when the user
+ * first signs up with email and password, but it can get lost/buried in the user's
+ * inbox if they don't verify right away.
+ * @returns {Promise<void>}
+ */
 async function resendVerificationEmail() {
   const auth = getAuth(app);
   await auth.authStateReady();
@@ -286,6 +357,9 @@ async function resendVerificationEmail() {
   }
 }
 
+/**
+ * Attaches an event listener for the verification email button.
+ */
 function attachVerificationListener() {
   const resendVerificationEmailButton = document.getElementById(
     "resend-verification-email-button",
@@ -307,6 +381,10 @@ User Profile Management
 ========================================================================================
 */
 
+/**
+ * Allows the user to edit their profile.
+ * @returns {Promise<void>}
+ */
 async function editUserProfile() {
   try {
     const displayNameInput = document.getElementById("display-name-input");
@@ -340,6 +418,9 @@ async function editUserProfile() {
   }
 }
 
+/**
+ * Attaches an event listener for the edit profile save button.
+ */
 function attachSaveProfileListener() {
   const saveProfileButton = document.getElementById("save-profile-button");
   if (saveProfileButton) {
@@ -356,6 +437,10 @@ Password Reset
 ========================================================================================
 */
 
+/**
+ * Sends an email that allows the user to reset their password.
+ * @returns {Promise<void>}
+ */
 async function sendResetEmail() {
   try {
     const auth = getAuth(app);
@@ -371,6 +456,9 @@ async function sendResetEmail() {
   }
 }
 
+/**
+ * Attaches an event listener for the reset password button.
+ */
 function attachResetListener() {
   const resetPasswordButton = document.getElementById("reset-password-button");
   if (resetPasswordButton) {

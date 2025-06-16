@@ -1,7 +1,6 @@
 /**
  * Creates and inserts an article HTML element styled the same way we style our backend
  * Django messages.
- *
  * @param class_ The class of the message. See the Bulma docs for more info.
  * @param title The title of the message.
  * @param body The body of the message.
