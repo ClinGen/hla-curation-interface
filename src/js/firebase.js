@@ -41,7 +41,7 @@ Common Functions
 
 /**
  * Gets the user's ID token from the OAuth provider.
- * @param providerString {string} The specific provider: "google.com" or "microsoft.com".
+ * @param providerString {string} The provider: "google.com" or "microsoft.com".
  * @returns {Promise<string>} The user's ID token.
  */
 async function getIdTokenFromProvider(providerString) {
@@ -53,7 +53,7 @@ async function getIdTokenFromProvider(providerString) {
 
 /**
  * Allows a user to sign in or log in using an OAuth provider.
- * @param providerString {string} The
+ * @param providerString {string} The provider: "google.com" or "microsoft.com".
  * @returns {Promise<void>}
  */
 async function continueWithProvider(providerString) {
@@ -121,7 +121,7 @@ async function getIdTokenFromEmailSignUp() {
     email,
     password,
   );
-  return userCredential.user.getIdToken();
+  return await userCredential.user.getIdToken();
 }
 
 /**
@@ -211,7 +211,7 @@ async function getIdTokenFromEmailLogIn() {
     email,
     password,
   );
-  return userCredential.user.getIdToken();
+  return await userCredential.user.getIdToken();
 }
 
 /**
