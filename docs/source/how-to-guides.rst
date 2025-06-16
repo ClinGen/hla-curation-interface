@@ -78,3 +78,41 @@ manually deploy the HCI, follow the steps below.
 
     just server-prod-deploy
 
+
+---------------------------------------
+How to Manually Test Sign Up and Log In
+---------------------------------------
+
+Testing sign up and log in is tricky to automate because we use Firebase for
+authentication. Here are the steps for testing sign up and log in manually.
+
+* Navigate to the Firebase web console.
+* Find the development instance.
+* Delete your user accounts from the development instance.
+* Run the HCI locally.
+* Make sure you can sign up with email and password using a temporary email service.
+* Log out of your temporary email account.
+* Log into your temporary email account.
+* Make sure you can sign up with a Google account.
+* Log out of your Google account.
+* Log into your Google account.
+* Make sure you can sign up with a Microsoft account.
+* Log out of your Microsoft account.
+* Log into your Microsoft account.
+
+----------------------------------------------
+How to Manually Test Editing Your User Profile
+----------------------------------------------
+
+It's tricky to automate the testing of the of the user profile page because we use
+Firebase for some of the functionality of the user profile page. Here are the steps for
+testing the user profile page manually.
+
+* Run the HCI locally.
+* Create a new account.
+* Navigate to the user profile page.
+* Make sure you can resend the verification email.
+* Make sure you can verify your email.
+* Click the edit button.
+* Make sure you can change your display name.
+* Make sure you can reset your password.
