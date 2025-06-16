@@ -3,6 +3,7 @@
 import json
 from unittest.mock import ANY, MagicMock, patch
 
+from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -25,7 +26,7 @@ class VerifyViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertTrue(data["valid"])
-        mock_authenticate.assert_called_once_with(ANY, id_token="fake")  # noqa: S106 (It's a fake token for testing.)
+        mock_authenticate.assert_called_once_with(ANY, id_token="fake")  # noqa: S106 (Hard-coded for testing.)
         mock_login.assert_called_once_with(
             ANY, mock_user, backend="firebase.backends.FirebaseBackend"
         )
@@ -49,3 +50,23 @@ class VerifyViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertFalse(data["valid"])
+
+
+class SignupViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse("signup")
+        self.user = User.objects.create(username="aketchum", password="pikachu")  # noqa: S106 (Hard-coded for testing.)
+
+    def test_already_logged_in(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.assertRedirects(response, reverse("home"))
+
+    def test_content(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, "Email")
+        self.assertContains(response, "Password")
+        self.assertContains(response, "Submit")
+        self.assertContains(response, "Google")
+        self.assertContains(response, "Microsoft")
