@@ -90,3 +90,21 @@ class LoginViewTest(TestCase):
         self.assertContains(response, "Submit")
         self.assertContains(response, "Google")
         self.assertContains(response, "Microsoft")
+
+
+class LogoutViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse("logout")
+        self.user = User.objects.create(username="aketchum", password="pikachu")  # noqa: S106 (Hard-coded for testing.)
+
+    def test_already_logged_out(self):
+        response = self.client.get(self.url)
+        self.assertRedirects(response, reverse("home"))
+
+    def test_logout(self):
+        self.client.force_login(self.user)
+        self.assertIn("_auth_user_id", self.client.session)
+        response = self.client.get(self.url)
+        self.assertRedirects(response, reverse("home"))
+        self.assertNotIn("_auth_user_id", self.client.session)
