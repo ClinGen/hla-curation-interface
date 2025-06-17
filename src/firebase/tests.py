@@ -61,10 +61,12 @@ class SignupViewTest(TestCase):
     def test_already_logged_in(self):
         self.client.force_login(self.user)
         response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("home"))
 
     def test_content(self):
         response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Email")
         self.assertContains(response, "Password")
         self.assertContains(response, "Submit")
@@ -81,10 +83,12 @@ class LoginViewTest(TestCase):
     def test_already_logged_in(self):
         self.client.force_login(self.user)
         response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("home"))
 
     def test_content(self):
         response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Email")
         self.assertContains(response, "Password")
         self.assertContains(response, "Submit")
@@ -100,11 +104,13 @@ class LogoutViewTest(TestCase):
 
     def test_already_logged_out(self):
         response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("home"))
 
     def test_logout(self):
         self.client.force_login(self.user)
         self.assertIn("_auth_user_id", self.client.session)
         response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("home"))
         self.assertNotIn("_auth_user_id", self.client.session)
