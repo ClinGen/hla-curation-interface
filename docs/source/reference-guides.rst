@@ -7,12 +7,87 @@ The Core App
 ------------
 
 The core app is where the home page and the pages found in the HCI's footer are housed.
-It is also used to house modules that aren't app-specific.
+It is also used to house modules that aren't app-specific. For example, it houses a
+custom ``UserProfile`` model that extends the Django ``User`` model. This
+``UserProfile`` model isn't specific to any app.
+
+``core.admin``
+==============
+
+.. automodule:: core.admin
+   :members:
+
+``core.apps``
+=============
+
+.. automodule:: core.apps
+   :members:
+
+``core.crud``
+=============
+
+.. automodule:: core.crud
+   :members:
+
+``core.models``
+===============
+
+.. automodule:: core.models
+   :members:
+
+``core.urls``
+=============
+
+.. automodule:: core.urls
+   :members:
 
 ``core.views``
 ==============
 
 .. automodule:: core.views
+   :members:
+
+----------------
+The Firebase App
+----------------
+
+The firebase app houses code related to using Google's Firebase service for
+authentication.
+
+``firebase.apps``
+=================
+
+.. automodule:: firebase.apps
+   :members:
+
+``firebase.backends``
+=====================
+
+.. automodule:: firebase.backends
+   :members:
+
+``firebase.clients``
+====================
+
+.. automodule:: firebase.clients
+   :members:
+
+``firebase.crud``
+=================
+
+.. automodule:: firebase.crud
+   :members:
+
+``firebase.urls``
+=================
+
+.. automodule:: firebase.urls
+   :members:
+
+``firebase.views``
+==================
+
+.. automodule:: firebase.views
    :members:
 
 ----------------

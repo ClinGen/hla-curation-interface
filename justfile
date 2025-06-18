@@ -100,7 +100,7 @@ alias tal := test-all
 # Coverage Recipes
 #=====================================================================
 
-# Collect new coverage, build new site, and open new site.
+# Collect new coverage, build new site, and open new site. -----------
 coverage-new: coverage-clean coverage-collect coverage-build-html coverage-open-html
 alias cnw := coverage-new
 
@@ -173,6 +173,10 @@ alias djsh := django-shell
 # Docs Recipes
 #=====================================================================
 
+# Build new docs and open new docs. ----------------------------------
+docs-new: docs-clean docs-build-html docs-open-html
+alias dnw := docs-new
+
 # Build the developer documentation site. ----------------------------
 docs-build-html:
     cd docs && uv run sphinx-build source build
@@ -182,6 +186,10 @@ alias dbh := docs-build-html
 docs-open-html:
     open docs/build/index.html
 alias doh := docs-open-html
+
+docs-clean:
+    rm -rf docs/build/
+alias dcl := docs-clean
 
 #=====================================================================
 # Infrastructure Code Quality Recipes
