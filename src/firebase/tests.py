@@ -151,7 +151,7 @@ class ViewProfileViewTest(TestCase):
 class EditProfileViewTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.url = reverse("view-profile")
+        self.url = reverse("edit-profile")
         self.user = User.objects.create(username="ash", password="pikachu")  # noqa: S106 (Hard-coded for testing.)
         self.user_profile = UserProfile.objects.create(user=self.user)
 

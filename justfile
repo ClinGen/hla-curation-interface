@@ -122,7 +122,7 @@ alias cbh := coverage-build-html
 
 # Open the test coverage site in your browser. -----------------------
 coverage-open-html:
-    open src/htmlcov/index.html
+    open src/coverage/index.html
 alias coh := coverage-open-html
 
 # Clean test coverage artifacts. -------------------------------------
