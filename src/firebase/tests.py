@@ -197,18 +197,18 @@ class FirebaseClientTest(TestCase):
             "firebase": {"sign_in_provider": self.sign_in_provider},
         }
 
-    def test_invalid_token(self):
+    def test_get_token_invalid(self):
         with self.assertLogs("firebase.clients", level="ERROR"):
             get_token_info("")
 
     @patch("firebase.clients.auth.verify_id_token")
-    def test_no_uid_or_email_token(self, mock_verify_id_token: MagicMock):
+    def test_get_token_no_uid_or_email(self, mock_verify_id_token: MagicMock):
         mock_verify_id_token.return_value = self.decoded_token_no_uid_or_email
         info = get_token_info("garbage")
         self.assertIsNone(info)
 
     @patch("firebase.clients.auth.verify_id_token")
-    def test_valid_token(self, mock_verify_id_token: MagicMock):
+    def test_get_token_valid(self, mock_verify_id_token: MagicMock):
         mock_verify_id_token.return_value = self.decoded_token_valid
         info = get_token_info("garbage")
         self.assertEqual(self.uid, info["username"])
