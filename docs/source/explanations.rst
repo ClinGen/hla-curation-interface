@@ -46,3 +46,29 @@ Firebase, we use a custom authentication backend.
 .. rubric:: Footnotes
 
 .. [#f1] These tokens are JSON Web Tokens.
+
+---------
+Using Bun
+---------
+
+What is Bun?
+============
+
+Bun is a JavaScript runtime similar to NodeJS and Deno.
+
+Why are we using Bun?
+=====================
+
+We use Bun to track our JavaScript dependencies in ``package.json``, and we use Bun to
+build these JavaScript dependencies. In some cases, we use Bun to copy the already-built
+JavaScript dependencies from the ``node_modules`` directory into the ``static``
+directory where Django takes over.
+
+Bun is significantly faster than NodeJS and somewhat faster than Deno. Bun provides a
+pleasant developer experience.
+
+What is the ``js`` directory for?
+=================================
+
+The ``js`` directory houses JavaScript modules that need to be built using Bun and then
+copied into the ``static`` directory.
