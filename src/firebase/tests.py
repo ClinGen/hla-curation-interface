@@ -8,6 +8,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from core.models import UserProfile
+from firebase.crud import create_firebase_user, read_firebase_user, update_firebase_user
 
 
 class VerifyViewTest(TestCase):
@@ -58,7 +59,7 @@ class SignupViewTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = reverse("signup")
-        self.user = User.objects.create(username="aketchum", password="pikachu")  # noqa: S106 (Hard-coded for testing.)
+        self.user = User.objects.create(username="ash", password="pikachu")  # noqa: S106 (Hard-coded for testing.)
 
     def test_already_logged_in(self):
         self.client.force_login(self.user)
@@ -80,7 +81,7 @@ class LoginViewTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = reverse("login")
-        self.user = User.objects.create(username="aketchum", password="pikachu")  # noqa: S106 (Hard-coded for testing.)
+        self.user = User.objects.create(username="ash", password="pikachu")  # noqa: S106 (Hard-coded for testing.)
 
     def test_already_logged_in(self):
         self.client.force_login(self.user)
@@ -102,7 +103,7 @@ class LogoutViewTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = reverse("logout")
-        self.user = User.objects.create(username="aketchum", password="pikachu")  # noqa: S106 (Hard-coded for testing.)
+        self.user = User.objects.create(username="ash", password="pikachu")  # noqa: S106 (Hard-coded for testing.)
 
     def test_already_logged_out(self):
         response = self.client.get(self.url)
@@ -122,7 +123,7 @@ class ViewProfileViewTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = reverse("view-profile")
-        self.user = User.objects.create(username="aketchum", password="pikachu")  # noqa: S106 (Hard-coded for testing.)
+        self.user = User.objects.create(username="ash", password="pikachu")  # noqa: S106 (Hard-coded for testing.)
         self.user_profile = UserProfile.objects.create(user=self.user)
 
     @patch("firebase.views.read_user_profile")
@@ -150,7 +151,7 @@ class EditProfileViewTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = reverse("view-profile")
-        self.user = User.objects.create(username="aketchum", password="pikachu")  # noqa: S106 (Hard-coded for testing.)
+        self.user = User.objects.create(username="ash", password="pikachu")  # noqa: S106 (Hard-coded for testing.)
         self.user_profile = UserProfile.objects.create(user=self.user)
 
     @patch("firebase.views.read_user_profile")
@@ -172,3 +173,39 @@ class EditProfileViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("login"))
+
+
+class CRUDTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(
+            username="ash",
+            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
+            email="ash@kantomail.net",
+        )
+
+    def test_create_with_non_existent_user(self):
+        create_firebase_user("misty", "misty@pokemail.com")
+        self.assertTrue(User.objects.filter(username="misty").exists())
+
+    def test_create_with_existing_user(self):
+        user = create_firebase_user(self.user.username, self.user.email)
+        self.assertTrue(User.objects.filter(username=self.user.username).exists())
+        self.assertEqual(self.user.username, user.username)
+
+    def test_read_with_non_existent_user(self):
+        user = read_firebase_user("brock")
+        self.assertIsNone(user)
+
+    def test_read_with_existing_user(self):
+        user = read_firebase_user("ash")
+        self.assertTrue(User.objects.filter(username=self.user.username).exists())
+        self.assertEqual(self.user.username, user.username)
+
+    def test_update_non_existent_user(self):
+        user = update_firebase_user("oak", "oak@kanto.edu")
+        self.assertIsNone(user)
+
+    def test_update_existing_user(self):
+        new_email = "aketchum@kantomail.net"
+        user = update_firebase_user("ash", new_email)
+        self.assertEqual(new_email, user.email)
