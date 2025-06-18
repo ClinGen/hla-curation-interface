@@ -8,8 +8,79 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from core.models import UserProfile
+from firebase.backends import FirebaseBackend
 from firebase.clients import get_token_info
 from firebase.crud import create_firebase_user, read_firebase_user, update_firebase_user
+
+
+class FirebaseBackendTest(TestCase):
+    def setUp(self):
+        self.backend = FirebaseBackend()
+        self.user = User.objects.create(
+            username="ash",
+            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
+            email="ash@kantomail.net",
+        )
+        self.user_profile = UserProfile.objects.create(
+            user=self.user,
+            firebase_uid=self.user.username,
+            firebase_email_verified=False,
+            firebase_photo_url="https://www.kantopeople.net/img/ash.jpg",
+            firebase_display_name="Ash",
+            firebase_sign_in_provider="password",
+        )
+
+    def test_authenticate_no_id_token(self):
+        request = MagicMock()
+        result = self.backend.authenticate(request, id_token=None)
+        self.assertIsNone(result)
+
+    @patch("firebase.backends.get_token_info")
+    def test_authenticate_no_info(self, mock_get_token_info: MagicMock):
+        mock_get_token_info.return_value = None
+        request = MagicMock()
+        result = self.backend.authenticate(request, id_token="garbage")  # noqa: S106 (Hard-coded for testing.)
+        self.assertIsNone(result)
+
+    @patch("firebase.backends.get_token_info")
+    def test_authenticate_non_existent_user(self, mock_get_token_info: MagicMock):
+        username = "misty"
+        self.assertFalse(User.objects.filter(username=username).exists())
+        self.assertFalse(UserProfile.objects.filter(firebase_uid=username).exists())
+        mock_get_token_info.return_value = {
+            "username": username,
+            "email": "misty@pokemail.com",
+            "email_verified": True,
+            "photo_url": "https://www.kantopeople.net/img/misty.jpg",
+            "display_name": "Misty",
+            "provider": "google.com",
+        }
+        request = MagicMock()
+        self.backend.authenticate(request, id_token="garbage")  # noqa: S106 (Hard-coded for testing.)
+        self.assertTrue(User.objects.filter(username=username).exists())
+        self.assertTrue(UserProfile.objects.filter(firebase_uid=username).exists())
+
+    @patch("firebase.backends.get_token_info")
+    def test_authenticate_existing_user(self, mock_get_token_info: MagicMock):
+        new_email = "aketchum@kanto.edu"
+        new_email_verified = True
+        mock_get_token_info.return_value = {
+            "username": self.user.username,
+            "email": new_email,
+            "email_verified": new_email_verified,
+            "photo_url": "https://www.kantopeople.net/img/ash.jpg",
+            "display_name": "Ash",
+            "provider": "password",
+        }
+        request = MagicMock()
+        user = self.backend.authenticate(request, id_token="garbage")  # noqa: S106 (Hard-coded for testing.)
+        self.assertTrue(User.objects.filter(username=self.user.username).exists())
+        # Should update the user's email if it's been reset.
+        self.assertEqual(new_email, user.email)
+        self.assertTrue(UserProfile.objects.filter(user=self.user).exists())
+        # Should update whether the email is verified.
+        user_profile = UserProfile.objects.get(user=self.user)
+        self.assertEqual(new_email_verified, user_profile.firebase_email_verified)
 
 
 class FirebaseClientTest(TestCase):
@@ -86,7 +157,7 @@ class CRUDTest(TestCase):
         self.assertIsNone(user)
 
     def test_update_existing_user(self):
-        new_email = "aketchum@kantomail.net"
+        new_email = "aketchum@kanto.edu"
         user = update_firebase_user("ash", new_email)
         self.assertEqual(new_email, user.email)
 

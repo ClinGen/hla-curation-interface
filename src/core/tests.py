@@ -144,7 +144,7 @@ class CRUDTest(TestCase):
         self.user_oak = User.objects.create(username="oak", password="#1prof")  # noqa: S106 (Hard-coded for testing.)
         self.user_profile_oak = UserProfile.objects.create(
             user=self.user_oak,
-            firebase_uid="abc123",
+            firebase_uid=self.user_oak.username,
             firebase_email_verified=False,
             firebase_photo_url="https://www.kantopeople.net/img/oak.jpg",
             firebase_display_name="Oak",
