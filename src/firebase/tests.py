@@ -227,20 +227,20 @@ class CRUDTest(TestCase):
             email="ash@kantomail.net",
         )
 
-    def test_create_with_non_existent_user(self):
+    def test_create_non_existent_user(self):
         create_firebase_user("misty", "misty@pokemail.com")
         self.assertTrue(User.objects.filter(username="misty").exists())
 
-    def test_create_with_existing_user(self):
+    def test_create_existing_user(self):
         user = create_firebase_user(self.user.username, self.user.email)
         self.assertTrue(User.objects.filter(username=self.user.username).exists())
         self.assertEqual(self.user.username, user.username)
 
-    def test_read_with_non_existent_user(self):
+    def test_read_non_existent_user(self):
         user = read_firebase_user("brock")
         self.assertIsNone(user)
 
-    def test_read_with_existing_user(self):
+    def test_read_existing_user(self):
         user = read_firebase_user("ash")
         self.assertTrue(User.objects.filter(username=self.user.username).exists())
         self.assertEqual(self.user.username, user.username)
