@@ -100,6 +100,10 @@ alias tal := test-all
 # Coverage Recipes
 #=====================================================================
 
+# Collect new coverage, build new site, and open new site.
+coverage-new: coverage-clean coverage-collect coverage-build-html coverage-open-html
+alias cnw := coverage-new
+
 # Collect test coverage stats. ---------------------------------------
 coverage-collect:
     cd src && uv run coverage run --rcfile=../pyproject.toml manage.py test
