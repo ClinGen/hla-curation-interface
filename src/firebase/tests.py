@@ -144,3 +144,31 @@ class ViewProfileViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("login"))
+
+
+class EditProfileViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse("view-profile")
+        self.user = User.objects.create(username="aketchum", password="pikachu")  # noqa: S106 (Hard-coded for testing.)
+        self.user_profile = UserProfile.objects.create(user=self.user)
+
+    @patch("firebase.views.read_user_profile")
+    def test_no_user_profile(self, mock_read_user_profile: MagicMock):
+        mock_read_user_profile.return_value = None
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("home"))
+
+    @patch("firebase.views.read_user_profile")
+    def test_has_user_profile(self, mock_read_user_profile: MagicMock):
+        mock_read_user_profile.return_value = self.user_profile, self.user
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_not_logged_in(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("login"))
