@@ -8,6 +8,8 @@
       ansible.builtin.include_tasks: ../tasks/admin/apt_upgrade.yml
     - name: Install | uv
       ansible.builtin.include_tasks: ../tasks/install/uv.yml
+    - name: Install | Bun
+      ansible.builtin.include_tasks: ../tasks/install/bun.yml
     - name: Install | project
       ansible.builtin.include_tasks: ../tasks/install/project.yml
     - name: Placement | Gunicorn files

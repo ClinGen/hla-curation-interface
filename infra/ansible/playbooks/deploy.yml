@@ -10,6 +10,8 @@
       ansible.builtin.include_tasks: ../tasks/admin/git_pull.yml
     - name: Admin | uv sync
       ansible.builtin.include_tasks: ../tasks/admin/uv_sync.yml
+    - name: Admin | Bun install
+      ansible.builtin.include_tasks: ../tasks/admin/bun_install.yml
     - name: Admin | Django migrate
       ansible.builtin.include_tasks: ../tasks/admin/django_migrate.yml
     - name: Admin | Django collectstatic

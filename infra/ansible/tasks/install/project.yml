@@ -9,3 +9,9 @@
     cmd: "~/.local/bin/uv sync"
   args:
     creates: "{{ repo_dir }}/.venv"
+- name: Ensure the JavaScript dependencies are installed
+  ansible.builtin.command:
+    chdir: hla-curation-interface
+    cmd: "~/.bun/bin/bun install"
+  args:
+    creates: "{{ repo_dir }}/node_modules"
