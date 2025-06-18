@@ -20,6 +20,7 @@ The HCI is maintained by the Stanford contingent of
 ## Getting Started
 
 - Install [uv](https://github.com/astral-sh/uv).
+- Install [Bun](https://bun.sh).
 - Clone the repository.
 - Install dependencies: `uv sync`.
 - Install [just](https://github.com/casey/just).
