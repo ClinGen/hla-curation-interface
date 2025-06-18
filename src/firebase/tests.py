@@ -8,6 +8,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from core.models import UserProfile
+from firebase.clients import get_token_info
 from firebase.crud import create_firebase_user, read_firebase_user, update_firebase_user
 
 
@@ -173,6 +174,49 @@ class EditProfileViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("login"))
+
+
+class FirebaseClientTest(TestCase):
+    def setUp(self):
+        self.uid = "abc123"
+        self.email = "foo@bar.org"
+        self.email_verified = True
+        self.picture = "https://www.bar.org/image.jpg"
+        self.name = "Foo Bar"
+        self.sign_in_provider = "password"
+        self.decoded_token_no_uid_or_email = {
+            "uid": None,
+            "email": None,
+        }
+        self.decoded_token_valid = {
+            "uid": self.uid,
+            "email": self.email,
+            "email_verified": self.email_verified,
+            "picture": self.picture,
+            "name": self.name,
+            "firebase": {"sign_in_provider": self.sign_in_provider},
+        }
+
+    def test_invalid_token(self):
+        with self.assertLogs("firebase.clients", level="ERROR"):
+            get_token_info("")
+
+    @patch("firebase.clients.auth.verify_id_token")
+    def test_no_uid_or_email_token(self, mock_verify_id_token: MagicMock):
+        mock_verify_id_token.return_value = self.decoded_token_no_uid_or_email
+        info = get_token_info("garbage")
+        self.assertIsNone(info)
+
+    @patch("firebase.clients.auth.verify_id_token")
+    def test_valid_token(self, mock_verify_id_token: MagicMock):
+        mock_verify_id_token.return_value = self.decoded_token_valid
+        info = get_token_info("garbage")
+        self.assertEqual(self.uid, info["username"])
+        self.assertEqual(self.email, info["email"])
+        self.assertEqual(self.email_verified, info["email_verified"])
+        self.assertEqual(self.picture, info["photo_url"])
+        self.assertEqual(self.name, info["display_name"])
+        self.assertEqual(self.sign_in_provider, info["provider"])
 
 
 class CRUDTest(TestCase):
