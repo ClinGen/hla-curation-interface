@@ -459,12 +459,16 @@ async function sendResetEmail() {
 /**
  * Attaches an event listener for the reset password button.
  */
-function attachResetListener() {
+function attachResetListeners() {
+  const resetPasswordAnchor = document.getElementById("reset-password-anchor");
+  if (resetPasswordAnchor) {
+    resetPasswordAnchor.addEventListener("click", sendResetEmail);
+  }
   const resetPasswordButton = document.getElementById("reset-password-button");
   if (resetPasswordButton) {
     resetPasswordButton.addEventListener("click", sendResetEmail);
   }
 }
 
-document.addEventListener("DOMContentLoaded", attachResetListener);
-document.addEventListener("htmx:load", attachResetListener);
+document.addEventListener("DOMContentLoaded", attachResetListeners);
+document.addEventListener("htmx:load", attachResetListeners);
