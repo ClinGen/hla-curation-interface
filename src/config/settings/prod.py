@@ -1,7 +1,5 @@
 """Provide production settings."""
 
-import os
-
 from django.contrib import messages
 
 from .base import *  # noqa: F403 (We want to import everything.)

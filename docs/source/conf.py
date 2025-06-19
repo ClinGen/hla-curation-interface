@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -11,6 +12,7 @@ author = "The Stanford ClinGen Team"
 release = "0.1"
 version = "0.1.0"
 
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.dev")
 django.setup()
 
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon"]
