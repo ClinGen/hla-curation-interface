@@ -10,7 +10,9 @@
     "ignore": [
       "./.venv/*",
       "./docs/*",
+      "./src/**/.mypy_cache/*",
       "./src/**/templates/*",
+      "./src/coverage/*",
       "./src/public/*",
       "./src/static/*"
     ]

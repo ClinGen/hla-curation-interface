@@ -118,12 +118,14 @@ class FirebaseClientTest(TestCase):
     def test_get_token_valid(self, mock_verify_id_token: MagicMock):
         mock_verify_id_token.return_value = self.decoded_token_valid
         info = get_token_info("garbage")
-        self.assertEqual(self.uid, info["username"])
-        self.assertEqual(self.email, info["email"])
-        self.assertEqual(self.email_verified, info["email_verified"])
-        self.assertEqual(self.picture, info["photo_url"])
-        self.assertEqual(self.name, info["display_name"])
-        self.assertEqual(self.sign_in_provider, info["provider"])
+        self.assertIsNotNone(info)
+        if info is not None:
+            self.assertEqual(self.uid, info["username"])
+            self.assertEqual(self.email, info["email"])
+            self.assertEqual(self.email_verified, info["email_verified"])
+            self.assertEqual(self.picture, info["photo_url"])
+            self.assertEqual(self.name, info["display_name"])
+            self.assertEqual(self.sign_in_provider, info["provider"])
 
 
 class CRUDTest(TestCase):

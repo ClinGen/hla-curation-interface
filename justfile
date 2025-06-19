@@ -14,48 +14,56 @@
 set dotenv-load := true
 
 #=====================================================================
+# Pre-Commit Recipe
+#=====================================================================
+
+# Runs all checks and tests. -----------------------------------------
+pre-commit: src-all test-all infra-all
+alias pre := pre-commit
+
+#=====================================================================
 # Continuous Integration Recipe
 #=====================================================================
 
 # Run all checks and tests that are run in CI. -----------------------
-continuous-integration: qual-src-format-check qual-src-lint django-check test-all
+continuous-integration: py-format-check js-format-check py-lint js-lint py-type-check django-check django-collectstatic test-all
 alias ci := continuous-integration
 
 #=====================================================================
-# Source Code Quality Recipes
+# Python Recipes
 #=====================================================================
 
-# Run all source code quality checks. --------------------------------
-qual-src-all: qual-src-format-check qual-src-lint qual-src-type-check
-alias qsal := qual-src-all
+# Run all Python code quality checks. --------------------------------
+py-all: py-format-check py-lint py-type-check
+alias pyal := py-all
 
-# Format the source code. --------------------------------------------
-qual-src-format:
+# Format the Python code. --------------------------------------------
+py-format:
     uv run ruff format
-alias qsfm := qual-src-format
+alias pyfm := py-format
 
-# Check the source code for formatting issues. -----------------------
-qual-src-format-check:
+# Check the Python code for formatting issues. -----------------------
+py-format-check:
     uv run ruff format --check
-alias qsfc := qual-src-format-check
+alias pyfc := py-format-check
 
-# Check the source code for lint errors. -----------------------------
-qual-src-lint:
+# Check the Python code for lint errors. -----------------------------
+py-lint:
     uv run ruff check
-alias qslt := qual-src-lint
+alias pylt := py-lint
 
-# Try to fix lint errors in the source code. -------------------------
-qual-src-lint-fix:
+# Try to fix lint errors in the Python code. -------------------------
+py-lint-fix:
     uv run ruff check --fix
-alias qslf := qual-src-lint-fix
+alias pylf := py-lint-fix
 
 # Check Python type hints. -------------------------------------------
-qual-src-type-check:
+py-type-check:
     cd src && uv run mypy .
-alias qstc := qual-src-type-check
+alias pytc := py-type-check
 
 #=====================================================================
-# JavaScript Code Recipes
+# JavaScript Recipes
 #=====================================================================
 
 # Run all JavaScript checks. -----------------------------------------
@@ -86,6 +94,38 @@ alias jslf := js-lint-fix
 js-build:
     bun build.js
 alias jsbl := js-build
+
+#=====================================================================
+# Combined Source Code Recipes
+#=====================================================================
+
+# Run all source code checks. ----------------------------------------
+src-all: src-format-check src-lint src-type-check src-build
+alias sal := src-all
+
+# Format the source code. --------------------------------------------
+src-format: py-format js-format
+alias sfm := src-format
+
+# Check the source code for formatting issues. -----------------------
+src-format-check: py-format-check js-format-check
+alias sfc := src-format-check
+
+# Check the source code for lint errors. -----------------------------
+src-lint: py-lint js-lint
+alias slt := src-lint
+
+# Try to fix lint errors in the source code. -------------------------
+src-lint-fix: py-lint-fix js-lint-fix
+alias slf := src-lint-fix
+
+# Check source code types. -------------------------------------------
+src-type-check: py-type-check
+alias stc := src-type-check
+
+# Run source code build steps. ---------------------------------------
+src-build: js-build
+alias sbl := src-build
 
 #=====================================================================
 # Test Recipes
@@ -129,7 +169,7 @@ coverage-open-html:
     open src/coverage/index.html
 alias coh := coverage-open-html
 
-# Clean test coverage artifacts. -------------------------------------
+# Remove test coverage artifacts. ------------------------------------
 coverage-clean:
     cd src && rm -rf coverage*
 alias ccl := coverage-clean
@@ -187,41 +227,96 @@ docs-open-html:
     open docs/build/index.html
 alias doh := docs-open-html
 
+# Remove the built documentation directory. --------------------------
 docs-clean:
     rm -rf docs/build/
 alias dcl := docs-clean
 
 #=====================================================================
-# Infrastructure Code Quality Recipes
+# Terraform Recipes
 #=====================================================================
 
-# Run all infrastructure code quality checks. ------------------------
-qual-infra-all: qual-infra-format-check qual-infra-lint
-alias qial := qual-infra-all
-
-# Format the infrastructure code. ------------------------------------
-qual-infra-format:
+# Format the Terraform code. -----------------------------------------
+terraform-format:
     cd infra/terraform && terraform fmt
-    yamlfmt
-alias qifm := qual-infra-format
+alias tffm := terraform-format
 
-# Check the infrastructure code for formatting issues. ---------------
-qual-infra-format-check:
+# Check the Terraform code for formatting issues. --------------------
+terraform-format-check:
     cd infra/terraform && terraform fmt -check
-    yamlfmt -lint
-alias qifc := qual-infra-format-check
+alias tffc := terraform-format-check
 
-# Check the infrastructure code for lint errors. ---------------------
-qual-infra-lint:
+# Check the Terraform code for lint errors. --------------------------
+terraform-lint:
     cd infra/terraform && terraform validate
-    cd infra/ansible && ansible-lint
-    cd .github && uv run yamllint .
-alias qilt := qual-infra-lint
+alias tflt := terraform-lint
 
-# Try to fix lint errors in the infrastructure code. -----------------
-qual-infra-lint-fix:
+#=====================================================================
+# Ansible Recipes
+#=====================================================================
+
+# Format the Ansible YAML. -------------------------------------------
+ansible-format:
+    cd infra/ansible && yamlfmt
+alias anfm := ansible-format
+
+# Check the Ansible YAML for formatting issues. ----------------------
+ansible-format-check:
+    cd infra/ansible && yamlfmt -lint
+alias anfc := ansible-format-check
+
+# Check the Ansible YAML for lint errors. ----------------------------
+ansible-lint:
+    cd infra/ansible && ansible-lint
+alias anlt := ansible-lint
+
+# Try to fix lint errors in the Ansible YAML. ------------------------
+ansible-lint-fix:
     cd infra/ansible && ansible-lint --fix
-alias qilf := qual-infra-lint-fix
+alias anlf := ansible-lint-fix
+
+#=====================================================================
+# GitHub Actions Recipes
+#=====================================================================
+
+# Format the GitHub Actions YAML. ------------------------------------
+gh-actions-format:
+    cd .github && yamlfmt
+alias ghfm := gh-actions-format
+
+# Check the GitHub Actions YAML for formatting issues. ---------------
+gh-actions-format-check:
+    cd .github && yamlfmt -lint
+alias ghfc := gh-actions-format-check
+
+# Check the GitHub Actions YAML for lint errrors. --------------------
+gh-actions-lint:
+    cd .github && uv run yamllint .
+alias ghlt := gh-actions-lint
+
+#=====================================================================
+# Combined Infrastructure as Code Recipes
+#=====================================================================
+
+# Run all infra code quality checks. ---------------------------------
+infra-all: infra-format-check infra-lint
+alias ial := infra-all
+
+# Format the infra code. ---------------------------------------------
+infra-format: terraform-format ansible-format gh-actions-format
+alias ifm := infra-format
+
+# Check the infra code for formatting issues. ------------------------
+infra-format-check: terraform-format-check ansible-format-check gh-actions-format-check
+alias ifc := infra-format-check
+
+# Check the infra code for lint errors. ------------------------------
+infra-lint: terraform-lint ansible-lint gh-actions-lint
+alias ilt := infra-lint
+
+# Try to fix lint errors in infra code. ------------------------------
+infra-lint-fix: ansible-lint-fix
+alias ilf := infra-lint-fix
 
 #=====================================================================
 # Server Recipes

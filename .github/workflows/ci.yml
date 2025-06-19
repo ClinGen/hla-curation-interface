@@ -15,7 +15,7 @@ jobs:
       - uses: "./.github/actions/install-python-dependencies"
       - uses: "extractions/setup-just@v3"
       - name: "Make sure the Python code is properly formatted"
-        run: "just qual-src-format-check"
+        run: "just py-format-check"
   check_2_javascript_code_is_formatted:
     runs-on: "ubuntu-latest"
     steps:
@@ -31,7 +31,7 @@ jobs:
       - uses: "./.github/actions/install-python-dependencies"
       - uses: "extractions/setup-just@v3"
       - name: "Make sure the Python code is free of lint errors"
-        run: "just qual-src-lint"
+        run: "just py-lint"
   check_4_javascript_code_is_linted:
     runs-on: "ubuntu-latest"
     steps:
@@ -47,7 +47,7 @@ jobs:
       - uses: "./.github/actions/install-python-dependencies"
       - uses: "extractions/setup-just@v3"
       - name: "Make sure the Python code's type hints are correct"
-        run: "just qual-src-type-check"
+        run: "just py-type-check"
   check_6_django_check_passes:
     runs-on: "ubuntu-latest"
     env:

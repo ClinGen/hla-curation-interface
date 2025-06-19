@@ -46,12 +46,12 @@ terraform {
   }
   // This is the S3 bucket where the Terraform state file will be stored.
   backend "s3" {
-    bucket  = "stanford-infra"
-    key     = "hci/terraform.tfstate"
-    profile = "stanford-clingen-projects"
-    region  = "us-west-2"
+    bucket         = "stanford-infra"
+    key            = "hci/terraform.tfstate"
+    profile        = "stanford-clingen-projects"
+    region         = "us-west-2"
     dynamodb_table = "hci_terraform_lock" // We store the lock file in a DynamoDB table.
-    encrypt = true
+    encrypt        = true
   }
 
   required_version = ">= 1.2.0"
