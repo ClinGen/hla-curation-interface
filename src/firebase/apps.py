@@ -1,5 +1,6 @@
 """Provides the configuration for the firebase app."""
 
+import os
 from pathlib import Path
 
 import firebase_admin
@@ -16,6 +17,9 @@ class FirebaseConfig(AppConfig):
 
     def ready(self) -> None:
         """Sets up the Firebase Admin SDK."""
+        if os.getenv("CI"):
+            # Don't do Firebase stuff in CI.
+            return
         service_account_key_path = Path(BASE_DIR / "firebase-account-key.json")
         if not firebase_admin._apps:  # noqa: SLF001 (Avoid initializing multiple times in development.)
             cred = credentials.Certificate(service_account_key_path)
