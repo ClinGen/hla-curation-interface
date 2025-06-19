@@ -17,8 +17,7 @@ class FirebaseConfig(AppConfig):
 
     def ready(self) -> None:
         """Sets up the Firebase Admin SDK."""
-        if os.getenv("CI"):
-            # Don't do Firebase stuff in CI.
+        if os.getenv("CI") or os.getenv("READTHEDOCS"):
             return
         service_account_key_path = Path(BASE_DIR / "firebase-account-key.json")
         if not firebase_admin._apps:  # noqa: SLF001 (Avoid initializing multiple times in development.)
