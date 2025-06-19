@@ -12,5 +12,6 @@ inventory.ini
 __pycache__/
 build/
 coverage/
+logs/
 node_modules/
 public/
