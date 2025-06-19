@@ -1,6 +1,6 @@
 {% for message in get_messages(request) %}
     {% if "debug" in message.tags %}
-        <div class="block">
+        <div class="block mt-4">
             <article class="message">
                 <div class="message-header">
                     {% set icon_name="bug" %}
@@ -13,7 +13,7 @@
             </article>
         </div>
     {% elif "info" in message.tags %}
-        <div class="block">
+        <div class="block mt-4">
             <article class="message is-info">
                 <div class="message-header">
                     {% set icon_name="info-square" %}
@@ -26,7 +26,7 @@
             </article>
         </div>
     {% elif "success" in message.tags %}
-        <div class="block">
+        <div class="block mt-4">
             <article class="message is-success">
                 <div class="message-header">
                     {% set icon_name="star" %}
@@ -39,7 +39,7 @@
             </article>
         </div>
     {% elif "warning" in message.tags %}
-        <div class="block">
+        <div class="block mt-4">
             <article class="message is-warning">
                 <div class="message-header">
                     {% set icon_name="exclamation-triangle" %}
@@ -52,7 +52,7 @@
             </article>
         </div>
     {% elif "error" in message.tags %}
-        <div class="block">
+        <div class="block mt-4">
             <article class="message is-danger">
                 <div class="message-header">
                     {% set icon_name="exclamation-octagon" %}

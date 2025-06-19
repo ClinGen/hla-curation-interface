@@ -11,6 +11,10 @@ function _displayMessage(class_, title, body, icon) {
   const container = document.getElementById("message-container");
 
   if (container) {
+    const articleDiv = document.createElement("div");
+    articleDiv.classList.add("block");
+    articleDiv.classList.add("mt-4");
+
     const article = document.createElement("article");
     article.classList.add("message");
     article.classList.add(`is-${class_}`);
@@ -44,7 +48,9 @@ function _displayMessage(class_, title, body, icon) {
     article.appendChild(headerDiv);
     article.appendChild(bodyDiv);
 
-    container.appendChild(article);
+    articleDiv.appendChild(article);
+
+    container.appendChild(articleDiv);
   }
 }
 
