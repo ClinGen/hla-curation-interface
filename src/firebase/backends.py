@@ -1,6 +1,5 @@
 """Provides authentication backends for the firebase app."""
 
-import logging
 from typing import Any
 
 from django.contrib.auth.backends import BaseBackend
@@ -10,8 +9,6 @@ from django.http import HttpRequest
 from core.crud import create_user_profile, update_user_profile
 from firebase.clients import get_token_info
 from firebase.crud import create_firebase_user, read_firebase_user, update_firebase_user
-
-logger = logging.getLogger(__name__)
 
 
 class FirebaseBackend(BaseBackend):
