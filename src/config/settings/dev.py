@@ -1,4 +1,4 @@
-"""Provide development settings."""
+"""Provides development settings."""
 
 from django.contrib import messages
 
