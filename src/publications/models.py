@@ -1,7 +1,16 @@
 """Houses database models for the publications app."""
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
+
+
+class PublicationTypes:
+    """Defines the publication type codes."""
+
+    PUBMED = "PUB"
+    BIORXIV = "BIO"
+    MEDRXIV = "MED"
 
 
 class Publication(models.Model):
@@ -12,7 +21,11 @@ class Publication(models.Model):
         default="",
         max_length=3,
         verbose_name="Publication Type",
-        help_text="One of: 'PUB' (PubMed), 'BIO' (bioRxiv), or 'MED' (medRxiv).",
+        help_text=(
+            f"One of: '{PublicationTypes.PUBMED}' (PubMed), "
+            f"'{PublicationTypes.BIORXIV}' (bioRxiv), or "
+            f"'{PublicationTypes.MEDRXIV}' (medRxiv)."
+        ),
     )
     doi = models.CharField(
         blank=False,
@@ -28,7 +41,10 @@ class Publication(models.Model):
         max_length=16,
         unique=True,
         verbose_name="PubMed ID",
-        help_text="The PubMed ID for the publication, e.g., 11910336.",
+        help_text=(
+            "The PubMed ID for the publication, e.g., 11910336. "
+            "(Required for PubMed articles.)"
+        ),
     )
     title = models.CharField(
         blank=True,
@@ -63,3 +79,16 @@ class Publication(models.Model):
     def __str__(self) -> str:
         """Returns a string representation of the publication."""
         return f"{self.publication_type}/{self.doi}"
+
+    def clean(self) -> None:
+        """Makes sure PubMed articles have PubMed IDs.
+
+        Raises:
+            ValidationError: When the publication is a PubMed article and a PubMed ID
+                             wasn't supplied.
+        """
+        super().clean()
+        if self.publication_type == PublicationTypes.PUBMED and not self.pubmed_id:
+            raise ValidationError(
+                {"pubmed_id": "The PubMed ID is required for PubMed articles."}
+            )
