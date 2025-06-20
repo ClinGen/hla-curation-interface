@@ -27,7 +27,7 @@ How does authentication with Firebase work?
 At a high level, here's what happens:
 
 * The user navigates to the login page.
-* The user clicks the "Sign in with Google" button or logs in with their email and
+* The user clicks the "Log In With Google" button or logs in with their email and
   password.
 * On the frontend, JavaScript is used to get a token [#f1]_ from Firebase.
 * On the frontend, JavaScript is used to send the token to the backend.
