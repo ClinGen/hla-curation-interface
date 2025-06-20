@@ -28,12 +28,11 @@ jobs:
           uv run ansible-playbook \
             -i "${{ secrets.TEST_SERVER_IP }}," \
             playbooks/deploy.yml \
-            --limit test_server \
             -e "ansible_ssh_private_key_file=~/.ssh/hci_ansible_test_ed25519" \
             -e "ansible_user=${{ secrets.TEST_SERVER_ANSIBLE_USER }}" \
             -e "repo_url=https://github.com/ClinGen/hla-curation-interface" \
             -e "repo_dir=${{ secrets.TEST_SERVER_REPO_DIR }}" \
-            -e "repo_branch=main" \
+            -e "repo_branch=${{ github.ref }}" \
             -e "subdomain=hci-test"
   deploy_to_prod:
     runs-on: ubuntu-latest

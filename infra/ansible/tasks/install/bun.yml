@@ -1,0 +1,13 @@
+- name: Ensure unzip is installed for Bun
+  ansible.builtin.package:
+    name: unzip
+    state: present
+  become: true
+- name: Ensure Bun is installed
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      curl -fsSL https://bun.sh/install | bash
+  args:
+    creates: "{{ ansible_env.HOME }}/.bun/bin/bun"
+  become: false

@@ -18,9 +18,11 @@ jobs:
     steps:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"
+      - uses: "./.github/actions/install-javascript-dependencies"
       - uses: "extractions/setup-just@v3"
       - name: "Collect test coverage and generate test coverage report"
         run: |
+          just js-build
           just django-collectstatic
           just coverage-collect
           just coverage-xml

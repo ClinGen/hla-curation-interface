@@ -20,8 +20,10 @@ The HCI is maintained by the Stanford contingent of
 ## Getting Started
 
 - Install [uv](https://github.com/astral-sh/uv).
+- Install [Bun](https://bun.sh).
+- Install JavaScript dependencies: `bun install`.
 - Clone the repository.
-- Install dependencies: `uv sync`.
+- Install Python dependencies: `uv sync`.
 - Install [just](https://github.com/casey/just).
 - Create and populate a `.env` file in the root of the repository.
 - Run the development server: `just django-runserver`.

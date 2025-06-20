@@ -1,26 +1,33 @@
-"""Provide development settings."""
+"""Provides development settings."""
 
-from .base import (  # noqa: F401 (We don't care about unused imports in this context.)
-    AUTH_PASSWORD_VALIDATORS,
-    BASE_DIR,
-    DATABASES,
-    DEFAULT_AUTO_FIELD,
-    INSTALLED_APPS,
-    LANGUAGE_CODE,
-    MIDDLEWARE,
-    ROOT_URLCONF,
-    SECRET_KEY,
-    STATIC_ROOT,
-    STATIC_URL,
-    STATICFILES_DIRS,
-    STORAGES,
-    TEMPLATES,
-    TIME_ZONE,
-    USE_I18N,
-    USE_TZ,
-    WSGI_APPLICATION,
-)
+from django.contrib import messages
+
+from .base import *  # noqa: F403 (We want to import everything.)
 
 DEBUG = True
 
 ALLOWED_HOSTS: list[str] = []
+
+MESSAGE_LEVEL = messages.DEBUG
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "DEBUG",
+    },
+}

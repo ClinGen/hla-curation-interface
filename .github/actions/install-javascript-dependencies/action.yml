@@ -1,0 +1,11 @@
+---
+name: "Install JavaScript dependencies"
+description: "Use Bun to install JavaScript dependencies for the project"
+runs:
+  using: "composite"
+  steps:
+    - name: "Install Bun"
+      uses: "oven-sh/setup-bun@v2"
+    - name: "Install JavaScript dependencies"
+      shell: "bash"
+      run: "bun install"

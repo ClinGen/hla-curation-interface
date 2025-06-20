@@ -8,23 +8,47 @@ on:
     branches:
       - "main"
 jobs:
-  check_1_source_code_is_formatted:
+  check_1_python_code_is_formatted:
     runs-on: "ubuntu-latest"
     steps:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"
       - uses: "extractions/setup-just@v3"
-      - name: "Make sure the code is properly formatted"
-        run: "just qual-src-format-check"
-  check_2_source_code_is_linted:
+      - name: "Make sure the Python code is properly formatted"
+        run: "just py-format-check"
+  check_2_javascript_code_is_formatted:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "./.github/actions/install-javascript-dependencies"
+      - uses: "extractions/setup-just@v3"
+      - name: "Make sure the JavaScript code is properly formatted"
+        run: "just js-format-check"
+  check_3_python_code_is_linted:
     runs-on: "ubuntu-latest"
     steps:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"
       - uses: "extractions/setup-just@v3"
-      - name: "Make sure the code is free of lint errors"
-        run: "just qual-src-lint"
-  check_3_django_check_passes:
+      - name: "Make sure the Python code is free of lint errors"
+        run: "just py-lint"
+  check_4_javascript_code_is_linted:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "./.github/actions/install-javascript-dependencies"
+      - uses: "extractions/setup-just@v3"
+      - name: "Make sure the JavaScript code is free of lint errors"
+        run: "just js-lint"
+  check_5_python_type_check_passes:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "./.github/actions/install-python-dependencies"
+      - uses: "extractions/setup-just@v3"
+      - name: "Make sure the Python code's type hints are correct"
+        run: "just py-type-check"
+  check_6_django_check_passes:
     runs-on: "ubuntu-latest"
     env:
       DJANGO_SETTINGS_MODULE: "config.settings.prod"
@@ -37,7 +61,7 @@ jobs:
       - uses: "extractions/setup-just@v3"
       - name: "Run the Django check utility"
         run: "just django-check"
-  check_4_tests_pass:
+  check_7_tests_pass:
     runs-on: "ubuntu-latest"
     env:
       DJANGO_SETTINGS_MODULE: "config.settings.prod"
@@ -47,6 +71,7 @@ jobs:
     steps:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"
+      - uses: "./.github/actions/install-javascript-dependencies"
       - uses: "extractions/setup-just@v3"
       - name: "Run the test suite"
         run: "just django-collectstatic && just test-all"

@@ -1,0 +1,82 @@
+{% extends "layouts/base.html" %}
+{% block title %}Edit Profile{% endblock %}
+{% block description %}Edit your user profile in the HLA Curation Interface.{% endblock %}
+{% block main %}
+    <div class="block mt-6 mb-6">
+        <h1 class="title">Edit User Profile</h1>
+        <nav class="level">
+            <div class="level-left">
+                {% if user_profile.firebase_photo_url %}
+                    <div class="level-item">
+                        <figure class="image is-32x32">
+                            <img class="is-rounded" src="{{ user_profile.firebase_photo_url }}" alt="User photo.">
+                        </figure>
+                    </div>
+                {% endif %}
+                <div class="level-left">
+                    <h2 class="subtitle">{{ request.user.email }}</h2>
+                </div>
+            </div>
+        </nav>
+        <div class="block">
+            <div class="field is-grouped">
+                <div class="control">
+                    <button class="button is-link is-small" id="save-profile-button">Save</button>
+                </div>
+                <div class="control">
+                    <a href="{{ url('view-profile') }}"
+                       hx-boost="true"
+                       class="button is-link is-light is-small"
+                    >
+                        Cancel
+                    </a>
+                </div>
+            </div>
+        </div>
+        <table class="table">
+            <tbody>
+                <tr>
+                    {% include "firebase/partials/profile/email.html" %}
+                </tr>
+                <tr>
+                    <td>Display Name</td>
+                    <td>
+                        <div class="field">
+                            <div class="control">
+                                <input class="input is-small"
+                                       type="text"
+                                       id="display-name-input"
+                                        {% if user_profile.firebase_display_name %}
+                                            value="{{ user_profile.firebase_display_name }}"
+                                        {% endif %}
+                                >
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Profile Picture URL</td>
+                    <td>
+                        <div class="field">
+                            <div class="control">
+                                <input class="input is-small"
+                                       type="text"
+                                       id="photo-url-input"
+                                       {% if user_profile.firebase_photo_url %}
+                                            value="{{ user_profile.firebase_photo_url }}"
+                                       {% endif %}
+                                >
+                                <p class="help is-success">A publicly accessible URL, e.g., https://upload.wikimedia.org/image.jpg.</p>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        {% if user_profile.firebase_sign_in_provider == "password" %}
+            <div class="block">
+                <button id="reset-password-button" class="button is-small">Reset Password</button>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

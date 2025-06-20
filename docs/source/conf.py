@@ -1,5 +1,8 @@
+import os
 import sys
 from pathlib import Path
+
+import django
 
 sys.path.insert(0, str(Path("..", "..", "src").resolve()))
 
@@ -8,6 +11,9 @@ copyright = "Clinical Genome Resource"
 author = "The Stanford ClinGen Team"
 release = "0.1"
 version = "0.1.0"
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.dev")
+django.setup()
 
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon"]
 

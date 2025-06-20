@@ -1,0 +1,13 @@
+{
+  "name": "hla-curation-interface",
+  "type": "module",
+  "dependencies": {
+    "bootstrap-icons": "^1.13.1",
+    "bulma": "^1.0.4",
+    "firebase": "^11.8.1",
+    "htmx.org": "^2.0.4"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4"
+  }
+}

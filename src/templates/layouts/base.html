@@ -5,14 +5,16 @@
     <meta name="description" content="{% block description %}{% endblock %}">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
-    <link rel="stylesheet" href="{{ static('hci/css/bulma.css') }}">
-    <link rel="stylesheet" href="{{ static('hci/css/custom.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ static('hci/css/bulma.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ static('hci/css/custom.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ static('hci/css/bootstrap-icons.css') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ static('hci/img/apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ static('hci/img/favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ static('hci/img/favicon-16x16.png') }}">
     <link rel="icon" type="image/x-icon" href="{{ static('hci/img/favicon.ico') }}">
     <link rel="manifest" href="{{ static('hci/site.webmanifest') }}">
     <script src="{{ static('hci/js/htmx.js') }}"></script>
+    <script src="{{ static('hci/js/firebase.js') }}"></script>
 </head>
 <body>
 <header>
@@ -22,6 +24,9 @@
 </header>
 <main>
     <div class="container">
+        <div id="message-container">
+            {% include "partials/messages.html" %}
+        </div>
         {% block main %}{% endblock %}
     </div>
 </main>

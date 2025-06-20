@@ -26,7 +26,12 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "core",
+    "firebase",
 ]
+
+# This needs to be set to "same-origin-allow-popups" for logging in with Google and
+# Microsoft via Firebase to work.
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -43,7 +48,17 @@ ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
+        "BACKEND": "django.template.backends.jinja2.Jinja2",
+        "DIRS": [
+            BASE_DIR / "templates",
+            BASE_DIR / "core" / "templates",
+            BASE_DIR / "firebase" / "templates",
+        ],
+        "OPTIONS": {"environment": "config.templates.environment"},
+    },
+    {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
@@ -51,14 +66,6 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
             ],
         },
-    },
-    {
-        "BACKEND": "django.template.backends.jinja2.Jinja2",
-        "DIRS": [
-            BASE_DIR / "templates",
-            BASE_DIR / "core" / "templates",
-        ],
-        "OPTIONS": {"environment": "config.templates.environment"},
     },
 ]
 
@@ -84,6 +91,11 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
+]
+
+AUTHENTICATION_BACKENDS = [
+    "firebase.backends.FirebaseBackend",
+    "django.contrib.auth.backends.ModelBackend",
 ]
 
 LANGUAGE_CODE = "en-us"

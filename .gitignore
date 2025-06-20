@@ -1,12 +1,17 @@
 *.db
 .env
 coverage.xml
+firebase-account-key.json
 inventory.ini
 
 .ansible/
+.mypy_cache/
+.ruff_cache/
 .terraform/
 .venv/
 __pycache__/
 build/
 coverage/
+logs/
+node_modules/
 public/

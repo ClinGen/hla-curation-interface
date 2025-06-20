@@ -1,6 +1,10 @@
+.logo-container {
+  padding: 20px;
+}
+
 @media (prefers-color-scheme: dark) {
-    .logo-container {
-        background-color: black;
-        padding: 20px;
-    }
+  .logo-container {
+    background-color: black;
+    padding: 20px;
+  }
 }
