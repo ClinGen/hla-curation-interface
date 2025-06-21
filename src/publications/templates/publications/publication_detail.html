@@ -1,0 +1,63 @@
+{% extends "layouts/base.html" %}
+{% block title %}Publication {{ object.pk }} Details{% endblock %}
+{% block description %}View information about publication {{ object.pk }}.{% endblock %}
+{% block main %}
+    <div class="box mt-6 mb-6">
+        <div class="level">
+            <div class="level-left">
+                <h1 class="title">Publication Details</h1>
+            </div>
+            <div class="level-right">
+                <span class="tag is-medium">{{ object.get_publication_type_display }}</span>
+            </div>
+        </div>
+
+        <h2 class="subtitle"><i>{{ object.title }}</i></h2>
+
+        <div class="block table-container">
+            <table class="table">
+                <tbody>
+                <tr>
+                    <td>Primary Author</td>
+                    <td>{{ object.author }}</td>
+                </tr>
+                {% if object.pubmed_id %}
+                    <tr>
+                        <td>PubMed ID</td>
+                        <td>
+                            <a href="https://pubmed.ncbi.nlm.nih.gov/{{ object.pubmed_id }}/" target="_blank" rel="noopener">
+                                {{ object.pubmed_id }}
+                                {% include "partials/icon.html" with icon_name="box-arrow-up-right" %}
+                            </a>
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if object.doi %}
+                    <tr>
+                        <td>Digital Object Identifier</td>
+                        <td>
+                            <a href="https://doi.org/{{ object.doi }}" target="_blank" rel="noopener">
+                                {{ object.doi }}
+                                {% include "partials/icon.html" with icon_name="box-arrow-up-right" %}
+                            </a>
+                        </td>
+                    </tr>
+                {% endif %}
+                <td>Added</td>
+                <td>{{ object.added_at|date:"Y-m-d" }}</td>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="buttons">
+            <a href="{% url 'publication-create' %}" class="button">
+                {% include "partials/icon.html" with icon_name="plus-circle" %}
+                Add Another Publication
+            </a>
+            <a href="#" class="button">
+                {% include "partials/icon.html" with icon_name="book" %}
+                View All Publications
+            </a>
+        </div>
+    </div>
+{% endblock %}

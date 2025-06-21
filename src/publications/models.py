@@ -3,6 +3,8 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.http import HttpResponseBase
+from django.urls import reverse
 
 
 class PublicationTypes:
@@ -13,12 +15,20 @@ class PublicationTypes:
     MEDRXIV = "MED"
 
 
+PUBLICATION_TYPE_CHOICES = {
+    PublicationTypes.PUBMED: "PubMed Article",
+    PublicationTypes.BIORXIV: "bioRxiv Paper",
+    PublicationTypes.MEDRXIV: "medRxiv Paper",
+}
+
+
 class Publication(models.Model):
     """Contains information about a publication that has been added to the HCI."""
 
     publication_type = models.CharField(
         blank=False,
-        default="",
+        choices=PUBLICATION_TYPE_CHOICES,
+        default=PublicationTypes.PUBMED,
         max_length=3,
         verbose_name="Publication Type",
         help_text=(
@@ -26,14 +36,6 @@ class Publication(models.Model):
             f"'{PublicationTypes.BIORXIV}' (bioRxiv), or "
             f"'{PublicationTypes.MEDRXIV}' (medRxiv)."
         ),
-    )
-    doi = models.CharField(
-        blank=False,
-        default="",
-        max_length=128,
-        unique=True,
-        verbose_name="Digital Object Identifier (DOI)",
-        help_text="The DOI for the publication, e.g., 10.1000/182.",
     )
     pubmed_id = models.CharField(
         blank=True,
@@ -44,6 +46,17 @@ class Publication(models.Model):
         help_text=(
             "The PubMed ID for the publication, e.g., 11910336. "
             "(Required for PubMed articles.)"
+        ),
+    )
+    doi = models.CharField(
+        blank=False,
+        default="",
+        max_length=128,
+        unique=True,
+        verbose_name="Digital Object Identifier (DOI)",
+        help_text=(
+            "The DOI for the publication, e.g., 10.1000/182. "
+            "(Optional for PubMed articles.)"
         ),
     )
     title = models.CharField(
@@ -85,6 +98,10 @@ class Publication(models.Model):
     def __str__(self) -> str:
         """Returns a string representation of the publication."""
         return f"{self.publication_type}/{self.doi}"
+
+    def get_absolute_url(self) -> HttpResponseBase | str | None:
+        """Returns the details page for a specific publication."""
+        return reverse("publication-detail", kwargs={"pk": self.pk})
 
     def clean(self) -> None:
         """Makes sure PubMed articles have PubMed IDs.
