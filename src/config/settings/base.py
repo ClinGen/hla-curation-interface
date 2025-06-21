@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "core",
     "firebase",
+    "publications",
 ]
 
 # This needs to be set to "same-origin-allow-popups" for logging in with Google and

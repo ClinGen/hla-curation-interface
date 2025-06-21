@@ -66,8 +66,14 @@ class Publication(models.Model):
         null=True,
         on_delete=models.SET_NULL,
         related_name="publications_added",
+        verbose_name="Added By",
+        help_text="The user who added the publication.",
     )
-    added_at = models.DateTimeField(auto_now_add=True)
+    added_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Added At",
+        help_text="When the publication was added.",
+    )
 
     class Meta:
         """Provides metadata."""
