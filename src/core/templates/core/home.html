@@ -6,8 +6,8 @@
         <section class="hero is-light">
             <div class="hero-body">
                 <p class="title">HLA Curation Interface</p>
-                {% if request.user.is_authenticated %}
-                    <p class="subtitle">You are logged in as {{ request.user.email }}.</p>
+                {% if user.is_authenticated %}
+                    <p class="subtitle">You are logged in as {{ user.email }}.</p>
                 {% else %}
                     <p class="subtitle">You are not logged in.</p>
                 {% endif %}

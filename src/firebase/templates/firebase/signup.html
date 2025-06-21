@@ -30,15 +30,17 @@
                     <div class="has-text-centered">
                         <div class="block">
                             <button id="signup-with-google-button" class="button">
-                                {% set icon_name="google" %}
-                                {% include "partials/icon.html" %}
+                                {% with icon_name="google" %}
+                                    {% include "partials/icon.html" %}
+                                {% endwith %}
                                 Sign Up With Google
                             </button>
                         </div>
                         <div class="block">
                             <button id="signup-with-microsoft-button" class="button">
-                                {% set icon_name="microsoft" %}
-                                {% include "partials/icon.html" %}
+                                {% with icon_name="microsoft" %}
+                                    {% include "partials/icon.html" %}
+                                {% endwith %}
                                 Sign Up With Microsoft
                             </button>
                         </div>

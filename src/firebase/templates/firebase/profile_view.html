@@ -19,12 +19,13 @@
             </div>
         </nav>
         <div class="block">
-            <a href="{{ url('edit-profile') }}"
+            <a href="{% url 'edit-profile' %}"
                hx-boost="true"
                class="button is-small"
             >
-                {% set icon_name="pencil" %}
-                {% include "partials/icon.html" %}
+                {% with icon_name="pencil" %}
+                    {% include "partials/icon.html" %}
+                {% endwith %}
                 Edit
             </a>
         </div>
@@ -42,8 +43,9 @@
                     {% else %}
                         <td>
                             <span class="has-text-warning">
-                                {% set icon_name="exclamation-triangle" %}
-                                {% include "partials/icon.html" %}
+                                {% with icon_name="exclamation-triangle" %}
+                                    {% include "partials/icon.html" %}
+                                {% endwith %}
                                 (Display name isn't set.)
                             </span>
                         </td>
@@ -58,8 +60,9 @@
                     {% else %}
                         <td>
                             <span class="has-text-warning">
-                                {% set icon_name="exclamation-triangle" %}
-                                {% include "partials/icon.html" %}
+                                {% with icon_name="exclamation-triangle" %}
+                                    {% include "partials/icon.html" %}
+                                {% endwith %}
                                 (Profile picture URL isn't set.)
                             </span>
                         </td>
