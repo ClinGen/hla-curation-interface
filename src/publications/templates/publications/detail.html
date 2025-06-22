@@ -27,7 +27,7 @@
                         <td>
                             <a href="https://pubmed.ncbi.nlm.nih.gov/{{ object.pubmed_id }}/" target="_blank" rel="noopener">
                                 {{ object.pubmed_id }}
-                                {% include "partials/icon.html" with icon_name="box-arrow-up-right" %}
+                                {% include "common/icon.html" with icon_name="box-arrow-up-right" %}
                             </a>
                         </td>
                     </tr>
@@ -38,7 +38,7 @@
                         <td>
                             <a href="https://doi.org/{{ object.doi }}" target="_blank" rel="noopener">
                                 {{ object.doi }}
-                                {% include "partials/icon.html" with icon_name="box-arrow-up-right" %}
+                                {% include "common/icon.html" with icon_name="box-arrow-up-right" %}
                             </a>
                         </td>
                     </tr>
@@ -51,11 +51,11 @@
 
         <div class="buttons">
             <a href="{% url 'publication-create' %}" class="button">
-                {% include "partials/icon.html" with icon_name="plus-circle" %}
+                {% include "common/icon.html" with icon_name="plus-circle" %}
                 Add Another Publication
             </a>
             <a href="{% url 'publication-list' %}" class="button">
-                {% include "partials/icon.html" with icon_name="book" %}
+                {% include "common/icon.html" with icon_name="book" %}
                 View All Publications
             </a>
         </div>

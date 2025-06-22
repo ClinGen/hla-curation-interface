@@ -4,7 +4,7 @@
             <article class="message">
                 <div class="message-header">
                     {% with icon_name="bug" %}
-                        <p>{% include "partials/icon.html" %}Debug</p>
+                        <p>{% include "common/icon.html" %}Debug</p>
                     {% endwith %}
                     <button hx-on-click="this.closest('.block').remove()" class="delete" aria-label="delete"></button>
                 </div>
@@ -18,7 +18,7 @@
             <article class="message is-info">
                 <div class="message-header">
                     {% with icon_name="info-square" %}
-                        <p>{% include "partials/icon.html" %}Info</p>
+                        <p>{% include "common/icon.html" %}Info</p>
                     {% endwith %}
                     <button hx-on-click="this.closest('.block').remove()" class="delete" aria-label="delete"></button>
                 </div>
@@ -32,7 +32,7 @@
             <article class="message is-success">
                 <div class="message-header">
                     {% with icon_name="star" %}
-                        <p>{% include "partials/icon.html" %}Success</p>
+                        <p>{% include "common/icon.html" %}Success</p>
                     {% endwith %}
                     <button hx-on-click="this.closest('.block').remove()" class="delete" aria-label="delete"></button>
                 </div>
@@ -46,7 +46,7 @@
             <article class="message is-warning">
                 <div class="message-header">
                     {% with icon_name="exclamation-triangle" %}
-                        <p>{% include "partials/icon.html" %}Warning</p>
+                        <p>{% include "common/icon.html" %}Warning</p>
                     {% endwith %}
                     <button hx-on-click="this.closest('.block').remove()" class="delete" aria-label="delete"></button>
                 </div>
@@ -60,7 +60,7 @@
             <article class="message is-danger">
                 <div class="message-header">
                     {% with icon_name="exclamation-octagon" %}
-                        <p>{% include "partials/icon.html" %}Error</p>
+                        <p>{% include "common/icon.html" %}Error</p>
                     {% endwith %}
                     <button hx-on-click="this.closest('.block').remove()" class="delete" aria-label="delete"></button>
                 </div>

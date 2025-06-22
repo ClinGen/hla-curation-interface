@@ -1,0 +1,9 @@
+<a href="{% url url %}"
+{% if request.resolver_match.view_name == url %}
+   class="navbar-item has-text-weight-bold"
+{% else %}
+   class="navbar-item"
+{% endif %}
+>
+    {{ text }}
+</a>

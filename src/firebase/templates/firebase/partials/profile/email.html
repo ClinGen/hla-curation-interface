@@ -3,7 +3,7 @@
     <td>
         <span class="has-text-success">
             {% with icon_name="check-circle" %}
-                {% include "partials/icon.html" %}
+                {% include "common/icon.html" %}
             {% endwith %}
             {{ user_profile.firebase_email_verified }}
         </span>
@@ -12,14 +12,14 @@
     <td>
         <span class="has-text-danger mr-3">
             {% with icon_name="x-circle" %}
-                {% include "partials/icon.html" %}
+                {% include "common/icon.html" %}
             {% endwith %}
             {{ user_profile.firebase_email_verified }}
         </span>
         <button id="resend-verification-email-button"
                 class="button is-small">
             {% with icon_name="envelope" %}
-                {% include "partials/icon.html" %}
+                {% include "common/icon.html" %}
             {% endwith %}
             Resend Verification Email
         </button>
