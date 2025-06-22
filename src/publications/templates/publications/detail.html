@@ -1,5 +1,5 @@
 {% extends "layouts/base.html" %}
-{% block title %}Publication {{ object.pk }} Details{% endblock %}
+{% block title %}Publication #{{ object.pk }} Details{% endblock %}
 {% block description %}View information about publication {{ object.pk }}.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
@@ -54,7 +54,7 @@
                 {% include "partials/icon.html" with icon_name="plus-circle" %}
                 Add Another Publication
             </a>
-            <a href="#" class="button">
+            <a href="{% url 'publication-list' %}" class="button">
                 {% include "partials/icon.html" with icon_name="book" %}
                 View All Publications
             </a>

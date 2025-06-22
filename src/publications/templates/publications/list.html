@@ -1,0 +1,30 @@
+{% extends "layouts/base.html" %}
+{% block title %}Publication List{% endblock %}
+{% block description %}View the list of publications in the HLA Curation Interface.{% endblock %}
+{% block main %}
+    <div class="box mt-6 mb-6">
+        <h1 class="title">All Publications</h1>
+        <table class="table is-fullwidth is-hoverable">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Publication Type</th>
+                <th>Author</th>
+                <th>Title</th>
+                <th>Added</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for pub in object_list %}
+                <tr>
+                    <td><a hx-boost="true" href="{% url 'publication-detail' pub.pk %}">#{{ pub.pk }}</a></td>
+                    <td>{{ pub.get_publication_type_display }}</td>
+                    <td>{{ pub.author }}</td>
+                    <td><i>{{ pub.title }}</i></td>
+                    <td>{{ pub.added_at|date:"Y-m-d" }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
