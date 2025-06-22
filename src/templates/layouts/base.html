@@ -1,6 +1,6 @@
 {% load static %}
 <!doctype html>
-<html lang="en" hx-headers='{"X-CSRF-TOKEN": "{% csrf_token %}"}'>
+<html lang="en" hx-headers='{"X-CSRF-TOKEN": "{{ csrf_token }}"}'>
 <head>
     <title>HCI | {% block title %}{% endblock %}</title>
     <meta name="description" content="{% block description %}{% endblock %}">
