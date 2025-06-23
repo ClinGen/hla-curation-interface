@@ -10,6 +10,7 @@
                 name="{{ field.param_name }}"
                 value="asc"
         >
+            {% include "common/icon.html" with icon_name="sort-down-alt" %}
             Sort Ascending
         </button>
     {% elif in_get and sort_dir == "asc" %}
@@ -19,6 +20,7 @@
                 name="{{ field.param_name }}"
                 value="desc"
         >
+            {% include "common/icon.html" with icon_name="sort-down" %}
             Sort Descending
         </button>
     {% elif in_get and sort_dir == "desc" %}
@@ -28,6 +30,7 @@
                 name="{{ field.param_name }}"
                 value="none"
         >
+            {% include "common/icon.html" with icon_name="arrow-counterclockwise" %}
             Sort Default
         </button>
     {% else %}
@@ -37,6 +40,7 @@
                 name="{{ field.param_name }}"
                 value="asc"
         >
+            {% include "common/icon.html" with icon_name="sort-down-alt" %}
             Sort Ascending
         </button>
     {% endif %}
