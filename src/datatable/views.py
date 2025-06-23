@@ -20,7 +20,7 @@ def datatable(
     order_by: str,
     fields: list[dict],
     template: str = "datatable/view.html",
-    partial: str = "datatable/partial.html",
+    partial: str = "datatable/partials/content.html",
 ) -> HttpResponse:
     """Returns a datatable for the given model.
 

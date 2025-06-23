@@ -12,3 +12,9 @@ def get_val(model: Model, field_name: str) -> Any | str:  # noqa: ANN401 (We don
     if hasattr(model, field_name):
         return getattr(model, field_name)
     return ""
+
+
+@register.filter
+def get_item(dictionary: dict, key: str) -> Any | str:  # noqa: ANN401 (We don't know the type of the value.)
+    """Returns the value to a key in a dictionary."""
+    return dictionary.get(key, "")

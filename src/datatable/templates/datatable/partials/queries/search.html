@@ -1,0 +1,21 @@
+{% load custom_filters %}
+<div class="field">
+    <label for="search-{{ field.param_name }}-input" class="label">
+        {{ field.text }}
+    </label>
+    <div class="control">
+        <input class="hx-include input is-small"
+               {% include "datatable/partials/htmx/attrs.html" %}
+               {% include "datatable/partials/htmx/sort.html" %}
+               hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
+               {% if request.GET|get_item:field.param_name %}
+                   value="{{ request.GET|get_item:field.param_name }}"
+               {% endif %}
+               id="search-{{ field.param_name }}-input"
+               name="{{ field.param_name }}"
+               placeholder="{{ field.placeholder }}"
+               style="width: 100px;"
+               type="search"
+        >
+    </div>
+</div>
