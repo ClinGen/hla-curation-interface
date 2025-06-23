@@ -1,11 +1,43 @@
+{% load custom_filters %}
 <label for="sort-{{ field.param_name }}-button" class="label">
     {{ field.text }}
 </label>
-<button type="submit"
-        id="sort-{{ field.param_name }}-button"
-        class="button is-small"
-        name="{{ field.param_name }}"
-        value="asc"
->
-    Sort Ascending
-</button>
+{% with in_get=field.param_name|in_get:request sort_dir=request.GET|get_item:field.param_name %}
+    {% if in_get and sort_dir == "none" %}
+        <button {% include "datatable/partials/htmx/attrs.html" %}
+                class="button is-small"
+                id="sort-{{ field.param_name }}-button"
+                name="{{ field.param_name }}"
+                value="asc"
+        >
+            Sort Ascending
+        </button>
+    {% elif in_get and sort_dir == "asc" %}
+        <button {% include "datatable/partials/htmx/attrs.html" %}
+                class="button is-small"
+                id="sort-{{ field.param_name }}-button"
+                name="{{ field.param_name }}"
+                value="desc"
+        >
+            Sort Descending
+        </button>
+    {% elif in_get and sort_dir == "desc" %}
+        <button {% include "datatable/partials/htmx/attrs.html" %}
+                class="button is-small"
+                id="sort-{{ field.param_name }}-button"
+                name="{{ field.param_name }}"
+                value="none"
+        >
+            Sort Default
+        </button>
+    {% else %}
+        <button {% include "datatable/partials/htmx/attrs.html" %}
+                class="button is-small"
+                id="sort-{{ field.param_name }}-button"
+                name="{{ field.param_name }}"
+                value="asc"
+        >
+            Sort Ascending
+        </button>
+    {% endif %}
+{% endwith %}
