@@ -1,5 +1,6 @@
 {% load custom_filters %}
 <div class="box mt-6 mb-6">
+    {% include "datatable/pagination.html" %}
     <div class="table-container">
         <table class="table">
             <thead>
@@ -32,4 +33,5 @@
             </tbody>
         </table>
     </div>
+    {% include "datatable/pagination.html" %}
 </div>

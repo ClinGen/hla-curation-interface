@@ -1,0 +1,48 @@
+<nav class="pagination is-small" role="navigation" aria-label="pagination">
+    {% if page.has_previous %}
+        <input id="previous-page-input"
+               type="hidden"
+               name="page"
+               value="{{ page.previous_page_number }}"
+        >
+        <button id="previous-page-button" class="pagination-previous">Previous</button>
+    {% else %}
+        <button id="previous-page-button" class="pagination-previous is-disabled">Previous</button>
+    {% endif %}
+
+    {% if page.has_next %}
+        <input id="next-page-input"
+               type="hidden"
+               name="page"
+               value="{{ page.next_page_number }}"
+        >
+        <button id="next-page-button" class="pagination-next">Next</button>
+    {% else %}
+        <button id="next-page-button" class="pagination-next is-disabled">Next</button>
+    {% endif %}
+
+    <ul id="pagination-list" class="pagination-list">
+        {% for p in paginator %}
+            <li>
+                <input id="page-{{ p }}-button"
+                       type="hidden"
+                       name="page"
+                       value="{{ p }}"
+                >
+                {% if p.number == page.number %}
+                    <button id="page-{{ p }}-button"
+                            class="pagination-link is-current"
+                    >
+                        {{ p.number }}
+                    </button>
+                {% else %}
+                    <button id="page-{{ p }}-button"
+                            class="pagination-link"
+                    >
+                        {{ p.number }}
+                    </button>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</nav>
