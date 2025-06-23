@@ -1,0 +1,17 @@
+<div class="level">
+    <div class="level-left">
+        <div class="level-item">
+            {% with query_params=request.GET %}
+                {% if query_params %}
+                    <button hx-get="{{ request.path }}"
+                            hx-push-url="true"
+                            hx-target="#datatable-content"
+                            class="button is-small"
+                    >
+                        Clear All Queries
+                    </button>
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+</div>
