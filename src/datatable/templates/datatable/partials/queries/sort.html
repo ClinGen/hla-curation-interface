@@ -1,5 +1,13 @@
 {% load custom_filters %}
-<label for="sort-{{ field.param_name }}-button" class="label">
+<label for="sort-{{ field.param_name }}-button"
+       {% with param=request.GET|get_item:field.param_name %}
+           {% if param and param != field.default_value %}
+               class="label has-text-info"
+           {% else %}
+               class="label"
+           {% endif %}
+       {% endwith  %}
+>
     {{ field.text }}
 </label>
 {% with in_get=field.param_name|in_get:request sort_dir=request.GET|get_item:field.param_name %}
