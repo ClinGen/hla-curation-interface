@@ -12,4 +12,5 @@ urlpatterns = [
         name="publication-detail",
     ),
     path("list", views.PublicationListView.as_view(), name="publication-list"),
+    path("search", views.publication_search, name="publication-search"),
 ]
