@@ -1,0 +1,14 @@
+<label for="filter-{{ field.param_name }}-select" class="label">{{ field.text }}</label>
+<div class="control">
+    <div class="select is-small">
+        <select name="{{ field.param_name }}"
+                id="filter-{{ field.param_name }}-select"
+        >
+            {% for option in field.options %}
+                <option value="{{ option }}">
+                    {{ option|capfirst }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+</div>

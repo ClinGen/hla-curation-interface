@@ -1,0 +1,35 @@
+{% load custom_filters %}
+<div class="box mt-6 mb-6">
+    <div class="table-container">
+        <table class="table">
+            <thead>
+            <tr>
+                {% for field in fields %}
+                    {% if field.type == "search" %}
+                        <th>{% include "datatable/queries/search.html" %}</th>
+                    {% elif field.type == "sort" %}
+                        <th>{% include "datatable/queries/sort.html" %}</th>
+                    {% elif field.type == "filter" %}
+                        <th>{% include "datatable/queries/filter.html" %}</th>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody>
+            {% if page %}
+                {% for object in page.object_list %}
+                    <tr>
+                        {% for field in fields %}
+                            <td>{{ object|get_val:field.param_name }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="{{ fields|length }}">No results.</td>
+                </tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>

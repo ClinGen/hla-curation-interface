@@ -640,6 +640,7 @@ dependencies = [
 dev = [
     { name = "ansible" },
     { name = "ansible-lint" },
+    { name = "beautifulsoup4" },
     { name = "coverage" },
     { name = "django-stubs", extra = ["compatible-mypy"] },
     { name = "furo" },
@@ -662,6 +663,7 @@ requires-dist = [
 dev = [
     { name = "ansible", specifier = ">=11.6.0" },
     { name = "ansible-lint", specifier = ">=25.5.0" },
+    { name = "beautifulsoup4", specifier = ">=4.13.4" },
     { name = "coverage", specifier = ">=7.8.2" },
     { name = "django-stubs", extras = ["compatible-mypy"], specifier = ">=5.2.0" },
     { name = "furo", specifier = ">=2024.8.6" },
