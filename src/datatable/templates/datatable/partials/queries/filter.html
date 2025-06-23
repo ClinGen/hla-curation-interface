@@ -1,11 +1,19 @@
+{% load custom_filters %}
 <label for="filter-{{ field.param_name }}-select" class="label">{{ field.text }}</label>
 <div class="control">
     <div class="select is-small">
-        <select name="{{ field.param_name }}"
+        <select class="hx-include"
+                {% include "datatable/partials/htmx/attrs.html" %}
+                {% include "datatable/partials/htmx/sort.html" %}
+                name="{{ field.param_name }}"
                 id="filter-{{ field.param_name }}-select"
         >
             {% for option in field.options %}
-                <option value="{{ option }}">
+                <option value="{{ option }}"
+                        {% if request.GET|get_item:field.param_name == option %}
+                            selected
+                        {% endif %}
+                >
                     {{ option|capfirst }}
                 </option>
             {% endfor %}
