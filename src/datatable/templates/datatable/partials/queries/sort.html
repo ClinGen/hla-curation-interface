@@ -1,5 +1,5 @@
 {% load custom_filters %}
-<label for="sort-{{ field.param_name }}-button"
+<label for="sort-{{ field.id }}-button"
        {% with param=request.GET|get_item:field.param_name %}
            {% if param and param != field.default_value %}
                class="label has-text-info"
@@ -14,7 +14,7 @@
     {% if in_get and sort_dir == "none" %}
         <button {% include "datatable/partials/htmx/attrs.html" %}
                 class="button is-small"
-                id="sort-{{ field.param_name }}-button"
+                id="sort-{{ field.id }}-button"
                 name="{{ field.param_name }}"
                 value="asc"
         >
@@ -24,7 +24,7 @@
     {% elif in_get and sort_dir == "asc" %}
         <button {% include "datatable/partials/htmx/attrs.html" %}
                 class="button is-small"
-                id="sort-{{ field.param_name }}-button"
+                id="sort-{{ field.id }}-button"
                 name="{{ field.param_name }}"
                 value="desc"
         >
@@ -34,7 +34,7 @@
     {% elif in_get and sort_dir == "desc" %}
         <button {% include "datatable/partials/htmx/attrs.html" %}
                 class="button is-small"
-                id="sort-{{ field.param_name }}-button"
+                id="sort-{{ field.id }}-button"
                 name="{{ field.param_name }}"
                 value="none"
         >
@@ -44,7 +44,7 @@
     {% else %}
         <button {% include "datatable/partials/htmx/attrs.html" %}
                 class="button is-small"
-                id="sort-{{ field.param_name }}-button"
+                id="sort-{{ field.id }}-button"
                 name="{{ field.param_name }}"
                 value="asc"
         >

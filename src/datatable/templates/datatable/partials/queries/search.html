@@ -1,6 +1,6 @@
 {% load custom_filters %}
 <div class="field">
-    <label for="search-{{ field.param_name }}-input"
+    <label for="search-{{ field.id }}-input"
            {% with param=request.GET|get_item:field.param_name %}
                {% if param and param != field.default_value %}
                    class="label has-text-info"
@@ -19,7 +19,7 @@
                {% if request.GET|get_item:field.param_name %}
                    value="{{ request.GET|get_item:field.param_name }}"
                {% endif %}
-               id="search-{{ field.param_name }}-input"
+               id="search-{{ field.id }}-input"
                name="{{ field.param_name }}"
                placeholder="{{ field.placeholder }}"
                style="width: 100px;"

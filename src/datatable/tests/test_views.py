@@ -1,6 +1,7 @@
 """Houses tests for the views module."""
 
 from bs4 import BeautifulSoup
+from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -12,7 +13,14 @@ class DatatableViewTest(TestCase):
 
     def setUp(self):
         """Sets up a Client for the tests."""
+        self.user = User.objects.create(
+            username="ash",
+            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
+            email="ash@kantomail.net",
+            is_staff=True,
+        )
         self.client = Client()
+        self.client.force_login(self.user)
         self.url = reverse("pokemon")
 
     def test_response_code(self):
@@ -23,7 +31,7 @@ class DatatableViewTest(TestCase):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         main_heading = soup.find(id="main-heading").get_text().strip()
-        self.assertEqual(main_heading, "Pokémon Datatable")
+        self.assertEqual(main_heading, "Search Pokémon")
 
     def test_number_of_results_default(self):
         response = self.client.get(self.url)

@@ -1,5 +1,5 @@
 {% load custom_filters %}
-<label for="filter-{{ field.param_name }}-select"
+<label for="filter-{{ field.id }}-select"
        {% with param=request.GET|get_item:field.param_name %}
            {% if param and param != field.default_value %}
                class="label has-text-info"
@@ -16,7 +16,7 @@
                 {% include "datatable/partials/htmx/attrs.html" %}
                 {% include "datatable/partials/htmx/sort.html" %}
                 name="{{ field.param_name }}"
-                id="filter-{{ field.param_name }}-select"
+                id="filter-{{ field.id }}-select"
         >
             {% for option in field.options %}
                 <option value="{{ option }}"
