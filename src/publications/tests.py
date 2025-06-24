@@ -110,3 +110,112 @@ class PublicationDetailViewTest(TestCase):
         soup = BeautifulSoup(response.content, "html.parser")
         add_button = soup.find(id="add-button").get_text().strip()
         self.assertIn("Add", add_button)
+
+
+class SearchPublicationsViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.publication_type = PublicationTypes.PUBMED
+        self.pubmed_id = "123"
+        self.doi = "10.1000/182"
+        self.title = "Common diseases in Pokémon"
+        self.author = "Oak"
+        self.added_at = DateTimeField(auto_now_add=True)
+        self.publication = Publication.objects.create(
+            publication_type=PublicationTypes.PUBMED,
+            pubmed_id=self.pubmed_id,
+            doi=self.doi,
+            title=self.title,
+            author=self.author,
+            added_at=self.added_at,
+        )
+        self.url = reverse("publication-search")
+
+    def test_shows_id_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        id_label = soup.find("label", {"for": "search-pk-input"}).get_text().strip()
+        self.assertEqual(id_label, "ID")
+        id_input = soup.find(id="search-pk-input")
+        self.assertIsNotNone(id_input)
+
+    def test_shows_type_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        type_label = (
+            soup.find("label", {"for": "filter-publication-type-select"})
+            .get_text()
+            .strip()
+        )
+        self.assertEqual(type_label, "Type")
+        type_select = soup.find(id="filter-publication-type-select")
+        self.assertIsNotNone(type_select)
+
+    def test_shows_author_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        author_label = (
+            soup.find("label", {"for": "search-author-input"}).get_text().strip()
+        )
+        self.assertEqual(author_label, "Author")
+        author_input = soup.find(id="search-author-input")
+        self.assertIsNotNone(author_input)
+
+    def test_shows_title_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        title_label = (
+            soup.find("label", {"for": "search-title-input"}).get_text().strip()
+        )
+        self.assertEqual(title_label, "Title")
+        title_input = soup.find(id="search-title-input")
+        self.assertIsNotNone(title_input)
+
+    def test_shows_added_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        added_label = (
+            soup.find("label", {"for": "sort-added-at-button"}).get_text().strip()
+        )
+        self.assertEqual(added_label, "Added")
+        added_button = soup.find(id="sort-added-at-button")
+        self.assertIsNotNone(added_button)
+
+    def test_shows_id_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        id_anchor = (
+            soup.find("tbody").find("tr").find_all("td")[0].find("a").get_text().strip()
+        )
+        self.assertIn(str(self.publication.pk), id_anchor)
+
+    def test_shows_type_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        publication_type = (
+            soup.find("tbody")
+            .find("tr")
+            .find_all("td")[1]
+            .find("span")
+            .get_text()
+            .strip()
+        )
+        self.assertIn("PubMed", publication_type)
+
+    def test_shows_author_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        author = soup.find("tbody").find("tr").find_all("td")[2].get_text().strip()
+        self.assertEqual(self.author, author)
+
+    def test_shows_title_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        title = soup.find("tbody").find("tr").find_all("td")[3].get_text().strip()
+        self.assertEqual(self.title, title)
+
+    def test_shows_added_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        added_at = soup.find("tbody").find("tr").find_all("td")[4].get_text().strip()
+        self.assertIsNotNone(added_at)
