@@ -54,6 +54,7 @@ def datatable(
         "paginator": paginator,
         "fields": fields,
         "data_title": data_title,
+        "partial": partial,
     }
 
     if request.headers.get("Hx-Request"):

@@ -91,4 +91,5 @@ def publication_search(request: HttpRequest) -> HttpResponse:
         order_by="pk",
         fields=FIELDS,  # type: ignore
         data_title="Publications",
+        partial="publications/partials/search.html",
     )
