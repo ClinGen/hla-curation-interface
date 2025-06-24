@@ -1,0 +1,20 @@
+{% load custom_filters %}
+<div class="level">
+    <div class="level-left">
+        <div class="level-item">
+            {% for field in fields %}
+                {% with value=request.GET|get_item:field.param_name %}
+                    {% if field.param_name in request.GET and value != field.default_value %}
+                        <button hx-get="{{ request.path }}"
+                                hx-push-url="true"
+                                hx-target="#datatable-content"
+                                class="button is-small"
+                        >
+                            Clear Queries
+                        </button>
+                    {% endif %}
+                {% endwith %}
+            {% endfor %}
+        </div>
+    </div>
+</div>

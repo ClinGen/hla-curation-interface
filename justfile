@@ -153,7 +153,7 @@ alias sbl := src-build
 # Run all tests. -----------------------------------------------------
 [group('test')]
 test-all:
-    cd src && uv run manage.py test --shuffle
+    cd src && uv run manage.py test --shuffle --parallel auto
 alias tal := test-all
 
 #=====================================================================

@@ -1,0 +1,69 @@
+{% if paginator.num_pages > 1 %}
+    <nav class="pagination is-small" role="navigation" aria-label="pagination">
+        {% if page.has_previous %}
+            <button {% include "datatable/partials/htmx/attrs.html" %}
+                    {% include "datatable/partials/htmx/sort.html" %}
+                    class="pagination-previous"
+                    id="previous-page-button"
+                    name="page"
+                    value="{{ page.previous_page_number }}"
+            >
+                Previous
+            </button>
+        {% else %}
+            <button id="previous-page-button"
+                    class="pagination-previous is-disabled"
+                    disabled
+            >
+                Previous
+            </button>
+        {% endif %}
+
+        {% if page.has_next %}
+            <button {% include "datatable/partials/htmx/attrs.html" %}
+                    {% include "datatable/partials/htmx/sort.html" %}
+                    class="pagination-next"
+                    id="next-page-button"
+                    name="page"
+                    value="{{ page.next_page_number }}"
+            >
+                Next
+            </button>
+        {% else %}
+            <button id="next-page-button"
+                    class="pagination-next is-disabled"
+                    disabled
+            >
+                Next
+            </button>
+        {% endif %}
+
+        <ul id="pagination-list" class="pagination-list">
+            {% for p in paginator %}
+                <li>
+                    {% if p.number == page.number %}
+                        <button {% include "datatable/partials/htmx/attrs.html" %}
+                                {% include "datatable/partials/htmx/sort.html" %}
+                                class="pagination-link is-current"
+                                id="page-{{ p.number }}-button"
+                                name="page"
+                                value="{{ p.number }}"
+                        >
+                            {{ p.number }}
+                        </button>
+                    {% else %}
+                        <button {% include "datatable/partials/htmx/attrs.html" %}
+                                {% include "datatable/partials/htmx/sort.html" %}
+                                class="pagination-link"
+                                id="page-{{ p.number }}-button"
+                                name="page"
+                                value="{{ p.number }}"
+                        >
+                            {{ p.number }}
+                        </button>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </nav>
+{% endif %}

@@ -1,9 +1,10 @@
+{% load static %}
 <div class="footer" hx-boost="true">
     <div class="columns">
         <div class="column">
             <a href="https://clinicalgenome.org">
                 <div class="logo-container">
-                    <img src="{{ static('hci/img/clingen-logo-with-text.svg') }}"
+                    <img src="{% static 'hci/img/clingen-logo-with-text.svg' %}"
                          alt="The ClinGen logo with 'Clinical Genome Resource' text underneath."
                     >
                 </div>
@@ -12,7 +13,7 @@
         <div class="column">
             <a href="https://med.stanford.edu">
                 <div class="logo-container">
-                    <img src="{{ static('hci/img/stanford-medicine-logo.png') }}"
+                    <img src="{% static 'hci/img/stanford-medicine-logo.png' %}"
                          alt="The Stanford Medicine logo."
                     >
                 </div>
@@ -20,21 +21,21 @@
         </div>
         <div class="column">
             <ul>
-                <li><a href="{{ url('about') }}">About</a></li>
-                <li><a href="{{ url('contact') }}">Contact</a></li>
-                <li><a href="{{ url('help') }}">Help</a></li>
+                <li><a href="{% url 'about' %}">About</a></li>
+                <li><a href="{% url 'contact' %}">Contact</a></li>
+                <li><a href="{% url 'help' %}">Help</a></li>
             </ul>
         </div>
         <div class="column">
             <ul>
-                <li><a href="{{ url('downloads') }}">Downloads</a></li>
-                <li><a href="{{ url('citing') }}">Citing</a></li>
+                <li><a href="{% url 'downloads' %}">Downloads</a></li>
+                <li><a href="{% url 'citing' %}">Citing</a></li>
             </ul>
         </div>
         <div class="column">
             <ul>
-                <li><a href="{{ url('acknowledgements') }}">Acknowledgements</a></li>
-                <li><a href="{{ url('collaborators') }}">Collaborators</a></li>
+                <li><a href="{% url 'acknowledgements' %}">Acknowledgements</a></li>
+                <li><a href="{% url 'collaborators' %}">Collaborators</a></li>
             </ul>
         </div>
     </div>

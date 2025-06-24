@@ -1,0 +1,91 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% block title %}Publication #{{ object.pk }} Details{% endblock %}
+{% block description %}View information about publication {{ object.pk }}.{% endblock %}
+{% block main %}
+    <div class="box mt-6 mb-6">
+        <div class="level">
+            <div class="level-left">
+                <h1 class="title">Publication Details</h1>
+            </div>
+            <div class="level-right">
+                {% if object.publication_type == "PUB" %}
+                    <a href="https://pubmed.ncbi.nlm.nih.gov/">
+                        <div class="box">
+                            <img src="{% static 'hci/img/pubmed-logo.svg' %}"
+                                 alt="The PubMed logo."
+                                 class="publication-logo"
+                            >
+                        </div>
+                    </a>
+                {% elif object.publication_type == "BIO" %}
+                    <a href="https://www.biorxiv.org/">
+                        <div class="box">
+                            <img src="{% static 'hci/img/biorxiv-logo.png' %}"
+                                 alt="The bioRxiv logo."
+                                 class="publication-logo"
+                            >
+                        </div>
+                    </a>
+                {% elif object.publication_type == "MED" %}
+                    <a href="https://www.medrxiv.org/">
+                        <div class="box">
+                            <img src="{% static 'hci/img/medrxiv-logo.png' %}"
+                                 alt="The medRxiv logo."
+                                 class="publication-logo"
+                            >
+                        </div>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <h2 class="subtitle"><i id="publication-title">{{ object.title }}</i></h2>
+
+        <div class="block table-container">
+            <table class="table">
+                <tbody>
+                <tr>
+                    <td>Primary Author</td>
+                    <td id="author">{{ object.author }}</td>
+                </tr>
+                {% if object.pubmed_id %}
+                    <tr>
+                        <td>PubMed ID</td>
+                        <td id="pubmed-id">
+                            <a href="https://pubmed.ncbi.nlm.nih.gov/{{ object.pubmed_id }}/" target="_blank" rel="noopener">
+                                {% include "common/icon.html" with icon_name="box-arrow-up-right" %}
+                                {{ object.pubmed_id }}
+                            </a>
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if object.doi %}
+                    <tr>
+                        <td>Digital Object Identifier</td>
+                        <td id="doi">
+                            <a href="https://doi.org/{{ object.doi }}" target="_blank" rel="noopener">
+                                {% include "common/icon.html" with icon_name="box-arrow-up-right" %}
+                                {{ object.doi }}
+                            </a>
+                        </td>
+                    </tr>
+                {% endif %}
+                <td>Added</td>
+                <td id="added-at">{{ object.added_at|date:"Y-m-d" }}</td>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="buttons">
+            <a href="{% url 'publication-search' %}" class="button" id="search-button">
+                {% include "common/icon.html" with icon_name="search" %}
+                Search Publications
+            </a>
+            <a href="{% url 'publication-create' %}" class="button" id="add-button">
+                {% include "common/icon.html" with icon_name="plus-circle" %}
+                Add Another Publication
+            </a>
+        </div>
+    </div>
+{% endblock %}

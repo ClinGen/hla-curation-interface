@@ -19,11 +19,11 @@ class UserProfileAdmin(admin.ModelAdmin):
 
     # We don't want admins to modify the Firebase fields of UserProfile objects because
     # Firebase should be the source of truth for users.
-    readonly_fields = (
+    readonly_fields = [
         "user",
         "firebase_uid",
         "firebase_email_verified",
         "firebase_photo_url",
         "firebase_display_name",
         "firebase_sign_in_provider",
-    )
+    ]

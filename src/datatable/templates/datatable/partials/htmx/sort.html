@@ -1,0 +1,7 @@
+{# Saves the field that the user is sorting on. #}
+{% load custom_filters %}
+{% for field in fields %}
+    {% if field.param_name in request.GET and field.type == "sort" %}
+        hx-vals='"{{ field.param_name }}": "{{ request.GET|get_item:field.param_name }}"'
+    {% endif %}
+{% endfor %}

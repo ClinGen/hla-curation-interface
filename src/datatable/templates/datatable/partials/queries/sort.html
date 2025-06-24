@@ -1,0 +1,55 @@
+{% load custom_filters %}
+<label for="sort-{{ field.id }}-button"
+       {% with param=request.GET|get_item:field.param_name %}
+           {% if param and param != field.default_value %}
+               class="label has-text-info"
+           {% else %}
+               class="label"
+           {% endif %}
+       {% endwith  %}
+>
+    {{ field.text }}
+</label>
+{% with in_get=field.param_name|in_get:request sort_dir=request.GET|get_item:field.param_name %}
+    {% if in_get and sort_dir == "none" %}
+        <button {% include "datatable/partials/htmx/attrs.html" %}
+                class="button is-small"
+                id="sort-{{ field.id }}-button"
+                name="{{ field.param_name }}"
+                value="asc"
+        >
+            {% include "common/icon.html" with icon_name="sort-down-alt" %}
+            Sort Ascending
+        </button>
+    {% elif in_get and sort_dir == "asc" %}
+        <button {% include "datatable/partials/htmx/attrs.html" %}
+                class="button is-small"
+                id="sort-{{ field.id }}-button"
+                name="{{ field.param_name }}"
+                value="desc"
+        >
+            {% include "common/icon.html" with icon_name="sort-down" %}
+            Sort Descending
+        </button>
+    {% elif in_get and sort_dir == "desc" %}
+        <button {% include "datatable/partials/htmx/attrs.html" %}
+                class="button is-small"
+                id="sort-{{ field.id }}-button"
+                name="{{ field.param_name }}"
+                value="none"
+        >
+            {% include "common/icon.html" with icon_name="arrow-counterclockwise" %}
+            Reset
+        </button>
+    {% else %}
+        <button {% include "datatable/partials/htmx/attrs.html" %}
+                class="button is-small"
+                id="sort-{{ field.id }}-button"
+                name="{{ field.param_name }}"
+                value="asc"
+        >
+            {% include "common/icon.html" with icon_name="sort-down-alt" %}
+            Sort Ascending
+        </button>
+    {% endif %}
+{% endwith %}

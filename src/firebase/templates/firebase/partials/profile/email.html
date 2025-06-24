@@ -2,22 +2,25 @@
 {% if user_profile.firebase_email_verified %}
     <td>
         <span class="has-text-success">
-            {% set icon_name="check-circle" %}
-            {% include "partials/icon.html" %}
+            {% with icon_name="check-circle" %}
+                {% include "common/icon.html" %}
+            {% endwith %}
             {{ user_profile.firebase_email_verified }}
         </span>
     </td>
 {% else %}
     <td>
         <span class="has-text-danger mr-3">
-            {% set icon_name="x-circle" %}
-            {% include "partials/icon.html" %}
+            {% with icon_name="x-circle" %}
+                {% include "common/icon.html" %}
+            {% endwith %}
             {{ user_profile.firebase_email_verified }}
         </span>
         <button id="resend-verification-email-button"
                 class="button is-small">
-            {% set icon_name="envelope" %}
-            {% include "partials/icon.html" %}
+            {% with icon_name="envelope" %}
+                {% include "common/icon.html" %}
+            {% endwith %}
             Resend Verification Email
         </button>
     </td>

@@ -34,20 +34,22 @@
                     <div class="has-text-centered">
                         <div class="block">
                             <button id="login-with-google-button" class="button">
-                                {% set icon_name="google" %}
-                                {% include "partials/icon.html" %}
+                                {% with icon_name="google" %}
+                                    {% include "common/icon.html" %}
+                                {% endwith %}
                                 Log In With Google
                             </button>
                         </div>
                         <div class="block">
                             <button id="login-with-microsoft-button" class="button">
-                                {% set icon_name="microsoft" %}
-                                {% include "partials/icon.html" %}
+                                {% with icon_name="microsoft" %}
+                                    {% include "common/icon.html" %}
+                                {% endwith %}
                                 Log In With Microsoft
                             </button>
                         </div>
                         <div class="content">
-                            Need an account? <a href="{{ url('signup') }}">Sign Up</a>
+                            Need an account? <a href="{% url 'signup' %}">Sign Up</a>
                         </div>
                     </div>
                 </div>
