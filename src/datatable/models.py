@@ -1,4 +1,4 @@
-"""Houses database models for the datatable app."""
+"""Houses database models for testing the datatable app."""
 
 from django.db import models
 

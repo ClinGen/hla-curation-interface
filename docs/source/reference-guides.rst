@@ -2,94 +2,6 @@
 Reference Guides
 ================
 
-------------
-The Core App
-------------
-
-The core app is where the home page and the pages found in the HCI's footer are housed.
-It is also used to house modules that aren't app-specific. For example, it houses a
-custom ``UserProfile`` model that extends the Django ``User`` model. This
-``UserProfile`` model isn't specific to any app.
-
-``core.admin``
-==============
-
-.. automodule:: core.admin
-   :members:
-
-``core.apps``
-=============
-
-.. automodule:: core.apps
-   :members:
-
-``core.crud``
-=============
-
-.. automodule:: core.crud
-   :members:
-
-``core.models``
-===============
-
-.. automodule:: core.models
-   :members:
-
-``core.urls``
-=============
-
-.. automodule:: core.urls
-   :members:
-
-``core.views``
-==============
-
-.. automodule:: core.views
-   :members:
-
-----------------
-The Firebase App
-----------------
-
-The firebase app houses code related to using Google's Firebase service for
-authentication.
-
-``firebase.apps``
-=================
-
-.. automodule:: firebase.apps
-   :members:
-
-``firebase.backends``
-=====================
-
-.. automodule:: firebase.backends
-   :members:
-
-``firebase.clients``
-====================
-
-.. automodule:: firebase.clients
-   :members:
-
-``firebase.crud``
-=================
-
-.. automodule:: firebase.crud
-   :members:
-
-``firebase.urls``
-=================
-
-.. automodule:: firebase.urls
-   :members:
-
-``firebase.views``
-==================
-
-.. automodule:: firebase.views
-   :members:
-
 ----------------
 Code Conventions
 ----------------
@@ -151,12 +63,181 @@ Here's an example:
 Type Hint Ignore Comments
 -------------------------
 
-If you ignore type hints, you *must* provide a justification for doing so. Generally
-speaking, it's better to just fix the problematic code.
+mypy expects ignore comments to be exactly ``# type: ignore``, so we can't provide
+justifications for them in the same line. Try to avoid using these. If you have to use
+one, you can provide a justification on another line if you want to.
 
 Here's an example:
 
 .. code-block:: python
 
-    service = FooService(client=client)  # pyright: ignore[reportArgumentType] (We are using a mock client for our test.)
+    service = FooService(client=client)  # type: ignore
 
+---------------
+Git Conventions
+---------------
+
+This reference guide describes how we use Git.
+
+Trunk-Based Development
+=======================
+
+.. _trunk-based development: https://trunkbaseddevelopment.com/
+
+We use `trunk-based development`_.
+
+Branch Naming
+=============
+
+Branches should be named with an issue number followed by a brief description of the
+branch's purpose. For example: ``123-fix-foobar``.
+
+------------
+The Core App
+------------
+
+The core app is where the home page and the pages found in the HCI's footer are housed.
+It is also used to house modules that aren't app-specific. For example, it houses a
+custom ``UserProfile`` model that extends the Django ``User`` model. This
+``UserProfile`` model isn't specific to any app.
+
+``core.admin``
+==============
+
+.. automodule:: core.admin
+   :members:
+
+``core.apps``
+=============
+
+.. automodule:: core.apps
+   :members:
+
+``core.crud``
+=============
+
+.. automodule:: core.crud
+   :members:
+
+``core.models``
+===============
+
+.. automodule:: core.models
+   :members:
+
+``core.urls``
+=============
+
+.. automodule:: core.urls
+   :members:
+
+``core.views``
+==============
+
+.. automodule:: core.views
+   :members:
+
+-----------------
+The Datatable App
+-----------------
+
+The datatable app provides a reusable ``datatable`` view that provides an interactive
+searchable, sortable, and filterable table. It uses HTMX for interactivity. The
+searching, sorting, and filtering are done on the backend.
+
+``datatable.templatetags.custom_filters``
+=========================================
+
+.. automodule:: datatable.templatetags.custom_filters
+   :members:
+
+``datatable.admin``
+===================
+
+.. automodule:: datatable.admin
+   :members:
+
+``datatable.apps``
+==================
+
+.. automodule:: datatable.apps
+   :members:
+
+``datatable.constants``
+=======================
+
+.. automodule:: datatable.constants
+   :members:
+
+``datatable.metadata``
+======================
+
+.. automodule:: datatable.metadata
+   :members:
+
+``datatable.models``
+====================
+
+.. automodule:: datatable.models
+   :members:
+
+``datatable.queries``
+=====================
+
+.. automodule:: datatable.queries
+   :members:
+
+``datatable.urls``
+==================
+
+.. automodule:: datatable.urls
+   :members:
+
+``datatable.views``
+===================
+
+.. automodule:: datatable.views
+   :members:
+
+----------------
+The Firebase App
+----------------
+
+The firebase app houses code related to using Google's Firebase service for
+authentication.
+
+``firebase.apps``
+=================
+
+.. automodule:: firebase.apps
+   :members:
+
+``firebase.backends``
+=====================
+
+.. automodule:: firebase.backends
+   :members:
+
+``firebase.clients``
+====================
+
+.. automodule:: firebase.clients
+   :members:
+
+``firebase.crud``
+=================
+
+.. automodule:: firebase.crud
+   :members:
+
+``firebase.urls``
+=================
+
+.. automodule:: firebase.urls
+   :members:
+
+``firebase.views``
+==================
+
+.. automodule:: firebase.views
+   :members:
