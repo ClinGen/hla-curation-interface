@@ -1,4 +1,4 @@
-<nav hx-boost="true" class="navbar" role="navigation" aria-label="main navigation">
+<nav class="navbar" role="navigation" aria-label="main navigation">
     <div class="navbar-menu">
         <div class="navbar-start">
             {% with url="home" text="Home" %}
@@ -7,7 +7,7 @@
             <div class="navbar-item has-dropdown is-hoverable">
                 <a class="navbar-link">Publications</a>
                 <div class="navbar-dropdown">
-                    {% with url="publication-list" text="Search" %}
+                    {% with url="publication-search" text="Search" %}
                         {% include 'partials/navbar_link.html' %}
                     {% endwith %}
                     {% with url="publication-create" text="Add" %}

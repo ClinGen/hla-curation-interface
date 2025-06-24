@@ -29,7 +29,9 @@
                                 {% with value=object|get_val:field.param_name %}
                                     {% if field.param_name == "pk" %}
                                         <td>
-                                            <a>#{{ value }}</a>
+                                            <a hx-boost="true" href="{% url 'publication-detail' value %}">
+                                                #{{ value }}
+                                            </a>
                                         </td>
                                     {% elif field.param_name == "publication_type" %}
                                         <td>

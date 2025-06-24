@@ -1,7 +1,7 @@
 """Provides views for the publications app."""
 
 from django.http import HttpRequest, HttpResponse
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView
 from django.views.generic.edit import CreateView
 
 from datatable.constants import FieldTypes, Filters, SortDirections
@@ -23,13 +23,6 @@ class PublicationDetailView(DetailView):
 
     model = Publication
     template_name = "publications/detail.html"
-
-
-class PublicationListView(ListView):
-    """Shows the user the list of publications."""
-
-    model = Publication
-    template_name = "publications/list.html"
 
 
 PUBLICATION_TYPE_OPTIONS = [
