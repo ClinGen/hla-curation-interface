@@ -131,7 +131,7 @@ class DatatableViewTest(TestCase):
         response = self.client.get(self.url, {"total": "desc"})
         soup = BeautifulSoup(response.content, "html.parser")
         total_sort_button = soup.find(id="sort-total-button").get_text().strip()
-        self.assertEqual(total_sort_button, "Sort Default")
+        self.assertEqual(total_sort_button, "Reset")
 
     def test_hp_sort_button_default(self):
         response = self.client.get(self.url)
@@ -149,7 +149,7 @@ class DatatableViewTest(TestCase):
         response = self.client.get(self.url, {"hp": "desc"})
         soup = BeautifulSoup(response.content, "html.parser")
         hp_sort_button = soup.find(id="sort-hp-button").get_text().strip()
-        self.assertEqual(hp_sort_button, "Sort Default")
+        self.assertEqual(hp_sort_button, "Reset")
 
     def test_attack_sort_button_default(self):
         response = self.client.get(self.url)
@@ -167,7 +167,7 @@ class DatatableViewTest(TestCase):
         response = self.client.get(self.url, {"attack": "desc"})
         soup = BeautifulSoup(response.content, "html.parser")
         attack_sort_button = soup.find(id="sort-attack-button").get_text().strip()
-        self.assertEqual(attack_sort_button, "Sort Default")
+        self.assertEqual(attack_sort_button, "Reset")
 
     def test_defense_sort_button_default(self):
         response = self.client.get(self.url)
@@ -185,7 +185,7 @@ class DatatableViewTest(TestCase):
         response = self.client.get(self.url, {"defense": "desc"})
         soup = BeautifulSoup(response.content, "html.parser")
         defense_sort_button = soup.find(id="sort-defense-button").get_text().strip()
-        self.assertEqual(defense_sort_button, "Sort Default")
+        self.assertEqual(defense_sort_button, "Reset")
 
     def test_sp_atk_sort_button_default(self):
         response = self.client.get(self.url)
@@ -203,7 +203,7 @@ class DatatableViewTest(TestCase):
         response = self.client.get(self.url, {"sp_atk": "desc"})
         soup = BeautifulSoup(response.content, "html.parser")
         sp_atk_sort_button = soup.find(id="sort-sp-atk-button").get_text().strip()
-        self.assertEqual(sp_atk_sort_button, "Sort Default")
+        self.assertEqual(sp_atk_sort_button, "Reset")
 
     def test_sp_def_sort_button_default(self):
         response = self.client.get(self.url)
@@ -221,7 +221,7 @@ class DatatableViewTest(TestCase):
         response = self.client.get(self.url, {"sp_def": "desc"})
         soup = BeautifulSoup(response.content, "html.parser")
         sp_def_sort_button = soup.find(id="sort-sp-def-button").get_text().strip()
-        self.assertEqual(sp_def_sort_button, "Sort Default")
+        self.assertEqual(sp_def_sort_button, "Reset")
 
     def test_speed_sort_button_default(self):
         response = self.client.get(self.url)
@@ -239,7 +239,7 @@ class DatatableViewTest(TestCase):
         response = self.client.get(self.url, {"speed": "desc"})
         soup = BeautifulSoup(response.content, "html.parser")
         speed_sort_button = soup.find(id="sort-speed-button").get_text().strip()
-        self.assertEqual(speed_sort_button, "Sort Default")
+        self.assertEqual(speed_sort_button, "Reset")
 
     def test_generation_select_default(self):
         response = self.client.get(self.url)
