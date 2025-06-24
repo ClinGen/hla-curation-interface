@@ -21,7 +21,7 @@
         </form>
     </div>
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("htmx:load", () => {
             const doiField = document.querySelector("input[name='doi']").closest(".field");
             function toggleDoiField() {
                 const selectedValue = document.querySelector("input[name='publication_type']:checked")?.value;
