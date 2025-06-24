@@ -40,19 +40,19 @@
             </div>
         </div>
 
-        <h2 class="subtitle"><i>{{ object.title }}</i></h2>
+        <h2 class="subtitle"><i id="publication-title">{{ object.title }}</i></h2>
 
         <div class="block table-container">
             <table class="table">
                 <tbody>
                 <tr>
                     <td>Primary Author</td>
-                    <td>{{ object.author }}</td>
+                    <td id="author">{{ object.author }}</td>
                 </tr>
                 {% if object.pubmed_id %}
                     <tr>
                         <td>PubMed ID</td>
-                        <td>
+                        <td id="pubmed-id">
                             <a href="https://pubmed.ncbi.nlm.nih.gov/{{ object.pubmed_id }}/" target="_blank" rel="noopener">
                                 {% include "common/icon.html" with icon_name="box-arrow-up-right" %}
                                 {{ object.pubmed_id }}
@@ -63,7 +63,7 @@
                 {% if object.doi %}
                     <tr>
                         <td>Digital Object Identifier</td>
-                        <td>
+                        <td id="doi">
                             <a href="https://doi.org/{{ object.doi }}" target="_blank" rel="noopener">
                                 {% include "common/icon.html" with icon_name="box-arrow-up-right" %}
                                 {{ object.doi }}
@@ -72,19 +72,19 @@
                     </tr>
                 {% endif %}
                 <td>Added</td>
-                <td>{{ object.added_at|date:"Y-m-d" }}</td>
+                <td id="added-at">{{ object.added_at|date:"Y-m-d" }}</td>
                 </tbody>
             </table>
         </div>
 
         <div class="buttons">
-            <a href="{% url 'publication-create' %}" class="button">
-                {% include "common/icon.html" with icon_name="plus-circle" %}
-                Add Another Publication
-            </a>
-            <a href="{% url 'publication-search' %}" class="button">
+            <a href="{% url 'publication-search' %}" class="button" id="search-button">
                 {% include "common/icon.html" with icon_name="search" %}
                 Search Publications
+            </a>
+            <a href="{% url 'publication-create' %}" class="button" id="add-button">
+                {% include "common/icon.html" with icon_name="plus-circle" %}
+                Add Another Publication
             </a>
         </div>
     </div>
