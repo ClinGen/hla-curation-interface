@@ -22,8 +22,6 @@
     </div>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const publicationTypeRadios = document.querySelectorAll("input[name='publication_type']");
-
             const doiField = document.querySelector("input[name='doi']").closest(".field");
             function toggleDoiField() {
                 const selectedValue = document.querySelector("input[name='publication_type']:checked")?.value;
@@ -44,11 +42,12 @@
                 }
             }
 
-            publicationTypeRadios.forEach(radio => {
+            const publicationTypeRadios = document.querySelectorAll("input[name='publication_type']");
+            for(const radio of publicationTypeRadios) {
                 radio.addEventListener("change", toggleDoiField);
                 radio.addEventListener("change", togglePubmedIdField);
-            });
-            
+            }
+
             toggleDoiField();
             togglePubmedIdField();
         });
