@@ -20,4 +20,37 @@
             </button>
         </form>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const publicationTypeRadios = document.querySelectorAll("input[name='publication_type']");
+
+            const doiField = document.querySelector("input[name='doi']").closest(".field");
+            function toggleDoiField() {
+                const selectedValue = document.querySelector("input[name='publication_type']:checked")?.value;
+                if (selectedValue === "PUB") {
+                    doiField.style.display = "none";
+                } else {
+                    doiField.style.display = "block";
+                }
+            }
+
+            const pubmedIdField = document.querySelector("input[name='pubmed_id']").closest(".field");
+            function togglePubmedIdField() {
+                const selectedValue = document.querySelector("input[name='publication_type']:checked")?.value;
+                if (selectedValue === "BIO" || selectedValue === "MED") {
+                    pubmedIdField.style.display = "none";
+                } else {
+                    pubmedIdField.style.display = "block";
+                }
+            }
+
+            publicationTypeRadios.forEach(radio => {
+                radio.addEventListener("change", toggleDoiField);
+                radio.addEventListener("change", togglePubmedIdField);
+            });
+            
+            toggleDoiField();
+            togglePubmedIdField();
+        });
+    </script>
 {% endblock %}

@@ -43,21 +43,15 @@ class Publication(models.Model):
         max_length=16,
         unique=True,
         verbose_name="PubMed ID",
-        help_text=(
-            "The PubMed ID for the publication, e.g., 11910336. "
-            "(Required for PubMed articles.)"
-        ),
+        help_text="The PubMed ID for the publication, e.g., 11910336.",
     )
     doi = models.CharField(
-        blank=False,
+        blank=True,
         default="",
         max_length=128,
         unique=True,
         verbose_name="Digital Object Identifier (DOI)",
-        help_text=(
-            "The DOI for the publication, e.g., 10.1000/182. "
-            "(Optional for PubMed articles.)"
-        ),
+        help_text="The DOI for the publication, e.g., 10.1000/182.",
     )
     title = models.CharField(
         blank=True,
