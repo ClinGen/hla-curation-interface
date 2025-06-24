@@ -90,5 +90,5 @@ def publication_search(request: HttpRequest) -> HttpResponse:
         model=Publication,
         order_by="pk",
         fields=FIELDS,  # type: ignore
-        main_heading="Search Publications",
+        data_title="Publications",
     )

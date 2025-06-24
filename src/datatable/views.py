@@ -19,7 +19,7 @@ def datatable(
     model: type[Model],
     order_by: str,
     fields: list[dict],
-    main_heading: str,
+    data_title: str,
     template: str = "datatable/view.html",
     partial: str = "datatable/partials/content.html",
 ) -> HttpResponse:
@@ -30,7 +30,7 @@ def datatable(
         model: The model we want a datatable for.
         order_by: The parameter to order the objects by.
         fields: The metadata about the model fields.
-        main_heading: The main heading for the page.
+        data_title: The title of the data used in the main heading and elsewhere.
         template: The full template for the view.
         partial: The partial template for HTMX responses.
     """
@@ -53,7 +53,7 @@ def datatable(
         "page": page,
         "paginator": paginator,
         "fields": fields,
-        "main_heading": main_heading,
+        "data_title": data_title,
     }
 
     if request.headers.get("Hx-Request"):
@@ -72,5 +72,5 @@ def pokemon(request: HttpRequest) -> HttpResponse:
         model=Pokemon,
         order_by="pokedex_number",
         fields=FIELDS,  # type: ignore
-        main_heading="Search Pokémon",
+        data_title="Pokémon",
     )
