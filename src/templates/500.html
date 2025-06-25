@@ -1,0 +1,21 @@
+{% extends "layouts/base.html" %}
+{% block title %}500 Internal Server Error{% endblock %}
+{% block description %}A 500 error occurred in the HLA Curation Interface.{% endblock %}
+{% block main %}
+    <article class="message is-danger mt-6 mb-6">
+        <div class="message-header">
+            <h1 class="title">
+                {% include "common/icon.html" with icon_name="exclamation-octagon" %}
+                500 Internal Server Error
+            </h1>
+        </div>
+        <div class="message-body">
+            Oops, an error occurred. Please try again later. If the issue persists,
+            please email
+            <a href="mailto:helpdesk@clinicalgenome.org">helpdesk@clinicalgenome.org</a>
+            and include detailed information on what you were doing when the error
+            occurred.
+            Return to the <a href="{% url 'home' %}">home page</a>.
+        </div>
+    </article>
+{% endblock %}

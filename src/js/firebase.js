@@ -40,6 +40,41 @@ Common Functions
 */
 
 /**
+ * Extracts the value of a specified query parameter from a given URL.
+ * @param {string} paramName The name of the query parameter to extract.
+ * @param {string} urlString The URL string to parse. Defaults to current window's URL.
+ * @returns {string | null} The extracted parameter value, or null if not found.
+ */
+function extractQueryParameterPath(
+  paramName,
+  urlString = window.location.href,
+) {
+  try {
+    const url = new URL(urlString);
+    const params = new URLSearchParams(url.search);
+    if (params.has(paramName)) {
+      return params.get(paramName);
+    }
+    return null;
+  } catch (error) {
+    message.error("Oops, something went wrong trying to parse the URL.");
+    return null;
+  }
+}
+
+/**
+ * Redirects the user to the next page or the home page.
+ */
+function redirect() {
+  const next = extractQueryParameterPath("next");
+  if (next) {
+    window.location.replace(next);
+  } else {
+    window.location.replace("/");
+  }
+}
+
+/**
  * Gets the user's ID token from the OAuth provider.
  * @param providerString {string} The provider: google.com or microsoft.com.
  * @returns {Promise<string>} The user's ID token.
@@ -61,7 +96,7 @@ async function continueWithProvider(providerString) {
     const idToken = await getIdTokenFromProvider(providerString);
     const data = await verifyIdToken(idToken);
     if (data.valid) {
-      window.location.href = "/";
+      redirect();
     } else {
       message.error(data.message);
     }
@@ -138,7 +173,7 @@ async function signUpWithEmail() {
     }
     const data = await verifyIdToken(idToken);
     if (data.valid) {
-      window.location.href = "/";
+      redirect();
     } else {
       message.error(data.message);
     }
@@ -223,7 +258,7 @@ async function logInWithEmail() {
     const idToken = await getIdTokenFromEmailLogIn();
     const data = await verifyIdToken(idToken);
     if (data.valid) {
-      window.location.href = "/";
+      redirect();
     } else {
       message.error(data.message);
     }

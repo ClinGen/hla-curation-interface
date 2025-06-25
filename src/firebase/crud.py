@@ -16,7 +16,7 @@ def create_firebase_user(uid: str, email: str) -> User:
     """
     user = read_firebase_user(uid)
     if user is None:
-        user = User.objects.create(username=uid, email=email)
+        user = User.objects.create(username=uid, email=email, is_active=False)
     return user
 
 
