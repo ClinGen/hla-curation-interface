@@ -54,3 +54,12 @@ class UserProfile(models.Model):
     def __str__(self) -> str:
         """Returns a string representation of the UserProfile object."""
         return f"{self.user.email}/{self.user.username}"
+
+    @property
+    def can_create(self) -> bool:
+        """Returns whether the user is allowed to create stuff in the HCI."""
+        return (
+            self.user.is_authenticated
+            and self.user.is_active
+            and self.firebase_email_verified
+        )

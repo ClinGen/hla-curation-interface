@@ -125,6 +125,12 @@ custom ``UserProfile`` model that extends the Django ``User`` model. This
 .. automodule:: core.models
    :members:
 
+``core.permissions``
+====================
+
+.. automodule:: core.permissions
+   :members:
+
 ``core.urls``
 =============
 

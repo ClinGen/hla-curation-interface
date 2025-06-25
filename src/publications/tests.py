@@ -1,10 +1,12 @@
 """Houses tests for the publications app."""
 
 from bs4 import BeautifulSoup
+from django.contrib.auth.models import User
 from django.db.models import DateTimeField
 from django.test import Client, TestCase
 from django.urls import reverse
 
+from core.models import UserProfile
 from publications.models import Publication, PublicationTypes
 
 
@@ -12,8 +14,59 @@ class PublicationCreateViewTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = reverse("publication-create")
+        self.active_user = User.objects.create(
+            username="ash",
+            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
+            is_active=True,
+        )
+        self.inactive_user = User.objects.create(
+            username="misty",
+            password="togepi",  # noqa: S106 (Hard-coded for testing.)
+            is_active=False,
+        )
+        self.user_with_unverified_email = User.objects.create(
+            username="brock",
+            password="onix",  # noqa: S106 (Hard-coded for testing.)
+            is_active=True,
+        )
+        UserProfile.objects.create(
+            user=self.user_with_unverified_email,
+            firebase_email_verified=False,
+        )
+        self.user_who_can_create = User.objects.create(
+            username="meowth",
+            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
+            is_active=True,
+        )
+        UserProfile.objects.create(
+            user=self.user_who_can_create,
+            firebase_email_verified=True,
+        )
+
+    def test_redirects_anonymous_user_to_login(self):
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
+
+    def test_permission_denied_if_not_active(self):
+        self.client.force_login(self.inactive_user)
+        # If DEBUG is true, this will print a warning and a stack trace.
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_permission_denied_if_no_user_profile(self):
+        self.client.force_login(self.active_user)
+        # If DEBUG is true, this will print a warning and a stack trace.
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_permission_denied_if_email_not_verified(self):
+        self.client.force_login(self.user_with_unverified_email)
+        # If DEBUG is true, this will print a warning and a stack trace.
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
 
     def test_shows_radio_buttons(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         pubmed_radio = (
@@ -30,6 +83,7 @@ class PublicationCreateViewTest(TestCase):
         self.assertIn("medRxiv", medrxiv_radio)
 
     def test_shows_inputs(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         pubmed_input = soup.find(id="id_pubmed_id")
@@ -38,6 +92,7 @@ class PublicationCreateViewTest(TestCase):
         self.assertIsNotNone(doi_input)
 
     def test_shows_submit_button(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         submit_button = soup.find("button", {"type": "submit"}).get_text().strip()

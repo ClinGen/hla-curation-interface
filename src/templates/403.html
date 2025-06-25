@@ -1,0 +1,31 @@
+{% extends "layouts/base.html" %}
+{% block title %}403 Forbidden{% endblock %}
+{% block description %}A 403 error occurred in the HLA Curation Interface.{% endblock %}
+{% block main %}
+    <article class="message is-warning mt-6 mb-6">
+        <div class="message-header">
+            <h1 class="title">
+                {% include "common/icon.html" with icon_name="exclamation-triangle" %}
+                403 Forbidden
+            </h1>
+        </div>
+        <div class="message-body">
+            {% if not request.user.is_authenticated %}
+                You are not logged in. Please <a href="{% url 'login' %}">log in</a> or
+                <a href="{% url 'signup' %}">sign up</a> to view this page.
+            {% elif not request.user.is_active %}
+                Your user account is not approved for the HLA Curation Interface.
+                Please email
+                <a href="mailto:helpdesk@clinicalgenome.org">helpdesk@clinicalgenome.org</a>
+                to request approval.
+            {% elif not request.user.profile.firebase_email_verified %}
+                Your email is not verified. Please check your inbox for the verification
+                email. If you need to resend the verification email, you can do so
+                <a href="{% url 'view-profile' %}">here</a>.
+            {% else %}
+                You don't have permission to access this page.
+                Return to the <a href="{% url 'home' %}">home page</a>.
+            {% endif %}
+        </div>
+    </article>
+{% endblock %}

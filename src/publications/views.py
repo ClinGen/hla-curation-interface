@@ -4,13 +4,14 @@ from django.http import HttpRequest, HttpResponse
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView
 
+from core.permissions import CreateAccessMixin
 from datatable.constants import FieldTypes, Filters, SortDirections
 from datatable.views import datatable
 from publications.forms import PublicationForm
 from publications.models import Publication, PublicationTypes
 
 
-class PublicationCreateView(CreateView):
+class PublicationCreateView(CreateAccessMixin, CreateView):  # type: ignore
     """Allows the user to create (add) a publication."""
 
     model = Publication

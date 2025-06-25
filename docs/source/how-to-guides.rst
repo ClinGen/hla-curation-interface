@@ -116,3 +116,11 @@ testing the user profile page manually.
 * Click the edit button.
 * Make sure you can change your display name.
 * Make sure you can reset your password.
+
+---------------------------------------
+How to Give a User Creation Permissions
+---------------------------------------
+
+* The user must have an account.
+* An admin must mark the user's ``User`` object as active in the admin site.
+* The user must have their email verified.
