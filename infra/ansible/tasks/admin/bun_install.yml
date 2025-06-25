@@ -1,6 +1,6 @@
 - name: Ensure our JavaScript dependencies are updated
   ansible.builtin.command:
     chdir: "{{ repo_dir }}"
-    cmd: "~/.bun/bin/bun install"
+    cmd: "~/.bun/bin/bun install --frozen-lockfile"
   tags:
     - skip_ansible_lint
