@@ -37,7 +37,7 @@ class CreateAccessMixin(AccessMixin):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         if hasattr(request.user, "profile") and request.user.profile.can_create:
-            return super().dispatch(request, *args, **kwargs)
+            return super().dispatch(request, *args, **kwargs)  # type: ignore
         raise PermissionDenied(PERMISSION_DENIED_MESSAGE)
 
 
