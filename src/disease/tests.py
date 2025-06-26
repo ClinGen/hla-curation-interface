@@ -121,3 +121,87 @@ class DiseaseDetailView(TestCase):
         soup = BeautifulSoup(response.content, "html.parser")
         add_button = soup.find(id="add-button").get_text().strip()
         self.assertIn("Add", add_button)
+
+
+class SearchDiseaseViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.disease_type = DiseaseTypes.MONDO
+        self.mondo_id = "MONDO:123"
+        self.ols_iri = "http://purl.obolibrary.org/obo/MONDO_123"
+        self.name = "acute oran berry intoxication"
+        self.added_at = datetime.datetime.now(tz=datetime.UTC).date().isoformat()
+        self.disease = Disease.objects.create(
+            disease_type=self.disease_type,
+            mondo_id=self.mondo_id,
+            ols_iri=self.ols_iri,
+            name=self.name,
+            added_at=self.added_at,
+        )
+        self.url = reverse("disease-search")
+
+    def test_shows_id_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        id_label = soup.find("label", {"for": "search-pk-input"}).get_text().strip()
+        self.assertEqual(id_label, "ID")
+        id_input = soup.find(id="search-pk-input")
+        self.assertIsNotNone(id_input)
+
+    def test_shows_mondo_id_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        mondo_id_label = (
+            soup.find("label", {"for": "search-mondo-id-input"}).get_text().strip()
+        )
+        self.assertEqual(mondo_id_label, "Mondo ID")
+        mondo_id_input = soup.find(id="search-mondo-id-input")
+        self.assertIsNotNone(mondo_id_input)
+
+    def test_shows_name_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        name_label = (
+            soup.find("label", {"for": "search-disease-name-input"}).get_text().strip()
+        )
+        self.assertEqual(name_label, "Name")
+        name_input = soup.find(id="search-disease-name-input")
+        self.assertIsNotNone(name_input)
+
+    def test_shows_added_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        added_label = (
+            soup.find("label", {"for": "sort-added-at-button"}).get_text().strip()
+        )
+        self.assertEqual(added_label, "Added")
+        added_button = soup.find(id="sort-added-at-button")
+        self.assertIsNotNone(added_button)
+
+    def test_shows_id_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        id_anchor = (
+            soup.find("tbody").find("tr").find_all("td")[0].find("a").get_text().strip()
+        )
+        self.assertIn(str(self.disease.pk), id_anchor)
+
+    def test_shows_mondo_id_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        mondo_id_anchor = (
+            soup.find("tbody").find("tr").find_all("td")[1].find("a").get_text().strip()
+        )
+        self.assertEqual(self.mondo_id, mondo_id_anchor)
+
+    def test_shows_name_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        name = soup.find("tbody").find("tr").find_all("td")[2].get_text().strip()
+        self.assertEqual(self.name, name)
+
+    def test_shows_added_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        added_at = soup.find("tbody").find("tr").find_all("td")[3].get_text().strip()
+        self.assertIn(self.added_at, added_at)

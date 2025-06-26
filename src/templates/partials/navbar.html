@@ -16,6 +16,9 @@
             <div class="navbar-item has-dropdown is-hoverable">
                 <a class="navbar-link">Diseases</a>
                 <div class="navbar-dropdown">
+                    {% with url="disease-search" text="Search" %}
+                        {% include 'partials/navbar_link.html' %}
+                    {% endwith %}
                     {% with url="disease-create" text="Add" %}
                         {% include 'partials/navbar_link.html' %}
                     {% endwith %}

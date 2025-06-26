@@ -78,7 +78,7 @@ FIELDS = [
 
 
 def publication_search(request: HttpRequest) -> HttpResponse:
-    """Returns an interactive datatable for searching publication."""
+    """Returns an interactive datatable for searching publications."""
     return datatable(
         request=request,
         model=Publication,
