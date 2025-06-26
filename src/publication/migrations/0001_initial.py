@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -100,7 +99,7 @@ class Migration(migrations.Migration):
             options={
                 "verbose_name": "Publication",
                 "verbose_name_plural": "Publications",
-                "db_table": "publications",
+                "db_table": "publication",
             },
         ),
     ]

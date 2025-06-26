@@ -1,9 +1,9 @@
-"""Provides forms for the publications app."""
+"""Provides forms for the publication app."""
 
 from django import forms
 from django.forms import ModelForm
 
-from publications.models import Publication
+from publication.models import Publication
 
 
 class PublicationForm(ModelForm):

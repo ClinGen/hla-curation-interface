@@ -1,4 +1,4 @@
-"""Provides views for the publications app."""
+"""Provides views for the publication app."""
 
 from django.http import HttpRequest, HttpResponse
 from django.views.generic import DetailView
@@ -7,8 +7,8 @@ from django.views.generic.edit import CreateView
 from core.permissions import CreateAccessMixin
 from datatable.constants import FieldTypes, Filters, SortDirections
 from datatable.views import datatable
-from publications.forms import PublicationForm
-from publications.models import Publication, PublicationTypes
+from publication.forms import PublicationForm
+from publication.models import Publication, PublicationTypes
 
 
 class PublicationCreateView(CreateAccessMixin, CreateView):  # type: ignore
@@ -16,14 +16,14 @@ class PublicationCreateView(CreateAccessMixin, CreateView):  # type: ignore
 
     model = Publication
     form_class = PublicationForm
-    template_name = "publications/create.html"
+    template_name = "publication/create.html"
 
 
 class PublicationDetailView(DetailView):
     """Shows the user information about a publication."""
 
     model = Publication
-    template_name = "publications/detail.html"
+    template_name = "publication/detail.html"
 
 
 PUBLICATION_TYPE_OPTIONS = [
@@ -78,12 +78,12 @@ FIELDS = [
 
 
 def publication_search(request: HttpRequest) -> HttpResponse:
-    """Returns an interactive datatable for searching publications."""
+    """Returns an interactive datatable for searching publication."""
     return datatable(
         request=request,
         model=Publication,
         order_by="pk",
         fields=FIELDS,  # type: ignore
         data_title="Publications",
-        partial="publications/partials/search.html",
+        partial="publication/partials/search.html",
     )

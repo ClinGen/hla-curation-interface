@@ -1,8 +1,8 @@
-"""Configures the admin site for the publications app."""
+"""Configures the admin site for the publication app."""
 
 from django.contrib import admin
 
-from publications.models import Publication
+from publication.models import Publication
 
 
 @admin.register(Publication)

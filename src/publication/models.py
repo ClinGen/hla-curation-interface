@@ -1,4 +1,4 @@
-"""Houses database models for the publications app."""
+"""Houses database models for the publication app."""
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -85,7 +85,7 @@ class Publication(models.Model):
     class Meta:
         """Provides metadata."""
 
-        db_table = "publications"
+        db_table = "publication"
         verbose_name = "Publication"
         verbose_name_plural = "Publications"
 

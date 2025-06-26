@@ -1,4 +1,4 @@
-"""Houses tests for the publications app."""
+"""Houses tests for the publication app."""
 
 from bs4 import BeautifulSoup
 from django.contrib.auth.models import User
@@ -7,7 +7,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from core.models import UserProfile
-from publications.models import Publication, PublicationTypes
+from publication.models import Publication, PublicationTypes
 
 
 class PublicationCreateViewTest(TestCase):
@@ -167,7 +167,7 @@ class PublicationDetailViewTest(TestCase):
         self.assertIn("Add", add_button)
 
 
-class SearchPublicationsViewTest(TestCase):
+class SearchPublicationViewTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.publication_type = PublicationTypes.PUBMED

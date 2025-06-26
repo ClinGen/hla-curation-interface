@@ -7,6 +7,6 @@ urlpatterns = [
     path("", include("core.urls")),
     path("admin/", admin.site.urls),
     path("firebase/", include("firebase.urls")),
-    path("publications/", include("publications.urls")),
+    path("publication/", include("publication.urls")),
     path("datatable-test/", include("datatable.urls")),
 ]

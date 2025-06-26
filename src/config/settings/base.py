@@ -28,7 +28,7 @@ INSTALLED_APPS = [
     "core",
     "datatable",
     "firebase",
-    "publications",
+    "publication",
 ]
 
 # This needs to be set to "same-origin-allow-popups" for logging in with Google and
