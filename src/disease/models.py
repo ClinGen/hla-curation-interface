@@ -3,6 +3,8 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.http import HttpResponseBase
+from django.urls import reverse
 
 
 class DiseaseTypes:
@@ -37,6 +39,14 @@ class Disease(models.Model):
         verbose_name="Mondo ID",
         help_text="The Mondo Disease Ontology ID, e.g., MONDO:1234567.",
     )
+    ols_iri = models.CharField(
+        blank=True,
+        default="",
+        max_length=88,  # A typical IRI is 44 characters long.
+        verbose_name=(
+            "Ontology Lookup Service (OLS) Internationalized Resource Identifier (IRI)"
+        ),
+    )
     name = models.CharField(
         blank=True,
         default="",
@@ -69,6 +79,10 @@ class Disease(models.Model):
     def __str__(self) -> str:
         """Returns a string representation of the disease."""
         return f"{self.mondo_id}/{self.name}"
+
+    def get_absolute_url(self) -> HttpResponseBase | str | None:
+        """Returns the details page for a specific disease."""
+        return reverse("disease-detail", kwargs={"pk": self.pk})
 
     def clean(self) -> None:
         """Makes sure the disease is valid.

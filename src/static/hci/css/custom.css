@@ -1,14 +1,14 @@
-.publication-logo {
-  width: 100px;
+.entity-type-logo {
+  height: 50px;
   padding: 5px;
 }
 
-.logo-container {
+.footer-logo-container {
   padding: 20px;
 }
 
 @media (prefers-color-scheme: dark) {
-  .logo-container {
+  .footer-logo-container {
     background-color: black;
     padding: 20px;
   }
