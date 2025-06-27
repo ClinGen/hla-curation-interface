@@ -60,4 +60,5 @@ def allele_search(request: HttpRequest) -> HttpResponse:
         order_by="pk",
         fields=FIELDS,
         data_title="Alleles",
+        partial="allele/partials/search.html",
     )
