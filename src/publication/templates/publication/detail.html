@@ -14,7 +14,7 @@
                         <div class="box">
                             <img src="{% static 'hci/img/pubmed-logo.svg' %}"
                                  alt="The PubMed logo."
-                                 class="publication-logo"
+                                 class="entity-type-logo"
                             >
                         </div>
                     </a>
@@ -23,7 +23,7 @@
                         <div class="box">
                             <img src="{% static 'hci/img/biorxiv-logo.png' %}"
                                  alt="The bioRxiv logo."
-                                 class="publication-logo"
+                                 class="entity-type-logo"
                             >
                         </div>
                     </a>
@@ -32,7 +32,7 @@
                         <div class="box">
                             <img src="{% static 'hci/img/medrxiv-logo.png' %}"
                                  alt="The medRxiv logo."
-                                 class="publication-logo"
+                                 class="entity-type-logo"
                             >
                         </div>
                     </a>
@@ -71,8 +71,14 @@
                         </td>
                     </tr>
                 {% endif %}
-                <td>Added</td>
-                <td id="added-at">{{ object.added_at|date:"Y-m-d" }}</td>
+                <tr>
+                    <td>HCI Publication ID</td>
+                    <td>{{ object.pk }}</td>
+                </tr>
+                <tr>
+                    <td>Added</td>
+                    <td id="added-at">{{ object.added_at|date:"Y-m-d" }}</td>
+                </tr>
                 </tbody>
             </table>
         </div>

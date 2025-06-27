@@ -1,0 +1,60 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% block title %}Disease #{{ object.pk }} Details{% endblock %}
+{% block description %}View information about disease {{ object.pk }}.{% endblock %}
+{% block main %}
+    <div class="box mt-6 mb-6">
+        <div class="level">
+            <div class="level-left">
+                <h1 class="title">Disease Details</h1>
+            </div>
+            <div class="level-right">
+                {% if object.disease_type == "MON" %}
+                    <a href="https://mondo.monarchinitiative.org/">
+                        <div class="box">
+                            <img src="{% static 'hci/img/mondo-logo.png' %}"
+                                 alt="The Mondo Disease Ontology logo."
+                                 class="entity-type-logo"
+                            >
+                        </div>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <h2 class="subtitle"><i id="disease-name">{{ disease.name }}</i></h2>
+
+        <div class="block table-container">
+            <table class="table">
+                <tbody>
+                    {% if object.mondo_id %}
+                        <tr>
+                            <td>Mondo ID</td>
+                            <td id="mondo-id">
+                                <a href="{{ object.iri }}">
+                                    {% include "common/icon.html" with icon_name="box-arrow-up-right" %}
+                                    {{ object.mondo_id }}
+                                </a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    <tr>
+                        <td>HCI Disease ID</td>
+                        <td>{{ object.pk }}</td>
+                    </tr>
+                    <tr>
+                        <td>Added</td>
+                        <td id="added-at">{{ object.added_at|date:"Y-m-d" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="buttons">
+            <a href="{% url 'disease-create' %}" class="button" id="add-button">
+                {% include "common/icon.html" with icon_name="plus-circle" %}
+                Add Another Disease
+            </a>
+        </div>
+    </div>
+{% endblock %}

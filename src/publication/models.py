@@ -40,7 +40,7 @@ class Publication(models.Model):
     pubmed_id = models.CharField(
         blank=True,
         default="",
-        max_length=16,
+        max_length=16,  # Most (all?) PubMed IDs are 8 characters long.
         unique=True,
         verbose_name="PubMed ID",
         help_text="The PubMed ID for the publication, e.g., 11910336.",
@@ -109,3 +109,7 @@ class Publication(models.Model):
             raise ValidationError(
                 {"pubmed_id": "The PubMed ID is required for PubMed articles."}
             )
+        if self.publication_type == PublicationTypes.BIORXIV and not self.doi:
+            raise ValidationError({"doi": "The DOI is required for bioRxiv papers."})
+        if self.publication_type == PublicationTypes.MEDRXIV and not self.doi:
+            raise ValidationError({"doi": "The DOI is required for medRxiv papers."})

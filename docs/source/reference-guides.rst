@@ -205,6 +205,48 @@ searching, sorting, and filtering are done on the backend.
 .. automodule:: datatable.views
    :members:
 
+---------------
+The Disease App
+---------------
+
+The disease app houses code related to disease information needed for curations.
+
+``disease.admin``
+=================
+
+.. automodule:: disease.admin
+   :members:
+
+``disease.apps``
+================
+
+.. automodule:: disease.apps
+   :members:
+
+``disease.forms``
+=================
+
+.. automodule:: disease.forms
+   :members:
+
+``disease.models``
+==================
+
+.. automodule:: disease.models
+   :members:
+
+``disease.urls``
+================
+
+.. automodule:: disease.urls
+   :members:
+
+``disease.views``
+=================
+
+.. automodule:: disease.views
+   :members:
+
 ----------------
 The Firebase App
 ----------------

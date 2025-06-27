@@ -1,8 +1,9 @@
 """Houses tests for the publication app."""
 
+import datetime
+
 from bs4 import BeautifulSoup
 from django.contrib.auth.models import User
-from django.db.models import DateTimeField
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -107,7 +108,7 @@ class PublicationDetailViewTest(TestCase):
         self.doi = "10.1000/182"
         self.title = "Common diseases in Pokémon"
         self.author = "Oak"
-        self.added_at = DateTimeField(auto_now_add=True)
+        self.added_at = datetime.datetime.now(tz=datetime.UTC).date().isoformat()
         self.publication = Publication.objects.create(
             publication_type=PublicationTypes.PUBMED,
             pubmed_id=self.pubmed_id,
@@ -121,7 +122,7 @@ class PublicationDetailViewTest(TestCase):
     def test_shows_publication_type(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        publication_type_image = soup.find("img", {"class": "publication-logo"})
+        publication_type_image = soup.find("img", {"class": "entity-type-logo"})
         self.assertIn("PubMed", publication_type_image.attrs["alt"])
 
     def test_shows_title(self):
@@ -152,7 +153,7 @@ class PublicationDetailViewTest(TestCase):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         date = soup.find(id="added-at").get_text().strip()
-        self.assertIsNotNone(date)
+        self.assertEqual(self.added_at, date)
 
     def test_shows_search_button(self):
         response = self.client.get(self.url)
@@ -175,7 +176,7 @@ class SearchPublicationViewTest(TestCase):
         self.doi = "10.1000/182"
         self.title = "Common diseases in Pokémon"
         self.author = "Oak"
-        self.added_at = DateTimeField(auto_now_add=True)
+        self.added_at = datetime.datetime.now(tz=datetime.UTC).date().isoformat()
         self.publication = Publication.objects.create(
             publication_type=PublicationTypes.PUBMED,
             pubmed_id=self.pubmed_id,
@@ -273,4 +274,4 @@ class SearchPublicationViewTest(TestCase):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         added_at = soup.find("tbody").find("tr").find_all("td")[4].get_text().strip()
-        self.assertIsNotNone(added_at)
+        self.assertIn(self.added_at, added_at)
