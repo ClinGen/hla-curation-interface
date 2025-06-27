@@ -6,7 +6,7 @@
     <h1 class="title">Add Allele</h1>
         <form method="post">{% csrf_token %}
             {{ form.non_field_errors }}
-            {% with field=form.car_id %}
+            {% with field=form.name %}
                 {% include "partials/form/input_text.html" %}
             {% endwith %}
             <button type="submit" class="button is-link">

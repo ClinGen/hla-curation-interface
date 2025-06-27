@@ -35,6 +35,14 @@ FIELDS = [
         "placeholder": "",
     },
     {
+        "text": "Name",
+        "param_name": "name",
+        "id": "allele-name",
+        "default_value": "",
+        "type": FieldTypes.SEARCH,
+        "placeholder": "",
+    },
+    {
         "text": "CAR ID",
         "param_name": "car_id",
         "id": "car-id",

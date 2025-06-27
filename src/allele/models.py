@@ -9,8 +9,19 @@ from django.urls import reverse
 class Allele(models.Model):
     """Contains information about an allele that has been added to the HCI."""
 
-    car_id = models.CharField(
+    name = models.CharField(
         blank=False,
+        default="",
+        max_length=60,
+        unique=True,
+        verbose_name="Name",
+        help_text=(
+            "The name of the HLA allele, e.g., DRB3*03:01. "
+            "(The 'HLA-' part can be omitted.)"
+        ),
+    )
+    car_id = models.CharField(
+        blank=True,
         default="",
         max_length=28,  # A CAR allele ID is of the form XAHLA718827727. 14 characters.
         unique=True,

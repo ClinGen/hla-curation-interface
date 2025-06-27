@@ -28,7 +28,7 @@
                                 {% with value=object|get_val:field.param_name %}
                                     {% if field.param_name == "pk" %}
                                         <td>
-                                            <a hx-boost="true" href="{% url 'disease-detail' value %}">
+                                            <a hx-boost="true" href="{% url 'allele-detail' value %}">
                                                 #{{ value }}
                                             </a>
                                         </td>
