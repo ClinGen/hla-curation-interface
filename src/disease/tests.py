@@ -116,6 +116,12 @@ class DiseaseDetailView(TestCase):
         added_at = soup.find(id="added-at").get_text().strip()
         self.assertEqual(self.added_at, added_at)
 
+    def test_shows_search_button(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        search_button = soup.find(id="search-button").get_text().strip()
+        self.assertIn("Search", search_button)
+
     def test_shows_add_button(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
