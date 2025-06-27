@@ -32,7 +32,7 @@ jobs:
             -e "ansible_user=${{ secrets.TEST_SERVER_ANSIBLE_USER }}" \
             -e "repo_url=https://github.com/ClinGen/hla-curation-interface" \
             -e "repo_dir=${{ secrets.TEST_SERVER_REPO_DIR }}" \
-            -e "repo_branch=${{ github.ref_name }}" \
+            -e "repo_branch=${{ github.event.workflow_run.head_branch }}" \
             -e "subdomain=hci-test"
   deploy_to_prod:
     runs-on: ubuntu-latest
