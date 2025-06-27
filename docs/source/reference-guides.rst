@@ -289,3 +289,43 @@ authentication.
 
 .. automodule:: firebase.views
    :members:
+
+-------------------
+The Publication App
+-------------------
+
+``publication.admin``
+=====================
+
+.. automodule:: publication.admin
+   :members:
+
+``publication.apps``
+====================
+
+.. automodule:: publication.apps
+   :members:
+
+``publication.forms``
+=====================
+
+.. automodule:: publication.forms
+   :members:
+
+``publication.models``
+======================
+
+.. automodule:: publication.models
+   :members:
+
+``publication.urls``
+====================
+
+.. automodule:: publication.urls
+   :members:
+
+``publication.views``
+=====================
+
+.. automodule:: publication.views
+   :members:
