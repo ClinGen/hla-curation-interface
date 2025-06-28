@@ -70,8 +70,8 @@ class DiseaseCreateView(TestCase):
         self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        pubmed_input = soup.find(id="id_mondo_id")
-        self.assertIsNotNone(pubmed_input)
+        mondo_input = soup.find(id="id_mondo_id")
+        self.assertIsNotNone(mondo_input)
 
     def test_shows_submit_button(self):
         self.client.force_login(self.user_who_can_create)
