@@ -9,6 +9,6 @@ from allele.models import Allele
 class AlleleAdmin(admin.ModelAdmin):
     """Configures the Allele model in the admin site."""
 
-    list_display = ["car_id", "added_by", "added_at"]
+    list_display = ["name", "car_id", "added_by", "added_at"]
     search_fields = ["car_id"]
     readonly_fields = ["added_by", "added_at"]
