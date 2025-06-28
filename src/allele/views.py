@@ -17,6 +17,16 @@ class AlleleCreateView(CreateAccessMixin, CreateView):  # type: ignore
     form_class = AlleleForm
     template_name = "allele/create.html"
 
+    def form_valid(self, form: AlleleForm) -> HttpResponse:
+        """Makes sure the user who added the allele is recorded.
+
+        Returns:
+             The details page for the allele if the form is valid, or the form with
+             errors if the form isn't valid.
+        """
+        form.instance.added_by = self.request.user
+        return super().form_valid(form)
+
 
 class AlleleDetailView(DetailView):
     """Shows user information about an allele."""

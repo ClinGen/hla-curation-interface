@@ -22,8 +22,8 @@ class Allele(models.Model):
     )
     car_id = models.CharField(
         blank=True,
-        default="",
         max_length=28,  # A CAR allele ID is of the form XAHLA718827727. 14 characters.
+        null=True,
         unique=True,
         verbose_name="CAR ID",
         help_text="ClinGen Allele Registry ID, e.g., XAHLA718827727.",

@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 
+from allele.models import Allele
 from core.models import UserProfile
 
 
@@ -76,3 +77,28 @@ class AlleleCreateView(TestCase):
         soup = BeautifulSoup(response.content, "html.parser")
         submit_button = soup.find("button", {"type": "submit"}).get_text().strip()
         self.assertEqual(submit_button, "Submit")
+
+    def test_creates_allele_with_valid_form_data(self):
+        self.client.force_login(self.user_who_can_create)
+        initial_allele_count = Allele.objects.count()
+        data = {"name": "ASH*01:02:03"}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Allele.objects.count(), initial_allele_count + 1)
+        new_allele = Allele.objects.first()
+        self.assertEqual(new_allele.name, "ASH*01:02:03")
+        self.assertEqual(new_allele.added_by, self.user_who_can_create)
+
+    def test_does_not_create_allele_with_invalid_form_data(self):
+        self.client.force_login(self.user_who_can_create)
+        initial_allele_count = Allele.objects.count()
+        data = {"name": ""}  # The name field is required.
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "allele/create.html")
+        self.assertIn("form", response.context)
+        form = response.context["form"]
+        self.assertFalse(form.is_valid())
+        self.assertIn("name", form.errors)
+        self.assertContains(response, "This field is required.")
+        self.assertEqual(Allele.objects.count(), initial_allele_count)
