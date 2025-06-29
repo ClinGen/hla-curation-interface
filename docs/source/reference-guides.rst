@@ -92,6 +92,48 @@ Branch Naming
 Branches should be named with an issue number followed by a brief description of the
 branch's purpose. For example: ``123-fix-foobar``.
 
+--------------
+The Allele App
+--------------
+
+The allele app houses code related to allele information needed for curations.
+
+``allele.admin``
+================
+
+.. automodule:: allele.admin
+   :members:
+
+``allele.apps``
+===============
+
+.. automodule:: allele.apps
+   :members:
+
+``allele.forms``
+================
+
+.. automodule:: allele.forms
+   :members:
+
+``allele.models``
+=================
+
+.. automodule:: allele.models
+   :members:
+
+``allele.urls``
+===============
+
+.. automodule:: allele.urls
+   :members:
+
+``allele.views``
+================
+
+.. automodule:: allele.views
+   :members:
+
 ------------
 The Core App
 ------------
@@ -293,6 +335,8 @@ authentication.
 -------------------
 The Publication App
 -------------------
+
+The publication app houses code related to publication information needed for curations.
 
 ``publication.admin``
 =====================
