@@ -1,0 +1,60 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% block title %}Allele #{{ object.pk }} Details{% endblock %}
+{% block description %}View information about allele {{ object.pk }}.{% endblock %}
+{% block main %}
+    <div class="box mt-6 mb-6">
+        <div class="level">
+            <div class="level-left">
+                <h1 class="title">Allele Details</h1>
+            </div>
+            <div class="level-right">
+                <a href="https://reg.clinicalgenome.org/">
+                    <div class="box">
+                        <img src="{% static 'hci/img/car-logo.png' %}"
+                             alt="The ClinGen Allele Registry logo."
+                             class="entity-type-logo"
+                        >
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <h2 class="subtitle"><i id="allele-name">{{ object.name }}</i></h2>
+
+        <div class="block table-container">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <td>ClinGen Allele Registry ID</td>
+                        <td id="car-id">
+                            <a href="https://reg.clinicalgenome.org/car/ui/id/xahla/detail/{{ object.car_id }}">
+                                {% include "common/icon.html" with icon_name="box-arrow-up-right" %}
+                                {{ object.car_id }}
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>HCI Allele ID</td>
+                        <td>{{ object.pk }}</td>
+                    </tr>
+                    <tr>
+                        <td>Added</td>
+                        <td id="added-at">{{ object.added_at|date:"Y-m-d" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="buttons">
+            <a href="{% url 'allele-search' %}" class="button" id="search-button">
+                {% include "common/icon.html" with icon_name="search" %}
+                Search Alleles
+            </a>
+            <a href="{% url 'allele-create' %}" class="button" id="add-button">
+                {% include "common/icon.html" with icon_name="plus-circle" %}
+                Add Another Allele
+            </a>
+        </div>
+    </div>
+{% endblock %}

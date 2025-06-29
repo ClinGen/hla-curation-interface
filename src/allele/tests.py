@@ -1,20 +1,18 @@
-"""Houses tests for the disease app."""
-
-import datetime
+"""Houses tests for the allele app."""
 
 from bs4 import BeautifulSoup
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 
+from allele.models import Allele
 from core.models import UserProfile
-from disease.models import Disease, DiseaseTypes
 
 
-class DiseaseCreateView(TestCase):
+class AlleleCreateView(TestCase):
     def setUp(self):
         self.client = Client()
-        self.url = reverse("disease-create")
+        self.url = reverse("allele-create")
         self.active_user = User.objects.create(
             username="ash",
             password="pikachu",  # noqa: S106 (Hard-coded for testing.)
@@ -66,12 +64,12 @@ class DiseaseCreateView(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 403)
 
-    def test_shows_mondo_input(self):
+    def test_shows_allele_name_input(self):
         self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        mondo_input = soup.find(id="id_mondo_id")
-        self.assertIsNotNone(mondo_input)
+        allele_name = soup.find(id="id_name")
+        self.assertIsNotNone(allele_name)
 
     def test_shows_submit_button(self):
         self.client.force_login(self.user_who_can_create)
@@ -80,41 +78,62 @@ class DiseaseCreateView(TestCase):
         submit_button = soup.find("button", {"type": "submit"}).get_text().strip()
         self.assertEqual(submit_button, "Submit")
 
+    def test_creates_allele_with_valid_form_data(self):
+        self.client.force_login(self.user_who_can_create)
+        initial_allele_count = Allele.objects.count()
+        data = {"name": "ASH*01:02:03"}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Allele.objects.count(), initial_allele_count + 1)
+        new_allele = Allele.objects.first()
+        self.assertEqual(new_allele.name, "ASH*01:02:03")
+        self.assertEqual(new_allele.added_by, self.user_who_can_create)
 
-class DiseaseDetailView(TestCase):
+    def test_does_not_create_allele_with_invalid_form_data(self):
+        self.client.force_login(self.user_who_can_create)
+        initial_allele_count = Allele.objects.count()
+        data = {"name": ""}  # The name field is required.
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "allele/create.html")
+        self.assertIn("form", response.context)
+        form = response.context["form"]
+        self.assertFalse(form.is_valid())
+        self.assertIn("name", form.errors)
+        self.assertContains(response, "This field is required.")
+        self.assertEqual(Allele.objects.count(), initial_allele_count)
+
+
+class AlleleDetailView(TestCase):
+    fixtures = ["allele.json"]
+
     def setUp(self):
         self.client = Client()
-        self.disease_type = DiseaseTypes.MONDO
-        self.mondo_id = "MONDO:123"
-        self.ols_iri = "http://purl.obolibrary.org/obo/MONDO_123"
-        self.name = "acute oran berry intoxication"
-        self.added_at = datetime.datetime.now(tz=datetime.UTC).date().isoformat()
-        self.disease = Disease.objects.create(
-            disease_type=self.disease_type,
-            mondo_id=self.mondo_id,
-            ols_iri=self.ols_iri,
-            name=self.name,
-            added_at=self.added_at,
-        )
-        self.url = reverse("disease-detail", kwargs={"pk": self.disease.pk})
+        self.url = reverse("allele-detail", kwargs={"pk": 1})
 
-    def test_shows_disease_type(self):
+    def test_shows_car_logo(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        disease_type_image = soup.find("img", {"class": "entity-type-logo"})
-        self.assertIn("Mondo", disease_type_image.attrs["alt"])
+        car_logo = soup.find("img", {"class": "entity-type-logo"})
+        self.assertIn("ClinGen Allele Registry", car_logo.attrs["alt"])
 
-    def test_shows_mondo_id(self):
+    def test_shows_allele_name(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        mondo_id = soup.find(id="mondo-id").get_text().strip()
-        self.assertEqual(self.mondo_id, mondo_id)
+        allele_name = soup.find(id="allele-name").get_text().strip()
+        self.assertEqual(allele_name, "FOO*01:02:03")
+
+    def test_shows_car_id(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        car_id = soup.find(id="car-id").get_text().strip()
+        self.assertEqual(car_id, "XAHLA123")
 
     def test_shows_added_at(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         added_at = soup.find(id="added-at").get_text().strip()
-        self.assertEqual(self.added_at, added_at)
+        self.assertEqual(added_at, "1970-01-01")
 
     def test_shows_search_button(self):
         response = self.client.get(self.url)
@@ -129,22 +148,12 @@ class DiseaseDetailView(TestCase):
         self.assertIn("Add", add_button)
 
 
-class SearchDiseaseViewTest(TestCase):
+class SearchAlleleViewTest(TestCase):
+    fixtures = ["allele.json"]
+
     def setUp(self):
         self.client = Client()
-        self.disease_type = DiseaseTypes.MONDO
-        self.mondo_id = "MONDO:123"
-        self.ols_iri = "http://purl.obolibrary.org/obo/MONDO_123"
-        self.name = "acute oran berry intoxication"
-        self.added_at = datetime.datetime.now(tz=datetime.UTC).date().isoformat()
-        self.disease = Disease.objects.create(
-            disease_type=self.disease_type,
-            mondo_id=self.mondo_id,
-            ols_iri=self.ols_iri,
-            name=self.name,
-            added_at=self.added_at,
-        )
-        self.url = reverse("disease-search")
+        self.url = reverse("allele-search")
 
     def test_shows_id_in_thead(self):
         response = self.client.get(self.url)
@@ -154,25 +163,25 @@ class SearchDiseaseViewTest(TestCase):
         id_input = soup.find(id="search-pk-input")
         self.assertIsNotNone(id_input)
 
-    def test_shows_mondo_id_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        mondo_id_label = (
-            soup.find("label", {"for": "search-mondo-id-input"}).get_text().strip()
-        )
-        self.assertEqual(mondo_id_label, "Mondo ID")
-        mondo_id_input = soup.find(id="search-mondo-id-input")
-        self.assertIsNotNone(mondo_id_input)
-
-    def test_shows_name_in_thead(self):
+    def test_shows_allele_name_in_thead(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         name_label = (
-            soup.find("label", {"for": "search-disease-name-input"}).get_text().strip()
+            soup.find("label", {"for": "search-allele-name-input"}).get_text().strip()
         )
         self.assertEqual(name_label, "Name")
-        name_input = soup.find(id="search-disease-name-input")
+        name_input = soup.find(id="search-allele-name-input")
         self.assertIsNotNone(name_input)
+
+    def test_shows_car_id_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        car_id_label = (
+            soup.find("label", {"for": "search-car-id-input"}).get_text().strip()
+        )
+        self.assertIsNotNone(car_id_label, "CAR ID")
+        car_id_input = soup.find(id="search-car-id-input")
+        self.assertIsNotNone(car_id_input)
 
     def test_shows_added_in_thead(self):
         response = self.client.get(self.url)
@@ -190,24 +199,24 @@ class SearchDiseaseViewTest(TestCase):
         id_anchor = (
             soup.find("tbody").find("tr").find_all("td")[0].find("a").get_text().strip()
         )
-        self.assertIn(str(self.disease.pk), id_anchor)
+        self.assertIn("1", id_anchor)
 
-    def test_shows_mondo_id_in_tbody(self):
+    def test_shows_allele_name_in_tbody(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        mondo_id_anchor = (
-            soup.find("tbody").find("tr").find_all("td")[1].find("a").get_text().strip()
+        name = soup.find("tbody").find("tr").find_all("td")[1].get_text().strip()
+        self.assertIn("FOO*01:02:03", name)
+
+    def test_shows_car_id_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        car_id = (
+            soup.find("tbody").find("tr").find_all("td")[2].find("a").get_text().strip()
         )
-        self.assertEqual(self.mondo_id, mondo_id_anchor)
-
-    def test_shows_name_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        name = soup.find("tbody").find("tr").find_all("td")[2].get_text().strip()
-        self.assertEqual(self.name, name)
+        self.assertIn("XAHLA123", car_id)
 
     def test_shows_added_in_tbody(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         added_at = soup.find("tbody").find("tr").find_all("td")[3].get_text().strip()
-        self.assertIn(self.added_at, added_at)
+        self.assertIn("1970-01-01", added_at)

@@ -1,0 +1,32 @@
+[
+  {
+    "model": "allele.allele",
+    "pk": 1,
+    "fields": {
+      "name": "FOO*01:02:03",
+      "car_id": "XAHLA123",
+      "added_by": null,
+      "added_at": "1970-01-01"
+    }
+  },
+  {
+    "model": "allele.allele",
+    "pk": 2,
+    "fields": {
+      "name": "BAR*04:05:06",
+      "car_id": "XAHLA456",
+      "added_by": null,
+      "added_at": "1990-01-01"
+    }
+  },
+  {
+    "model": "allele.allele",
+    "pk": 3,
+    "fields": {
+      "name": "BAZ*07:08:09",
+      "car_id": "XAHLA789",
+      "added_by": null,
+      "added_at": "1980-01-01"
+    }
+  }
+]
