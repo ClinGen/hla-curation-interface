@@ -11,7 +11,7 @@ from core.models import UserProfile
 from disease.models import Disease, DiseaseTypes
 
 
-class DiseaseCreateView(TestCase):
+class DiseaseCreateTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = reverse("disease-create")
@@ -106,7 +106,7 @@ class DiseaseCreateView(TestCase):
         self.assertEqual(Disease.objects.count(), initial_disease_count)
 
 
-class DiseaseDetailView(TestCase):
+class DiseaseDetailTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.disease_type = DiseaseTypes.MONDO
@@ -154,7 +154,7 @@ class DiseaseDetailView(TestCase):
         self.assertIn("Add", add_button)
 
 
-class SearchDiseaseViewTest(TestCase):
+class DiseaseSearchTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.disease_type = DiseaseTypes.MONDO

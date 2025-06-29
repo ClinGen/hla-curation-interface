@@ -10,7 +10,7 @@ from disease.forms import DiseaseForm
 from disease.models import Disease
 
 
-class DiseaseCreateView(CreateAccessMixin, CreateView):  # type: ignore
+class DiseaseCreate(CreateAccessMixin, CreateView):  # type: ignore
     """Allows the user to create (add) a disease."""
 
     model = Disease
@@ -28,7 +28,7 @@ class DiseaseCreateView(CreateAccessMixin, CreateView):  # type: ignore
         return super().form_valid(form)
 
 
-class DiseaseDetailView(DetailView):
+class DiseaseDetail(DetailView):
     """Shows user information about a disease."""
 
     model = Disease
