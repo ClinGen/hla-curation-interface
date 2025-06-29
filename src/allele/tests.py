@@ -9,7 +9,7 @@ from allele.models import Allele
 from core.models import UserProfile
 
 
-class AlleleCreateView(TestCase):
+class AlleleCreateTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = reverse("allele-create")
@@ -104,7 +104,7 @@ class AlleleCreateView(TestCase):
         self.assertEqual(Allele.objects.count(), initial_allele_count)
 
 
-class AlleleDetailView(TestCase):
+class AlleleDetailTest(TestCase):
     fixtures = ["allele.json"]
 
     def setUp(self):
@@ -148,7 +148,7 @@ class AlleleDetailView(TestCase):
         self.assertIn("Add", add_button)
 
 
-class SearchAlleleViewTest(TestCase):
+class AlleleSearchTest(TestCase):
     fixtures = ["allele.json"]
 
     def setUp(self):

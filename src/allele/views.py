@@ -10,7 +10,7 @@ from datatable.constants import FieldTypes, SortDirections
 from datatable.views import datatable
 
 
-class AlleleCreateView(CreateAccessMixin, CreateView):  # type: ignore
+class AlleleCreate(CreateAccessMixin, CreateView):  # type: ignore
     """Allows the user to create (add) an allele."""
 
     model = Allele
@@ -28,7 +28,7 @@ class AlleleCreateView(CreateAccessMixin, CreateView):  # type: ignore
         return super().form_valid(form)
 
 
-class AlleleDetailView(DetailView):
+class AlleleDetail(DetailView):
     """Shows user information about an allele."""
 
     model = Allele
