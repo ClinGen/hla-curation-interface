@@ -1,7 +1,5 @@
 """Houses tests for the disease app."""
 
-import datetime
-
 from bs4 import BeautifulSoup
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
@@ -107,21 +105,12 @@ class DiseaseCreateTest(TestCase):
 
 
 class DiseaseDetailTest(TestCase):
+    fixtures = ["disease.json"]
+
     def setUp(self):
         self.client = Client()
         self.disease_type = DiseaseTypes.MONDO
-        self.mondo_id = "MONDO:123"
-        self.ols_iri = "http://purl.obolibrary.org/obo/MONDO_123"
-        self.name = "acute oran berry intoxication"
-        self.added_at = datetime.datetime.now(tz=datetime.UTC).date().isoformat()
-        self.disease = Disease.objects.create(
-            disease_type=self.disease_type,
-            mondo_id=self.mondo_id,
-            ols_iri=self.ols_iri,
-            name=self.name,
-            added_at=self.added_at,
-        )
-        self.url = reverse("disease-detail", kwargs={"pk": self.disease.pk})
+        self.url = reverse("disease-detail", kwargs={"pk": 1})
 
     def test_shows_disease_type(self):
         response = self.client.get(self.url)
@@ -133,13 +122,13 @@ class DiseaseDetailTest(TestCase):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         mondo_id = soup.find(id="mondo-id").get_text().strip()
-        self.assertEqual(self.mondo_id, mondo_id)
+        self.assertEqual(mondo_id, "MONDO:123")
 
     def test_shows_added_at(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         added_at = soup.find(id="added-at").get_text().strip()
-        self.assertEqual(self.added_at, added_at)
+        self.assertEqual(added_at, "2000-01-01")
 
     def test_shows_search_button(self):
         response = self.client.get(self.url)
@@ -155,20 +144,10 @@ class DiseaseDetailTest(TestCase):
 
 
 class DiseaseSearchTest(TestCase):
+    fixtures = ["disease.json"]
+
     def setUp(self):
         self.client = Client()
-        self.disease_type = DiseaseTypes.MONDO
-        self.mondo_id = "MONDO:123"
-        self.ols_iri = "http://purl.obolibrary.org/obo/MONDO_123"
-        self.name = "acute oran berry intoxication"
-        self.added_at = datetime.datetime.now(tz=datetime.UTC).date().isoformat()
-        self.disease = Disease.objects.create(
-            disease_type=self.disease_type,
-            mondo_id=self.mondo_id,
-            ols_iri=self.ols_iri,
-            name=self.name,
-            added_at=self.added_at,
-        )
         self.url = reverse("disease-search")
 
     def test_shows_id_in_thead(self):
@@ -215,7 +194,7 @@ class DiseaseSearchTest(TestCase):
         id_anchor = (
             soup.find("tbody").find("tr").find_all("td")[0].find("a").get_text().strip()
         )
-        self.assertIn(str(self.disease.pk), id_anchor)
+        self.assertIn("1", id_anchor)
 
     def test_shows_mondo_id_in_tbody(self):
         response = self.client.get(self.url)
@@ -223,16 +202,16 @@ class DiseaseSearchTest(TestCase):
         mondo_id_anchor = (
             soup.find("tbody").find("tr").find_all("td")[1].find("a").get_text().strip()
         )
-        self.assertEqual(self.mondo_id, mondo_id_anchor)
+        self.assertEqual("MONDO:123", mondo_id_anchor)
 
     def test_shows_name_in_tbody(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         name = soup.find("tbody").find("tr").find_all("td")[2].get_text().strip()
-        self.assertEqual(self.name, name)
+        self.assertEqual(name, "acute oran berry intoxication")
 
     def test_shows_added_in_tbody(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         added_at = soup.find("tbody").find("tr").find_all("td")[3].get_text().strip()
-        self.assertIn(self.added_at, added_at)
+        self.assertIn("2000-01-01", added_at)
