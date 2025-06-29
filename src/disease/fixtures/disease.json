@@ -1,0 +1,38 @@
+[
+  {
+    "model": "disease.disease",
+    "pk": 1,
+    "fields": {
+      "disease_type": "MON",
+      "mondo_id": "MONDO:123",
+      "ols_iri": "http://purl.obolibrary.org/obo/MONDO_123",
+      "name": "acute oran berry intoxication",
+      "added_by": null,
+      "added_at": "2000-01-01"
+    }
+  },
+  {
+    "model": "disease.disease",
+    "pk": 2,
+    "fields": {
+      "disease_type": "MON",
+      "mondo_id": "MONDO:456",
+      "ols_iri": "http://purl.obolibrary.org/obo/MONDO_456",
+      "name": "acute cheri berry intoxication",
+      "added_by": null,
+      "added_at": "2010-01-01"
+    }
+  },
+  {
+    "model": "disease.disease",
+    "pk": 3,
+    "fields": {
+      "disease_type": "MON",
+      "mondo_id": "MONDO:789",
+      "ols_iri": "http://purl.obolibrary.org/obo/MONDO_789",
+      "name": "acute chesto berry intoxication",
+      "added_by": null,
+      "added_at": "1980-01-01"
+    }
+  }
+]
