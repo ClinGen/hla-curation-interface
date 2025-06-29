@@ -102,3 +102,47 @@ class AlleleCreateView(TestCase):
         self.assertIn("name", form.errors)
         self.assertContains(response, "This field is required.")
         self.assertEqual(Allele.objects.count(), initial_allele_count)
+
+
+class AlleleDetailView(TestCase):
+    fixtures = ["allele.json"]
+
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse("allele-detail", kwargs={"pk": 1})
+
+    def test_shows_car_logo(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        car_logo = soup.find("img", {"class": "entity-type-logo"})
+        self.assertIn("ClinGen Allele Registry", car_logo.attrs["alt"])
+
+    def test_shows_allele_name(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        allele_name = soup.find(id="allele-name").get_text().strip()
+        self.assertEqual(allele_name, "FOO*01:02:03")
+
+    def test_shows_car_id(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        car_id = soup.find(id="car-id").get_text().strip()
+        self.assertEqual(car_id, "XAHLA123")
+
+    def test_shows_added_at(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        added_at = soup.find(id="added-at").get_text().strip()
+        self.assertEqual(added_at, "1970-01-01")
+
+    def test_shows_search_button(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        search_button = soup.find(id="search-button").get_text().strip()
+        self.assertIn("Search", search_button)
+
+    def test_shows_add_button(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        add_button = soup.find(id="add-button").get_text().strip()
+        self.assertIn("Add", add_button)
