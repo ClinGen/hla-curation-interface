@@ -11,7 +11,7 @@ from publication.forms import PublicationForm
 from publication.models import Publication, PublicationTypes
 
 
-class PublicationCreateView(CreateAccessMixin, CreateView):  # type: ignore
+class PublicationCreate(CreateAccessMixin, CreateView):  # type: ignore
     """Allows the user to create (add) a publication."""
 
     model = Publication
@@ -29,7 +29,7 @@ class PublicationCreateView(CreateAccessMixin, CreateView):  # type: ignore
         return super().form_valid(form)
 
 
-class PublicationDetailView(DetailView):
+class PublicationDetail(DetailView):
     """Shows the user information about a publication."""
 
     model = Publication

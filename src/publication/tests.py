@@ -11,7 +11,7 @@ from core.models import UserProfile
 from publication.models import Publication, PublicationTypes
 
 
-class PublicationCreateViewTest(TestCase):
+class PublicationCreateTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = reverse("publication-create")
@@ -126,7 +126,7 @@ class PublicationCreateViewTest(TestCase):
         self.assertEqual(Publication.objects.count(), initial_publication_count)
 
 
-class PublicationDetailViewTest(TestCase):
+class PublicationDetailTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.publication_type = PublicationTypes.PUBMED
@@ -194,7 +194,7 @@ class PublicationDetailViewTest(TestCase):
         self.assertIn("Add", add_button)
 
 
-class SearchPublicationViewTest(TestCase):
+class PublicationSearchTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.publication_type = PublicationTypes.PUBMED
