@@ -146,3 +146,77 @@ class AlleleDetailView(TestCase):
         soup = BeautifulSoup(response.content, "html.parser")
         add_button = soup.find(id="add-button").get_text().strip()
         self.assertIn("Add", add_button)
+
+
+class SearchAlleleViewTest(TestCase):
+    fixtures = ["allele.json"]
+
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse("allele-search")
+
+    def test_shows_id_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        id_label = soup.find("label", {"for": "search-pk-input"}).get_text().strip()
+        self.assertEqual(id_label, "ID")
+        id_input = soup.find(id="search-pk-input")
+        self.assertIsNotNone(id_input)
+
+    def test_shows_allele_name_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        name_label = (
+            soup.find("label", {"for": "search-allele-name-input"}).get_text().strip()
+        )
+        self.assertEqual(name_label, "Name")
+        name_input = soup.find(id="search-allele-name-input")
+        self.assertIsNotNone(name_input)
+
+    def test_shows_car_id_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        car_id_label = (
+            soup.find("label", {"for": "search-car-id-input"}).get_text().strip()
+        )
+        self.assertIsNotNone(car_id_label, "CAR ID")
+        car_id_input = soup.find(id="search-car-id-input")
+        self.assertIsNotNone(car_id_input)
+
+    def test_shows_added_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        added_label = (
+            soup.find("label", {"for": "sort-added-at-button"}).get_text().strip()
+        )
+        self.assertEqual(added_label, "Added")
+        added_button = soup.find(id="sort-added-at-button")
+        self.assertIsNotNone(added_button)
+
+    def test_shows_id_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        id_anchor = (
+            soup.find("tbody").find("tr").find_all("td")[0].find("a").get_text().strip()
+        )
+        self.assertIn("1", id_anchor)
+
+    def test_shows_allele_name_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        name = soup.find("tbody").find("tr").find_all("td")[1].get_text().strip()
+        self.assertIn("FOO*01:02:03", name)
+
+    def test_shows_car_id_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        car_id = (
+            soup.find("tbody").find("tr").find_all("td")[2].find("a").get_text().strip()
+        )
+        self.assertIn("XAHLA123", car_id)
+
+    def test_shows_added_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        added_at = soup.find("tbody").find("tr").find_all("td")[3].get_text().strip()
+        self.assertIn("1970-01-01", added_at)
