@@ -99,6 +99,32 @@ class PublicationCreateViewTest(TestCase):
         submit_button = soup.find("button", {"type": "submit"}).get_text().strip()
         self.assertEqual(submit_button, "Submit")
 
+    def test_creates_publication_with_valid_form_data(self):
+        self.client.force_login(self.user_who_can_create)
+        initial_publication_count = Publication.objects.count()
+        data = {"publication_type": "PUB", "pubmed_id": "123"}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Publication.objects.count(), initial_publication_count + 1)
+        new_publication = Publication.objects.first()
+        self.assertEqual(new_publication.publication_type, "PUB")
+        self.assertEqual(new_publication.pubmed_id, "123")
+        self.assertEqual(new_publication.added_by, self.user_who_can_create)
+
+    def test_does_not_create_publication_with_invalid_form_data(self):
+        self.client.force_login(self.user_who_can_create)
+        initial_publication_count = Publication.objects.count()
+        data = {"publication_type": ""}  # The publication_type field is required.
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "publication/create.html")
+        self.assertIn("form", response.context)
+        form = response.context["form"]
+        self.assertFalse(form.is_valid())
+        self.assertIn("pubmed_id", form.errors)
+        self.assertContains(response, "This field is required.")
+        self.assertEqual(Publication.objects.count(), initial_publication_count)
+
 
 class PublicationDetailViewTest(TestCase):
     def setUp(self):

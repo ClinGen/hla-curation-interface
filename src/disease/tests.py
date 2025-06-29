@@ -80,6 +80,31 @@ class DiseaseCreateView(TestCase):
         submit_button = soup.find("button", {"type": "submit"}).get_text().strip()
         self.assertEqual(submit_button, "Submit")
 
+    def test_creates_disease_with_valid_form_data(self):
+        self.client.force_login(self.user_who_can_create)
+        initial_disease_count = Disease.objects.count()
+        data = {"mondo_id": "MONDO:123"}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Disease.objects.count(), initial_disease_count + 1)
+        new_disease = Disease.objects.first()
+        self.assertEqual(new_disease.mondo_id, "MONDO:123")
+        self.assertEqual(new_disease.added_by, self.user_who_can_create)
+
+    def test_does_not_create_disease_with_invalid_form_data(self):
+        self.client.force_login(self.user_who_can_create)
+        initial_disease_count = Disease.objects.count()
+        data = {"mondo_id": ""}  # The mondo_id field is required.
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "disease/create.html")
+        self.assertIn("form", response.context)
+        form = response.context["form"]
+        self.assertFalse(form.is_valid())
+        self.assertIn("mondo_id", form.errors)
+        self.assertContains(response, "This field is required.")
+        self.assertEqual(Disease.objects.count(), initial_disease_count)
+
 
 class DiseaseDetailView(TestCase):
     def setUp(self):

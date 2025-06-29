@@ -17,6 +17,16 @@ class DiseaseCreateView(CreateAccessMixin, CreateView):  # type: ignore
     form_class = DiseaseForm
     template_name = "disease/create.html"
 
+    def form_valid(self, form: DiseaseForm) -> HttpResponse:
+        """Makes sure the user who added the disease is recorded.
+
+        Returns:
+             The details page for the disease if the form is valid, or the form with
+             errors if the form isn't valid.
+        """
+        form.instance.added_by = self.request.user
+        return super().form_valid(form)
+
 
 class DiseaseDetailView(DetailView):
     """Shows user information about a disease."""
