@@ -39,7 +39,7 @@ class Publication(models.Model):
     )
     pubmed_id = models.CharField(
         blank=True,
-        default="",
+        null=True,
         max_length=16,  # Most (all?) PubMed IDs are 8 characters long.
         unique=True,
         verbose_name="PubMed ID",
@@ -47,7 +47,7 @@ class Publication(models.Model):
     )
     doi = models.CharField(
         blank=True,
-        default="",
+        null=True,
         max_length=128,
         unique=True,
         verbose_name="Digital Object Identifier (DOI)",
