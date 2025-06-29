@@ -18,6 +18,16 @@ class PublicationCreateView(CreateAccessMixin, CreateView):  # type: ignore
     form_class = PublicationForm
     template_name = "publication/create.html"
 
+    def form_valid(self, form: PublicationForm) -> HttpResponse:
+        """Makes sure the user who added the publication is recorded.
+
+        Returns:
+             The details page for the publication if the form is valid, or the form with
+             errors if the form isn't valid.
+        """
+        form.instance.added_by = self.request.user
+        return super().form_valid(form)
+
 
 class PublicationDetailView(DetailView):
     """Shows the user information about a publication."""
