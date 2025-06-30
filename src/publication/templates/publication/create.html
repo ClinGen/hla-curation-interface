@@ -7,13 +7,13 @@
         <form method="post">{% csrf_token %}
             {{ form.non_field_errors }}
             {% with field=form.publication_type %}
-                {% include "partials/form/input_radio.html" %}
+                {% include "common/form/input_radio.html" %}
             {% endwith %}
             {% with field=form.pubmed_id %}
-                {% include "partials/form/input_text.html" %}
+                {% include "common/form/input_text.html" %}
             {% endwith %}
             {% with field=form.doi %}
-                {% include "partials/form/input_text.html" %}
+                {% include "common/form/input_text.html" %}
             {% endwith %}
             <button type="submit" class="button is-link">
                 Submit
