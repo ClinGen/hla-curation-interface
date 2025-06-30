@@ -1,14 +1,12 @@
 """Houses tests for the publication app."""
 
-import datetime
-
 from bs4 import BeautifulSoup
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from core.models import UserProfile
-from publication.models import Publication, PublicationTypes
+from publication.models import Publication
 
 
 class PublicationCreateTest(TestCase):
@@ -127,23 +125,11 @@ class PublicationCreateTest(TestCase):
 
 
 class PublicationDetailTest(TestCase):
+    fixtures = ["publication.json"]
+
     def setUp(self):
         self.client = Client()
-        self.publication_type = PublicationTypes.PUBMED
-        self.pubmed_id = "123"
-        self.doi = "10.1000/182"
-        self.title = "Common diseases in Pokémon"
-        self.author = "Oak"
-        self.added_at = datetime.datetime.now(tz=datetime.UTC).date().isoformat()
-        self.publication = Publication.objects.create(
-            publication_type=PublicationTypes.PUBMED,
-            pubmed_id=self.pubmed_id,
-            doi=self.doi,
-            title=self.title,
-            author=self.author,
-            added_at=self.added_at,
-        )
-        self.url = reverse("publication-detail", kwargs={"pk": self.publication.pk})
+        self.url = reverse("publication-detail", kwargs={"pk": 1})
 
     def test_shows_publication_type(self):
         response = self.client.get(self.url)
@@ -155,31 +141,31 @@ class PublicationDetailTest(TestCase):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         title = soup.find(id="publication-title").get_text().strip()
-        self.assertEqual(self.title, title)
+        self.assertEqual(title, "Diseases in grass type Pokémon in the Kanto region")
 
     def test_shows_author(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        title = soup.find(id="publication-title").get_text().strip()
-        self.assertEqual(self.title, title)
+        author = soup.find(id="author").get_text().strip()
+        self.assertEqual(author, "Oak")
 
     def test_shows_pubmed_id(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         pubmed_id = soup.find(id="pubmed-id").find("a").get_text().strip()
-        self.assertEqual(self.pubmed_id, pubmed_id)
+        self.assertEqual(pubmed_id, "123")
 
     def test_shows_doi(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         doi = soup.find(id="doi").find("a").get_text().strip()
-        self.assertEqual(self.doi, doi)
+        self.assertEqual(doi, "10.1000/123")
 
     def test_shows_date(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         date = soup.find(id="added-at").get_text().strip()
-        self.assertEqual(self.added_at, date)
+        self.assertEqual(date, "1990-01-01")
 
     def test_shows_search_button(self):
         response = self.client.get(self.url)
@@ -195,22 +181,10 @@ class PublicationDetailTest(TestCase):
 
 
 class PublicationSearchTest(TestCase):
+    fixtures = ["publication.json"]
+
     def setUp(self):
         self.client = Client()
-        self.publication_type = PublicationTypes.PUBMED
-        self.pubmed_id = "123"
-        self.doi = "10.1000/182"
-        self.title = "Common diseases in Pokémon"
-        self.author = "Oak"
-        self.added_at = datetime.datetime.now(tz=datetime.UTC).date().isoformat()
-        self.publication = Publication.objects.create(
-            publication_type=PublicationTypes.PUBMED,
-            pubmed_id=self.pubmed_id,
-            doi=self.doi,
-            title=self.title,
-            author=self.author,
-            added_at=self.added_at,
-        )
         self.url = reverse("publication-search")
 
     def test_shows_id_in_thead(self):
@@ -269,7 +243,7 @@ class PublicationSearchTest(TestCase):
         id_anchor = (
             soup.find("tbody").find("tr").find_all("td")[0].find("a").get_text().strip()
         )
-        self.assertIn(str(self.publication.pk), id_anchor)
+        self.assertIn("1", id_anchor)
 
     def test_shows_type_in_tbody(self):
         response = self.client.get(self.url)
@@ -288,16 +262,16 @@ class PublicationSearchTest(TestCase):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         author = soup.find("tbody").find("tr").find_all("td")[2].get_text().strip()
-        self.assertEqual(self.author, author)
+        self.assertEqual(author, "Oak")
 
     def test_shows_title_in_tbody(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         title = soup.find("tbody").find("tr").find_all("td")[3].get_text().strip()
-        self.assertEqual(self.title, title)
+        self.assertEqual(title, "Diseases in grass type Pokémon in the Kanto region")
 
     def test_shows_added_in_tbody(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         added_at = soup.find("tbody").find("tr").find_all("td")[4].get_text().strip()
-        self.assertIn(self.added_at, added_at)
+        self.assertIn("1990-01-01", added_at)
