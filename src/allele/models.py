@@ -52,7 +52,7 @@ class Allele(models.Model):
 
     def __str__(self) -> str:
         """Returns a string representation of the allele."""
-        return f"{self.car_id}"
+        return self.name
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         """Returns the details page for a specific allele."""
