@@ -13,11 +13,12 @@
 </div>
 <script>
     document.addEventListener("htmx:load", () => {
-        const element = document.getElementById("{{ field.id_for_label }}");
+        const select = document.getElementById("{{ field.id_for_label }}");
         const config = {
-            searchEnabled: true,
             itemSelectText: "Press to select.",
+            removeItemButton: true,
+            searchEnabled: true,
         };
-        const choices = new Choices(element, config);
+        const choices = new Choices(select, config);
     });
 </script>

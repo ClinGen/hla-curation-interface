@@ -29,6 +29,10 @@ class Haplotype(models.Model):
         Allele,
         db_table="haplotype_allele_map",
         related_name="haplotypes",
+        help_text=(
+            "The constituent alleles of the haplotype. "
+            "Saved in chromosomal mapping order."
+        ),
     )
     added_by = models.ForeignKey(
         User,
