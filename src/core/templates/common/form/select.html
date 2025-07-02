@@ -5,19 +5,13 @@
     <label class="label">{{ field.label }}</label>
     <div class="has-text-danger">{{ field.errors }}</div>
 {% endif %}
+{% if field.help_text %}
+    <p class="help">{{ field.help_text }}</p>
+{% endif %}
 <div class="field">
-    {% if field.help_text %}
-        <p class="help">{{ field.help_text }}</p>
-    {% endif %}
-    {{ field }}
+    <div class="control">
+        <div class="select">
+            {{ field }}
+        </div>
+    </div>
 </div>
-<script>
-    document.addEventListener("htmx:load", () => {
-        const element = document.getElementById("{{ field.id_for_label }}");
-        const config = {
-            searchEnabled: true,
-            itemSelectText: "Press to select.",
-        };
-        const choices = new Choices(element, config);
-    });
-</script>
