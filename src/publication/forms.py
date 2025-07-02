@@ -15,5 +15,5 @@ class PublicationForm(ModelForm):
         model = Publication
         fields = ["publication_type", "doi", "pubmed_id"]
         widgets = {
-            "publication_type": forms.RadioSelect(),
+            "publication_type": forms.RadioSelect,
         }

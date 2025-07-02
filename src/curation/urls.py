@@ -1,0 +1,9 @@
+"""Configures URLs for the curation app."""
+
+from django.urls import path
+
+from curation import views
+
+urlpatterns = [
+    path("create", views.CurationCreate.as_view(), name="curation-create"),
+]

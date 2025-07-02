@@ -39,6 +39,7 @@ class Curation(models.Model):
         on_delete=models.PROTECT,
         blank=True,
         null=True,
+        help_text="Select the allele for this curation.",
     )
     added_by = models.ForeignKey(
         User,

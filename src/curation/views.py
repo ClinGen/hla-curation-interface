@@ -1,0 +1,26 @@
+"""Provides views for the curation app."""
+
+from django.http import HttpResponse
+from django.views.generic.edit import CreateView
+
+from core.permissions import CreateAccessMixin
+from curation.forms import CurationForm
+from curation.models import Curation
+
+
+class CurationCreate(CreateAccessMixin, CreateView):
+    """Allows the user to create (add) a curation."""
+
+    model = Curation
+    form_class = CurationForm
+    template_name = "curation/create.html"
+
+    def form_valid(self, form: CurationForm) -> HttpResponse:
+        """Makes sure the user who added the curation is recorded.
+
+        Returns:
+             The details page for the curation if the form is valid, or the form with
+             errors if the form isn't valid.
+        """
+        form.instance.added_by = self.request.user
+        return super().form_valid(form)
