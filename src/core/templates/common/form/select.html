@@ -6,12 +6,18 @@
     <div class="has-text-danger">{{ field.errors }}</div>
 {% endif %}
 <div class="field">
-    <div class="control">
-        <div class="select">
-            {{ field }}
-        </div>
-    </div>
     {% if field.help_text %}
         <p class="help">{{ field.help_text }}</p>
     {% endif %}
+    {{ field }}
 </div>
+<script>
+    document.addEventListener("htmx:load", () => {
+        const element = document.getElementById("{{ field.id_for_label }}");
+        const config = {
+            searchEnabled: true,
+            itemSelectText: "Press to select.",
+        };
+        const choices = new Choices(element, config);
+    });
+</script>
