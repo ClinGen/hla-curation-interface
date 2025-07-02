@@ -10,5 +10,5 @@ class AlleleAdmin(admin.ModelAdmin):
     """Configures the Allele model in the admin site."""
 
     list_display = ["name", "car_id", "added_by", "added_at"]
-    search_fields = ["car_id"]
+    search_fields = ["name", "car_id"]
     readonly_fields = ["added_by", "added_at"]
