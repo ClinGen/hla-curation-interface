@@ -5,12 +5,58 @@ from django.db import models
 
 from allele.models import Allele
 
+CHROMOSOMAL_MAPPING_ORDER = {
+    "DPB2": 0,
+    "DPA2": 1,
+    "DPB1": 2,
+    "DPA1": 3,
+    "DOA": 4,
+    "DMA": 5,
+    "DMB": 6,
+    "Z": 7,
+    "TAP1": 8,
+    "TAP2": 9,
+    "DOB": 10,
+    "DQB2": 11,
+    "DQA2": 12,
+    "DQB3": 13,
+    "DQB1": 14,
+    "DQA1": 15,
+    "C": 16,
+    "B": 17,
+    "S": 18,
+    "MICA": 19,
+    "MICB": 20,
+    "DRA": 21,
+    "DRB9": 22,
+    "DRB3..DRB8": 23,
+    "DRB2": 24,
+    "DRB1": 25,
+    "E": 26,
+    "N": 27,
+    "L": 28,
+    "J": 29,
+    "R": 30,
+    "Y": 31,
+    "W": 32,
+    "A": 33,
+    "U": 34,
+    "K": 35,
+    "T": 36,
+    "H": 37,
+    "G": 38,
+    "P": 39,
+    "V": 40,
+    "F": 41,
+    "HFE": 42,
+}
+
 
 class Haplotype(models.Model):
     """Contains information about a haplotype that has been added to the HCI."""
 
     name = models.CharField(
-        blank=False,
+        blank=True,
         default="",
         max_length=300,
         unique=True,
