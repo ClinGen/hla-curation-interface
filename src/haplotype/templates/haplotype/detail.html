@@ -47,6 +47,10 @@
         </div>
 
         <div class="buttons">
+            <a href="{% url 'haplotype-search' %}" class="button" id="search-button">
+                {% include "common/icon.html" with icon_name="search" %}
+                Search Haplotypes
+            </a>
             <a href="{% url 'haplotype-create' %}" class="button" id="add-button">
                 {% include "common/icon.html" with icon_name="plus-circle" %}
                 Add Another Haplotype

@@ -62,4 +62,5 @@ def haplotype_search(request: HttpRequest) -> HttpResponse:
         order_by="pk",
         fields=FIELDS,  # type: ignore
         data_title="Haplotypes",
+        partial="haplotype/partials/search.html",
     )
