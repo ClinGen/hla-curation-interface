@@ -38,6 +38,13 @@ class Haplotype(models.Model):
         help_text="When the haplotype was added.",
     )
 
+    class Meta:
+        """Provides metadata."""
+
+        db_table = "haplotype"
+        verbose_name = "Haplotype"
+        verbose_name_plural = "Haplotypes"
+
     def __str__(self) -> str:
         """Returns a string representation of a specific haplotype."""
         return self.name
