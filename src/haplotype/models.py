@@ -49,7 +49,7 @@ class Haplotype(models.Model):
 
     def __str__(self) -> str:
         """Returns a string representation of a specific haplotype."""
-        return self.name
+        return f"Haplotype #{self.pk}"
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         """Returns the details page for a specific haplotype."""

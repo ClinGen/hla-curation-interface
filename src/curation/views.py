@@ -8,7 +8,7 @@ from curation.forms import CurationForm
 from curation.models import Curation
 
 
-class CurationCreate(CreateAccessMixin, CreateView):
+class CurationCreate(CreateAccessMixin, CreateView):  # type: ignore
     """Allows the user to create (add) a curation."""
 
     model = Curation
