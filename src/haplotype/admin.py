@@ -9,6 +9,6 @@ from haplotype.models import Haplotype
 class HaplotypeAdmin(admin.ModelAdmin):
     """Configures the Haplotype model in the admin site."""
 
-    list_display = ["name", "car_id", "added_by", "added_at"]
-    search_fields = ["name", "car_id"]
+    list_display = ["car_id", "added_by", "added_at"]
+    search_fields = ["car_id"]
     readonly_fields = ["added_by", "added_at"]
