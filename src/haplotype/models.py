@@ -2,6 +2,8 @@
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.http import HttpResponseBase
+from django.urls import reverse
 
 from allele.models import Allele
 
@@ -48,3 +50,7 @@ class Haplotype(models.Model):
     def __str__(self) -> str:
         """Returns a string representation of a specific haplotype."""
         return self.name
+
+    def get_absolute_url(self) -> HttpResponseBase | str | None:
+        """Returns the details page for a specific haplotype."""
+        return reverse("haplotype-detail", kwargs={"pk": self.pk})
