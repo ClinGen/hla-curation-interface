@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from allele.models import Allele
+from haplotype.models import Haplotype
 
 
 class CurationTypes:
@@ -36,10 +37,17 @@ class Curation(models.Model):
     )
     allele = models.ForeignKey(
         Allele,
-        on_delete=models.PROTECT,
         blank=True,
         null=True,
+        on_delete=models.PROTECT,
         help_text="Select the allele for this curation.",
+    )
+    haplotype = models.ForeignKey(
+        Haplotype,
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+        help_text="Select the haplotype for this curation.",
     )
     added_by = models.ForeignKey(
         User,
