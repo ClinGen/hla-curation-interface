@@ -110,6 +110,12 @@ The allele app houses code related to allele information needed for curations.
 .. automodule:: allele.apps
    :members:
 
+``allele.clients``
+==================
+
+.. automodule:: allele.clients
+   :members:
+
 ``allele.forms``
 ================
 

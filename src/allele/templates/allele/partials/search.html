@@ -34,7 +34,10 @@
                                         </td>
                                     {% elif field.param_name == "car_id" %}
                                         <td>
-                                            <a href="https://reg.clinicalgenome.org/car/ui/id/xahla/detail/{{ object.car_id }}">
+                                            <a href="https://reg.clinicalgenome.org/car/ui/id/xahla/detail/{{ object.car_id }}"
+                                               target="_blank"
+                                               rel="noopener noreferrer"
+                                            >
                                                 {% include "common/icon.html" with icon_name="box-arrow-up-right" %}
                                                 {{ value }}
                                             </a>

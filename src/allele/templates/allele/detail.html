@@ -9,7 +9,7 @@
                 <h1 class="title">Allele Details</h1>
             </div>
             <div class="level-right">
-                <a href="https://reg.clinicalgenome.org/">
+                <a href="https://reg.clinicalgenome.org/" target="_blank" rel="noopener noreferrer">
                     <div class="box">
                         <img src="{% static 'hci/img/car-logo.png' %}"
                              alt="The ClinGen Allele Registry logo."
@@ -28,7 +28,10 @@
                     <tr>
                         <td>ClinGen Allele Registry ID</td>
                         <td id="car-id">
-                            <a href="https://reg.clinicalgenome.org/car/ui/id/xahla/detail/{{ object.car_id }}">
+                            <a href="https://reg.clinicalgenome.org/car/ui/id/xahla/detail/{{ object.car_id }}"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                            >
                                 {% include "common/icon.html" with icon_name="box-arrow-up-right" %}
                                 {{ object.car_id }}
                             </a>

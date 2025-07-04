@@ -1,5 +1,7 @@
 """Houses tests for the allele app."""
 
+from unittest.mock import MagicMock, patch
+
 from bs4 import BeautifulSoup
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
@@ -78,16 +80,38 @@ class AlleleCreateTest(TestCase):
         submit_button = soup.find("button", {"type": "submit"}).get_text().strip()
         self.assertEqual(submit_button, "Submit")
 
-    def test_creates_allele_with_valid_form_data(self):
+    @patch("allele.views.fetch_allele_data")
+    def test_creates_allele_with_valid_form_data(
+        self, mock_fetch_allele_data: MagicMock
+    ):
         self.client.force_login(self.user_who_can_create)
         initial_allele_count = Allele.objects.count()
         data = {"name": "ASH*01:02:03"}
+        mock_fetch_allele_data.return_value = [  # Mock the CAR API response.
+            {
+                "@id": "https://reg.clinicalgenome.org/allele/XAHLA123",
+                "hlaFields": [
+                    {
+                        "alleleGroup": "01",
+                        "descriptor": "ASH*01:02:03",
+                        "gene": "ASH",
+                        "hlaProtein": "02",
+                        "synonDnaSub": "03",
+                    }
+                ],
+                "id": "XAHLA123",
+                "type": "hla",
+            }
+        ]
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Allele.objects.count(), initial_allele_count + 1)
         new_allele = Allele.objects.first()
-        self.assertEqual(new_allele.name, "ASH*01:02:03")
-        self.assertEqual(new_allele.added_by, self.user_who_can_create)
+        self.assertIsNotNone(new_allele)
+        if new_allele:
+            self.assertEqual(new_allele.name, "ASH*01:02:03")
+            self.assertEqual(new_allele.car_id, "XAHLA123")
+            self.assertEqual(new_allele.added_by, self.user_who_can_create)
 
     def test_does_not_create_allele_with_invalid_form_data(self):
         self.client.force_login(self.user_who_can_create)
