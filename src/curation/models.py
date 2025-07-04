@@ -84,6 +84,9 @@ class Curation(models.Model):
     def clean(self) -> None:
         """Makes sure the curation has an allele or haplotype.
 
+        Also makes sure that haplotype information isn't added to an allele curation
+        and vice versa.
+
         Raises:
             ValidationError: When the curation type is allele but the allele for the
                              curation is not provided. Same for haplotype.
@@ -97,3 +100,7 @@ class Curation(models.Model):
             raise ValidationError(
                 {"haplotype": "A haplotype is required for a haplotype curation."}
             )
+        if self.curation_type == CurationTypes.ALLELE and self.haplotype:
+            self.haplotype = None
+        if self.curation_type == CurationTypes.HAPLOTYPE and self.allele:
+            self.allele = None
