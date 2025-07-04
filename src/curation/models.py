@@ -3,6 +3,8 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.http import HttpResponseBase
+from django.urls import reverse
 
 from allele.models import Allele
 from haplotype.models import Haplotype
@@ -75,15 +77,23 @@ class Curation(models.Model):
         """Returns a string representation of the curation."""
         return f"Curation #{self.pk} ({self.curation_type})"
 
+    def get_absolute_url(self) -> HttpResponseBase | str | None:
+        """Returns the details page for a specific publication."""
+        return reverse("curation-detail", kwargs={"pk": self.pk})
+
     def clean(self) -> None:
-        """Makes sure an allele curation has an allele.
+        """Makes sure the curation has an allele or haplotype.
 
         Raises:
             ValidationError: When the curation type is allele but the allele for the
-                             curation is not provided.
+                             curation is not provided. Same for haplotype.
         """
         super().clean()
         if self.curation_type == CurationTypes.ALLELE and not self.allele:
             raise ValidationError(
-                {"allele": "An allele is required for allele curations."}
+                {"allele": "An allele is required for an allele curation."}
+            )
+        if self.curation_type == CurationTypes.HAPLOTYPE and not self.haplotype:
+            raise ValidationError(
+                {"haplotype": "A haplotype is required for a haplotype curation."}
             )

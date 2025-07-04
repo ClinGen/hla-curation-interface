@@ -1,6 +1,7 @@
 """Provides views for the curation app."""
 
 from django.http import HttpResponse
+from django.views.generic import DetailView
 from django.views.generic.edit import CreateView
 
 from core.permissions import CreateAccessMixin
@@ -24,3 +25,10 @@ class CurationCreate(CreateAccessMixin, CreateView):  # type: ignore
         """
         form.instance.added_by = self.request.user
         return super().form_valid(form)
+
+
+class CurationDetail(DetailView):
+    """Shows the user information about a curation."""
+
+    model = Curation
+    template_name = "curation/detail.html"

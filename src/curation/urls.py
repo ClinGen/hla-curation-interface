@@ -6,4 +6,5 @@ from curation import views
 
 urlpatterns = [
     path("create", views.CurationCreate.as_view(), name="curation-create"),
+    path("detail/<int:pk>", views.CurationDetail.as_view(), name="curation-detail"),
 ]
