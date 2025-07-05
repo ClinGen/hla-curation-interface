@@ -1,5 +1,7 @@
 """Houses tests for the publication app."""
 
+from unittest.mock import MagicMock, patch
+
 from bs4 import BeautifulSoup
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
@@ -97,17 +99,43 @@ class PublicationCreateTest(TestCase):
         submit_button = soup.find("button", {"type": "submit"}).get_text().strip()
         self.assertEqual(submit_button, "Submit")
 
-    def test_creates_publication_with_valid_form_data(self):
+    @patch("publication.views.fetch_pubmed_data")
+    def test_creates_publication_with_valid_form_data(
+        self, mock_fetch_pubmed_data: MagicMock
+    ):
         self.client.force_login(self.user_who_can_create)
         initial_publication_count = Publication.objects.count()
         data = {"publication_type": "PUB", "pubmed_id": "123"}
+        mock_pubmed_response = """
+<PubmedArticleSet>
+  <PubmedArticle>
+    <MedlineCitation>
+      <Article>
+        <ArticleTitle>Common diseases in Pokémon</ArticleTitle>
+        <AuthorList CompleteYN="Y">
+          <Author ValidYN="Y">
+            <LastName>Oak</LastName>
+          </Author>
+          <Author ValidYN="Y">
+            <LastName>Birch</LastName>
+          </Author>
+        </AuthorList>
+      </Article>
+    </MedlineCitation>
+  </PubmedArticle>
+</PubmedArticleSet>
+        """
+        mock_fetch_pubmed_data.return_value = BeautifulSoup(mock_pubmed_response, "xml")
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Publication.objects.count(), initial_publication_count + 1)
         new_publication = Publication.objects.first()
-        self.assertEqual(new_publication.publication_type, "PUB")
-        self.assertEqual(new_publication.pubmed_id, "123")
-        self.assertEqual(new_publication.added_by, self.user_who_can_create)
+        self.assertIsNotNone(new_publication)
+        self.assertEqual(new_publication.publication_type, "PUB")  # type: ignore[union-attr]
+        self.assertEqual(new_publication.pubmed_id, "123")  # type: ignore[union-attr]
+        self.assertEqual(new_publication.added_by, self.user_who_can_create)  # type: ignore[union-attr]
+        self.assertEqual(new_publication.author, "Oak")  # type: ignore[union-attr]
+        self.assertEqual(new_publication.title, "Common diseases in Pokémon")  # type: ignore[union-attr]
 
     def test_does_not_create_publication_with_invalid_form_data(self):
         self.client.force_login(self.user_who_can_create)

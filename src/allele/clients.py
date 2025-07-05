@@ -22,7 +22,6 @@ def fetch_allele_data(name: str, timeout: int = 5) -> list[dict] | None:
     try:
         response = requests.get(f"{CAR_URL}/{name}", timeout=timeout)
         response.raise_for_status()
-        return response.json()
     except (
         requests.exceptions.ConnectionError,
         requests.exceptions.HTTPError,
@@ -34,6 +33,8 @@ def fetch_allele_data(name: str, timeout: int = 5) -> list[dict] | None:
         message = "Unable to get allele data from CAR"
         logger.exception(message)
         return None
+    else:
+        return response.json()
 
 
 def get_car_id(data: list[dict] | None) -> str | None:

@@ -5,9 +5,11 @@ description = "The HLA Curation Interface (HCI) is a tool designed to facilitate
 readme = "README.rst"
 requires-python = ">=3.13"
 dependencies = [
+    "beautifulsoup4>=4.13.4",
     "django>=5.2.1",
     "firebase-admin>=6.8.0",
     "gunicorn>=23.0.0",
+    "lxml>=6.0.0",
     "python-dotenv>=1.1.0",
     "requests>=2.32.3",
     "sentry-sdk[django]>=2.29.1",
@@ -24,8 +26,8 @@ dev = [
     "mypy>=1.15.0",
     "ruff>=0.11.11",
     "sphinx>=8.2.3",
-    "beautifulsoup4>=4.13.4",
     "types-requests>=2.32.4.20250611",
+    "types-lxml>=2025.3.30",
 ]
 
 [tool.ruff]

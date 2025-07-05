@@ -108,10 +108,9 @@ class AlleleCreateTest(TestCase):
         self.assertEqual(Allele.objects.count(), initial_allele_count + 1)
         new_allele = Allele.objects.first()
         self.assertIsNotNone(new_allele)
-        if new_allele:
-            self.assertEqual(new_allele.name, "ASH*01:02:03")
-            self.assertEqual(new_allele.car_id, "XAHLA123")
-            self.assertEqual(new_allele.added_by, self.user_who_can_create)
+        self.assertEqual(new_allele.name, "ASH*01:02:03")  # type: ignore[union-attr]
+        self.assertEqual(new_allele.car_id, "XAHLA123")  # type: ignore[union-attr]
+        self.assertEqual(new_allele.added_by, self.user_who_can_create)  # type: ignore[union-attr]
 
     def test_does_not_create_allele_with_invalid_form_data(self):
         self.client.force_login(self.user_who_can_create)

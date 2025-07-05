@@ -23,7 +23,6 @@ def fetch_disease_data(mondo_id: str, timeout: int = 5) -> dict | None:
         mondo_id = mondo_id.replace(":", "_")
         response = requests.get(f"{MONDO_URL}/{mondo_id}", timeout=timeout)
         response.raise_for_status()
-        return response.json()
     except (
         requests.exceptions.ConnectionError,
         requests.exceptions.HTTPError,
@@ -35,6 +34,8 @@ def fetch_disease_data(mondo_id: str, timeout: int = 5) -> dict | None:
         message = "Unable to get disease data from OLS"
         logger.exception(message)
         return None
+    else:
+        return response.json()
 
 
 def get_name(data: dict) -> str:
@@ -44,7 +45,7 @@ def get_name(data: dict) -> str:
         data: The data fetched from the OLS.
 
     Returns:
-        The disease name in the data if present or None otherwise.
+        The disease name in the data if present or an empty string otherwise.
     """
     name = ""
     if (
@@ -66,7 +67,7 @@ def get_iri(data: dict) -> str:
         data: The data fetched from the OLS.
 
     Returns:
-        The IRI in the data if present or None otherwise.
+        The IRI in the data if present or an empty string otherwise.
     """
     iri = ""
     if (

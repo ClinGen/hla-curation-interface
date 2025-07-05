@@ -1,12 +1,15 @@
 """Provides views for the publication app."""
 
+from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView
 
 from core.permissions import CreateAccessMixin
 from datatable.constants import FieldTypes, Filters, SortDirections
 from datatable.views import datatable
+from publication.clients import fetch_pubmed_data, get_pubmed_author, get_pubmed_title
 from publication.forms import PublicationForm
 from publication.models import Publication, PublicationTypes
 
@@ -25,8 +28,19 @@ class PublicationCreate(CreateAccessMixin, CreateView):  # type: ignore
              The details page for the publication if the form is valid, or the form with
              errors if the form isn't valid.
         """
-        form.instance.added_by = self.request.user
-        return super().form_valid(form)
+        if form.instance.publication_type == PublicationTypes.PUBMED:
+            pubmed_data = fetch_pubmed_data(form.instance.pubmed_id)
+            if pubmed_data:
+                form.instance.author = get_pubmed_author(pubmed_data)
+                form.instance.title = get_pubmed_title(pubmed_data)
+                form.instance.added_by = self.request.user
+                return super().form_valid(form)
+        message = (
+            "Oops, something went wrong trying to fetch data from PubMed. "
+            "Please try again later."
+        )
+        messages.warning(self.request, message)
+        return redirect("disease-create")
 
 
 class PublicationDetail(DetailView):
