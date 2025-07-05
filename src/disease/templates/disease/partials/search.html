@@ -34,7 +34,7 @@
                                         </td>
                                     {% elif field.param_name == "mondo_id" %}
                                         <td>
-                                            <a href="{{ object.iri }}">
+                                            <a href="{{ object.iri }}" target="_blank" rel="noopener noreferrer">
                                                 {% include "common/icon.html" with icon_name="box-arrow-up-right" %}
                                                 {{ value }}
                                             </a>

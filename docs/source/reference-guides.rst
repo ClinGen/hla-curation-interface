@@ -271,6 +271,12 @@ The disease app houses code related to disease information needed for curations.
 .. automodule:: disease.apps
    :members:
 
+``disease.clients``
+===================
+
+.. automodule:: disease.clients
+   :members:
+
 ``disease.forms``
 =================
 

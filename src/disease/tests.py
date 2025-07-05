@@ -1,5 +1,7 @@
 """Houses tests for the disease app."""
 
+from unittest.mock import MagicMock, patch
+
 from bs4 import BeautifulSoup
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
@@ -78,16 +80,35 @@ class DiseaseCreateTest(TestCase):
         submit_button = soup.find("button", {"type": "submit"}).get_text().strip()
         self.assertEqual(submit_button, "Submit")
 
-    def test_creates_disease_with_valid_form_data(self):
+    @patch("disease.views.fetch_disease_data")
+    def test_creates_disease_with_valid_form_data(
+        self, mock_fetch_disease_data: MagicMock
+    ):
         self.client.force_login(self.user_who_can_create)
         initial_disease_count = Disease.objects.count()
         data = {"mondo_id": "MONDO:123"}
+        mock_fetch_disease_data.return_value = {  # Mock the OLS API response.
+            "_embedded": {
+                "terms": [
+                    {
+                        "iri": "http://purl.obolibrary.org/obo/MONDO_123",
+                        "label": "acute oran berry intoxication",
+                    }
+                ]
+            }
+        }
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Disease.objects.count(), initial_disease_count + 1)
         new_disease = Disease.objects.first()
-        self.assertEqual(new_disease.mondo_id, "MONDO:123")
-        self.assertEqual(new_disease.added_by, self.user_who_can_create)
+        self.assertIsNotNone(new_disease)
+        if new_disease:
+            self.assertEqual(new_disease.mondo_id, "MONDO:123")
+            self.assertEqual(new_disease.added_by, self.user_who_can_create)
+            self.assertEqual(new_disease.name, "acute oran berry intoxication")
+            self.assertEqual(
+                new_disease.iri, "http://purl.obolibrary.org/obo/MONDO_123"
+            )
 
     def test_does_not_create_disease_with_invalid_form_data(self):
         self.client.force_login(self.user_who_can_create)

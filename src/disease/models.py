@@ -39,13 +39,11 @@ class Disease(models.Model):
         verbose_name="Mondo ID",
         help_text="The Mondo Disease Ontology ID, e.g., MONDO:1234567.",
     )
-    ols_iri = models.CharField(
+    iri = models.CharField(
         blank=True,
         default="",
-        max_length=88,  # A typical IRI is 44 characters long.
-        verbose_name=(
-            "Ontology Lookup Service (OLS) Internationalized Resource Identifier (IRI)"
-        ),
+        max_length=88,  # A typical disease IRI is 44 characters long.
+        verbose_name="Internationalized Resource Identifier (IRI)",
     )
     name = models.CharField(
         blank=True,

@@ -10,7 +10,7 @@
             </div>
             <div class="level-right">
                 {% if object.disease_type == "MON" %}
-                    <a href="https://mondo.monarchinitiative.org/">
+                    <a href="https://mondo.monarchinitiative.org/" target="_blank" rel="noopener noreferrer">
                         <div class="box">
                             <img src="{% static 'hci/img/mondo-logo.png' %}"
                                  alt="The Mondo Disease Ontology logo."
@@ -31,7 +31,7 @@
                         <tr>
                             <td>Mondo ID</td>
                             <td id="mondo-id">
-                                <a href="{{ object.iri }}">
+                                <a href="{{ object.iri }}" target="_blank" rel="noopener noreferrer">
                                     {% include "common/icon.html" with icon_name="box-arrow-up-right" %}
                                     {{ object.mondo_id }}
                                 </a>
