@@ -1,0 +1,56 @@
+{% load custom_filters %}
+<div id="datatable-content" >
+    <div class="box mt-6 mb-6">
+        <h1 class="title" id="main-heading">Search {{ data_title }}</h1>
+        {% include "datatable/partials/number.html" %}
+        {% include "datatable/partials/pagination.html" %}
+        {% include "datatable/partials/clear.html" %}
+        <div class="table-container">
+            <table class="table is-fullwidth">
+                <thead>
+                <tr>
+                    {% for field in fields %}
+                        {% if field.type == "search" %}
+                            <th>{% include "datatable/partials/queries/search.html" %}</th>
+                        {% elif field.type == "sort" %}
+                            <th>{% include "datatable/partials/queries/sort.html" %}</th>
+                        {% elif field.type == "filter" %}
+                            <th>{% include "datatable/partials/queries/filter.html" %}</th>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                {% if page %}
+                    {% for object in page.object_list %}
+                        <tr>
+                            {% for field in fields %}
+                                {% with value=object|get_val:field.param_name %}
+                                    {% if field.param_name == "pk" %}
+                                        <td>
+                                            <a hx-boost="true" href="{% url 'haplotype-detail' value %}">
+                                                #{{ value }}
+                                            </a>
+                                        </td>
+                                    {% elif field.param_name == "added_at" %}
+                                        <td>
+                                            {{ value|date:"Y-m-d H:i" }}
+                                        </td>
+                                    {% else %}
+                                        <td>{{ value }}</td>
+                                    {% endif %}
+                                {% endwith %}
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="{{ fields|length }}">No results.</td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+        {% include "datatable/partials/pagination.html" %}
+    </div>
+</div>

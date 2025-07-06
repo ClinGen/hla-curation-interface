@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "datatable",
     "disease",
     "firebase",
+    "haplotype",
     "publication",
 ]
 

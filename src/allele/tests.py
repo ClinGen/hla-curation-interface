@@ -9,6 +9,7 @@ from django.urls import reverse
 
 from allele.models import Allele
 from core.models import UserProfile
+from haplotype.models import Haplotype
 
 
 class AlleleCreateTest(TestCase):
@@ -128,7 +129,7 @@ class AlleleCreateTest(TestCase):
 
 
 class AlleleDetailTest(TestCase):
-    fixtures = ["allele.json"]
+    fixtures = ["test_alleles.json"]
 
     def setUp(self):
         self.client = Client()
@@ -143,19 +144,19 @@ class AlleleDetailTest(TestCase):
     def test_shows_allele_name(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        allele_name = soup.find(id="allele-name").get_text().strip()
-        self.assertEqual(allele_name, "FOO*01:02:03")
+        allele_name = soup.find(id="allele-1-name").get_text().strip()
+        self.assertEqual(allele_name, "A*01:02:03")
 
     def test_shows_car_id(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        car_id = soup.find(id="car-id").get_text().strip()
+        car_id = soup.find(id="allele-1-car-id").get_text().strip()
         self.assertEqual(car_id, "XAHLA123")
 
     def test_shows_added_at(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        added_at = soup.find(id="added-at").get_text().strip()
+        added_at = soup.find(id="allele-1-added-at").get_text().strip()
         self.assertEqual(added_at, "1970-01-01")
 
     def test_shows_search_button(self):
@@ -170,9 +171,23 @@ class AlleleDetailTest(TestCase):
         add_button = soup.find(id="add-button").get_text().strip()
         self.assertIn("Add", add_button)
 
+    def test_shows_haplotype(self):
+        allele_1 = Allele.objects.get(pk=1)
+        allele_2 = Allele.objects.get(pk=2)
+        haplotype_name = allele_1.name + "~" + allele_2.name
+        haplotype = Haplotype.objects.create(name=haplotype_name)
+        haplotype.alleles.add(allele_1)
+        haplotype.alleles.add(allele_2)
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        haplotype_anchor = soup.find(id="haplotype-anchor").get_text().strip()
+        self.assertIn(str(haplotype.pk), haplotype_anchor)
+        haplotype_name_in_html = soup.find(id="haplotype-name").get_text().strip()
+        self.assertEqual(haplotype_name_in_html, haplotype_name)
+
 
 class AlleleSearchTest(TestCase):
-    fixtures = ["allele.json"]
+    fixtures = ["test_alleles.json"]
 
     def setUp(self):
         self.client = Client()
@@ -228,7 +243,7 @@ class AlleleSearchTest(TestCase):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         name = soup.find("tbody").find("tr").find_all("td")[1].get_text().strip()
-        self.assertIn("FOO*01:02:03", name)
+        self.assertIn("A*01:02:03", name)
 
     def test_shows_car_id_in_tbody(self):
         response = self.client.get(self.url)

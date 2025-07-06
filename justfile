@@ -245,9 +245,9 @@ alias djsh := django-shell
 # Load test data into the database. ----------------------------------
 [group('django')]
 django-loaddata:
-    cd src && uv run manage.py loaddata allele/fixtures/allele.json
-    cd src && uv run manage.py loaddata disease/fixtures/disease.json
-    cd src && uv run manage.py loaddata publication/fixtures/publication.json
+    cd src && uv run manage.py loaddata allele/fixtures/test_alleles.json
+    cd src && uv run manage.py loaddata disease/fixtures/test_diseases.json
+    cd src && uv run manage.py loaddata publication/fixtures/test_publications.json
 alias djld := django-loaddata
 
 #=====================================================================

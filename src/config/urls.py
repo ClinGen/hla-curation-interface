@@ -10,5 +10,6 @@ urlpatterns = [
     path("datatable/", include("datatable.urls")),
     path("disease/", include("disease.urls")),
     path("firebase/", include("firebase.urls")),
+    path("haplotype/", include("haplotype.urls")),
     path("publication/", include("publication.urls")),
 ]

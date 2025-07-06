@@ -5,58 +5,6 @@ from django.db import models
 from django.http import HttpResponseBase
 from django.urls import reverse
 
-# Genes on chromosome 6 ordered by location in ascending order.
-GENE_LIST = [
-    "HFE",
-    "F",
-    "V",
-    "P",
-    "G",
-    "H",
-    "T",
-    "K",
-    "U",
-    "A",
-    "W",
-    "Y",
-    "R",
-    "J",
-    "L",
-    "N",
-    "E",
-    "C",
-    "B",
-    "S",
-    "MICA",
-    "MICB",
-    "DRA",
-    "DRB9",
-    "DRB8",
-    "DRB7",
-    "DRB6",
-    "DRB5",
-    "DRB4",
-    "DRB3",
-    "DRB2",
-    "DRB1",
-    "DQA1",
-    "DQB1",
-    "DQB3",
-    "DQA2",
-    "DQB2",
-    "DOB",
-    "TAP2",
-    "TAP1",
-    "Z",
-    "DMB",
-    "DMA",
-    "DOA",
-    "DPA1",
-    "DPB1",
-    "DPA2",
-    "DPB2",
-]
-
 
 class Allele(models.Model):
     """Contains information about an allele that has been added to the HCI."""
@@ -64,12 +12,12 @@ class Allele(models.Model):
     name = models.CharField(
         blank=False,
         default="",
-        max_length=60,
+        max_length=60,  # Should be plenty of characters.
         unique=True,
         verbose_name="Name",
         help_text=(
-            "The name of the HLA allele, e.g., DRB3*03:01. "
-            "(The 'HLA-' part can be omitted.)"
+            "The name of the HLA allele, e.g., DRB3*03:01:01. "
+            "(The 'HLA-' part should be omitted.)"
         ),
     )
     car_id = models.CharField(
@@ -104,7 +52,7 @@ class Allele(models.Model):
 
     def __str__(self) -> str:
         """Returns a string representation of the allele."""
-        return f"{self.car_id}"
+        return self.name
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         """Returns the details page for a specific allele."""

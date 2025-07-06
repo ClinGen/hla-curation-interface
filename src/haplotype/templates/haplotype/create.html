@@ -1,0 +1,17 @@
+{% extends "layouts/base.html" %}
+{% block title %}Add Haplotype{% endblock %}
+{% block description %}Add a haplotype to the HLA Curation Interface.{% endblock %}
+{% block main %}
+    <div class="box mt-6 mb-6">
+        <h1 class="title">Add Haplotype</h1>
+        <form method="post">{% csrf_token %}
+            {{ form.non_field_errors }}
+            {% with field=form.alleles %}
+                {% include "common/form/select_search.html" %}
+            {% endwith %}
+            <button type="submit" class="button is-link">
+                Submit
+            </button>
+        </form>
+    </div>
+{% endblock %}

@@ -205,7 +205,7 @@ class PublicationCreateTest(TestCase):
 
 
 class PublicationDetailTest(TestCase):
-    fixtures = ["publication.json"]
+    fixtures = ["test_publications.json"]
 
     def setUp(self):
         self.client = Client()
@@ -261,7 +261,7 @@ class PublicationDetailTest(TestCase):
 
 
 class PublicationSearchTest(TestCase):
-    fixtures = ["publication.json"]
+    fixtures = ["test_publications.json"]
 
     def setUp(self):
         self.client = Client()

@@ -1,0 +1,26 @@
+{% if hide_label %}
+    <label class="label is-hidden">{{ field.label }}</label>
+    <div class="has-text-danger">{{ field.errors }}</div>
+{% else %}
+    <label class="label">{{ field.label }}</label>
+    <div class="has-text-danger">{{ field.errors }}</div>
+{% endif %}
+<div class="field" style="width: 50%;">
+    {% if field.help_text %}
+        <p class="help">{{ field.help_text }}</p>
+    {% endif %}
+    {{ field }}
+</div>
+<script>
+    document.addEventListener("htmx:load", () => {
+        const select = document.getElementById("{{ field.id_for_label }}");
+        const config = {
+            itemSelectText: "Press to select.",
+            noChoicesText: "No items to choose from.",
+            noResultsText: "No items found for your search.",
+            removeItemButton: true,
+            searchEnabled: true,
+        };
+        const choices = new Choices(select, config);
+    });
+</script>

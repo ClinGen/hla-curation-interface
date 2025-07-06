@@ -344,6 +344,48 @@ authentication.
 .. automodule:: firebase.views
    :members:
 
+-----------------
+The Haplotype App
+-----------------
+
+The haplotype app houses code related to haplotype information needed for curations.
+
+``haplotype.admin``
+===================
+
+.. automodule:: haplotype.admin
+   :members:
+
+``haplotype.apps``
+==================
+
+.. automodule:: haplotype.apps
+   :members:
+
+``haplotype.forms``
+===================
+
+.. automodule:: haplotype.forms
+   :members:
+
+``haplotype.models``
+====================
+
+.. automodule:: haplotype.models
+   :members:
+
+``haplotype.urls``
+==================
+
+.. automodule:: haplotype.urls
+   :members:
+
+``haplotype.views``
+===================
+
+.. automodule:: haplotype.views
+   :members:
+
 -------------------
 The Publication App
 -------------------

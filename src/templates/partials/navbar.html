@@ -25,6 +25,17 @@
                 </div>
             </div>
             <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Haplotypes</a>
+                <div class="navbar-dropdown">
+                    {% with url="haplotype-search" text="Search" %}
+                        {% include 'partials/navbar_link.html' %}
+                    {% endwith %}
+                    {% with url="haplotype-create" text="Add" %}
+                        {% include 'partials/navbar_link.html' %}
+                    {% endwith %}
+                </div>
+            </div>
+            <div class="navbar-item has-dropdown is-hoverable">
                 <a class="navbar-link">Diseases</a>
                 <div class="navbar-dropdown">
                     {% with url="disease-search" text="Search" %}

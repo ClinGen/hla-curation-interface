@@ -1,0 +1,45 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% block title %}Haplotype #{{ object.pk }} Details{% endblock %}
+{% block description %}View information about haplotype #{{ object.pk }}.{% endblock %}
+{% block main %}
+    <div class="box mt-6 mb-6">
+        <div class="level">
+            <div class="level-left">
+                <h1 class="title">Haplotype #{{ object.pk }} Details</h1>
+            </div>
+        </div>
+
+        <h2 class="subtitle"><i id="haplotype-{{ object.pk }}-name">{{ object.name }}</i></h2>
+
+        <div class="block table-container">
+            <table class="table">
+                <tbody>
+                <tr>
+                    <td>HCI Haplotype ID</td>
+                    <td>{{ object.pk }}</td>
+                </tr>
+                <tr>
+                    <td>Added</td>
+                    <td id="haplotype-{{ object.pk }}-added-at">{{ object.added_at|date:"Y-m-d" }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="buttons">
+            <a href="{% url 'haplotype-search' %}" class="button" id="search-button">
+                {% include "common/icon.html" with icon_name="search" %}
+                Search Haplotypes
+            </a>
+            <a href="{% url 'haplotype-create' %}" class="button" id="add-button">
+                {% include "common/icon.html" with icon_name="plus-circle" %}
+                Add Another Haplotype
+            </a>
+        </div>
+    </div>
+
+    {% for allele in object.alleles.all %}
+        {% include "allele/partials/detail_content.html" with object=allele %}
+    {% endfor %}
+{% endblock %}

@@ -9,7 +9,7 @@ from datatable.models import Pokemon
 class QueriesTest(TestCase):
     """Tests the queries module."""
 
-    fixtures = ["pokemon.json"]
+    fixtures = ["test_pokemon.json"]
 
     def setUp(self):
         """Sets up a RequestFactory and sets up our Pokémon QuerySet."""

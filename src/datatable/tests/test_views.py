@@ -9,7 +9,7 @@ from django.urls import reverse
 class DatatableViewTest(TestCase):
     """Tests the datatable view."""
 
-    fixtures = ["pokemon.json"]
+    fixtures = ["test_pokemon.json"]
 
     def setUp(self):
         """Sets up a Client for the tests."""
