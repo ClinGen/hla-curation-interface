@@ -100,7 +100,7 @@ class PublicationCreateTest(TestCase):
         self.assertEqual(submit_button, "Submit")
 
     @patch("publication.views.fetch_pubmed_data")
-    def test_creates_publication_with_valid_form_data(
+    def test_creates_pubmed_publication_with_valid_form_data(
         self, mock_fetch_pubmed_data: MagicMock
     ):
         self.client.force_login(self.user_who_can_create)
@@ -136,6 +136,58 @@ class PublicationCreateTest(TestCase):
         self.assertEqual(new_publication.added_by, self.user_who_can_create)  # type: ignore[union-attr]
         self.assertEqual(new_publication.author, "Oak")  # type: ignore[union-attr]
         self.assertEqual(new_publication.title, "Common diseases in Pokémon")  # type: ignore[union-attr]
+
+    @patch("publication.views.fetch_rxiv_data")
+    def test_creates_biorxiv_publication_with_valid_form_data(
+        self, mock_fetch_rxiv_data: MagicMock
+    ):
+        self.client.force_login(self.user_who_can_create)
+        initial_publication_count = Publication.objects.count()
+        data = {"publication_type": "BIO", "doi": "10.1101/123"}
+        mock_fetch_rxiv_data.return_value = {
+            "collection": [
+                {
+                    "title": "Common diseases in Pokémon",
+                    "authors": "Oak, P.; Birch, P.",
+                }
+            ]
+        }
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Publication.objects.count(), initial_publication_count + 1)
+        new_publication = Publication.objects.first()
+        self.assertIsNotNone(new_publication)
+        self.assertEqual(new_publication.publication_type, "BIO")  # type: ignore[union-attr]
+        self.assertEqual(new_publication.doi, "10.1101/123")  # type: ignore[union-attr]
+        self.assertEqual(new_publication.added_by, self.user_who_can_create)  # type: ignore[union-attr]
+        self.assertEqual(new_publication.author, "Oak, P.")  # type: ignore[union-attr]
+        self.assertEqual(new_publication.title, "Common diseases in Pokémon")  # type: ignore[union-attr]
+
+    @patch("publication.views.fetch_rxiv_data")
+    def test_creates_medrxiv_publication_with_valid_form_data(
+        self, mock_fetch_rxiv_data: MagicMock
+    ):
+        self.client.force_login(self.user_who_can_create)
+        initial_publication_count = Publication.objects.count()
+        data = {"publication_type": "MED", "doi": "10.1101/456"}
+        mock_fetch_rxiv_data.return_value = {
+            "collection": [
+                {
+                    "title": "Diseases in Johto region Pokémon",
+                    "authors": "Elm, P.; Juniper, P.",
+                }
+            ]
+        }
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Publication.objects.count(), initial_publication_count + 1)
+        new_publication = Publication.objects.first()
+        self.assertIsNotNone(new_publication)
+        self.assertEqual(new_publication.publication_type, "MED")  # type: ignore[union-attr]
+        self.assertEqual(new_publication.doi, "10.1101/456")  # type: ignore[union-attr]
+        self.assertEqual(new_publication.added_by, self.user_who_can_create)  # type: ignore[union-attr]
+        self.assertEqual(new_publication.author, "Elm, P.")  # type: ignore[union-attr]
+        self.assertEqual(new_publication.title, "Diseases in Johto region Pokémon")  # type: ignore[union-attr]
 
     def test_does_not_create_publication_with_invalid_form_data(self):
         self.client.force_login(self.user_who_can_create)

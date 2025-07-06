@@ -9,7 +9,14 @@ from django.views.generic.edit import CreateView
 from core.permissions import CreateAccessMixin
 from datatable.constants import FieldTypes, Filters, SortDirections
 from datatable.views import datatable
-from publication.clients import fetch_pubmed_data, get_pubmed_author, get_pubmed_title
+from publication.clients import (
+    fetch_pubmed_data,
+    fetch_rxiv_data,
+    get_pubmed_author,
+    get_pubmed_title,
+    get_rxiv_author,
+    get_rxiv_title,
+)
 from publication.forms import PublicationForm
 from publication.models import Publication, PublicationTypes
 
@@ -33,6 +40,18 @@ class PublicationCreate(CreateAccessMixin, CreateView):  # type: ignore
             if pubmed_data:
                 form.instance.author = get_pubmed_author(pubmed_data)
                 form.instance.title = get_pubmed_title(pubmed_data)
+                form.instance.added_by = self.request.user
+                return super().form_valid(form)
+        elif (
+            form.instance.publication_type == PublicationTypes.BIORXIV
+            or form.instance.publication_type == PublicationTypes.MEDRXIV
+        ):
+            rxiv_data = fetch_rxiv_data(
+                form.instance.publication_type, form.instance.doi
+            )
+            if rxiv_data:
+                form.instance.author = get_rxiv_author(rxiv_data)
+                form.instance.title = get_rxiv_title(rxiv_data)
                 form.instance.added_by = self.request.user
                 return super().form_valid(form)
         message = (
