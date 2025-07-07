@@ -1,0 +1,59 @@
+{% extends "layouts/base.html" %}
+{% block title %}Add Curation{% endblock %}
+{% block description %}Add a curation to the HLA Curation Interface.{% endblock %}
+{% block main %}
+    <div class="box mt-6 mb-6">
+        <h1 class="title">Add Curation</h1>
+        <form method="post">{% csrf_token %}
+            {{ form.non_field_errors }}
+            {% with field=form.curation_type %}
+                {% include "common/form/input_radio.html" %}
+            {% endwith %}
+            <div id="allele-div">
+                {% with field=form.allele %}
+                    {% include "common/form/select_search.html" %}
+                {% endwith %}
+            </div>
+            <div id="haplotype-div">
+                {% with field=form.haplotype %}
+                    {% include "common/form/select_search.html" %}
+                {% endwith %}
+            </div>
+            <button type="submit" class="button is-link">
+                Submit
+            </button>
+        </form>
+    </div>
+    <script>
+        document.addEventListener("htmx:load", () => {
+            const alleleDiv = document.getElementById("allele-div");
+            function toggleAlleleDivVisibility() {
+                const selectedValue = document.querySelector("input[name='curation_type']:checked")?.value;
+                if (selectedValue === "HAP") {
+                    alleleDiv.style.display = "none";
+                } else {
+                    alleleDiv.style.display = "block";
+                }
+            }
+
+            const haplotypeDiv = document.getElementById("haplotype-div");
+            function toggleHaplotypeDivVisibility() {
+                const selectedValue = document.querySelector("input[name='curation_type']:checked")?.value;
+                if (selectedValue === "ALL") {
+                    haplotypeDiv.style.display = "none";
+                } else {
+                    haplotypeDiv.style.display = "block";
+                }
+            }
+
+            const curationTypeRadios = document.querySelectorAll("input[name='curation_type']");
+            for(const radio of curationTypeRadios) {
+                radio.addEventListener("change", toggleAlleleDivVisibility);
+                radio.addEventListener("change", toggleHaplotypeDivVisibility);
+            }
+
+            toggleAlleleDivVisibility();
+            toggleHaplotypeDivVisibility();
+        });
+    </script>
+{% endblock %}

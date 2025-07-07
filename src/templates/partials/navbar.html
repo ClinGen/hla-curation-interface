@@ -57,6 +57,17 @@
                     {% endwith %}
                 </div>
             </div>
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Curations</a>
+                <div class="navbar-dropdown">
+                    {% with url="curation-search" text="Search" %}
+                        {% include 'partials/navbar_link.html' %}
+                    {% endwith %}
+                    {% with url="curation-create" text="Add" %}
+                        {% include 'partials/navbar_link.html' %}
+                    {% endwith %}
+                </div>
+            </div>
         </div>
         <div class="navbar-end">
             <div class="navbar-item">

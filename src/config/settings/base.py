@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "allele",
     "core",
+    "curation",
     "datatable",
     "disease",
     "firebase",

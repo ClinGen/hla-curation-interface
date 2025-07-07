@@ -9,12 +9,16 @@
             {% with field=form.publication_type %}
                 {% include "common/form/input_radio.html" %}
             {% endwith %}
-            {% with field=form.pubmed_id %}
-                {% include "common/form/input_text.html" %}
-            {% endwith %}
-            {% with field=form.doi %}
-                {% include "common/form/input_text.html" %}
-            {% endwith %}
+            <div id="pubmed-div">
+                {% with field=form.pubmed_id %}
+                    {% include "common/form/input_text.html" %}
+                {% endwith %}
+            </div>
+            <div id="doi-div">
+                {% with field=form.doi %}
+                    {% include "common/form/input_text.html" %}
+                {% endwith %}
+            </div>
             <button type="submit" class="button is-link">
                 Submit
             </button>
@@ -22,34 +26,34 @@
     </div>
     <script>
         document.addEventListener("htmx:load", () => {
-            const doiField = document.querySelector("input[name='doi']").closest(".field");
-            function toggleDoiField() {
+            const pubmedDiv = document.getElementById("pubmed-div");
+            function togglePubmedDivVisibility() {
                 const selectedValue = document.querySelector("input[name='publication_type']:checked")?.value;
-                if (selectedValue === "PUB") {
-                    doiField.style.display = "none";
+                if (selectedValue === "BIO" || selectedValue === "MED") {
+                    pubmedDiv.style.display = "none";
                 } else {
-                    doiField.style.display = "block";
+                    pubmedDiv.style.display = "block";
                 }
             }
 
-            const pubmedIdField = document.querySelector("input[name='pubmed_id']").closest(".field");
-            function togglePubmedIdField() {
+            const doiDiv = document.getElementById("doi-div");
+            function toggleDoiDivVisibility() {
                 const selectedValue = document.querySelector("input[name='publication_type']:checked")?.value;
-                if (selectedValue === "BIO" || selectedValue === "MED") {
-                    pubmedIdField.style.display = "none";
+                if (selectedValue === "PUB") {
+                    doiDiv.style.display = "none";
                 } else {
-                    pubmedIdField.style.display = "block";
+                    doiDiv.style.display = "block";
                 }
             }
 
             const publicationTypeRadios = document.querySelectorAll("input[name='publication_type']");
             for(const radio of publicationTypeRadios) {
-                radio.addEventListener("change", toggleDoiField);
-                radio.addEventListener("change", togglePubmedIdField);
+                radio.addEventListener("change", togglePubmedDivVisibility);
+                radio.addEventListener("change", toggleDoiDivVisibility);
             }
 
-            toggleDoiField();
-            togglePubmedIdField();
+            togglePubmedDivVisibility();
+            toggleDoiDivVisibility();
         });
     </script>
 {% endblock %}
