@@ -62,6 +62,8 @@ FIELDS = [
     {
         "text": "Allele",
         "param_name": "allele",
+        "is_foreign_key": True,
+        "filter": True,
         "id": "allele",
         "default_value": "",
         "type": FieldTypes.SEARCH,
@@ -70,6 +72,7 @@ FIELDS = [
     {
         "text": "Haplotype",
         "param_name": "haplotype",
+        "is_foreign_key": True,
         "id": "haplotype",
         "default_value": "",
         "type": FieldTypes.SEARCH,
@@ -93,4 +96,5 @@ def curation_search(request: HttpRequest) -> HttpResponse:
         order_by="pk",
         fields=FIELDS,  # type: ignore
         data_title="Curations",
+        partial="curation/partials/search.html",
     )
