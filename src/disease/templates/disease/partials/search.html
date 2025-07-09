@@ -1,6 +1,20 @@
 {% load custom_filters %}
 <div id="datatable-content" >
     <div class="box mt-6 mb-6">
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li>
+                    <a href="{% url 'home' %}">
+                        Home
+                    </a>
+                </li>
+                <li class="is-active">
+                    <a href="" aria-current="page">
+                        Diseases
+                    </a>
+                </li>
+            </ul>
+        </nav>
         <h1 class="title" id="main-heading">Search {{ data_title }}</h1>
         {% include "datatable/partials/number.html" %}
         {% include "datatable/partials/pagination.html" %}

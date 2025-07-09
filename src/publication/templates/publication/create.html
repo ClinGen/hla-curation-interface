@@ -3,6 +3,25 @@
 {% block description %}Add a publication to the HLA Curation Interface.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li>
+                    <a href="{% url 'home' %}">
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'publication-search' %}">
+                        Publications
+                    </a>
+                </li>
+                <li class="is-active">
+                    <a href="" aria-current="page">
+                        Add Publication
+                    </a>
+                </li>
+            </ul>
+        </nav>
         <h1 class="title">Add Publication</h1>
         <form method="post">{% csrf_token %}
             {{ form.non_field_errors }}

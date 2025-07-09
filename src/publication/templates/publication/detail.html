@@ -4,9 +4,28 @@
 {% block description %}View information about publication #{{ object.pk }}.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li>
+                    <a href="{% url 'home' %}">
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'publication-search' %}">
+                        Publications
+                    </a>
+                </li>
+                <li class="is-active">
+                    <a href="" aria-current="page">
+                        Publication #{{ object.pk }}
+                    </a>
+                </li>
+            </ul>
+        </nav>
         <div class="level">
             <div class="level-left">
-                <h1 class="title">Publication #{{ object.pk }} Details</h1>
+                <h1 class="title">Publication Details</h1>
             </div>
             <div class="level-right">
                 {% if object.publication_type == "PUB" %}

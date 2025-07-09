@@ -3,7 +3,26 @@
 {% block description %}View information about curation #{{ object.pk }}.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
-        <h1 class="title">Curation #{{ object.pk }} Details</h1>
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li>
+                    <a href="{% url 'home' %}">
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'curation-search' %}">
+                        Curations
+                    </a>
+                </li>
+                <li class="is-active">
+                    <a href="" aria-current="page">
+                        Curation #{{ object.pk }}
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <h1 class="title">Curation Details</h1>
         <div class="block table-container">
             <table class="table">
                 <tbody>
