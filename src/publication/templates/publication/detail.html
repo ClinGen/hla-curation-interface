@@ -1,12 +1,12 @@
 {% extends "layouts/base.html" %}
 {% load static %}
 {% block title %}Publication #{{ object.pk }} Details{% endblock %}
-{% block description %}View information about publication {{ object.pk }}.{% endblock %}
+{% block description %}View information about publication #{{ object.pk }}.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
         <div class="level">
             <div class="level-left">
-                <h1 class="title">Publication Details</h1>
+                <h1 class="title">Publication #{{ object.pk }} Details</h1>
             </div>
             <div class="level-right">
                 {% if object.publication_type == "PUB" %}

@@ -40,5 +40,48 @@
                 Add Another Curation
             </a>
         </div>
+
+    </div>
+
+    <div class="box mt-6 mb-6">
+        <h1 class="title">Evidence</h1>
+        <a href="{% url 'evidence-create' object.pk %}" class="button" id="add-evidence-button">
+            {% include "common/icon.html" with icon_name="plus-circle" %}
+            Add Evidence
+        </a>
+        {% if object.evidence.all %}
+            <div class="block table-container mt-4">
+                <table class="table is-fullwidth">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Publication</th>
+                            <th>Conflicting</th>
+                            <th>Included</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for evidence in object.evidence.all %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'evidence-detail' curation_pk=object.pk evidence_pk=evidence.pk %}">
+                                        #{{ evidence.pk }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="{% url 'publication-detail' evidence.publication.pk %}">
+                                        {{ evidence.publication }}
+                                    </a>
+                                </td>
+                                <td>{{ evidence.is_conflicting }}</td>
+                                <td>{{ evidence.is_included }}</td>
+                                <td>Score</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
     </div>
 {% endblock %}

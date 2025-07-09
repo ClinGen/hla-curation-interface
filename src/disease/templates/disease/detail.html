@@ -1,12 +1,12 @@
 {% extends "layouts/base.html" %}
 {% load static %}
 {% block title %}Disease #{{ object.pk }} Details{% endblock %}
-{% block description %}View information about disease {{ object.pk }}.{% endblock %}
+{% block description %}View information about disease #{{ object.pk }}.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
         <div class="level">
             <div class="level-left">
-                <h1 class="title">Disease Details</h1>
+                <h1 class="title">Disease #{{ object.pk }} Details</h1>
             </div>
             <div class="level-right">
                 {% if object.disease_type == "MON" %}

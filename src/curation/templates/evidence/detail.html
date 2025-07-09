@@ -1,0 +1,28 @@
+{% extends "layouts/base.html" %}
+{% block title %}Evidence #{{ object.pk }} Details{% endblock %}
+{% block description %}View information about evidence #{{ object.pk }}.{% endblock %}
+{% block main %}
+<div class="box mt-6 mb-6">
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li>
+                <a href="{% url 'curation-search' %}">
+                    Curations
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'curation-detail' object.curation.pk %}">
+                    Curation #{{ object.curation.pk }}
+                </a>
+            </li>
+            <li class="is-active">
+                <a href="" aria-current="page">
+                    Evidence #{{ object.pk }}
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <h1 class="title">Evidence #{{ object.pk }} Details</h1>
+    <p>Hello, World!</p>
+</div>
+{% endblock %}

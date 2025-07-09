@@ -8,6 +8,7 @@ from django.urls import reverse
 
 from allele.models import Allele
 from haplotype.models import Haplotype
+from publication.models import Publication
 
 
 class CurationTypes:
@@ -42,6 +43,7 @@ class Curation(models.Model):
         blank=True,
         null=True,
         on_delete=models.PROTECT,
+        related_name="curations",
         help_text="Select the allele for this curation.",
     )
     haplotype = models.ForeignKey(
@@ -49,6 +51,7 @@ class Curation(models.Model):
         blank=True,
         null=True,
         on_delete=models.PROTECT,
+        related_name="curations",
         help_text="Select the haplotype for this curation.",
     )
     added_by = models.ForeignKey(
@@ -79,7 +82,7 @@ class Curation(models.Model):
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         """Returns the details page for a specific publication."""
-        return reverse("curation-detail", kwargs={"pk": self.pk})
+        return reverse("curation-detail", kwargs={"curation_pk": self.pk})
 
     def clean(self) -> None:
         """Makes sure the curation has an allele or haplotype.
@@ -104,3 +107,48 @@ class Curation(models.Model):
             self.haplotype = None
         if self.curation_type == CurationTypes.HAPLOTYPE and self.allele:
             self.allele = None
+
+
+class Evidence(models.Model):
+    """Contains evidence derived from a publication."""
+
+    curation = models.ForeignKey(
+        Curation,
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name="evidence",
+        help_text="The curation that the evidence belongs to.",
+    )
+    publication = models.ForeignKey(
+        Publication,
+        blank=False,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name="evidence",
+        help_text="The publication that the evidence comes from.",
+    )
+    is_conflicting = models.BooleanField(
+        default=False,
+        verbose_name="Conflicts",
+        help_text="Is the evidence in this association conflicting?",
+    )
+    is_included = models.BooleanField(
+        default=False,
+        verbose_name="Include",
+        help_text="Should this evidence be included for scoring?",
+    )
+
+    def __str__(self) -> str:
+        """Returns a string representation of the curation."""
+        return f"Evidence #{self.pk}"
+
+    def get_absolute_url(self) -> HttpResponseBase | str | None:
+        """Returns the details page for an evidence item."""
+        return reverse(
+            "evidence-detail",
+            kwargs={
+                "curation_pk": self.curation.pk,
+                "evidence_pk": self.pk,
+            },
+        )

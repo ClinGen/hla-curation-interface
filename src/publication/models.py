@@ -91,7 +91,10 @@ class Publication(models.Model):
 
     def __str__(self) -> str:
         """Returns a string representation of the publication."""
-        return f"{self.publication_type}/{self.doi}"
+        title = self.title[:-1] if self.title.endswith(".") else self.title
+        if self.publication_type == PublicationTypes.PUBMED:
+            return f"{self.author}. {title}. {self.pubmed_id}."
+        return f"{self.author}. {title}. {self.doi}."
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         """Returns the details page for a specific publication."""

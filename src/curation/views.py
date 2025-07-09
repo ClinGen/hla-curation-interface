@@ -5,8 +5,8 @@ from django.views.generic import DetailView
 from django.views.generic.edit import CreateView
 
 from core.permissions import CreateAccessMixin
-from curation.forms import CurationForm
-from curation.models import Curation, CurationTypes
+from curation.forms import CurationForm, EvidenceForm
+from curation.models import Curation, CurationTypes, Evidence
 from datatable.constants import FieldTypes, Filters, SortDirections
 from datatable.views import datatable
 
@@ -34,6 +34,7 @@ class CurationDetail(DetailView):
 
     model = Curation
     template_name = "curation/detail.html"
+    pk_url_kwarg = "curation_pk"
 
 
 CURATION_TYPE_OPTIONS = [
@@ -98,3 +99,37 @@ def curation_search(request: HttpRequest) -> HttpResponse:
         data_title="Curations",
         partial="curation/partials/search.html",
     )
+
+
+class EvidenceCreate(CreateAccessMixin, CreateView):  # type: ignore
+    """Allows the user to create (add) evidence."""
+
+    model = Evidence
+    form_class = EvidenceForm
+    template_name = "evidence/create.html"
+
+    def form_valid(self, form: EvidenceForm) -> HttpResponse:
+        """Makes sure the user who added the evidence is recorded.
+
+        Returns:
+             The details page for the evidence if the form is valid, or the form with
+             errors otherwise.
+        """
+        curation = Curation.objects.get(pk=self.kwargs["curation_pk"])
+        form.instance.curation = curation
+        form.instance.added_by = self.request.user
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):  # noqa
+        """Returns the context with the curation ID."""
+        context = super().get_context_data(**kwargs)
+        context["curation_pk"] = self.kwargs["curation_pk"]
+        return context
+
+
+class EvidenceDetail(DetailView):
+    """Shows the user information about evidence."""
+
+    model = Evidence
+    template_name = "evidence/detail.html"
+    pk_url_kwarg = "evidence_pk"

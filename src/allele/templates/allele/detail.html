@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 {% block title %}Allele #{{ object.pk }} Details{% endblock %}
-{% block description %}View information about allele {{ object.pk }}.{% endblock %}
+{% block description %}View information about allele #{{ object.pk }}.{% endblock %}
 {% block main %}
     {% include "allele/partials/detail_content.html" with object=object %}
     {% if object.haplotypes.all %}
