@@ -152,3 +152,8 @@ class Evidence(models.Model):
                 "evidence_pk": self.pk,
             },
         )
+
+    @property
+    def score(self) -> int:
+        """Returns the score for the evidence."""
+        return 0

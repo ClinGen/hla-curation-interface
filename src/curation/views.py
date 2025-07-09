@@ -1,7 +1,7 @@
 """Provides views for the curation app."""
 
 from django.http import HttpRequest, HttpResponse
-from django.views.generic import DetailView
+from django.views.generic import DetailView, UpdateView
 from django.views.generic.edit import CreateView
 
 from core.permissions import CreateAccessMixin

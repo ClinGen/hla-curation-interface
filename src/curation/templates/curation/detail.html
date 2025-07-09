@@ -64,10 +64,16 @@
 
     <div class="box mt-6 mb-6">
         <h1 class="title">Evidence</h1>
-        <a href="{% url 'evidence-create' object.pk %}" class="button" id="add-evidence-button">
-            {% include "common/icon.html" with icon_name="plus-circle" %}
-            Add Evidence
-        </a>
+        <div class="buttons">
+            <a href="" class="button" id="add-evidence-button">
+                {% include "common/icon.html" with icon_name="pencil" %}
+                Edit
+            </a>
+            <a href="{% url 'evidence-create' object.pk %}" class="button" id="add-evidence-button">
+                {% include "common/icon.html" with icon_name="plus-circle" %}
+                Add Evidence
+            </a>
+        </div>
         {% if object.evidence.all %}
             <div class="block table-container mt-4">
                 <table class="table is-fullwidth">
@@ -93,9 +99,25 @@
                                         {{ evidence.publication }}
                                     </a>
                                 </td>
-                                <td>{{ evidence.is_conflicting }}</td>
-                                <td>{{ evidence.is_included }}</td>
-                                <td>Score</td>
+                                <td>
+                                    <label class="checkbox" disabled>
+                                        {% if evidence.is_conflicting %}
+                                            <input type="checkbox" disabled checked/>
+                                        {% else %}
+                                            <input type="checkbox" disabled />
+                                        {% endif %}
+                                    </label>
+                                </td>
+                                <td>
+                                    <label class="checkbox" disabled>
+                                        {% if evidence.is_included %}
+                                            <input type="checkbox" disabled checked/>
+                                        {% else %}
+                                            <input type="checkbox" disabled />
+                                        {% endif %}
+                                    </label>
+                                </td>
+                                <td>{{ evidence.score }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
