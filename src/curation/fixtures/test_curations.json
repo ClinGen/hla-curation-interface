@@ -1,0 +1,13 @@
+[
+  {
+    "model": "curation.curation",
+    "pk": 1,
+    "fields": {
+      "curation_type": "ALL",
+      "allele": 1,
+      "haplotype": null,
+      "added_by": null,
+      "added_at": "1970-01-01"
+    }
+  }
+]

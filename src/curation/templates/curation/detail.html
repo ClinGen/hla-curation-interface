@@ -29,18 +29,24 @@
     <div class="box mt-6 mb-6">
         <h1 class="title">Evidence</h1>
         <div class="buttons">
-            <a href="{% url 'curation-edit' object.pk %}" class="button" id="add-evidence-button">
+            <a href="{% url 'curation-edit' object.pk %}"
+               class="button"
+               id="edit-button"
+            >
                 {% include "common/icon.html" with icon_name="pencil" %}
                 Edit
             </a>
-            <a href="{% url 'evidence-create' object.pk %}" class="button" id="add-evidence-button">
+            <a href="{% url 'evidence-create' object.pk %}"
+               class="button"
+               id="add-evidence-button"
+            >
                 {% include "common/icon.html" with icon_name="plus-circle" %}
                 Add Evidence
             </a>
         </div>
         {% if object.evidence.all %}
             <div class="block table-container mt-4">
-                <table class="table is-fullwidth">
+                <table class="table is-fullwidth" id="evidence-table">
                     <thead>
                         <tr>
                             <th>ID</th>

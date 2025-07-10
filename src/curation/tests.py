@@ -8,6 +8,7 @@ from django.urls import reverse
 from allele.models import Allele
 from core.models import UserProfile
 from curation.models import Curation
+from haplotype.models import Haplotype
 
 
 class CurationCreateTest(TestCase):
@@ -119,6 +120,199 @@ class CurationCreateTest(TestCase):
         self.assertEqual(Curation.objects.count(), initial_curation_count + 1)
         new_curation = Curation.objects.first()
         self.assertIsNotNone(new_curation)
-        self.assertEqual(new_curation.curation_type, "ALL")  # type: ignore[union-attr]
-        self.assertEqual(new_curation.allele, Allele.objects.get(pk=1))  # type: ignore[union-attr]
+        self.assertEqual(new_curation.curation_type, "HAP")  # type: ignore[union-attr]
+        self.assertEqual(new_curation.haplotype, Haplotype.objects.get(pk=1))  # type: ignore[union-attr]
         self.assertEqual(new_curation.added_by, self.user_who_can_create)  # type: ignore[union-attr]
+
+
+class CurationDetailTest(TestCase):
+    fixtures = [
+        "test_alleles.json",
+        "test_curations.json",
+        "test_evidence.json",
+        "test_publications.json",
+    ]
+
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse("curation-detail", kwargs={"curation_pk": 1})
+
+    def test_shows_breadcrumb(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        breadcrumb = soup.find("nav", {"class": "breadcrumb"})
+        self.assertIsNotNone(breadcrumb)
+
+    def test_shows_allele_name(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        allele = soup.find(id="allele").get_text().strip()
+        self.assertEqual(allele, "A*01:02:03")
+
+    def test_shows_curation_id(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        curation_id = soup.find(id="curation-id").get_text().strip()
+        self.assertEqual(curation_id, "1")
+
+    def test_shows_added_at(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        added_at = soup.find(id="added-at").get_text().strip()
+        self.assertEqual(added_at, "1970-01-01")
+
+    def test_shows_search_button(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        search_button = soup.find(id="search-button").get_text().strip()
+        self.assertIn("Search", search_button)
+
+    def test_shows_add_button(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        add_button = soup.find(id="add-button").get_text().strip()
+        self.assertIn("Add", add_button)
+
+    def test_shows_edit_button(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        edit_button = soup.find(id="edit-button").get_text().strip()
+        self.assertIn("Edit", edit_button)
+
+    def test_shows_add_evidence_button(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        add_evidence_button = soup.find(id="add-evidence-button").get_text().strip()
+        self.assertIn("Add Evidence", add_evidence_button)
+
+    def test_shows_id_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        evidence_table = soup.find(id="evidence-table")
+        id_th = (
+            evidence_table.find("thead").find("tr").find_all("th")[0].get_text().strip()
+        )
+        self.assertEqual(id_th, "ID")
+
+    def test_shows_publication_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        evidence_table = soup.find(id="evidence-table")
+        publication_th = (
+            evidence_table.find("thead").find("tr").find_all("th")[1].get_text().strip()
+        )
+        self.assertEqual(publication_th, "Publication")
+
+    def test_shows_status_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        evidence_table = soup.find(id="evidence-table")
+        status_th = (
+            evidence_table.find("thead").find("tr").find_all("th")[2].get_text().strip()
+        )
+        self.assertEqual(status_th, "Status")
+
+    def test_shows_conflicting_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        evidence_table = soup.find(id="evidence-table")
+        conflicting_th = (
+            evidence_table.find("thead").find("tr").find_all("th")[3].get_text().strip()
+        )
+        self.assertEqual(conflicting_th, "Conflicting")
+
+    def test_shows_included_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        evidence_table = soup.find(id="evidence-table")
+        included_th = (
+            evidence_table.find("thead").find("tr").find_all("th")[4].get_text().strip()
+        )
+        self.assertEqual(included_th, "Included")
+
+    def test_shows_score_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        evidence_table = soup.find(id="evidence-table")
+        score_th = (
+            evidence_table.find("thead").find("tr").find_all("th")[5].get_text().strip()
+        )
+        self.assertEqual(score_th, "Score")
+
+    def test_shows_id_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        evidence_table = soup.find(id="evidence-table")
+        id_anchor = (
+            evidence_table.find("tbody")
+            .find("tr")
+            .find_all("td")[0]
+            .find("a")
+            .get_text()
+            .strip()
+        )
+        self.assertIn("1", id_anchor)
+
+    def test_shows_publication_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        evidence_table = soup.find(id="evidence-table")
+        publication_anchor = (
+            evidence_table.find("tbody")
+            .find("tr")
+            .find_all("td")[1]
+            .find("a")
+            .get_text()
+            .strip()
+        )
+        title = "Diseases in grass type Pokémon in the Kanto region"
+        self.assertIn(title, publication_anchor)
+
+    def test_shows_status_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        evidence_table = soup.find(id="evidence-table")
+        status = (
+            evidence_table.find("tbody")
+            .find("tr")
+            .find_all("td")[2]
+            .find("span")
+            .get_text()
+            .strip()
+        )
+        self.assertEqual(status, "In Progress")
+
+    def test_shows_conflicting_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        evidence_table = soup.find(id="evidence-table")
+        conflicting = (
+            evidence_table.find("tbody")
+            .find("tr")
+            .find_all("td")[3]
+            .find("label")
+            .find("input")
+        )
+        self.assertIsNotNone(conflicting)
+
+    def test_shows_included_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        evidence_table = soup.find(id="evidence-table")
+        included = (
+            evidence_table.find("tbody")
+            .find("tr")
+            .find_all("td")[4]
+            .find("label")
+            .find("input")
+        )
+        self.assertIsNotNone(included)
+
+    def test_shows_score_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        evidence_table = soup.find(id="evidence-table")
+        score = (
+            evidence_table.find("tbody").find("tr").find_all("td")[5].get_text().strip()
+        )
+        self.assertEqual(score, "0")

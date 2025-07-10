@@ -1,0 +1,15 @@
+[
+  {
+    "model": "curation.evidence",
+    "pk": 1,
+    "fields": {
+      "status": "INP",
+      "curation": 1,
+      "publication": 1,
+      "is_conflicting": false,
+      "is_included": false,
+      "added_by": null,
+      "added_at": "1970-01-01"
+    }
+  }
+]

@@ -161,6 +161,20 @@ class Evidence(models.Model):
         verbose_name="Include",
         help_text="Should this evidence be included for scoring?",
     )
+    added_by = models.ForeignKey(
+        User,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="evidence_added",
+        verbose_name="Added By",
+        help_text="The user who added the evidence.",
+    )
+    added_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Added At",
+        help_text="When the evidence was added.",
+    )
 
     def __str__(self) -> str:
         """Returns a string representation of the curation."""
