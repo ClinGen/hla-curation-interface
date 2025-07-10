@@ -27,44 +27,8 @@
                 </li>
             </ul>
         </nav>
-
-        <h1 class="title">Curation Details</h1>
-        <div class="block table-container">
-            <table class="table">
-                <tbody>
-                {% if curation.curation_type == "ALL" %}
-                    <tr>
-                        <td>Allele</td>
-                        <td id="allele">{{ curation.allele }}</td>
-                    </tr>
-                {% elif curation.curation_type == "HAP" %}
-                    <tr>
-                        <td>Haplotype</td>
-                        <td id="haplotype">{{ curation.haplotype }}</td>
-                    </tr>
-                {% endif %}
-                <tr>
-                    <td>HCI Curation ID</td>
-                    <td>{{ curation.pk }}</td>
-                </tr>
-                <tr>
-                    <td>Added</td>
-                    <td id="added-at">{{ curation.added_at|date:"Y-m-d" }}</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="buttons">
-            <a href="{% url 'curation-search' %}" class="button" id="search-button">
-                {% include "common/icon.html" with icon_name="search" %}
-                Search Curations
-            </a>
-            <a href="{% url 'curation-create' %}" class="button" id="add-button">
-                {% include "common/icon.html" with icon_name="plus-circle" %}
-                Add Another Curation
-            </a>
-        </div>
+        {% include "curation/partials/details_table.html" %}
+        {% include "curation/partials/buttons.html" %}
     </div>
 
     <div class="box mt-6 mb-6">
