@@ -138,9 +138,8 @@ class Evidence(models.Model):
     )
     curation = models.ForeignKey(
         Curation,
-        blank=True,
         null=True,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name="evidence",
         help_text="The curation that the evidence belongs to.",
     )
@@ -148,7 +147,7 @@ class Evidence(models.Model):
         Publication,
         blank=False,
         null=True,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name="evidence",
         help_text="The publication that the evidence comes from.",
     )
@@ -169,10 +168,11 @@ class Evidence(models.Model):
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         """Returns the details page for an evidence item."""
+        curation_pk = self.curation.pk if self.curation else None
         return reverse(
             "evidence-detail",
             kwargs={
-                "curation_pk": self.curation.pk,
+                "curation_pk": curation_pk,
                 "evidence_pk": self.pk,
             },
         )

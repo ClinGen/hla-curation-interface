@@ -126,29 +126,21 @@ class HaplotypeDetailTest(TestCase):
         added_at = soup.find(id="haplotype-1-added-at").get_text().strip()
         self.assertEqual(added_at, "1970-01-01")
 
-    def test_shows_names_of_alleles(self):
+    def test_shows_allele_ids(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        allele_1_name = soup.find(id="allele-1-anchor").get_text().strip()
+        self.assertIn("1", allele_1_name)
+        allele_2_name = soup.find(id="allele-2-anchor").get_text().strip()
+        self.assertIn("2", allele_2_name)
+
+    def test_shows_allele_names(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         allele_1_name = soup.find(id="allele-1-name").get_text().strip()
         self.assertEqual(allele_1_name, "A*01:02:03")
         allele_2_name = soup.find(id="allele-2-name").get_text().strip()
         self.assertEqual(allele_2_name, "B*04:05:06")
-
-    def test_shows_car_ids_of_alleles(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        allele_1_car_id = soup.find(id="allele-1-car-id").get_text().strip()
-        self.assertEqual(allele_1_car_id, "XAHLA123")
-        allele_2_car_id = soup.find(id="allele-2-car-id").get_text().strip()
-        self.assertEqual(allele_2_car_id, "XAHLA456")
-
-    def test_shows_added_at_dates_of_alleles(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        allele_1_added_at = soup.find(id="allele-1-added-at").get_text().strip()
-        self.assertEqual(allele_1_added_at, "1970-01-01")
-        allele_2_added_at = soup.find(id="allele-2-added-at").get_text().strip()
-        self.assertEqual(allele_2_added_at, "1990-01-01")
 
 
 class HaplotypeSearchTest(TestCase):

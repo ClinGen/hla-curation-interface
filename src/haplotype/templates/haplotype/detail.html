@@ -66,13 +66,13 @@
                     {% for allele in object.alleles.all %}
                         <tr>
                             <td>
-                                <a id="allele-anchor"
+                                <a id="allele-{{ allele.pk }}-anchor"
                                    href="{% url 'allele-detail' allele.pk %}"
                                 >
                                     #{{ allele.pk }}
                                 </a>
                             </td>
-                            <td id="allele-name">
+                            <td id="allele-{{ allele.pk }}-name">
                                 {{ allele.name }}
                             </td>
                         </tr>
