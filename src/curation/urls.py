@@ -12,6 +12,7 @@ urlpatterns = [
         name="curation-detail",
     ),
     path("search", views.curation_search, name="curation-search"),
+    path("edit/<int:curation_pk>", views.curation_edit, name="curation-edit"),
     path(
         "<int:curation_pk>/evidence/create",
         views.EvidenceCreate.as_view(),

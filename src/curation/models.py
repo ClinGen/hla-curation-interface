@@ -109,9 +109,33 @@ class Curation(models.Model):
             self.allele = None
 
 
+class EvidenceStatus:
+    """Defines the evidence status codes."""
+
+    IN_PROGRESS = "INP"
+    DONE = "DNE"
+
+
+EVIDENCE_STATUS_CHOICES = {
+    EvidenceStatus.IN_PROGRESS: "In Progress",
+    EvidenceStatus.DONE: "Done",
+}
+
+
 class Evidence(models.Model):
     """Contains evidence derived from a publication."""
 
+    status = models.CharField(
+        blank=False,
+        choices=EVIDENCE_STATUS_CHOICES,
+        default=EvidenceStatus.IN_PROGRESS,
+        max_length=3,
+        verbose_name="Evidence Status",
+        help_text=(
+            f"Either '{EvidenceStatus.IN_PROGRESS}' (in progress) or "
+            f"'{EvidenceStatus.DONE}' (done)."
+        ),
+    )
     curation = models.ForeignKey(
         Curation,
         blank=True,

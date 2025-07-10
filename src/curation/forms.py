@@ -1,12 +1,12 @@
 """Provides forms for the curation app."""
 
 from django import forms
-from django.forms import ModelForm
+from django.forms import ModelForm, modelformset_factory
 
 from curation.models import Curation, Evidence
 
 
-class CurationForm(ModelForm):
+class CurationCreateForm(ModelForm):
     """Allows the user to add a curation."""
 
     class Meta:
@@ -17,7 +17,7 @@ class CurationForm(ModelForm):
         widgets = {"curation_type": forms.RadioSelect}
 
 
-class EvidenceForm(ModelForm):
+class EvidenceCreateForm(ModelForm):
     """Allows the user to add evidence."""
 
     class Meta:
@@ -25,3 +25,24 @@ class EvidenceForm(ModelForm):
 
         model = Evidence
         fields = ["publication"]
+
+
+class EvidenceTopLevelEditForm(ModelForm):
+    """Allows the user to edit the top-level evidence fields."""
+
+    class Meta:
+        """Provides metadata."""
+
+        model = Evidence
+        fields = ["status", "is_conflicting", "is_included"]
+        widgets = {
+            "is_conflicting": forms.CheckboxInput(),
+            "is_included": forms.CheckboxInput(),
+        }
+
+
+EvidenceTopLevelEditFormSet = modelformset_factory(
+    Evidence,
+    form=EvidenceTopLevelEditForm,
+    extra=0,
+)

@@ -1,11 +1,17 @@
 """Provides views for the curation app."""
 
+from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
-from django.views.generic import DetailView, UpdateView
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.generic import DetailView
 from django.views.generic.edit import CreateView
 
 from core.permissions import CreateAccessMixin
-from curation.forms import CurationForm, EvidenceForm
+from curation.forms import (
+    CurationCreateForm,
+    EvidenceCreateForm,
+    EvidenceTopLevelEditFormSet,
+)
 from curation.models import Curation, CurationTypes, Evidence
 from datatable.constants import FieldTypes, Filters, SortDirections
 from datatable.views import datatable
@@ -15,10 +21,10 @@ class CurationCreate(CreateAccessMixin, CreateView):  # type: ignore
     """Allows the user to create (add) a curation."""
 
     model = Curation
-    form_class = CurationForm
+    form_class = CurationCreateForm
     template_name = "curation/create.html"
 
-    def form_valid(self, form: CurationForm) -> HttpResponse:
+    def form_valid(self, form: CurationCreateForm) -> HttpResponse:
         """Makes sure the user who added the curation is recorded.
 
         Returns:
@@ -35,6 +41,31 @@ class CurationDetail(DetailView):
     model = Curation
     template_name = "curation/detail.html"
     pk_url_kwarg = "curation_pk"
+
+
+def curation_edit(request: HttpRequest, curation_pk: int) -> HttpResponse:
+    """Returns the editable curation details page.
+
+    Args:
+         request: The Django request object.
+         curation_pk: The primary key for the curation.
+    """
+    curation = get_object_or_404(Curation, pk=curation_pk)
+    evidence = Evidence.objects.filter(curation=curation)
+    if request.method == "POST":
+        evidence_formset = EvidenceTopLevelEditFormSet(request.POST, queryset=evidence)
+        if evidence_formset.is_valid():
+            evidence_formset.save()
+            messages.success(request, "Changes saved successfully.")
+            return redirect("curation-detail", curation_pk=curation.pk)
+    else:
+        evidence_formset = EvidenceTopLevelEditFormSet(queryset=evidence)
+
+    context = {
+        "curation": curation,
+        "evidence_formset": evidence_formset,
+    }
+    return render(request, "curation/edit.html", context)
 
 
 CURATION_TYPE_OPTIONS = [
@@ -105,10 +136,10 @@ class EvidenceCreate(CreateAccessMixin, CreateView):  # type: ignore
     """Allows the user to create (add) evidence."""
 
     model = Evidence
-    form_class = EvidenceForm
+    form_class = EvidenceCreateForm
     template_name = "evidence/create.html"
 
-    def form_valid(self, form: EvidenceForm) -> HttpResponse:
+    def form_valid(self, form: EvidenceCreateForm) -> HttpResponse:
         """Makes sure the user who added the evidence is recorded.
 
         Returns:
