@@ -316,3 +316,108 @@ class CurationDetailTest(TestCase):
             evidence_table.find("tbody").find("tr").find_all("td")[5].get_text().strip()
         )
         self.assertEqual(score, "0")
+
+
+class CurationSearchTest(TestCase):
+    fixtures = ["test_alleles.json", "test_curations.json"]
+
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse("curation-search")
+
+    def test_shows_breadcrumb(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        breadcrumb = soup.find("nav", {"class": "breadcrumb"})
+        self.assertIsNotNone(breadcrumb)
+
+    def test_shows_id_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        id_label = soup.find("label", {"for": "search-pk-input"}).get_text().strip()
+        self.assertEqual(id_label, "ID")
+        id_input = soup.find(id="search-pk-input")
+        self.assertIsNotNone(id_input)
+
+    def test_shows_type_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        type_label = (
+            soup.find("label", {"for": "filter-curation-type-select"})
+            .get_text()
+            .strip()
+        )
+        self.assertEqual(type_label, "Type")
+        type_select = soup.find(id="filter-curation-type-select")
+        self.assertIsNotNone(type_select)
+
+    def test_shows_allele_name_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        name_label = (
+            soup.find("label", {"for": "search-allele-name-input"}).get_text().strip()
+        )
+        self.assertEqual(name_label, "Allele")
+        name_input = soup.find(id="search-allele-name-input")
+        self.assertIsNotNone(name_input)
+
+    def test_shows_haplotype_name_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        name_label = (
+            soup.find("label", {"for": "search-haplotype-name-input"})
+            .get_text()
+            .strip()
+        )
+        self.assertEqual(name_label, "Haplotype")
+        name_input = soup.find(id="search-haplotype-name-input")
+        self.assertIsNotNone(name_input)
+
+    def test_shows_added_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        added_label = (
+            soup.find("label", {"for": "sort-added-at-button"}).get_text().strip()
+        )
+        self.assertEqual(added_label, "Added")
+        added_button = soup.find(id="sort-added-at-button")
+        self.assertIsNotNone(added_button)
+
+    def test_shows_id_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        id_anchor = (
+            soup.find("tbody").find("tr").find_all("td")[0].find("a").get_text().strip()
+        )
+        self.assertIn("1", id_anchor)
+
+    def test_shows_type_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        curation_type = (
+            soup.find("tbody")
+            .find("tr")
+            .find_all("td")[1]
+            .find("span")
+            .get_text()
+            .strip()
+        )
+        self.assertIn("Allele", curation_type)
+
+    def test_shows_allele_name_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        name = soup.find("tbody").find("tr").find_all("td")[2].get_text().strip()
+        self.assertIn("A*01:02:03", name)
+
+    def test_shows_haplotype_name_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        name = soup.find("tbody").find("tr").find_all("td")[3].get_text().strip()
+        self.assertIn("--", name)
+
+    def test_shows_added_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        added_at = soup.find("tbody").find("tr").find_all("td")[4].get_text().strip()
+        self.assertIn("1970-01-01", added_at)
