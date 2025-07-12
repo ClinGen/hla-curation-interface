@@ -122,6 +122,19 @@ EVIDENCE_STATUS_CHOICES = {
 }
 
 
+class Zygosity:
+    """Defines zygosity status codes."""
+
+    MONOALLELIC = "MO"
+    BIALLELIC = "BI"
+
+
+ZYGOSITY_CHOICES = {
+    Zygosity.MONOALLELIC: "Monoallelic",
+    Zygosity.BIALLELIC: "Biallelic",
+}
+
+
 class Evidence(models.Model):
     """Contains evidence derived from a publication."""
 
@@ -130,7 +143,7 @@ class Evidence(models.Model):
         choices=EVIDENCE_STATUS_CHOICES,
         default=EvidenceStatus.IN_PROGRESS,
         max_length=3,
-        verbose_name="Evidence Status",
+        verbose_name="Status",
         help_text=(
             f"Either '{EvidenceStatus.IN_PROGRESS}' (in progress) or "
             f"'{EvidenceStatus.DONE}' (done)."
@@ -161,6 +174,18 @@ class Evidence(models.Model):
         verbose_name="Include",
         help_text="Should this evidence be included for scoring?",
     )
+    is_gwas = models.BooleanField(
+        default=False,
+        verbose_name="GWAS",
+        help_text="Was the study a genome-wide association study?",
+    )
+    zygosity = models.CharField(
+        choices=ZYGOSITY_CHOICES,
+        default=Zygosity.MONOALLELIC,
+        max_length=2,
+        verbose_name="Zygosity",
+        help_text="Either monoallelic (homozygous) or biallelic (heterozygous).",
+    )
     added_by = models.ForeignKey(
         User,
         blank=True,
@@ -175,6 +200,13 @@ class Evidence(models.Model):
         verbose_name="Added At",
         help_text="When the evidence was added.",
     )
+
+    class Meta:
+        """Provides metadata."""
+
+        db_table = "evidence"
+        verbose_name = "evidence"
+        verbose_name_plural = "Evidence"
 
     def __str__(self) -> str:
         """Returns a string representation of the curation."""
