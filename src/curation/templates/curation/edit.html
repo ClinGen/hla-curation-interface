@@ -27,7 +27,7 @@
                 </li>
             </ul>
         </nav>
-        {% include "curation/partials/details_table.html" %}
+        {% include "curation/partials/details_table.html" with object=curation %}
         {% include "curation/partials/buttons.html" %}
     </div>
 
@@ -44,7 +44,7 @@
                 </a>
             </div>
             <div class="block table-container mt-4">
-                <table class="table is-fullwidth">
+                <table class="table is-fullwidth" id="evidence-table">
                     <thead>
                         <tr>
                             <th>ID</th>
