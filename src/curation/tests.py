@@ -8,11 +8,12 @@ from django.urls import reverse
 from allele.models import Allele
 from core.models import UserProfile
 from curation.models import Curation
+from disease.models import Disease
 from haplotype.models import Haplotype
 
 
 class CurationCreateTest(TestCase):
-    fixtures = ["test_alleles.json", "test_haplotypes.json"]
+    fixtures = ["test_alleles.json", "test_haplotypes.json", "test_diseases.json"]
 
     def setUp(self):
         self.client = Client()
@@ -91,6 +92,13 @@ class CurationCreateTest(TestCase):
         allele_select = soup.find(id="id_allele")
         self.assertIsNotNone(allele_select)
 
+    def test_shows_disease_select(self):
+        self.client.force_login(self.user_who_can_create)
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        disease_select = soup.find(id="id_disease")
+        self.assertIsNotNone(disease_select)
+
     def test_shows_submit_button(self):
         self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
@@ -101,7 +109,7 @@ class CurationCreateTest(TestCase):
     def test_creates_allele_curation_with_valid_form_data(self):
         self.client.force_login(self.user_who_can_create)
         initial_curation_count = Curation.objects.count()
-        data = {"curation_type": "ALL", "allele": "1"}
+        data = {"curation_type": "ALL", "allele": "1", "disease": "1"}
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Curation.objects.count(), initial_curation_count + 1)
@@ -109,12 +117,13 @@ class CurationCreateTest(TestCase):
         self.assertIsNotNone(new_curation)
         self.assertEqual(new_curation.curation_type, "ALL")  # type: ignore[union-attr]
         self.assertEqual(new_curation.allele, Allele.objects.get(pk=1))  # type: ignore[union-attr]
+        self.assertEqual(new_curation.disease, Disease.objects.get(pk=1))  # type: ignore[union-attr]
         self.assertEqual(new_curation.added_by, self.user_who_can_create)  # type: ignore[union-attr]
 
     def test_creates_haplotype_curation_with_valid_form_data(self):
         self.client.force_login(self.user_who_can_create)
         initial_curation_count = Curation.objects.count()
-        data = {"curation_type": "HAP", "haplotype": "1"}
+        data = {"curation_type": "HAP", "haplotype": "1", "disease": "1"}
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Curation.objects.count(), initial_curation_count + 1)
@@ -122,15 +131,17 @@ class CurationCreateTest(TestCase):
         self.assertIsNotNone(new_curation)
         self.assertEqual(new_curation.curation_type, "HAP")  # type: ignore[union-attr]
         self.assertEqual(new_curation.haplotype, Haplotype.objects.get(pk=1))  # type: ignore[union-attr]
+        self.assertEqual(new_curation.disease, Disease.objects.get(pk=1))  # type: ignore[union-attr]
         self.assertEqual(new_curation.added_by, self.user_who_can_create)  # type: ignore[union-attr]
 
 
 class CurationDetailTest(TestCase):
     fixtures = [
         "test_alleles.json",
+        "test_diseases.json",
+        "test_publications.json",
         "test_curations.json",
         "test_evidence.json",
-        "test_publications.json",
     ]
 
     def setUp(self):
@@ -148,6 +159,12 @@ class CurationDetailTest(TestCase):
         soup = BeautifulSoup(response.content, "html.parser")
         allele = soup.find(id="allele").get_text().strip()
         self.assertEqual(allele, "A*01:02:03")
+
+    def test_shows_disease_name(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        allele = soup.find(id="disease").get_text().strip()
+        self.assertEqual(allele, "acute oran berry intoxication")
 
     def test_shows_curation_id(self):
         response = self.client.get(self.url)
@@ -319,7 +336,7 @@ class CurationDetailTest(TestCase):
 
 
 class CurationSearchTest(TestCase):
-    fixtures = ["test_alleles.json", "test_curations.json"]
+    fixtures = ["test_alleles.json", "test_diseases.json", "test_curations.json"]
 
     def setUp(self):
         self.client = Client()
@@ -373,6 +390,16 @@ class CurationSearchTest(TestCase):
         name_input = soup.find(id="search-haplotype-name-input")
         self.assertIsNotNone(name_input)
 
+    def test_shows_disease_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        disease_label = (
+            soup.find("label", {"for": "search-disease-name-input"}).get_text().strip()
+        )
+        self.assertEqual(disease_label, "Disease")
+        disease_input = soup.find(id="search-disease-name-input")
+        self.assertIsNotNone(disease_input)
+
     def test_shows_added_in_thead(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
@@ -416,19 +443,26 @@ class CurationSearchTest(TestCase):
         name = soup.find("tbody").find("tr").find_all("td")[3].get_text().strip()
         self.assertIn("--", name)
 
+    def test_shows_disease_name_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        disease = soup.find("tbody").find("tr").find_all("td")[4].get_text().strip()
+        self.assertEqual("acute oran berry intoxication", disease)
+
     def test_shows_added_in_tbody(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        added_at = soup.find("tbody").find("tr").find_all("td")[4].get_text().strip()
+        added_at = soup.find("tbody").find("tr").find_all("td")[5].get_text().strip()
         self.assertIn("1970-01-01", added_at)
 
 
 class CurationEditTest(TestCase):
     fixtures = [
         "test_alleles.json",
+        "test_diseases.json",
+        "test_publications.json",
         "test_curations.json",
         "test_evidence.json",
-        "test_publications.json",
     ]
 
     def setUp(self):
@@ -446,6 +480,12 @@ class CurationEditTest(TestCase):
         soup = BeautifulSoup(response.content, "html.parser")
         allele = soup.find(id="allele").get_text().strip()
         self.assertEqual(allele, "A*01:02:03")
+
+    def test_shows_disease_name(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        allele = soup.find(id="disease").get_text().strip()
+        self.assertEqual(allele, "acute oran berry intoxication")
 
     def test_shows_curation_id(self):
         response = self.client.get(self.url)

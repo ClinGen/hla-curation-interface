@@ -111,6 +111,15 @@ FIELDS = [
         "placeholder": "",
     },
     {
+        "text": "Disease",
+        "param_name": "disease",
+        "is_foreign_key": True,
+        "id": "disease-name",
+        "default_value": "",
+        "type": FieldTypes.SEARCH,
+        "placeholder": "",
+    },
+    {
         "text": "Added",
         "param_name": "added_at",
         "id": "added-at",

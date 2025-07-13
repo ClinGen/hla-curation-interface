@@ -7,6 +7,7 @@ from django.http import HttpResponseBase
 from django.urls import reverse
 
 from allele.models import Allele
+from disease.models import Disease
 from haplotype.models import Haplotype
 from publication.models import Publication
 
@@ -42,7 +43,7 @@ class Curation(models.Model):
         Allele,
         blank=True,
         null=True,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name="curations",
         help_text="Select the allele for this curation.",
     )
@@ -50,9 +51,17 @@ class Curation(models.Model):
         Haplotype,
         blank=True,
         null=True,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name="curations",
         help_text="Select the haplotype for this curation.",
+    )
+    disease = models.ForeignKey(
+        Disease,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="curations",
+        help_text="Select the disease for this curation.",
     )
     added_by = models.ForeignKey(
         User,

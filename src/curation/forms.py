@@ -13,7 +13,7 @@ class CurationCreateForm(ModelForm):
         """Provides metadata."""
 
         model = Curation
-        fields = ["curation_type", "allele", "haplotype"]
+        fields = ["curation_type", "allele", "haplotype", "disease"]
         widgets = {"curation_type": forms.RadioSelect}
 
 

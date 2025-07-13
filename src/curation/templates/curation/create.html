@@ -38,6 +38,9 @@
                     {% include "common/form/select_search.html" %}
                 {% endwith %}
             </div>
+            {% with field=form.disease %}
+                {% include "common/form/select_search.html" %}
+            {% endwith %}
             <button type="submit" class="button is-link">
                 Submit
             </button>

@@ -76,7 +76,7 @@ class Disease(models.Model):
 
     def __str__(self) -> str:
         """Returns a string representation of the disease."""
-        return f"{self.mondo_id}/{self.name}"
+        return self.name
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         """Returns the details page for a specific disease."""
