@@ -9,17 +9,41 @@
         </thead>
         <tbody>
             <tr>
-                <td>Step 1A: Allele or Haplotype</td>
+                <td>
+                    {% if object.score_step_1a is None %}
+                        <span class="tag is-warning is-light">
+                            {% include "common/icon.html" with icon_name="cone-striped" %}
+                            Step 1A: Allele or Haplotype
+                        </span>
+                    {% else %}
+                        <span class="tag is-success is-light">
+                            {% include "common/icon.html" with icon_name="check-circle-fill" %}
+                            Step 1A: Allele or Haplotype
+                        </span>
+                    {% endif %}
+                </td>
                 <td>Allele</td>
-                <td {% if object.score_step_1a == 0 %}class="is-info"{% endif %}>0</td>
+                <td {% if object.score_step_1a == 0 %}class="is-success"{% endif %}>0</td>
             </tr>
             <tr>
                 <td></td>
                 <td>Haplotype</td>
-                <td {% if object.score_step_1a == 2 %}class="is-info"{% endif %}>2</td>
+                <td {% if object.score_step_1a == 2 %}class="is-success"{% endif %}>2</td>
             </tr>
             <tr>
-                <td>Step 1B: Allele Resolution</td>
+                <td>
+                    {% if object.score_step_1b is None %}
+                        <span class="tag is-warning is-light">
+                            {% include "common/icon.html" with icon_name="cone-striped" %}
+                            Step 1B: Allele Resolution
+                        </span>
+                    {% else %}
+                        <span class="tag is-success is-light">
+                            {% include "common/icon.html" with icon_name="check-circle-fill" %}
+                            Step 1B: Allele Resolution
+                        </span>
+                    {% endif %}
+                </td>
                 <td>1-field (see Step 6B)</td>
                 <td>0</td>
             </tr>

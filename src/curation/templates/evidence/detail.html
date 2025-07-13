@@ -80,6 +80,10 @@
             </tbody>
         </table>
     </div>
+    <a href="{% url 'curation-detail' object.curation.pk %}" class="button" id="back-button">
+        {% include "common/icon.html" with icon_name="arrow-left" %}
+        Back to Curation
+    </a>
 </div>
 <div class="box mt-6 mb-6">
     <h1 class="title">Score</h1>
