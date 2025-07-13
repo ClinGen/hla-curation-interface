@@ -27,7 +27,66 @@
             </li>
         </ul>
     </nav>
-    <h1 class="title">Evidence #{{ object.pk }} Details</h1>
-    <p>Hello, World!</p>
+    <h1 class="title">Evidence Details</h1>
+    <div class="block table-container">
+        <table class="table">
+            <tbody>
+                {% if object.curation.curation_type == "ALL" %}
+                    <tr>
+                        <td>Allele</td>
+                        <td id="allele">{{ object.curation.allele }}</td>
+                    </tr>
+                {% elif object.curation.curation_type == "HAP" %}
+                    <tr>
+                        <td>Haplotype</td>
+                        <td id="haplotype">{{ object.curation.haplotype }}</td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <td>Disease</td>
+                    <td id="disease">{{ object.curation.disease }}</td>
+                </tr>
+                <tr>
+                    <td>Publication</td>
+                    <td id="publication">{{ object.publication }}</td>
+                </tr>
+                {% if object.status == "INP" %}
+                    <tr>
+                        <td>Status</td>
+                        <td id="status">
+                            <span class="tag is-info is-light">
+                                In Progress
+                            </span>
+                        </td>
+                    </tr>
+                {% elif object.status == "DNE" %}
+                    <tr>
+                        <td>Status</td>
+                        <td id="status">
+                            <span class="tag is-success is-light">
+                                In Progress
+                            </span>
+                        </td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <td>HCI Curation ID</td>
+                    <td id="curation-id">{{ object.pk }}</td>
+                </tr>
+                <tr>
+                    <td>Added</td>
+                    <td id="added-at">{{ object.added_at|date:"Y-m-d" }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="box mt-6 mb-6">
+    <h1 class="title">Score</h1>
+    <a href="" class="button" id="edit-button">
+        {% include "common/icon.html" with icon_name="pencil" %}
+        Edit
+    </a>
+    {% include "evidence/partials/score.html" %}
 </div>
 {% endblock %}

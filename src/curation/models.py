@@ -57,7 +57,7 @@ class Curation(models.Model):
     )
     disease = models.ForeignKey(
         Disease,
-        blank=True,
+        blank=False,
         null=True,
         on_delete=models.CASCADE,
         related_name="curations",
@@ -236,3 +236,12 @@ class Evidence(models.Model):
     def score(self) -> int:
         """Returns the score for the evidence."""
         return 0
+
+    @property
+    def score_step_1a(self) -> int | None:
+        """Returns the score for step 1A."""
+        if self.curation.curation_type == CurationTypes.ALLELE:
+            return 0
+        if self.curation.curation_type == CurationTypes.HAPLOTYPE:
+            return 2
+        return None
