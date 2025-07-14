@@ -13,6 +13,7 @@ from curation.forms import (
     EvidenceTopLevelEditFormSet,
 )
 from curation.models import Curation, CurationTypes, Evidence
+from curation.score import FRAMEWORK
 from datatable.constants import FieldTypes, Filters, SortDirections
 from datatable.views import datatable
 
@@ -173,3 +174,9 @@ class EvidenceDetail(DetailView):
     model = Evidence
     template_name = "evidence/detail.html"
     pk_url_kwarg = "evidence_pk"
+
+    def get_context_data(self, **kwargs):  # noqa
+        """Returns the context with the framework."""
+        context = super().get_context_data(**kwargs)
+        context["framework"] = FRAMEWORK
+        return context

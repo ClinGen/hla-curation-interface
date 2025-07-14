@@ -1,0 +1,12 @@
+{% load custom_filters %}
+{% if object|get_val:step.score is None %}
+    <span class="tag is-warning is-light">
+        {% include "common/icon.html" with icon_name="cone-striped" %}
+        {{ step.text }}
+    </span>
+{% else %}
+    <span class="tag is-success is-light">
+        {% include "common/icon.html" with icon_name="check-circle-fill" %}
+        {{ step.text }}
+    </span>
+{% endif %}

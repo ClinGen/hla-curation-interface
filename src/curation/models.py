@@ -245,3 +245,23 @@ class Evidence(models.Model):
         if self.curation.curation_type == CurationTypes.HAPLOTYPE:
             return 2
         return None
+
+    @property
+    def score_step_1b(self) -> int | None:
+        """Returns the score for step 1B."""
+        if self.curation.curation_type == CurationTypes.ALLELE:
+            num_fields = self.curation.allele.name.count(":") + 1
+            score = {
+                1: 0,
+                2: 1,
+                3: 2,
+                4: 2,
+            }
+            return score.get(num_fields)
+        return None
+
+    @property
+    def score_step_1c(self) -> int | None:
+        """Returns the score for step 1B."""
+        if self.zygosity == Zygosity.MONOALLELIC:
+            return
