@@ -140,8 +140,8 @@ class Zygosity:
 
 
 ZYGOSITY_CHOICES = {
-    Zygosity.MONOALLELIC: "Monoallelic",
-    Zygosity.BIALLELIC: "Biallelic",
+    Zygosity.MONOALLELIC: "Monoallelic (heterozygous)",
+    Zygosity.BIALLELIC: "Biallelic (homozygous)",
 }
 
 
@@ -189,7 +189,11 @@ class Evidence(models.Model):
         verbose_name="GWAS",
         help_text="Was the study a genome-wide association study?",
     )
-    is_gwas_notes = models.TextField(default="")
+    is_gwas_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Notes",
+    )
     zygosity = models.CharField(
         choices=ZYGOSITY_CHOICES,
         default=Zygosity.MONOALLELIC,
@@ -197,7 +201,11 @@ class Evidence(models.Model):
         verbose_name="Zygosity",
         help_text="Either monoallelic (homozygous) or biallelic (heterozygous).",
     )
-    zygosity_notes = models.TextField(default="")
+    zygosity_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Notes",
+    )
     added_by = models.ForeignKey(
         User,
         blank=True,

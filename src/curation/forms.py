@@ -63,4 +63,5 @@ class EvidenceEditForm(ModelForm):
         ]
         widgets = {
             "zygosity": forms.RadioSelect(),
+            "zygosity_notes": forms.Textarea(attrs={"class": "textarea"}),
         }

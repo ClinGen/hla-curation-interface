@@ -45,14 +45,35 @@
                 <p class="menu-label">Menu</p>
                 <ul class="menu-list">
                     <li><a href="#zygosity">Zygosity</a></li>
+                    <li><a href="#save">Save</a></li>
                 </ul>
             </aside>
         </div>
         <div class="column">
-            <form>{% csrf_token %}
+            <form method="post">{% csrf_token %}
                 <div class="box">
                     <h2 id="zygosity" class="title is-4">Zygosity</h2>
                     {% include "common/form/input_radio.html" with field=form.zygosity hide_label=True %}
+                    {% include "common/form/textarea.html" with field=form.zygosity_notes %}
+                </div>
+                <div class="box">
+                    <h2 id="save" class="title is-4">Save</h2>
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button type="submit"
+                                    class="button is-link"
+                            >
+                                Save All Changes
+                            </button>
+                        </div>
+                        <div class="control">
+                            <a href="{% url 'evidence-detail' object.curation.pk object.pk %}"
+                               class="button is-link is-light"
+                            >
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>

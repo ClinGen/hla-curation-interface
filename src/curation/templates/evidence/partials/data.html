@@ -1,0 +1,24 @@
+<div class="block table-container mt-4">
+    <table class="table is-fullwidth is-hoverable">
+        <thead>
+            <tr>
+                <th>Field</th>
+                <th>Value</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Zygosity</td>
+                <td>
+                    {% if object.zygosity == "MO" %}
+                        Monoallelic (heterozygous)
+                    {% elif object.zygosity == "BI" %}
+                        Biallelic (homozygous)
+                    {% endif %}
+                </td>
+                <td>{{ object.zygosity_notes }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
