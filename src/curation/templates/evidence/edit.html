@@ -1,0 +1,43 @@
+{% extends "layouts/base.html" %}
+{% block title %}Edit Evidence{% endblock %}
+{% block description %}Edit evidence #{{ object.pk }}.{% endblock %}
+{% block main %}
+<div class="box mt-6 mb-6">
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li>
+                <a href="{% url 'home' %}">
+                    Home
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'curation-search' %}">
+                    Curations
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'curation-detail' object.curation.pk %}">
+                    Curation #{{ object.curation.pk }}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'evidence-detail' object.curation.pk object.pk %}">
+                    Evidence #{{ object.pk }}
+                </a>
+            </li>
+            <li class="is-active">
+                <a href="" aria-current="page">
+                    Edit Data
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <h1 class="title">Edit Evidence Data</h1>
+    <form>{% csrf_token %}
+        <div class="box">
+            <h2 id="zygosity" class="title is-4">Zygosity</h2>
+            {% include "common/form/input_radio.html" with field=form.zygosity %}
+        </div>
+    </form>
+</div>
+{% endblock %}

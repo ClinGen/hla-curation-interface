@@ -3,13 +3,14 @@
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import DetailView
+from django.views.generic import DetailView, UpdateView
 from django.views.generic.edit import CreateView
 
 from core.permissions import CreateAccessMixin
 from curation.forms import (
     CurationCreateForm,
     EvidenceCreateForm,
+    EvidenceEditForm,
     EvidenceTopLevelEditFormSet,
 )
 from curation.models import Curation, CurationTypes, Evidence
@@ -180,3 +181,12 @@ class EvidenceDetail(DetailView):
         context = super().get_context_data(**kwargs)
         context["framework"] = FRAMEWORK
         return context
+
+
+class EvidenceEdit(UpdateView):
+    """Allows the user to edit evidence."""
+
+    model = Evidence
+    form_class = EvidenceEditForm
+    template_name = "evidence/edit.html"
+    pk_url_kwarg = "evidence_pk"

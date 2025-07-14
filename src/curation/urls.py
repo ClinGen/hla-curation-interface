@@ -23,4 +23,9 @@ urlpatterns = [
         views.EvidenceDetail.as_view(),
         name="evidence-detail",
     ),
+    path(
+        "<int:curation_pk>/evidence/<int:evidence_pk>/edit",
+        views.EvidenceEdit.as_view(),
+        name="evidence-edit",
+    ),
 ]

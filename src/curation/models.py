@@ -189,6 +189,7 @@ class Evidence(models.Model):
         verbose_name="GWAS",
         help_text="Was the study a genome-wide association study?",
     )
+    is_gwas_notes = models.TextField(default="")
     zygosity = models.CharField(
         choices=ZYGOSITY_CHOICES,
         default=Zygosity.MONOALLELIC,
@@ -196,6 +197,7 @@ class Evidence(models.Model):
         verbose_name="Zygosity",
         help_text="Either monoallelic (homozygous) or biallelic (heterozygous).",
     )
+    zygosity_notes = models.TextField(default="")
     added_by = models.ForeignKey(
         User,
         blank=True,

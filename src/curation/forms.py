@@ -46,3 +46,21 @@ EvidenceTopLevelEditFormSet = modelformset_factory(
     form=EvidenceTopLevelEditForm,
     extra=0,
 )
+
+
+class EvidenceEditForm(ModelForm):
+    """Allows the user to edit all evidence fields other than the top-level fields."""
+
+    class Meta:
+        """Provides metadata."""
+
+        model = Evidence
+        fields = [
+            "is_gwas",
+            "is_gwas_notes",
+            "zygosity",
+            "zygosity_notes",
+        ]
+        widgets = {
+            "zygosity": forms.RadioSelect(),
+        }
