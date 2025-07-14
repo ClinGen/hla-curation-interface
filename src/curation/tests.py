@@ -332,7 +332,7 @@ class CurationDetailTest(TestCase):
         score = (
             evidence_table.find("tbody").find("tr").find_all("td")[5].get_text().strip()
         )
-        self.assertEqual(score, "0")
+        self.assertEqual(score, "2.0")
 
 
 class CurationSearchTest(TestCase):
@@ -640,4 +640,4 @@ class CurationEditTest(TestCase):
         score = (
             evidence_table.find("tbody").find("tr").find_all("td")[5].get_text().strip()
         )
-        self.assertEqual(score, "0")
+        self.assertEqual(score, "2.0")

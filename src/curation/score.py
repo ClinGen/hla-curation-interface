@@ -74,14 +74,14 @@ class Interval:
         elif self.start == float("-inf"):
             start = "-∞"
         else:
-            start = self.start
+            start = str(self.start)
 
         if self.end == float("inf"):
             end = "∞"
         elif self.end == float("-inf"):
             end = "-∞"
         else:
-            end = self.end
+            end = str(self.end)
 
         return f"{start} {start_operator} {self.variable} {end_operator} {end}"
 

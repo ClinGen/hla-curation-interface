@@ -241,7 +241,7 @@ class Evidence(models.Model):
     @property
     def score_step_1(self) -> float:
         """Returns the score for step 1."""
-        total = 0
+        total = 0.0
         total += self.score_step_1a if self.score_step_1a else 0
         total += self.score_step_1b if self.score_step_1b else 0
         total += self.score_step_1c if self.score_step_1c else 0
@@ -250,16 +250,20 @@ class Evidence(models.Model):
     @property
     def score_step_1a(self) -> float | None:
         """Returns the score for step 1A."""
-        if self.curation.curation_type == CurationTypes.ALLELE:
+        if self.curation and self.curation.curation_type == CurationTypes.ALLELE:
             return Points.S1A_ALLELE
-        if self.curation.curation_type == CurationTypes.HAPLOTYPE:
+        if self.curation and self.curation.curation_type == CurationTypes.HAPLOTYPE:
             return Points.S1A_HAPLOTYPE
         return None
 
     @property
     def score_step_1b(self) -> float | None:
         """Returns the score for step 1B."""
-        if self.curation.curation_type == CurationTypes.ALLELE:
+        if (
+            self.curation
+            and self.curation.curation_type == CurationTypes.ALLELE
+            and self.curation.allele
+        ):
             num_fields = self.curation.allele.name.count(":") + 1
             score = {
                 1: Points.S1B_1_FIELD,
