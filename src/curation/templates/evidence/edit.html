@@ -33,11 +33,29 @@
         </ul>
     </nav>
     <h1 class="title">Edit Evidence Data</h1>
-    <form>{% csrf_token %}
-        <div class="box">
-            <h2 id="zygosity" class="title is-4">Zygosity</h2>
-            {% include "common/form/input_radio.html" with field=form.zygosity %}
+    {% include "evidence/partials/detail_table.html" %}
+    <a href="{% url 'evidence-detail' object.curation.pk object.pk %}" class="button" id="back-button">
+        {% include "common/icon.html" with icon_name="arrow-left" %}
+        Back to Evidence Details
+    </a>
+    <hr>
+    <div class="columns">
+        <div class="column is-one-fifth">
+            <aside class="menu">
+                <p class="menu-label">Menu</p>
+                <ul class="menu-list">
+                    <li><a href="#zygosity">Zygosity</a></li>
+                </ul>
+            </aside>
         </div>
-    </form>
+        <div class="column">
+            <form>{% csrf_token %}
+                <div class="box">
+                    <h2 id="zygosity" class="title is-4">Zygosity</h2>
+                    {% include "common/form/input_radio.html" with field=form.zygosity hide_label=True %}
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}

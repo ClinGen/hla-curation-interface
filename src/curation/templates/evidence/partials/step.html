@@ -1,12 +1,6 @@
 {% load custom_filters %}
 {% if object|get_val:step.score is None %}
-    <span class="tag is-warning is-light">
-        {% include "common/icon.html" with icon_name="cone-striped" %}
-        {{ step.text }}
-    </span>
+    {% include "common/tags/in_progress.html" with text=step.text %}
 {% else %}
-    <span class="tag is-success is-light">
-        {% include "common/icon.html" with icon_name="check-circle-fill" %}
-        {{ step.text }}
-    </span>
+    {% include "common/tags/done.html" with text=step.text %}
 {% endif %}
