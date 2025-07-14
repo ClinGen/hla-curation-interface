@@ -7,6 +7,7 @@ from django.http import HttpResponseBase
 from django.urls import reverse
 
 from allele.models import Allele
+from curation.score import Points
 from disease.models import Disease
 from haplotype.models import Haplotype
 from publication.models import Publication
@@ -233,35 +234,47 @@ class Evidence(models.Model):
         )
 
     @property
-    def score(self) -> int:
+    def score(self) -> float:
         """Returns the score for the evidence."""
-        return 0
+        return self.score_step_1
 
     @property
-    def score_step_1a(self) -> int | None:
+    def score_step_1(self) -> float:
+        """Returns the score for step 1."""
+        total = 0
+        total += self.score_step_1a if self.score_step_1a else 0
+        total += self.score_step_1b if self.score_step_1b else 0
+        total += self.score_step_1c if self.score_step_1c else 0
+        return total
+
+    @property
+    def score_step_1a(self) -> float | None:
         """Returns the score for step 1A."""
         if self.curation.curation_type == CurationTypes.ALLELE:
-            return 0
+            return Points.S1A_ALLELE
         if self.curation.curation_type == CurationTypes.HAPLOTYPE:
-            return 2
+            return Points.S1A_HAPLOTYPE
         return None
 
     @property
-    def score_step_1b(self) -> int | None:
+    def score_step_1b(self) -> float | None:
         """Returns the score for step 1B."""
         if self.curation.curation_type == CurationTypes.ALLELE:
             num_fields = self.curation.allele.name.count(":") + 1
             score = {
-                1: 0,
-                2: 1,
-                3: 2,
-                4: 2,
+                1: Points.S1B_1_FIELD,
+                2: Points.S1B_2_FIELD,
+                3: Points.S1B_3_FIELD,
+                4: Points.S1B_4_FIELD,
             }
             return score.get(num_fields)
         return None
 
     @property
-    def score_step_1c(self) -> int | None:
+    def score_step_1c(self) -> float | None:
         """Returns the score for step 1B."""
         if self.zygosity == Zygosity.MONOALLELIC:
-            return
+            return Points.S1C_MONOALLELIC
+        if self.zygosity == Zygosity.BIALLELIC:
+            return Points.S1C_BIALLELIC
+        return None

@@ -55,12 +55,14 @@ class Interval:
         end: float,
         start_inclusive: bool,
         end_inclusive: bool,
+        variable: str,
     ) -> None:
-        """Sets the interval's start, end, and text representation."""
+        """Sets the interval's start, end, and variable."""
         self.start = start
         self.end = end
         self.start_inclusive = start_inclusive
         self.end_inclusive = end_inclusive
+        self.variable = variable
 
     def __str__(self) -> str:
         """Returns a string representation of the Interval object for the user."""
@@ -81,7 +83,7 @@ class Interval:
         else:
             end = self.end
 
-        return f"{start} {start_operator} p-value {end_operator} {end}"
+        return f"{start} {start_operator} {self.variable} {end_operator} {end}"
 
     def __repr__(self) -> str:
         """Returns a string representation of the Interval object for the developer."""
@@ -109,30 +111,35 @@ step_3a_gwas_interval_1 = Interval(
     end=float("inf"),
     start_inclusive=True,
     end_inclusive=False,
+    variable="p-value",
 )
 step_3a_gwas_interval_2 = Interval(
     start=5 * 10e-8,
     end=step_3a_gwas_interval_1.start,
     start_inclusive=True,
     end_inclusive=False,
+    variable="p-value",
 )
 step_3a_gwas_interval_3 = Interval(
     start=1 * 10e-11,
     end=step_3a_gwas_interval_2.start,
     start_inclusive=True,
     end_inclusive=False,
+    variable="p-value",
 )
 step_3a_gwas_interval_4 = Interval(
     start=1 * 10e-14,
     end=step_3a_gwas_interval_3.start,
     start_inclusive=True,
     end_inclusive=False,
+    variable="p-value",
 )
 step_3a_gwas_interval_5 = Interval(
     start=float("-inf"),
     end=step_3a_gwas_interval_4.start,
     start_inclusive=False,
     end_inclusive=False,
+    variable="p-value",
 )
 
 step_3a_non_gwas_interval_1 = Interval(
@@ -140,30 +147,136 @@ step_3a_non_gwas_interval_1 = Interval(
     end=float("inf"),
     start_inclusive=True,
     end_inclusive=False,
+    variable="p-value",
 )
 step_3a_non_gwas_interval_2 = Interval(
     start=0.01,
     end=step_3a_non_gwas_interval_1.start,
     start_inclusive=True,
     end_inclusive=False,
+    variable="p-value",
 )
 step_3a_non_gwas_interval_3 = Interval(
     start=0.0005,
     end=step_3a_non_gwas_interval_2.start,
     start_inclusive=True,
     end_inclusive=False,
+    variable="p-value",
 )
 step_3a_non_gwas_interval_4 = Interval(
     start=0.0001,
     end=step_3a_non_gwas_interval_3.start,
     start_inclusive=True,
     end_inclusive=False,
+    variable="p-value",
 )
 step_3a_non_gwas_interval_5 = Interval(
     start=float("-inf"),
     end=step_3a_non_gwas_interval_4.start,
     start_inclusive=False,
     end_inclusive=False,
+    variable="p-value",
+)
+
+step_3c_or_rr_interval_1 = Interval(
+    start=2,
+    end=float("inf"),
+    start_inclusive=True,
+    end_inclusive=False,
+    variable="OR/RR",
+)
+step_3c_or_rr_interval_2 = Interval(
+    start=float("-inf"),
+    end=0.5,
+    start_inclusive=False,
+    end_inclusive=True,
+    variable="OR/RR",
+)
+step_3c_beta_interval_1 = Interval(
+    start=0.5,
+    end=float("inf"),
+    start_inclusive=True,
+    end_inclusive=False,
+    variable="Beta",
+)
+step_3c_beta_interval_2 = Interval(
+    start=float("-inf"),
+    end=-0.5,
+    start_inclusive=False,
+    end_inclusive=True,
+    variable="Beta",
+)
+
+step_4_gwas_interval_1 = Interval(
+    start=float("-inf"),
+    end=1000,
+    start_inclusive=False,
+    end_inclusive=False,
+    variable="size",
+)
+step_4_gwas_interval_2 = Interval(
+    start=step_4_gwas_interval_1.end,
+    end=2499,
+    start_inclusive=True,
+    end_inclusive=True,
+    variable="size",
+)
+step_4_gwas_interval_3 = Interval(
+    start=step_4_gwas_interval_2.end + 1,
+    end=4999,
+    start_inclusive=True,
+    end_inclusive=True,
+    variable="size",
+)
+step_4_gwas_interval_4 = Interval(
+    start=step_4_gwas_interval_3.end + 1,
+    end=9999,
+    start_inclusive=True,
+    end_inclusive=True,
+    variable="size",
+)
+step_4_gwas_interval_5 = Interval(
+    start=step_4_gwas_interval_4.end + 1,
+    end=float("inf"),
+    start_inclusive=True,
+    end_inclusive=False,
+    variable="size",
+)
+
+step_4_non_gwas_interval_1 = Interval(
+    start=float("-inf"),
+    end=50,
+    start_inclusive=False,
+    end_inclusive=False,
+    variable="size",
+)
+step_4_non_gwas_interval_2 = Interval(
+    start=step_4_non_gwas_interval_1.end,
+    end=99,
+    start_inclusive=True,
+    end_inclusive=True,
+    variable="size",
+)
+step_4_non_gwas_interval_3 = Interval(
+    start=step_4_non_gwas_interval_2.end + 1,
+    end=249,
+    start_inclusive=True,
+    end_inclusive=True,
+    variable="size",
+)
+step_4_non_gwas_interval_4 = Interval(
+    start=step_4_non_gwas_interval_3.end + 1,
+    end=499,
+    start_inclusive=True,
+    end_inclusive=True,
+    variable="size",
+)
+step_4_non_gwas_interval_5 = Interval(
+    start=step_4_non_gwas_interval_4.end + 1,
+    end=float("inf"),
+    start_inclusive=True,
+    end_inclusive=False,
+    variable="size",
 )
 
 # This is used to render the score table.
@@ -171,204 +284,326 @@ FRAMEWORK = [
     {
         "text": "Step 1A: Allele or Haplotype",
         "category": "Allele",
-        "split": False,
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_1a",
         "points": Points.S1A_ALLELE,
     },
     {
         "text": None,
         "category": "Haplotype",
-        "split": False,
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_1a",
         "points": Points.S1A_HAPLOTYPE,
     },
     {
         "text": "Step 1B: Allele Resolution",
         "category": "1-field (see Step 6B)",
-        "split": False,
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_1b",
         "points": Points.S1B_1_FIELD,
     },
     {
         "text": None,
         "category": "2-field",
-        "split": False,
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_1b",
         "points": Points.S1B_2_FIELD,
     },
     {
         "text": None,
         "category": "3-field, G-group, P-group",
-        "split": False,
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_1b",
         "points": Points.S1B_3_FIELD,
     },
     {
         "text": None,
         "category": "4-field",
-        "split": False,
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_1b",
         "points": Points.S1B_4_FIELD,
     },
     {
         "text": "Step 1C: Zygosity",
         "category": "Monoallelic (heterozygous)",
-        "split": False,
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_1c",
         "points": Points.S1C_MONOALLELIC,
     },
     {
         "text": None,
         "category": "Biallelic (homozygous)",
-        "split": False,
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_1c",
         "points": Points.S1C_BIALLELIC,
     },
     {
         "text": "Step 1D: Phase",
         "category": "Phase confirmed",
-        "split": False,
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_1d",
         "points": Points.S1D_PHASE_CONFIRMED,
     },
     {
         "text": "Step 2: Typing Method",
-        "category": "Tag SNPs or Microarrays",
-        "split": False,
+        "category": "Tag SNPs or microarrays",
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_2",
         "points": Points.S2_TAG_SNPS_OR_MICROARRAYS,
     },
     {
         "text": None,
         "category": "Serological",
-        "split": False,
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_2",
         "points": Points.S2_SEROLOGICAL,
     },
     {
         "text": None,
         "category": "Imputation",
-        "split": False,
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_2",
         "points": Points.S2_IMPUTATION,
     },
     {
         "text": None,
-        "category": "Low Resolution Typing",
-        "split": False,
+        "category": "Low-resolution typing",
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_2",
         "points": Points.S2_LOW_RES_TYPING,
     },
     {
         "text": None,
-        "category": "High Resolution Typing",
-        "split": False,
+        "category": "High-resolution typing",
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_2",
         "points": Points.S2_HIGH_RES_TYPING,
     },
     {
         "text": None,
-        "category": "Whole Exome Sequencing",
-        "split": False,
+        "category": "Whole exome sequencing",
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_2",
         "points": Points.S2_WHOLE_EXOME_SEQ,
     },
     {
         "text": None,
-        "category": "Sanger-Sequencing-Based Typing",
-        "split": False,
+        "category": "Sanger-sequencing-based typing",
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_2",
         "points": Points.S2_SANGER_SEQ,
     },
     {
         "text": None,
-        "category": "Whole Gene Sequencing",
-        "split": False,
+        "category": "Whole gene sequencing",
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_2",
         "points": Points.S2_WHOLE_GENE_SEQ,
     },
     {
         "text": None,
-        "category": "Whole Genome Sequencing and/or Panel-Based NGS (>50x coverage)",
-        "split": False,
+        "category": "Whole genome sequencing and/or panel-based NGS (>50x coverage)",
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_2",
         "points": Points.S2_WHOLE_GENOME_SEQ_AND_OR_NGS,
     },
     {
         "text": "Step 3A: Statistics (p-value)",
         "category": ["GWAS", "Non-GWAS"],
-        "split": True,
+        "split_horizontal": True,
+        "split_vertical": False,
         "score": "score_step_3a",
         "points": "",
     },
     {
         "text": None,
         "category": [step_3a_gwas_interval_1, step_3a_non_gwas_interval_1],
-        "split": True,
+        "split_horizontal": True,
+        "split_vertical": False,
         "score": "score_step_3a",
         "points": Points.S3A_INTERVAL_1,
     },
     {
         "text": None,
         "category": [step_3a_gwas_interval_2, step_3a_non_gwas_interval_2],
-        "split": True,
+        "split_horizontal": True,
+        "split_vertical": False,
         "score": "score_step_3a",
         "points": Points.S3A_INTERVAL_2,
     },
     {
         "text": None,
         "category": [step_3a_gwas_interval_3, step_3a_non_gwas_interval_3],
-        "split": True,
+        "split_horizontal": True,
+        "split_vertical": False,
         "score": "score_step_3a",
         "points": Points.S3A_INTERVAL_3,
     },
     {
         "text": None,
         "category": [step_3a_gwas_interval_4, step_3a_non_gwas_interval_4],
-        "split": True,
+        "split_horizontal": True,
+        "split_vertical": False,
         "score": "score_step_3a",
         "points": Points.S3A_INTERVAL_4,
     },
     {
         "text": None,
         "category": [step_3a_gwas_interval_5, step_3a_non_gwas_interval_5],
-        "split": True,
+        "split_horizontal": True,
+        "split_vertical": False,
         "score": "score_step_3a",
         "points": Points.S3A_INTERVAL_5,
     },
     {
         "text": "Step 3B: Multiple Testing Correction",
         "category": "Overall correction for multiple testing",
-        "split": False,
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_3b",
         "points": Points.S3B_OVERALL_CORRECTION,
     },
     {
         "text": None,
         "category": "2-step p-value correction",
-        "split": False,
+        "split_horizontal": False,
+        "split_vertical": False,
         "score": "score_step_3b",
         "points": Points.S3B_2_STEP_CORRECTION,
     },
     {
+        "text": "Step 3C: Statistics (Effect Size)*",
+        "category": [
+            step_3c_or_rr_interval_1,
+            step_3c_or_rr_interval_2,
+            step_3c_beta_interval_1,
+            step_3c_beta_interval_2,
+        ],
+        "split_horizontal": False,
+        "split_vertical": True,
+        "score": "score_step_3c",
+        "points": Points.S3C_OR_RR_BETA,
+    },
+    {
+        "text": None,
+        "category": "CI does not cross 1 (OR/RR) or 0 (beta)",
+        "split_horizontal": False,
+        "split_vertical": False,
+        "score": "score_step_3c",
+        "points": Points.S3C_CI_DOES_NOT_CROSS,
+    },
+    {
         "text": "Step 4: Cohort Size",
         "category": ["GWAS", "Non-GWAS"],
-        "split": True,
+        "split_horizontal": True,
+        "split_vertical": False,
         "score": "score_step_4",
         "points": "",
     },
     {
         "text": None,
-        "category": ["<1,000", "<50"],
-        "split": True,
+        "category": [step_4_gwas_interval_1, step_4_non_gwas_interval_1],
+        "split_horizontal": True,
+        "split_vertical": False,
         "score": "score_step_4",
         "points": Points.S4_INTERVAL_1,
     },
     {
         "text": None,
-        "category": ["1,000-2,499", "50-99"],
-        "split": True,
+        "category": [step_4_gwas_interval_2, step_4_non_gwas_interval_2],
+        "split_horizontal": True,
+        "split_vertical": False,
         "score": "score_step_4",
-        "points": Points.S3A_INTERVAL_2,
+        "points": Points.S4_INTERVAL_2,
+    },
+    {
+        "text": None,
+        "category": [step_4_gwas_interval_3, step_4_non_gwas_interval_3],
+        "split_horizontal": True,
+        "split_vertical": False,
+        "score": "score_step_4",
+        "points": Points.S4_INTERVAL_3,
+    },
+    {
+        "text": None,
+        "category": [step_4_gwas_interval_4, step_4_non_gwas_interval_4],
+        "split_horizontal": True,
+        "split_vertical": False,
+        "score": "score_step_4",
+        "points": Points.S4_INTERVAL_4,
+    },
+    {
+        "text": None,
+        "category": [step_4_gwas_interval_5, step_4_non_gwas_interval_5],
+        "split_horizontal": True,
+        "split_vertical": False,
+        "score": "score_step_4",
+        "points": Points.S4_INTERVAL_5,
+    },
+    {
+        "text": "Step 5: Additional Phenotypes",
+        "category": "Has specific disease-related phenotype",
+        "split_horizontal": False,
+        "split_vertical": False,
+        "score": "score_step_5",
+        "points": Points.S5_SPECIFIC_PHENOTYPE,
+    },
+    {
+        "text": None,
+        "category": "Only disease tested",
+        "split_horizontal": False,
+        "split_vertical": False,
+        "score": "score_step_5",
+        "points": Points.S5_ONLY_DISEASE_TESTED,
+    },
+    {
+        "text": "Step 6A: Weighing Association (multiplier)",
+        "category": "Significant association with disease",
+        "split_horizontal": False,
+        "split_vertical": False,
+        "score": "score_step_6a",
+        "points": Points.S6A_ASSOCIATION,
+    },
+    {
+        "text": None,
+        "category": "No significant association",
+        "split_horizontal": False,
+        "split_vertical": False,
+        "score": "score_step_6a",
+        "points": Points.S6A_NO_ASSOCIATION,
+    },
+    {
+        "text": "Step 6B: Low Field Resolution (multiplier)",
+        "category": "1-field resolution",
+        "split_horizontal": False,
+        "split_vertical": False,
+        "score": "score_step_6b",
+        "points": Points.S6B_1_FIELD,
+    },
+    {
+        "text": None,
+        "category": "> 1-field resolution",
+        "split_horizontal": False,
+        "split_vertical": False,
+        "score": "score_step_6b",
+        "points": Points.S6B_MORE_THAN_1_FIELD,
     },
 ]

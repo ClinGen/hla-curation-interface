@@ -1,5 +1,5 @@
 <div class="block table-container mt-4">
-    <table class="table is-fullwidth">
+    <table class="table is-fullwidth is-hoverable">
         <thead>
             <tr>
                 <th>Step</th>
@@ -16,8 +16,10 @@
                         {% endif %}
                     </td>
                     <td>
-                        {% if step.split %}
-                            {% include "evidence/partials/split.html" %}
+                        {% if step.split_horizontal %}
+                            {% include "evidence/partials/split_horizontal.html" %}
+                        {% elif step.split_vertical %}
+                            {% include "evidence/partials/split_vertical.html" %}
                         {% else %}
                             {{ step.category }}
                         {% endif %}
@@ -25,6 +27,10 @@
                     {% include "evidence/partials/points.html" %}
                 </tr>
             {% endfor %}
+            <tr class="is-info">
+                <td colspan="2"><b>Total</b></td>
+                <td><b>{{ object.score }}</b></td>
+            </tr>
         </tbody>
     </table>
     <div class="block">
