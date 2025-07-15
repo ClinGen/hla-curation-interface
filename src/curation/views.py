@@ -13,7 +13,7 @@ from curation.forms import (
     EvidenceEditForm,
     EvidenceTopLevelEditFormSet,
 )
-from curation.models import Curation, CurationTypes, Evidence
+from curation.models import Curation, CurationTypes, Evidence, Status
 from curation.score import FRAMEWORK
 from datatable.constants import FieldTypes, Filters, SortDirections
 from datatable.views import datatable
@@ -76,6 +76,12 @@ CURATION_TYPE_OPTIONS = [
     CurationTypes.HAPLOTYPE,
 ]
 
+STATUS_OPTIONS = [
+    Filters.DEFAULT,
+    Status.IN_PROGRESS,
+    Status.DONE,
+]
+
 FIELDS = [
     {
         "text": "ID",
@@ -120,6 +126,14 @@ FIELDS = [
         "default_value": "",
         "type": FieldTypes.SEARCH,
         "placeholder": "",
+    },
+    {
+        "text": "Status",
+        "param_name": "status",
+        "id": "status",
+        "default_value": STATUS_OPTIONS[0],
+        "type": FieldTypes.FILTER,
+        "options": STATUS_OPTIONS,
     },
     {
         "text": "Added",

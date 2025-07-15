@@ -18,6 +18,16 @@
             <td id="disease">{{ object.disease }}</td>
         </tr>
         <tr>
+            <td>Status</td>
+            <td id="status">
+                {% if object.status == "INP" %}
+                    {% include "common/tags/in_progress.html" %}
+                {% elif object.status == "DNE" %}
+                    {% include "common/tags/done.html" %}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
             <td>Score</td>
             <td id="score">{{ object.score }}</td>
         </tr>

@@ -68,6 +68,14 @@
                                         <td>
                                             {{ value|default:"------" }}
                                         </td>
+                                    {% elif field.param_name == "status" %}
+                                        <td>
+                                            {% if value == "INP" %}
+                                                {% include "common/tags/in_progress.html" %}
+                                            {% elif value == "DNE" %}
+                                                {% include "common/tags/done.html" %}
+                                            {% endif %}
+                                        </td>
                                     {% elif field.param_name == "added_at" %}
                                         <td>
                                             {{ value|date:"Y-m-d H:i" }}

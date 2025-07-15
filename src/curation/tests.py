@@ -166,6 +166,18 @@ class CurationDetailTest(TestCase):
         allele = soup.find(id="disease").get_text().strip()
         self.assertEqual(allele, "acute oran berry intoxication")
 
+    def test_shows_status(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        status = soup.find(id="status").get_text().strip()
+        self.assertEqual(status, "In Progress")
+
+    def test_shows_score(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        score = soup.find(id="score").get_text().strip()
+        self.assertIsNotNone(score)
+
     def test_shows_curation_id(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
@@ -400,6 +412,16 @@ class CurationSearchTest(TestCase):
         disease_input = soup.find(id="search-disease-name-input")
         self.assertIsNotNone(disease_input)
 
+    def test_shows_score_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        status_label = (
+            soup.find("label", {"for": "filter-status-select"}).get_text().strip()
+        )
+        self.assertEqual(status_label, "Status")
+        status_select = soup.find(id="filter-status-select")
+        self.assertIsNotNone(status_select)
+
     def test_shows_added_in_thead(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
@@ -449,10 +471,16 @@ class CurationSearchTest(TestCase):
         disease = soup.find("tbody").find("tr").find_all("td")[4].get_text().strip()
         self.assertEqual("acute oran berry intoxication", disease)
 
+    def test_shows_score_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        status = soup.find("tbody").find("tr").find_all("td")[5].get_text().strip()
+        self.assertEqual(status, "In Progress")
+
     def test_shows_added_in_tbody(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        added_at = soup.find("tbody").find("tr").find_all("td")[5].get_text().strip()
+        added_at = soup.find("tbody").find("tr").find_all("td")[6].get_text().strip()
         self.assertIn("1970-01-01", added_at)
 
 

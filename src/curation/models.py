@@ -13,6 +13,19 @@ from haplotype.models import Haplotype
 from publication.models import Publication
 
 
+class Status:
+    """Defines the status codes for curations and evidence."""
+
+    IN_PROGRESS = "INP"
+    DONE = "DNE"
+
+
+STATUS_CHOICES = {
+    Status.IN_PROGRESS: "In Progress",
+    Status.DONE: "Done",
+}
+
+
 class CurationTypes:
     """Defines the curation type codes."""
 
@@ -29,6 +42,16 @@ CURATION_TYPE_CHOICES = {
 class Curation(models.Model):
     """Contains top-level information about a curation."""
 
+    status = models.CharField(
+        blank=False,
+        choices=STATUS_CHOICES,
+        default=Status.IN_PROGRESS,
+        max_length=3,
+        verbose_name="Status",
+        help_text=(
+            f"Either '{Status.IN_PROGRESS}' (in progress) or '{Status.DONE}' (done)."
+        ),
+    )
     curation_type = models.CharField(
         blank=False,
         choices=CURATION_TYPE_CHOICES,
@@ -130,19 +153,6 @@ class Curation(models.Model):
         return total
 
 
-class EvidenceStatus:
-    """Defines the evidence status codes."""
-
-    IN_PROGRESS = "INP"
-    DONE = "DNE"
-
-
-EVIDENCE_STATUS_CHOICES = {
-    EvidenceStatus.IN_PROGRESS: "In Progress",
-    EvidenceStatus.DONE: "Done",
-}
-
-
 class Zygosity:
     """Defines zygosity status codes."""
 
@@ -161,13 +171,12 @@ class Evidence(models.Model):
 
     status = models.CharField(
         blank=False,
-        choices=EVIDENCE_STATUS_CHOICES,
-        default=EvidenceStatus.IN_PROGRESS,
+        choices=STATUS_CHOICES,
+        default=Status.IN_PROGRESS,
         max_length=3,
         verbose_name="Status",
         help_text=(
-            f"Either '{EvidenceStatus.IN_PROGRESS}' (in progress) or "
-            f"'{EvidenceStatus.DONE}' (done)."
+            f"Either '{Status.IN_PROGRESS}' (in progress) or '{Status.DONE}' (done)."
         ),
     )
     curation = models.ForeignKey(
