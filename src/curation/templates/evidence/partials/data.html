@@ -36,7 +36,7 @@
                     {% if object.typing_method %}
                         {{ object.get_typing_method_display }}
                     {% else %}
-                        Not Selected
+                        Not selected
                     {% endif %}
                 </td>
                 <td>{{ object.typing_method_notes }}</td>
@@ -51,6 +51,17 @@
                     {% endif %}
                 </td>
                 <td>{{ object.p_value.notes }}</td>
+            </tr>
+            <tr>
+                <td>Multiple Testing Correction</td>
+                <td>
+                    {% if object.multiple_testing_correction %}
+                        {{ object.get_multiple_testing_correction_display }}
+                    {% else %}
+                        Not selected
+                    {% endif %}
+                </td>
+                <td>{{ object.multiple_testing_correction_notes }}</td>
             </tr>
         </tbody>
     </table>

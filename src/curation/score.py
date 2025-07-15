@@ -34,8 +34,8 @@ class Points:
     S3A_INTERVAL_3 = 1
     S3A_INTERVAL_4 = 1.5
     S3A_INTERVAL_5 = 2
-    S3B_OVERALL_CORRECTION = 1
-    S3B_2_STEP_CORRECTION = 2
+    S3B_OVERALL = 1
+    S3B_TWO_STEP = 2
     S3C_OR_RR_BETA = 1
     S3C_CI_DOES_NOT_CROSS = 1
     S4_INTERVAL_1 = 0
@@ -461,7 +461,7 @@ FRAMEWORK = [
         "split_horizontal": False,
         "split_vertical": False,
         "score": "score_step_3b",
-        "points": Points.S3B_OVERALL_CORRECTION,
+        "points": Points.S3B_OVERALL,
     },
     {
         "text": None,
@@ -469,7 +469,7 @@ FRAMEWORK = [
         "split_horizontal": False,
         "split_vertical": False,
         "score": "score_step_3b",
-        "points": Points.S3B_2_STEP_CORRECTION,
+        "points": Points.S3B_TWO_STEP,
     },
     {
         "text": "Step 3C: Statistics (Effect Size)*",

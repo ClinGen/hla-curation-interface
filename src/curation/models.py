@@ -271,6 +271,19 @@ TYPING_METHOD_CHOICES = {
 P_VALUE_DIGITS = 40
 
 
+class MultipleTestingCorrection:
+    """Defines codes for multiple testing correction."""
+
+    OVERALL = "OVR"
+    TWO_STEP = "TWO"
+
+
+MULTIPLE_TESTING_CORRECTION_CHOICES = {
+    MultipleTestingCorrection.OVERALL: "Overall correction for multiple testing",
+    MultipleTestingCorrection.TWO_STEP: "2-step p-value correction",
+}
+
+
 class Evidence(models.Model):
     """Contains evidence derived from a publication."""
 
@@ -376,6 +389,19 @@ class Evidence(models.Model):
         default="",
         verbose_name="Notes",
     )
+    multiple_testing_correction = models.CharField(
+        blank=True,
+        choices=MULTIPLE_TESTING_CORRECTION_CHOICES,
+        default="",
+        max_length=3,
+        verbose_name="Multiple Testing Correction",
+        help_text="Correction for multiple hypothesis testing.",
+    )
+    multiple_testing_correction_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Notes",
+    )
     added_by = models.ForeignKey(
         User,
         blank=True,
@@ -474,7 +500,7 @@ class Evidence(models.Model):
 
     @property
     def score_step_1c(self) -> float | None:
-        """Returns the score for step 1B."""
+        """Returns the score for step 1C."""
         if self.zygosity == Zygosity.MONOALLELIC:
             return Points.S1C_MONOALLELIC
         if self.zygosity == Zygosity.BIALLELIC:
@@ -516,11 +542,12 @@ class Evidence(models.Model):
         """Returns the score for step 3."""
         total = 0.0
         total += self.score_step_3a if self.score_step_3a else 0
+        total += self.score_step_3b if self.score_step_3b else 0
         return total
 
     @property
     def score_step_3a(self) -> float | None:  # noqa: C901
-        """Returns the score for step 3a."""
+        """Returns the score for step 3A."""
         if not self.p_value:
             return None
         if self.is_gwas:
@@ -545,4 +572,15 @@ class Evidence(models.Model):
                 return Points.S3A_INTERVAL_4
             if step_3a_non_gwas_interval_5.contains(self.p_value):
                 return Points.S3A_INTERVAL_5
+        return None
+
+    @property
+    def score_step_3b(self) -> float | None:
+        """Returns the score for step 3B."""
+        if self.multiple_testing_correction == "":
+            return None
+        if self.multiple_testing_correction == MultipleTestingCorrection.OVERALL:
+            return Points.S3B_OVERALL
+        if self.multiple_testing_correction == MultipleTestingCorrection.TWO_STEP:
+            return Points.S3B_TWO_STEP
         return None

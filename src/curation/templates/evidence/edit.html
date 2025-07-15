@@ -48,6 +48,7 @@
                     <li><a href="#zygosity">Zygosity</a></li>
                     <li><a href="#phase">Phase</a></li>
                     <li><a href="#typing-method">Typing Method</a></li>
+                    <li><a href="#multiple-testing-correction">Multiple Testing Correction</a></li>
                     <li><a href="#save">Save</a></li>
                 </ul>
             </aside>
@@ -78,6 +79,11 @@
                     <h2 id="p-value" class="title is-4">p-value</h2>
                     {% include "common/form/input_text.html" with field=form.p_value_string hide_label=True %}
                     {% include "common/form/textarea.html" with field=form.p_value_notes %}
+                </div>
+                <div class="box">
+                    <h2 id="multiple-testing-correction" class="title is-4">Multiple Testing Correction</h2>
+                    {% include "common/form/select.html" with field=form.multiple_testing_correction hide_label=True %}
+                    {% include "common/form/textarea.html" with field=form.multiple_testing_correction_notes %}
                 </div>
                 <div class="box">
                     <h2 id="save" class="title is-4">Save</h2>
