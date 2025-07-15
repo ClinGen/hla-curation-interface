@@ -454,5 +454,5 @@ class Evidence(models.Model):
             TypingMethod.LONG_READ_SEQ: Points.S2_LONG_READ_SEQ,
         }
         if self.typing_method != "":
-            total += typing_method_points.get(self.typing_method)
+            total += typing_method_points.get(self.typing_method, 0)
         return total
