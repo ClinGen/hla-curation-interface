@@ -7,7 +7,19 @@ from django.http import HttpResponseBase
 from django.urls import reverse
 
 from allele.models import Allele
-from curation.score import Points
+from curation.score import (
+    Points,
+    step_3a_gwas_interval_1,
+    step_3a_gwas_interval_2,
+    step_3a_gwas_interval_3,
+    step_3a_gwas_interval_4,
+    step_3a_gwas_interval_5,
+    step_3a_non_gwas_interval_1,
+    step_3a_non_gwas_interval_2,
+    step_3a_non_gwas_interval_3,
+    step_3a_non_gwas_interval_4,
+    step_3a_non_gwas_interval_5,
+)
 from disease.models import Disease
 from haplotype.models import Haplotype
 from publication.models import Publication
@@ -256,6 +268,9 @@ TYPING_METHOD_CHOICES = {
 }
 
 
+P_VALUE_DIGITS = 40
+
+
 class Evidence(models.Model):
     """Contains evidence derived from a publication."""
 
@@ -339,6 +354,28 @@ class Evidence(models.Model):
         default="",
         verbose_name="Notes",
     )
+    p_value_string = models.CharField(
+        blank=False,
+        default="",
+        max_length=P_VALUE_DIGITS,
+        verbose_name="p-value String",
+        help_text=(
+            "The reported p-value as a decimal (e.g. 0.05) or in scientific "
+            "notation (e.g. 5e-8)."
+        ),
+    )
+    p_value = models.DecimalField(
+        decimal_places=P_VALUE_DIGITS - 10,
+        max_digits=P_VALUE_DIGITS,
+        null=True,
+        verbose_name="p-value Decimal",
+        help_text="The p-value represented as a decimal.",
+    )
+    p_value_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Notes",
+    )
     added_by = models.ForeignKey(
         User,
         blank=True,
@@ -376,10 +413,27 @@ class Evidence(models.Model):
             },
         )
 
+    def clean_p_value_string(self) -> None:
+        """Makes sure the p-value is valid.
+
+        Raises:
+             ValidationError: When we can't convert the p-value string to a float.
+        """
+        if self.p_value_string != "":
+            try:
+                float(self.p_value_string)
+            except (ValueError, TypeError) as exc:
+                message = (
+                    "Unable to save p-value as written. "
+                    "Make sure it is written as a decimal (e.g. 0.05) "
+                    "or in scientific notation (e.g. 5e-8)."
+                )
+                raise ValidationError({"p_value_string": message}) from exc
+
     @property
     def score(self) -> float:
         """Returns the score for the evidence."""
-        return self.score_step_1 + self.score_step_2
+        return self.score_step_1 + self.score_step_2 + self.score_step_3
 
     @property
     def score_step_1(self) -> float:
@@ -456,3 +510,39 @@ class Evidence(models.Model):
         if self.typing_method != "":
             total += typing_method_points.get(self.typing_method, 0)
         return total
+
+    @property
+    def score_step_3(self) -> float:
+        """Returns the score for step 3."""
+        total = 0.0
+        total += self.score_step_3a if self.score_step_3a else 0
+        return total
+
+    @property
+    def score_step_3a(self) -> float | None:  # noqa: C901
+        """Returns the score for step 3a."""
+        if not self.p_value:
+            return None
+        if self.is_gwas:
+            if step_3a_gwas_interval_1.contains(self.p_value):
+                return Points.S3A_INTERVAL_1
+            if step_3a_gwas_interval_2.contains(self.p_value):
+                return Points.S3A_INTERVAL_2
+            if step_3a_gwas_interval_3.contains(self.p_value):
+                return Points.S3A_INTERVAL_3
+            if step_3a_gwas_interval_4.contains(self.p_value):
+                return Points.S3A_INTERVAL_4
+            if step_3a_gwas_interval_5.contains(self.p_value):
+                return Points.S3A_INTERVAL_5
+        else:
+            if step_3a_non_gwas_interval_1.contains(self.p_value):
+                return Points.S3A_INTERVAL_1
+            if step_3a_non_gwas_interval_2.contains(self.p_value):
+                return Points.S3A_INTERVAL_2
+            if step_3a_non_gwas_interval_3.contains(self.p_value):
+                return Points.S3A_INTERVAL_3
+            if step_3a_non_gwas_interval_4.contains(self.p_value):
+                return Points.S3A_INTERVAL_4
+            if step_3a_non_gwas_interval_5.contains(self.p_value):
+                return Points.S3A_INTERVAL_5
+        return None

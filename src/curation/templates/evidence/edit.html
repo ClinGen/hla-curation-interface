@@ -75,6 +75,11 @@
                     {% include "common/form/textarea.html" with field=form.typing_method_notes %}
                 </div>
                 <div class="box">
+                    <h2 id="p-value" class="title is-4">p-value</h2>
+                    {% include "common/form/input_text.html" with field=form.p_value_string hide_label=True %}
+                    {% include "common/form/textarea.html" with field=form.p_value_notes %}
+                </div>
+                <div class="box">
                     <h2 id="save" class="title is-4">Save</h2>
                     <div class="field is-grouped">
                         <div class="control">

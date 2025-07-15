@@ -214,3 +214,17 @@ class EvidenceEdit(UpdateView):
     form_class = EvidenceEditForm
     template_name = "evidence/edit.html"
     pk_url_kwarg = "evidence_pk"
+
+    def form_valid(self, form: EvidenceEditForm) -> HttpResponse:
+        """Sets the p-value.
+
+        Returns:
+             The details page for the evidence if the form is valid, or the form with
+             errors if the form isn't valid.
+        """
+        p_value_string = form.cleaned_data["p_value_string"]
+        if p_value_string == "":
+            form.instance.p_value = None
+        else:
+            form.instance.p_value = float(p_value_string)
+        return super().form_valid(form)

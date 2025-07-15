@@ -1,5 +1,7 @@
 """Houses code related to scoring evidence."""
 
+from decimal import Decimal
+
 
 class Points:
     """Defines the points for the steps."""
@@ -95,7 +97,7 @@ class Interval:
         end_bracket = "]" if self.end_inclusive else ")"
         return f"Interval({start_bracket}{self.start}, {self.end}{end_bracket})"
 
-    def contains(self, number: float) -> bool:
+    def contains(self, number: float | Decimal) -> bool:
         """Returns whether the given number falls within the interval."""
         if self.start_inclusive:
             lower_bound_check = number >= self.start

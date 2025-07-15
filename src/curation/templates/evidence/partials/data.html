@@ -1,3 +1,4 @@
+{% load custom_filters %}
 <div class="block table-container mt-4">
     <table class="table is-fullwidth is-hoverable">
         <thead>
@@ -39,6 +40,17 @@
                     {% endif %}
                 </td>
                 <td>{{ object.typing_method_notes }}</td>
+            </tr>
+            <tr>
+                <td>p-value</td>
+                <td>
+                    {% if object.p_value_string %}
+                        {{ object.p_value_string }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>{{ object.p_value.notes }}</td>
             </tr>
         </tbody>
     </table>
