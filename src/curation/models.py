@@ -282,6 +282,16 @@ class Evidence(models.Model):
         default="",
         verbose_name="Notes",
     )
+    phase_confirmed = models.BooleanField(
+        default=False,
+        verbose_name="Phase Confirmed",
+        help_text="Is the chromosomal phase between alleles at different loci known?",
+    )
+    phase_confirmed_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Notes",
+    )
     added_by = models.ForeignKey(
         User,
         blank=True,
@@ -331,6 +341,7 @@ class Evidence(models.Model):
         total += self.score_step_1a if self.score_step_1a else 0
         total += self.score_step_1b if self.score_step_1b else 0
         total += self.score_step_1c if self.score_step_1c else 0
+        total += self.score_step_1d if self.score_step_1d else 0
         return total
 
     @property
@@ -368,3 +379,10 @@ class Evidence(models.Model):
         if self.zygosity == Zygosity.BIALLELIC:
             return Points.S1C_BIALLELIC
         return None
+
+    @property
+    def score_step_1d(self) -> float:
+        """Returns the score for step 1D."""
+        if self.phase_confirmed:
+            return Points.S1D_PHASE_CONFIRMED
+        return Points.S1D_PHASE_NOT_CONFIRMED
