@@ -1,0 +1,50 @@
+<h1 class="title">Curation Details</h1>
+<div class="block table-container">
+    <form method="post">{% csrf_token %}
+        <div class="field is-grouped">
+            <div class="control">
+                <button type="submit" class="button is-link">Save</button>
+            </div>
+            <div class="control">
+                <a href="{% url 'curation-detail' object.pk %}" class="button is-link is-light">Cancel</a>
+            </div>
+        </div>
+        <table class="table">
+            <tbody>
+            {% if object.curation_type == "ALL" %}
+                <tr>
+                    <td>Allele</td>
+                    <td id="allele">{{ object.allele }}</td>
+                </tr>
+            {% elif object.curation_type == "HAP" %}
+                <tr>
+                    <td>Haplotype</td>
+                    <td id="haplotype">{{ object.haplotype }}</td>
+                </tr>
+            {% endif %}
+            <tr>
+                <td>Disease</td>
+                <td id="disease">{{ object.disease }}</td>
+            </tr>
+            <tr>
+                <td>Status</td>
+                <td id="status">
+                    {% include "common/form/select.html" with field=form.status class="is-small" %}
+                </td>
+            </tr>
+            <tr>
+                <td>Score</td>
+                <td id="score">{{ object.score }}</td>
+            </tr>
+            <tr>
+                <td>HCI Curation ID</td>
+                <td id="curation-id">{{ object.pk }}</td>
+            </tr>
+            <tr>
+                <td>Added</td>
+                <td id="added-at">{{ object.added_at|date:"Y-m-d" }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+</div>

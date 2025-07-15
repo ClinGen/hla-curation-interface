@@ -1,0 +1,22 @@
+<div class="field">
+    <div class="has-text-danger">{{ field.errors }}</div>
+    {% if show_label %}
+        <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {% else %}
+        <label class="label is-hidden" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {% endif %}
+    {% if show_help and field.help_text %}
+        <p class="help">{{ field.help_text }}</p>
+    {% endif %}
+    <div class="control">
+        {% if class %}
+            <div class="select {{ class }}">
+                {{ field }}
+            </div>
+        {% else %}
+            <div class="select">
+                {{ field }}
+            </div>
+        {% endif %}
+    </div>
+</div>

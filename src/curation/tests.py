@@ -205,7 +205,7 @@ class CurationDetailTest(TestCase):
     def test_shows_edit_button(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        edit_button = soup.find(id="edit-button").get_text().strip()
+        edit_button = soup.find(id="edit-evidence-button").get_text().strip()
         self.assertIn("Edit", edit_button)
 
     def test_shows_add_evidence_button(self):
@@ -484,7 +484,7 @@ class CurationSearchTest(TestCase):
         self.assertIn("1970-01-01", added_at)
 
 
-class CurationEditTest(TestCase):
+class CurationEditEvidenceTest(TestCase):
     fixtures = [
         "test_alleles.json",
         "test_diseases.json",
@@ -495,7 +495,7 @@ class CurationEditTest(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.url = reverse("curation-edit", kwargs={"curation_pk": 1})
+        self.url = reverse("curation-edit-evidence", kwargs={"curation_pk": 1})
 
     def test_shows_breadcrumb(self):
         response = self.client.get(self.url)

@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 {% block title %}Curation #{{ curation.pk }} Edit{% endblock %}
-{% block description %}Edit information about curation #{{ curation.pk }}.{% endblock %}
+{% block description %}Edit top-level evidence for curation #{{ curation.pk }}.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
         <nav class="breadcrumb" aria-label="breadcrumbs">
@@ -27,7 +27,7 @@
                 </li>
             </ul>
         </nav>
-        {% include "curation/partials/detail_table.html" with object=curation %}
+        {% include "curation/partials/curation_detail_table.html" with object=curation %}
         {% include "curation/partials/buttons.html" %}
     </div>
 

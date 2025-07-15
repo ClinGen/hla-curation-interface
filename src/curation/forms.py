@@ -17,6 +17,16 @@ class CurationCreateForm(ModelForm):
         widgets = {"curation_type": forms.RadioSelect}
 
 
+class CurationEditForm(ModelForm):
+    """Allows the user to edit a curation."""
+
+    class Meta:
+        """Provides metadata."""
+
+        model = Curation
+        fields = ["status"]
+
+
 class EvidenceCreateForm(ModelForm):
     """Allows the user to add evidence."""
 

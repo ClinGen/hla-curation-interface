@@ -9,6 +9,7 @@ from django.views.generic.edit import CreateView
 from core.permissions import CreateAccessMixin
 from curation.forms import (
     CurationCreateForm,
+    CurationEditForm,
     EvidenceCreateForm,
     EvidenceEditForm,
     EvidenceTopLevelEditFormSet,
@@ -45,8 +46,17 @@ class CurationDetail(DetailView):
     pk_url_kwarg = "curation_pk"
 
 
-def curation_edit(request: HttpRequest, curation_pk: int) -> HttpResponse:
-    """Returns the editable curation details page.
+class CurationEdit(UpdateView):
+    """Shows the user information about a curation."""
+
+    model = Curation
+    form_class = CurationEditForm
+    template_name = "curation/edit_curation.html"
+    pk_url_kwarg = "curation_pk"
+
+
+def curation_edit_evidence(request: HttpRequest, curation_pk: int) -> HttpResponse:
+    """Returns the editable curation details page with editable top-level evidence.
 
     Args:
          request: The Django request object.
@@ -67,7 +77,7 @@ def curation_edit(request: HttpRequest, curation_pk: int) -> HttpResponse:
         "curation": curation,
         "evidence_formset": evidence_formset,
     }
-    return render(request, "curation/edit.html", context)
+    return render(request, "curation/edit_evidence.html", context)
 
 
 CURATION_TYPE_OPTIONS = [

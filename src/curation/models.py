@@ -118,14 +118,15 @@ class Curation(models.Model):
         return reverse("curation-detail", kwargs={"curation_pk": self.pk})
 
     def clean(self) -> None:
-        """Makes sure the curation has an allele or haplotype.
+        """Makes sure the curation is saved in a valid state.
 
-        Also makes sure that haplotype information isn't added to an allele curation
-        and vice versa.
+        - Makes sure the curation has an allele or haplotype
+        - Makes sure that haplotype information isn't added to an allele curation
+          and vice versa.
+        - Makes sure a curation can't be marked as done if it has in-progress evidence.
 
         Raises:
-            ValidationError: When the curation type is allele but the allele for the
-                             curation is not provided. Same for haplotype.
+            ValidationError: If the curation isn't in a valid state.
         """
         super().clean()
         if self.curation_type == CurationTypes.ALLELE and not self.allele:
@@ -140,6 +141,12 @@ class Curation(models.Model):
             self.haplotype = None
         if self.curation_type == CurationTypes.HAPLOTYPE and self.allele:
             self.allele = None
+        if self.status == Status.DONE:
+            for evidence in self.evidence.all():
+                if evidence.status == Status.IN_PROGRESS and evidence.is_included:
+                    raise ValidationError(
+                        {"status": "All included evidence must be marked as done."}
+                    )
 
     @property
     def score(self) -> float:
