@@ -14,15 +14,19 @@ class Points:
     S1C_BIALLELIC = 0.5
     S1D_PHASE_NOT_CONFIRMED = 0
     S1D_PHASE_CONFIRMED = 0.5
-    S2_TAG_SNPS_OR_MICROARRAYS = 0
+    S2_TAG_SNPS = 0
+    S2_MICROARRAYS = 0
     S2_SEROLOGICAL = 1
     S2_IMPUTATION = 2
     S2_LOW_RES_TYPING = 3
     S2_HIGH_RES_TYPING = 3
     S2_WHOLE_EXOME_SEQ = 3
+    S2_RNA_SEQ = 3
     S2_SANGER_SEQ = 4
     S2_WHOLE_GENE_SEQ = 4
-    S2_WHOLE_GENOME_SEQ_AND_OR_NGS = 5
+    S2_WHOLE_GENOME_SEQ = 5
+    S2_NEXT_GENERATION_SEQ = 5
+    S2_LONG_READ_SEQ = 5
     S3A_INTERVAL_1 = 0
     S3A_INTERVAL_2 = 0.5
     S3A_INTERVAL_3 = 1
@@ -355,11 +359,11 @@ FRAMEWORK = [
     },
     {
         "text": "Step 2: Typing Method",
-        "category": "Tag SNPs or microarrays",
+        "category": "Tagging / Tag SNPs / Microarrays",
         "split_horizontal": False,
         "split_vertical": False,
         "score": "score_step_2",
-        "points": Points.S2_TAG_SNPS_OR_MICROARRAYS,
+        "points": Points.S2_TAG_SNPS,
     },
     {
         "text": None,
@@ -379,7 +383,7 @@ FRAMEWORK = [
     },
     {
         "text": None,
-        "category": "Low-resolution typing",
+        "category": "Molecular genotyping (low and high resolution) / Whole exome sequencing / RNA sequencing ",  # noqa: E501
         "split_horizontal": False,
         "split_vertical": False,
         "score": "score_step_2",
@@ -387,23 +391,7 @@ FRAMEWORK = [
     },
     {
         "text": None,
-        "category": "High-resolution typing",
-        "split_horizontal": False,
-        "split_vertical": False,
-        "score": "score_step_2",
-        "points": Points.S2_HIGH_RES_TYPING,
-    },
-    {
-        "text": None,
-        "category": "Whole exome sequencing",
-        "split_horizontal": False,
-        "split_vertical": False,
-        "score": "score_step_2",
-        "points": Points.S2_WHOLE_EXOME_SEQ,
-    },
-    {
-        "text": None,
-        "category": "Sanger-sequencing-based typing",
+        "category": "Sanger-sequencing-based typing / Whole gene sequencing",
         "split_horizontal": False,
         "split_vertical": False,
         "score": "score_step_2",
@@ -411,19 +399,11 @@ FRAMEWORK = [
     },
     {
         "text": None,
-        "category": "Whole gene sequencing",
+        "category": "Whole genome sequencing / Panel-based next generation sequencing (> 50x coverage) / Long-read sequencing",  # noqa: E501
         "split_horizontal": False,
         "split_vertical": False,
         "score": "score_step_2",
-        "points": Points.S2_WHOLE_GENE_SEQ,
-    },
-    {
-        "text": None,
-        "category": "Whole genome sequencing and/or panel-based NGS (>50x coverage)",
-        "split_horizontal": False,
-        "split_vertical": False,
-        "score": "score_step_2",
-        "points": Points.S2_WHOLE_GENOME_SEQ_AND_OR_NGS,
+        "points": Points.S2_WHOLE_GENOME_SEQ,
     },
     {
         "text": "Step 3A: Statistics (p-value)",

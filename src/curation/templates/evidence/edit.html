@@ -47,6 +47,7 @@
                     <li><a href="#gwas">GWAS</a></li>
                     <li><a href="#zygosity">Zygosity</a></li>
                     <li><a href="#phase">Phase</a></li>
+                    <li><a href="#typing-method">Typing Method</a></li>
                     <li><a href="#save">Save</a></li>
                 </ul>
             </aside>
@@ -67,6 +68,11 @@
                     <h2 id="phase" class="title is-4">Phase</h2>
                     {% include "common/form/input_radio.html" with field=form.phase_confirmed hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.phase_confirmed_notes %}
+                </div>
+                <div class="box">
+                    <h2 id="typing-method" class="title is-4">Typing Method</h2>
+                    {% include "common/form/select.html" with field=form.typing_method hide_label=True show_help=True %}
+                    {% include "common/form/textarea.html" with field=form.typing_method_notes %}
                 </div>
                 <div class="box">
                     <h2 id="save" class="title is-4">Save</h2>

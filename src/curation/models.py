@@ -222,6 +222,40 @@ ZYGOSITY_CHOICES = {
 }
 
 
+class TypingMethod:
+    """Defines typing method codes."""
+
+    TAG_SNPS = "TAG"
+    MICROARRAYS = "MIC"
+    SEROLOGICAL = "SER"
+    IMPUTATION = "IMP"
+    LOW_RES_TYPING = "LRT"
+    HIGH_RES_TYPING = "HRT"
+    WHOLE_EXOME_SEQ = "WES"
+    RNA_SEQ = "RNA"
+    SANGER_SEQ = "SBT"
+    WHOLE_GENE_SEQ = "WGN"
+    WHOLE_GENOME_SEQ = "WGS"
+    NEXT_GENERATION_SEQ = "NGS"
+    LONG_READ_SEQ = "LRS"
+
+
+TYPING_METHOD_CHOICES = {
+    TypingMethod.TAG_SNPS: "Tagging / Tag SNPs",
+    TypingMethod.MICROARRAYS: "Microarrays",
+    TypingMethod.SEROLOGICAL: "Serological typing",
+    TypingMethod.IMPUTATION: "Imputation",
+    TypingMethod.LOW_RES_TYPING: "Low-resolution molecular genotyping",
+    TypingMethod.HIGH_RES_TYPING: "High-resolution molecular genotyping",
+    TypingMethod.WHOLE_EXOME_SEQ: "Whole exome sequencing",
+    TypingMethod.RNA_SEQ: "RNA sequencing",
+    TypingMethod.SANGER_SEQ: "Sanger-sequencing-based typing",
+    TypingMethod.WHOLE_GENOME_SEQ: "Whole genome sequencing",
+    TypingMethod.NEXT_GENERATION_SEQ: "Next generation sequencing",
+    TypingMethod.LONG_READ_SEQ: "Long read sequencing",
+}
+
+
 class Evidence(models.Model):
     """Contains evidence derived from a publication."""
 
@@ -292,6 +326,19 @@ class Evidence(models.Model):
         default="",
         verbose_name="Notes",
     )
+    typing_method = models.CharField(
+        blank=True,
+        choices=TYPING_METHOD_CHOICES,
+        default="",
+        max_length=3,
+        verbose_name="Typing Method",
+        help_text="The typing method used to determine HLA sequence.",
+    )
+    typing_method_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Notes",
+    )
     added_by = models.ForeignKey(
         User,
         blank=True,
@@ -332,7 +379,7 @@ class Evidence(models.Model):
     @property
     def score(self) -> float:
         """Returns the score for the evidence."""
-        return self.score_step_1
+        return self.score_step_1 + self.score_step_2
 
     @property
     def score_step_1(self) -> float:
@@ -386,3 +433,26 @@ class Evidence(models.Model):
         if self.phase_confirmed:
             return Points.S1D_PHASE_CONFIRMED
         return Points.S1D_PHASE_NOT_CONFIRMED
+
+    @property
+    def score_step_2(self) -> float:
+        """Returns the score for step 2."""
+        total = 0.0
+        typing_method_points = {
+            TypingMethod.TAG_SNPS: Points.S2_TAG_SNPS,
+            TypingMethod.MICROARRAYS: Points.S2_MICROARRAYS,
+            TypingMethod.SEROLOGICAL: Points.S2_SEROLOGICAL,
+            TypingMethod.IMPUTATION: Points.S2_IMPUTATION,
+            TypingMethod.LOW_RES_TYPING: Points.S2_LOW_RES_TYPING,
+            TypingMethod.HIGH_RES_TYPING: Points.S2_HIGH_RES_TYPING,
+            TypingMethod.WHOLE_EXOME_SEQ: Points.S2_WHOLE_EXOME_SEQ,
+            TypingMethod.RNA_SEQ: Points.S2_RNA_SEQ,
+            TypingMethod.SANGER_SEQ: Points.S2_SANGER_SEQ,
+            TypingMethod.WHOLE_GENE_SEQ: Points.S2_WHOLE_GENE_SEQ,
+            TypingMethod.WHOLE_GENOME_SEQ: Points.S2_WHOLE_GENOME_SEQ,
+            TypingMethod.NEXT_GENERATION_SEQ: Points.S2_NEXT_GENERATION_SEQ,
+            TypingMethod.LONG_READ_SEQ: Points.S2_LONG_READ_SEQ,
+        }
+        if self.typing_method != "":
+            total += typing_method_points.get(self.typing_method)
+        return total

@@ -29,6 +29,17 @@
                 <td>{{ object.phase_confirmed }}</td>
                 <td>{{ object.phase_confirmed_notes }}</td>
             </tr>
+            <tr>
+                <td>Typing Method</td>
+                <td>
+                    {% if object.typing_method %}
+                        {{ object.get_typing_method_display }}
+                    {% else %}
+                        Not Selected
+                    {% endif %}
+                </td>
+                <td>{{ object.typing_method_notes }}</td>
+            </tr>
         </tbody>
     </table>
 </div>
