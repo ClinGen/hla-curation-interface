@@ -32,6 +32,26 @@
             </td>
         </tr>
         <tr>
+            <td>Classification</td>
+            <td id="classification">
+                {% if object.classification == "DEF" %}
+                    <span class="tag">Definitive</span>
+                {% elif object.classification == "STR" %}
+                    <span class="tag">Strong</span>
+                {% elif object.classification == "MOD" %}
+                    <span class="tag">Moderate</span>
+                {% elif object.classification == "LIM" %}
+                    <span class="tag">Limited</span>
+                {% elif object.classification == "NOK" %}
+                    <span class="tag">No Known Association</span>
+                {% elif object.classification == "DIS" %}
+                    <span class="tag">Disputed</span>
+                {% elif object.classification == "REF" %}
+                    <span class="tag">Refuted</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
             <td>Score</td>
             <td id="score">{{ object.score }}</td>
         </tr>

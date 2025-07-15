@@ -24,7 +24,7 @@ class CurationEditForm(ModelForm):
         """Provides metadata."""
 
         model = Curation
-        fields = ["status"]
+        fields = ["status", "classification"]
 
 
 class EvidenceCreateForm(ModelForm):

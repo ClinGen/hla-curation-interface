@@ -39,6 +39,29 @@ CURATION_TYPE_CHOICES = {
 }
 
 
+class Classification:
+    """Defines the classification codes for a curation."""
+
+    DEFINITIVE = "DEF"
+    STRONG = "STR"
+    MODERATE = "MOD"
+    LIMITED = "LIM"
+    NO_KNOWN = "NOK"
+    DISPUTED = "DIS"
+    REFUTED = "REF"
+
+
+CLASSIFICATION_CHOICES = {
+    Classification.DEFINITIVE: "Definitive",
+    Classification.STRONG: "Strong",
+    Classification.MODERATE: "Moderate",
+    Classification.LIMITED: "Limited",
+    Classification.NO_KNOWN: "No Known Association",
+    Classification.DISPUTED: "Disputed",
+    Classification.REFUTED: "Refuted",
+}
+
+
 class Curation(models.Model):
     """Contains top-level information about a curation."""
 
@@ -62,6 +85,14 @@ class Curation(models.Model):
             f"Either '{CurationTypes.ALLELE}' (allele) or "
             f"'{CurationTypes.HAPLOTYPE}' (haplotype)."
         ),
+    )
+    classification = models.CharField(
+        blank=False,
+        choices=CLASSIFICATION_CHOICES,
+        default=Classification.NO_KNOWN,
+        max_length=3,
+        verbose_name="Classification",
+        help_text="The classification level for the curation.",
     )
     allele = models.ForeignKey(
         Allele,
@@ -117,13 +148,14 @@ class Curation(models.Model):
         """Returns the details page for a specific publication."""
         return reverse("curation-detail", kwargs={"curation_pk": self.pk})
 
-    def clean(self) -> None:
+    def clean(self) -> None:  # noqa: C901 (Locality of behavior wins out here.)
         """Makes sure the curation is saved in a valid state.
 
         - Makes sure the curation has an allele or haplotype
         - Makes sure that haplotype information isn't added to an allele curation
           and vice versa.
         - Makes sure a curation can't be marked as done if it has in-progress evidence.
+        - Makes sure the classification is correct given the score.
 
         Raises:
             ValidationError: If the curation isn't in a valid state.
@@ -147,6 +179,23 @@ class Curation(models.Model):
                     raise ValidationError(
                         {"status": "All included evidence must be marked as done."}
                     )
+        if self.pk:
+            if self.classification == Classification.NO_KNOWN and self.score != 0:
+                raise ValidationError({"classification": "Score must be 0."})
+            if self.classification == Classification.LIMITED and self.score >= 25:
+                raise ValidationError({"classification": "Score must be less than 25."})
+            if self.classification == Classification.MODERATE and not (
+                25 <= self.score <= 50
+            ):
+                raise ValidationError({"classification": "Score must be in 25-50."})
+            if self.classification == Classification.STRONG and self.score < 50:
+                raise ValidationError(
+                    {"classification": "Score must be greater than 50."}
+                )
+            if self.classification == Classification.DEFINITIVE and self.score < 50:
+                raise ValidationError(
+                    {"classification": "Score must be greater than 50."}
+                )
 
     @property
     def score(self) -> float:

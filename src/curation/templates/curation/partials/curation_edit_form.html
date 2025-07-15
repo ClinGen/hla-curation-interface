@@ -33,6 +33,12 @@
                 </td>
             </tr>
             <tr>
+                <td>Classification</td>
+                <td id="classification">
+                    {% include "common/form/select.html" with field=form.classification class="is-small" %}
+                </td>
+            </tr>
+            <tr>
                 <td>Score</td>
                 <td id="score">{{ object.score }}</td>
             </tr>
