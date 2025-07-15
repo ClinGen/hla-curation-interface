@@ -118,6 +118,17 @@ class Curation(models.Model):
         if self.curation_type == CurationTypes.HAPLOTYPE and self.allele:
             self.allele = None
 
+    @property
+    def score(self) -> float:
+        """Returns the score for the curation."""
+        total = 0.0
+        for evidence in self.evidence.all():
+            if evidence.is_included and evidence.is_conflicting:
+                total -= evidence.score
+            elif evidence.is_included and not evidence.is_conflicting:
+                total += evidence.score
+        return total
+
 
 class EvidenceStatus:
     """Defines the evidence status codes."""
