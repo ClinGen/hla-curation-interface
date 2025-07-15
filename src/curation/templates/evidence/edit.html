@@ -44,6 +44,7 @@
             <aside class="menu">
                 <p class="menu-label">Menu</p>
                 <ul class="menu-list">
+                    <li><a href="#gwas">GWAS</a></li>
                     <li><a href="#zygosity">Zygosity</a></li>
                     <li><a href="#save">Save</a></li>
                 </ul>
@@ -51,6 +52,11 @@
         </div>
         <div class="column">
             <form method="post">{% csrf_token %}
+                <div class="box">
+                    <h2 id="gwas" class="title is-4">GWAS</h2>
+                    {% include "common/form/input_radio.html" with field=form.is_gwas hide_label=True show_help=True %}
+                    {% include "common/form/textarea.html" with field=form.is_gwas_notes %}
+                </div>
                 <div class="box">
                     <h2 id="zygosity" class="title is-4">Zygosity</h2>
                     {% include "common/form/input_radio.html" with field=form.zygosity hide_label=True %}

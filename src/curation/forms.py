@@ -58,6 +58,10 @@ EvidenceTopLevelEditFormSet = modelformset_factory(
 )
 
 
+TEXTAREA_ATTRS = {"class": "textarea", "rows": 2}
+YN_BOOL_CHOICES = [(True, "Yes"), (False, "No")]
+
+
 class EvidenceEditForm(ModelForm):
     """Allows the user to edit all evidence fields other than the top-level fields."""
 
@@ -72,6 +76,8 @@ class EvidenceEditForm(ModelForm):
             "zygosity_notes",
         ]
         widgets = {
+            "is_gwas": forms.RadioSelect(choices=YN_BOOL_CHOICES),
+            "is_gwas_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
             "zygosity": forms.RadioSelect(),
-            "zygosity_notes": forms.Textarea(attrs={"class": "textarea"}),
+            "zygosity_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
         }

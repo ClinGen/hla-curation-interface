@@ -9,6 +9,11 @@
         </thead>
         <tbody>
             <tr>
+                <td>Genome-Wide Association Study (GWAS)</td>
+                <td>{{ object.is_gwas }}</td>
+                <td>{{ object.is_gwas_notes }}</td>
+            </tr>
+            <tr>
                 <td>Zygosity</td>
                 <td>
                     {% if object.zygosity == "MO" %}
