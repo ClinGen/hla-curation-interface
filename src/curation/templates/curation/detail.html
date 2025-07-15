@@ -74,13 +74,9 @@
                                 </td>
                                 <td>
                                     {% if evidence.status == "INP" %}
-                                        <span class="tag is-info is-light">
-                                            In Progress
-                                        </span>
+                                        {% include "common/tags/in_progress.html" %}
                                     {% elif evidence.status == "DNE" %}
-                                        <span class="tag is-success is-light">
-                                            Done
-                                        </span>
+                                        {% include "common/tags/done.html" %}
                                     {% endif %}
                                 </td>
                                 <td>
