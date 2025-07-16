@@ -74,6 +74,17 @@
                 </td>
                 <td>{{ object.odds_ratio_notes }}</td>
             </tr>
+            <tr>
+                <td>Beta Coefficient</td>
+                <td>
+                    {% if object.beta_string %}
+                        {{ object.beta_string }}
+                    {% else %}
+                        Not provided
+                    {% endif %}
+                </td>
+                <td>{{ object.beta_notes }}</td>
+            </tr>
         </tbody>
     </table>
 </div>

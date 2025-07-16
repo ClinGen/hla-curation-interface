@@ -218,7 +218,7 @@ class EvidenceEdit(UpdateView):
     pk_url_kwarg = "evidence_pk"
 
     def form_valid(self, form: EvidenceEditForm) -> HttpResponse:
-        """Sets the p-value and odds ratio.
+        """Sets the value for several fields that don't appear in the form.
 
         Returns:
              The details page for the evidence if the form is valid, or the form with
@@ -231,8 +231,15 @@ class EvidenceEdit(UpdateView):
             form.instance.p_value = Decimal(p_value_string)
 
         odds_ratio_string = form.cleaned_data["odds_ratio_string"]
-        if p_value_string == "":
+        if odds_ratio_string == "":
             form.instance.odds_ratio = None
         else:
             form.instance.odds_ratio = Decimal(odds_ratio_string)
+
+        beta_string = form.cleaned_data["beta_string"]
+        if beta_string == "":
+            form.instance.beta = None
+        else:
+            form.instance.beta = Decimal(beta_string)
+
         return super().form_valid(form)

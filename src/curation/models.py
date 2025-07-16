@@ -367,7 +367,7 @@ class Evidence(models.Model):
         verbose_name="Notes",
     )
     p_value_string = models.CharField(
-        blank=False,
+        blank=True,
         default="",
         max_length=40,
         verbose_name="p-value",
@@ -402,7 +402,7 @@ class Evidence(models.Model):
         verbose_name="Notes",
     )
     odds_ratio_string = models.CharField(
-        blank=False,
+        blank=True,
         default="",
         max_length=10,
         verbose_name="Odds Ratio (OR)",
@@ -419,6 +419,25 @@ class Evidence(models.Model):
         blank=True,
         default="",
         verbose_name="Odds Ratio (OR) Notes",
+    )
+    beta_string = models.CharField(
+        blank=True,
+        default="",
+        max_length=10,
+        verbose_name="Beta Coefficient",
+        help_text="The beta coefficient.",
+    )
+    beta = models.DecimalField(
+        decimal_places=5,
+        max_digits=10,
+        null=True,
+        verbose_name="Beta Coefficient",
+        help_text="The beta coefficient represented as a decimal.",
+    )
+    beta_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Beta Notes",
     )
     added_by = models.ForeignKey(
         User,
@@ -461,7 +480,7 @@ class Evidence(models.Model):
         """Makes sure the p-value string is valid.
 
         Raises:
-             ValidationError: When we can't convert the p-value string to a float.
+             ValidationError: When we can't convert the p-value string to a decimal.
         """
         if self.p_value_string != "":
             try:
@@ -478,17 +497,33 @@ class Evidence(models.Model):
         """Makes sure the odds ratio string is valid.
 
         Raises:
-             ValidationError: When we can't convert the p-value string to a float.
+             ValidationError: When we can't convert the odds ratio string to a decimal.
         """
         if self.odds_ratio_string != "":
             try:
-                Decimal(self.p_value_string)
+                Decimal(self.odds_ratio_string)
             except InvalidOperation as exc:
                 message = (
                     "Unable to save odds ratio as written. "
                     "Make sure it is written as an integer or decimal."
                 )
                 raise ValidationError({"odds_ratio_string": message}) from exc
+
+    def clean_beta_string(self) -> None:
+        """Makes sure the beta string is valid.
+
+        Raises:
+             ValidationError: When we can't convert the beta string to a decimal.
+        """
+        if self.beta_string != "":
+            try:
+                Decimal(self.beta_string)
+            except InvalidOperation as exc:
+                message = (
+                    "Unable to save beta coefficient as written. "
+                    "Make sure it is written as an integer or decimal."
+                )
+                raise ValidationError({"beta_string": message}) from exc
 
     @property
     def score(self) -> float:
@@ -624,5 +659,7 @@ class Evidence(models.Model):
     def score_step_3c1(self) -> float | None:
         """Returns the score for step 3C."""
         if self.odds_ratio and (self.odds_ratio >= 2 or self.odds_ratio <= 0.5):
+            return Points.S3C_OR_RR_BETA
+        if self.beta and (self.beta >= 0.5 or self.beta <= -0.5):
             return Points.S3C_OR_RR_BETA
         return None
