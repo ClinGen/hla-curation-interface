@@ -230,9 +230,9 @@ class EvidenceEdit(UpdateView):
         else:
             form.instance.p_value = Decimal(p_value_string)
 
-        # odds_ratio_string = form.cleaned_data["odds_ratio_string"]
-        # if p_value_string == "":
-        #     form.instance.odds_ratio = None
-        # else:
-        #     form.instance.odds_ratio = Decimal(odds_ratio_string)
+        odds_ratio_string = form.cleaned_data["odds_ratio_string"]
+        if p_value_string == "":
+            form.instance.odds_ratio = None
+        else:
+            form.instance.odds_ratio = Decimal(odds_ratio_string)
         return super().form_valid(form)

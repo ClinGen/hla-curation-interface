@@ -577,6 +577,7 @@ class Evidence(models.Model):
         total = 0.0
         total += self.score_step_3a if self.score_step_3a else 0
         total += self.score_step_3b if self.score_step_3b else 0
+        total += self.score_step_3c1 if self.score_step_3c1 else 0
         return total
 
     @property
@@ -617,4 +618,11 @@ class Evidence(models.Model):
             return Points.S3B_OVERALL
         if self.multiple_testing_correction == MultipleTestingCorrection.TWO_STEP:
             return Points.S3B_TWO_STEP
+        return None
+
+    @property
+    def score_step_3c1(self) -> float | None:
+        """Returns the score for step 3C."""
+        if self.odds_ratio and (self.odds_ratio >= 2 or self.odds_ratio <= 0.5):
+            return Points.S3C_OR_RR_BETA
         return None

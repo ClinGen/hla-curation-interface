@@ -481,7 +481,7 @@ FRAMEWORK = [
         ],
         "split_horizontal": False,
         "split_vertical": True,
-        "score": "score_step_3c",
+        "score": "score_step_3c1",
         "points": Points.S3C_OR_RR_BETA,
     },
     {
@@ -489,7 +489,7 @@ FRAMEWORK = [
         "category": "CI does not cross 1 (OR/RR) or 0 (beta)",
         "split_horizontal": False,
         "split_vertical": False,
-        "score": "score_step_3c",
+        "score": "score_step_3c2",
         "points": Points.S3C_CI_DOES_NOT_CROSS,
     },
     {
