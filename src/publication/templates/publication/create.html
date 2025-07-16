@@ -30,12 +30,12 @@
             {% endwith %}
             <div id="pubmed-div">
                 {% with field=form.pubmed_id %}
-                    {% include "common/form/input_text.html" %}
+                    {% include "common/form/input_text.html" with show_help=True %}
                 {% endwith %}
             </div>
             <div id="doi-div">
                 {% with field=form.doi %}
-                    {% include "common/form/input_text.html" %}
+                    {% include "common/form/input_text.html" with show_help=True %}
                 {% endwith %}
             </div>
             <button type="submit" class="button is-link mt-3">

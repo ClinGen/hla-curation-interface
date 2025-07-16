@@ -1,5 +1,7 @@
 """Houses database models for the curation app."""
 
+from decimal import Decimal, InvalidOperation
+
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -268,9 +270,6 @@ TYPING_METHOD_CHOICES = {
 }
 
 
-P_VALUE_DIGITS = 40
-
-
 class MultipleTestingCorrection:
     """Defines codes for multiple testing correction."""
 
@@ -370,16 +369,16 @@ class Evidence(models.Model):
     p_value_string = models.CharField(
         blank=False,
         default="",
-        max_length=P_VALUE_DIGITS,
-        verbose_name="p-value String",
+        max_length=40,
+        verbose_name="p-value",
         help_text=(
             "The reported p-value as a decimal (e.g. 0.05) or in scientific "
             "notation (e.g. 5e-8)."
         ),
     )
     p_value = models.DecimalField(
-        decimal_places=P_VALUE_DIGITS - 10,
-        max_digits=P_VALUE_DIGITS,
+        decimal_places=30,
+        max_digits=40,
         null=True,
         verbose_name="p-value Decimal",
         help_text="The p-value represented as a decimal.",
@@ -401,6 +400,25 @@ class Evidence(models.Model):
         blank=True,
         default="",
         verbose_name="Notes",
+    )
+    odds_ratio_string = models.CharField(
+        blank=False,
+        default="",
+        max_length=10,
+        verbose_name="Odds Ratio (OR)",
+        help_text="The odds ratio.",
+    )
+    odds_ratio = models.DecimalField(
+        decimal_places=5,
+        max_digits=10,
+        null=True,
+        verbose_name="Odds Ratio (OR) Decimal",
+        help_text="The odds ratio represented as a decimal.",
+    )
+    odds_ratio_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Odds Ratio (OR) Notes",
     )
     added_by = models.ForeignKey(
         User,
@@ -440,21 +458,37 @@ class Evidence(models.Model):
         )
 
     def clean_p_value_string(self) -> None:
-        """Makes sure the p-value is valid.
+        """Makes sure the p-value string is valid.
 
         Raises:
              ValidationError: When we can't convert the p-value string to a float.
         """
         if self.p_value_string != "":
             try:
-                float(self.p_value_string)
-            except (ValueError, TypeError) as exc:
+                Decimal(self.p_value_string)
+            except InvalidOperation as exc:
                 message = (
                     "Unable to save p-value as written. "
                     "Make sure it is written as a decimal (e.g. 0.05) "
                     "or in scientific notation (e.g. 5e-8)."
                 )
                 raise ValidationError({"p_value_string": message}) from exc
+
+    def clean_odds_ratio_string(self) -> None:
+        """Makes sure the odds ratio string is valid.
+
+        Raises:
+             ValidationError: When we can't convert the p-value string to a float.
+        """
+        if self.odds_ratio_string != "":
+            try:
+                Decimal(self.p_value_string)
+            except InvalidOperation as exc:
+                message = (
+                    "Unable to save odds ratio as written. "
+                    "Make sure it is written as an integer or decimal."
+                )
+                raise ValidationError({"odds_ratio_string": message}) from exc
 
     @property
     def score(self) -> float:

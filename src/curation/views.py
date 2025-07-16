@@ -1,5 +1,7 @@
 """Provides views for the curation app."""
 
+from decimal import Decimal
+
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -216,7 +218,7 @@ class EvidenceEdit(UpdateView):
     pk_url_kwarg = "evidence_pk"
 
     def form_valid(self, form: EvidenceEditForm) -> HttpResponse:
-        """Sets the p-value.
+        """Sets the p-value and odds ratio.
 
         Returns:
              The details page for the evidence if the form is valid, or the form with
@@ -226,5 +228,11 @@ class EvidenceEdit(UpdateView):
         if p_value_string == "":
             form.instance.p_value = None
         else:
-            form.instance.p_value = float(p_value_string)
+            form.instance.p_value = Decimal(p_value_string)
+
+        # odds_ratio_string = form.cleaned_data["odds_ratio_string"]
+        # if p_value_string == "":
+        #     form.instance.odds_ratio = None
+        # else:
+        #     form.instance.odds_ratio = Decimal(odds_ratio_string)
         return super().form_valid(form)

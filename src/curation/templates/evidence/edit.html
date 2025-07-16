@@ -77,13 +77,18 @@
                 </div>
                 <div class="box">
                     <h2 id="p-value" class="title is-4">p-value</h2>
-                    {% include "common/form/input_text.html" with field=form.p_value_string hide_label=True %}
+                    {% include "common/form/input_text.html" with field=form.p_value_string hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.p_value_notes %}
                 </div>
                 <div class="box">
                     <h2 id="multiple-testing-correction" class="title is-4">Multiple Testing Correction</h2>
                     {% include "common/form/select.html" with field=form.multiple_testing_correction hide_label=True %}
                     {% include "common/form/textarea.html" with field=form.multiple_testing_correction_notes %}
+                </div>
+                <div class="box">
+                    <h2 id="effect-size" class="title is-4">Effect Size</h2>
+                    {% include "common/form/input_text.html" with field=form.odds_ratio_string %}
+                    {% include "common/form/textarea.html" with field=form.odds_ratio_notes show_help=False %}
                 </div>
                 <div class="box">
                     <h2 id="save" class="title is-4">Save</h2>

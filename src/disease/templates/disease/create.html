@@ -26,7 +26,7 @@
         <form method="post">{% csrf_token %}
             {{ form.non_field_errors }}
             {% with field=form.mondo_id %}
-                {% include "common/form/input_text.html" %}
+                {% include "common/form/input_text.html" with show_help=True %}
             {% endwith %}
             <button type="submit" class="button is-link">
                 Submit

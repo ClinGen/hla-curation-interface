@@ -36,7 +36,7 @@
                     {% if object.typing_method %}
                         {{ object.get_typing_method_display }}
                     {% else %}
-                        Not selected
+                        Not provided
                     {% endif %}
                 </td>
                 <td>{{ object.typing_method_notes }}</td>
@@ -62,6 +62,17 @@
                     {% endif %}
                 </td>
                 <td>{{ object.multiple_testing_correction_notes }}</td>
+            </tr>
+            <tr>
+                <td>Odds Ratio</td>
+                <td>
+                    {% if object.odds_ratio_string %}
+                        {{ object.odds_ratio_string }}
+                    {% else %}
+                        Not provided
+                    {% endif %}
+                </td>
+                <td>{{ object.odds_ratio_notes }}</td>
             </tr>
         </tbody>
     </table>
