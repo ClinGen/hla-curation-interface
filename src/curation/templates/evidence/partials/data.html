@@ -75,6 +75,17 @@
                 <td>{{ object.odds_ratio_notes }}</td>
             </tr>
             <tr>
+                <td>Relative Risk</td>
+                <td>
+                    {% if object.relative_risk_string %}
+                        {{ object.relative_risk_string }}
+                    {% else %}
+                        Not provided
+                    {% endif %}
+                </td>
+                <td>{{ object.relative_risk_notes }}</td>
+            </tr>
+            <tr>
                 <td>Beta Coefficient</td>
                 <td>
                     {% if object.beta_string %}

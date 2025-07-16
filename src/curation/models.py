@@ -420,6 +420,25 @@ class Evidence(models.Model):
         default="",
         verbose_name="Odds Ratio (OR) Notes",
     )
+    relative_risk_string = models.CharField(
+        blank=True,
+        default="",
+        max_length=10,
+        verbose_name="Relative Risk (RR)",
+        help_text="The relative risk.",
+    )
+    relative_risk = models.DecimalField(
+        decimal_places=5,
+        max_digits=10,
+        null=True,
+        verbose_name="Relative Risk (RR) Decimal",
+        help_text="The relative risk represented as a decimal.",
+    )
+    relative_risk_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Relative Risk (RR) Notes",
+    )
     beta_string = models.CharField(
         blank=True,
         default="",
@@ -508,6 +527,23 @@ class Evidence(models.Model):
                     "Make sure it is written as an integer or decimal."
                 )
                 raise ValidationError({"odds_ratio_string": message}) from exc
+
+    def clean_relative_risk_string(self) -> None:
+        """Makes sure the relative risk string is valid.
+
+        Raises:
+             ValidationError: When we can't convert the relative risk string to a
+                              decimal.
+        """
+        if self.relative_risk_string != "":
+            try:
+                Decimal(self.relative_risk_string)
+            except InvalidOperation as exc:
+                message = (
+                    "Unable to save relative risk as written. "
+                    "Make sure it is written as an integer or decimal."
+                )
+                raise ValidationError({"relative_risk_string": message}) from exc
 
     def clean_beta_string(self) -> None:
         """Makes sure the beta string is valid.
@@ -659,6 +695,10 @@ class Evidence(models.Model):
     def score_step_3c1(self) -> float | None:
         """Returns the score for step 3C."""
         if self.odds_ratio and (self.odds_ratio >= 2 or self.odds_ratio <= 0.5):
+            return Points.S3C_OR_RR_BETA
+        if self.relative_risk and (
+            self.relative_risk >= 2 or self.relative_risk <= 0.5
+        ):
             return Points.S3C_OR_RR_BETA
         if self.beta and (self.beta >= 0.5 or self.beta <= -0.5):
             return Points.S3C_OR_RR_BETA

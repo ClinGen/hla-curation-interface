@@ -236,6 +236,12 @@ class EvidenceEdit(UpdateView):
         else:
             form.instance.odds_ratio = Decimal(odds_ratio_string)
 
+        relative_risk_string = form.cleaned_data["relative_risk_string"]
+        if relative_risk_string == "":
+            form.instance.relative_risk = None
+        else:
+            form.instance.relative_risk = Decimal(relative_risk_string)
+
         beta_string = form.cleaned_data["beta_string"]
         if beta_string == "":
             form.instance.beta = None
