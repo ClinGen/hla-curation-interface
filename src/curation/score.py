@@ -57,8 +57,8 @@ class Interval:
     def __init__(
         self,
         *,
-        start: float,
-        end: float,
+        start: float | Decimal,
+        end: float | Decimal,
         start_inclusive: bool,
         end_inclusive: bool,
         variable: str,

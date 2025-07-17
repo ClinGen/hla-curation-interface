@@ -50,6 +50,7 @@
                     <li><a href="#typing-method">Typing Method</a></li>
                     <li><a href="#multiple-testing-correction">Multiple Testing Correction</a></li>
                     <li><a href="#effect-size">Effect Size</a></li>
+                    <li><a href="#confidence-interval">Confidence Interval</a></li>
                     <li><a href="#save">Save</a></li>
                 </ul>
             </aside>
@@ -99,6 +100,12 @@
                         {% include "common/form/input_text.html" with field=form.beta_string show_help=True %}
                     </div>
                     {% include "common/form/textarea.html" with field=form.effect_size_statistic_notes show_help=False %}
+                </div>
+                <div class="box">
+                    <h2 id="confidence-interval" class="title is-4">Confidence Interval</h2>
+                    {% include "common/form/input_text.html" with field=form.ci_start_string show_help=True %}
+                    {% include "common/form/input_text.html" with field=form.ci_end_string show_help=True %}
+                    {% include "common/form/textarea.html" with field=form.ci_notes %}
                 </div>
                 <div class="box">
                     <h2 id="save" class="title is-4">Save</h2>

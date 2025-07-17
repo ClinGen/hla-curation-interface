@@ -25,6 +25,7 @@ from curation.score import (
 from disease.models import Disease
 from haplotype.models import Haplotype
 from publication.models import Publication
+from curation.score import Interval
 
 
 class Status:
@@ -473,6 +474,39 @@ class Evidence(models.Model):
         verbose_name="Beta Coefficient",
         help_text="The beta coefficient represented as a decimal.",
     )
+    ci_start_string = models.CharField(
+        blank=True,
+        default="",
+        max_length=10,
+        verbose_name="Confidence Interval Start",
+        help_text="The start of the confidence interval as a decimal (e.g. 0.5).",
+    )
+    ci_start = models.DecimalField(
+        decimal_places=5,
+        max_digits=10,
+        null=True,
+        verbose_name="Confidence Interval Start Decimal",
+        help_text="The confidence interval start represented as a decimal.",
+    )
+    ci_end_string = models.CharField(
+        blank=True,
+        default="",
+        max_length=10,
+        verbose_name="Confidence Interval End",
+        help_text="The end of the confidence interval as a decimal (e.g. 0.5).",
+    )
+    ci_end = models.DecimalField(
+        decimal_places=5,
+        max_digits=10,
+        null=True,
+        verbose_name="Confidence Interval End Decimal",
+        help_text="The confidence interval end represented as a decimal.",
+    )
+    ci_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Notes",
+    )
     added_by = models.ForeignKey(
         User,
         blank=True,
@@ -682,6 +716,7 @@ class Evidence(models.Model):
         total += self.score_step_3a if self.score_step_3a else 0
         total += self.score_step_3b if self.score_step_3b else 0
         total += self.score_step_3c1 if self.score_step_3c1 else 0
+        total += self.score_step_3c2 if self.score_step_3c2 else 0
         return total
 
     @property
@@ -726,7 +761,7 @@ class Evidence(models.Model):
 
     @property
     def score_step_3c1(self) -> float | None:
-        """Returns the score for step 3C."""
+        """Returns the first score for step 3C."""
         if self.odds_ratio and (self.odds_ratio >= 2 or self.odds_ratio <= 0.5):
             return Points.S3C_OR_RR_BETA
         if self.relative_risk and (
@@ -735,4 +770,36 @@ class Evidence(models.Model):
             return Points.S3C_OR_RR_BETA
         if self.beta and (self.beta >= 0.5 or self.beta <= -0.5):
             return Points.S3C_OR_RR_BETA
+        return None
+
+    @property
+    def score_step_3c2(self) -> float | None:
+        """Returns the second score for step 3C."""
+        has_stat = self.effect_size_statistic
+        stat_is_odds_ratio_or_relative_risk = (
+            self.effect_size_statistic == EffectSizeStatistic.ODDS_RATIO
+            or self.effect_size_statistic == EffectSizeStatistic.RELATIVE_RISK
+        )
+        stat_is_beta = self.effect_size_statistic == EffectSizeStatistic.BETA
+        has_ci = self.ci_start and self.ci_end
+        if has_stat and stat_is_odds_ratio_or_relative_risk and has_ci:
+            confidence_interval = Interval(
+                start=self.ci_start,
+                end=self.ci_end,
+                start_inclusive=True,
+                end_inclusive=True,
+                variable="CI",
+            )
+            if not confidence_interval.contains(1):
+                return Points.S3C_CI_DOES_NOT_CROSS
+        if has_stat and stat_is_beta and has_ci:
+            confidence_interval = Interval(
+                start=self.ci_start,
+                end=self.ci_end,
+                start_inclusive=True,
+                end_inclusive=True,
+                variable="CI",
+            )
+            if not confidence_interval.contains(0):
+                return Points.S3C_CI_DOES_NOT_CROSS
         return None

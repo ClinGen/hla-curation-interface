@@ -108,6 +108,17 @@
                     {% endif %}
                 </td>
             </tr>
+            <tr>
+                <td>Confidence Interval</td>
+                <td>
+                    {% if object.ci_start_string and object.ci_end_string %}
+                        [{{ object.ci_start_string }}, {{ object.ci_end_string }}]
+                    {% else %}
+                        Not Provided
+                    {% endif %}
+                </td>
+                <td>{{ object.ci_notes }}</td>
+            </tr>
         </tbody>
     </table>
 </div>

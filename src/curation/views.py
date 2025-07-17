@@ -273,4 +273,16 @@ class EvidenceEdit(UpdateView):
         else:
             form.instance.beta = Decimal(beta_string)
 
+        ci_start_string = form.cleaned_data["ci_start_string"]
+        if ci_start_string == "":
+            form.instance.ci_start = None
+        else:
+            form.instance.ci_start = Decimal(ci_start_string)
+
+        ci_end_string = form.cleaned_data["ci_end_string"]
+        if ci_end_string == "":
+            form.instance.ci_end = None
+        else:
+            form.instance.ci_end = Decimal(ci_end_string)
+
         return super().form_valid(form)
