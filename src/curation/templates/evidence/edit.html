@@ -88,12 +88,17 @@
                 </div>
                 <div class="box">
                     <h2 id="effect-size" class="title is-4">Effect Size</h2>
-                    {% include "common/form/input_text.html" with field=form.odds_ratio_string %}
-                    {% include "common/form/textarea.html" with field=form.odds_ratio_notes show_help=False %}
-                    {% include "common/form/input_text.html" with field=form.relative_risk_string %}
-                    {% include "common/form/textarea.html" with field=form.relative_risk_notes show_help=False %}
-                    {% include "common/form/input_text.html" with field=form.beta_string %}
-                    {% include "common/form/textarea.html" with field=form.beta_notes show_help=False %}
+                    {% include "common/form/select.html" with field=form.effect_size_statistic %}
+                    <div id="odds-ratio-div" class="mb-2">
+                        {% include "common/form/input_text.html" with field=form.odds_ratio_string show_help=True %}
+                    </div>
+                    <div id="relative-risk-div" class="mb-2">
+                        {% include "common/form/input_text.html" with field=form.relative_risk_string show_help=True %}
+                    </div>
+                    <div id="beta-div" class="mb-2">
+                        {% include "common/form/input_text.html" with field=form.beta_string show_help=True %}
+                    </div>
+                    {% include "common/form/textarea.html" with field=form.effect_size_statistic_notes show_help=False %}
                 </div>
                 <div class="box">
                     <h2 id="save" class="title is-4">Save</h2>
@@ -118,4 +123,40 @@
         </div>
     </div>
 </div>
+<script>
+    const EFFECT_SIZE_SELECT_ID = "id_effect_size_statistic";
+    function toggleDivVisibility(elementId, div, toggleValue) {
+        const selectedValue = document.getElementById(elementId).value;
+        if (selectedValue !== toggleValue) {
+            div.style.display = "none";
+        } else {
+            div.style.display = "block";
+        }
+    }
+    document.addEventListener("htmx:load", () => {
+        function toggleOddsRatioDivVisibility() {
+            const oddsRatioDiv = document.getElementById("odds-ratio-div");
+            toggleDivVisibility(EFFECT_SIZE_SELECT_ID, oddsRatioDiv, "OR");
+        }
+
+        function toggleRelativeRiskDivVisibility() {
+            const relativeRiskDiv = document.getElementById("relative-risk-div");
+            toggleDivVisibility(EFFECT_SIZE_SELECT_ID, relativeRiskDiv, "RR");
+        }
+
+        function toggleBetaDivVisibility() {
+            const betaDiv = document.getElementById("beta-div");
+            toggleDivVisibility(EFFECT_SIZE_SELECT_ID, betaDiv, "BE");
+        }
+
+        const select = document.getElementById(EFFECT_SIZE_SELECT_ID);
+        select.addEventListener("change", toggleOddsRatioDivVisibility);
+        select.addEventListener("change", toggleRelativeRiskDivVisibility);
+        select.addEventListener("change", toggleBetaDivVisibility);
+
+        toggleOddsRatioDivVisibility();
+        toggleRelativeRiskDivVisibility();
+        toggleBetaDivVisibility();
+    });
+</script>
 {% endblock %}

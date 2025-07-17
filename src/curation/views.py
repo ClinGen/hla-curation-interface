@@ -16,7 +16,13 @@ from curation.forms import (
     EvidenceEditForm,
     EvidenceTopLevelEditFormSet,
 )
-from curation.models import Curation, CurationTypes, Evidence, Status
+from curation.models import (
+    Curation,
+    CurationTypes,
+    EffectSizeStatistic,
+    Evidence,
+    Status,
+)
 from curation.score import FRAMEWORK
 from datatable.constants import FieldTypes, Filters, SortDirections
 from datatable.views import datatable
@@ -220,10 +226,29 @@ class EvidenceEdit(UpdateView):
     def form_valid(self, form: EvidenceEditForm) -> HttpResponse:
         """Sets the value for several fields that don't appear in the form.
 
+        Also makes sure there is only one effect size statistic.
+
         Returns:
              The details page for the evidence if the form is valid, or the form with
              errors if the form isn't valid.
         """
+        effect_size_statistic = form.cleaned_data["effect_size_statistic"]
+        if effect_size_statistic == EffectSizeStatistic.ODDS_RATIO:
+            form.instance.relative_risk_string = ""
+            form.instance.relative_risk = None
+            form.instance.beta_string = ""
+            form.instance.beta = None
+        elif effect_size_statistic == EffectSizeStatistic.RELATIVE_RISK:
+            form.instance.odds_ratio_string = ""
+            form.instance.odds_ratio = None
+            form.instance.beta_string = ""
+            form.instance.beta = None
+        elif effect_size_statistic == EffectSizeStatistic.BETA:
+            form.instance.relative_risk_string = ""
+            form.instance.relative_risk = None
+            form.instance.odds_ratio_string = ""
+            form.instance.odds_ratio = None
+
         p_value_string = form.cleaned_data["p_value_string"]
         if p_value_string == "":
             form.instance.p_value = None

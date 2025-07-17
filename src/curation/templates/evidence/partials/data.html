@@ -36,7 +36,7 @@
                     {% if object.typing_method %}
                         {{ object.get_typing_method_display }}
                     {% else %}
-                        Not provided
+                        Not Provided
                     {% endif %}
                 </td>
                 <td>{{ object.typing_method_notes }}</td>
@@ -58,7 +58,7 @@
                     {% if object.multiple_testing_correction %}
                         {{ object.get_multiple_testing_correction_display }}
                     {% else %}
-                        Not selected
+                        Not Selected
                     {% endif %}
                 </td>
                 <td>{{ object.multiple_testing_correction_notes }}</td>
@@ -69,10 +69,14 @@
                     {% if object.odds_ratio_string %}
                         {{ object.odds_ratio_string }}
                     {% else %}
-                        Not provided
+                        Not Provided
                     {% endif %}
                 </td>
-                <td>{{ object.odds_ratio_notes }}</td>
+                <td>
+                    {% if effect_size_statistic == "OR" %}
+                        {{ object.effect_size_statistic_notes }}
+                    {% endif %}
+                </td>
             </tr>
             <tr>
                 <td>Relative Risk</td>
@@ -80,10 +84,14 @@
                     {% if object.relative_risk_string %}
                         {{ object.relative_risk_string }}
                     {% else %}
-                        Not provided
+                        Not Provided
                     {% endif %}
                 </td>
-                <td>{{ object.relative_risk_notes }}</td>
+                <td>
+                    {% if effect_size_statistic == "RR" %}
+                        {{ object.effect_size_statistic_notes }}
+                    {% endif %}
+                </td>
             </tr>
             <tr>
                 <td>Beta Coefficient</td>
@@ -91,10 +99,14 @@
                     {% if object.beta_string %}
                         {{ object.beta_string }}
                     {% else %}
-                        Not provided
+                        Not Provided
                     {% endif %}
                 </td>
-                <td>{{ object.beta_notes }}</td>
+                <td>
+                    {% if effect_size_statistic == "BT" %}
+                        {{ object.effect_size_statistic_notes }}
+                    {% endif %}
+                </td>
             </tr>
         </tbody>
     </table>

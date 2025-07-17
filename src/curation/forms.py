@@ -82,12 +82,11 @@ class EvidenceEditForm(ModelForm):
             "p_value_notes",
             "multiple_testing_correction",
             "multiple_testing_correction_notes",
+            "effect_size_statistic",
+            "effect_size_statistic_notes",
             "odds_ratio_string",
-            "odds_ratio_notes",
             "relative_risk_string",
-            "relative_risk_notes",
             "beta_string",
-            "beta_notes",
         ]
         widgets = {
             "is_gwas": forms.RadioSelect(choices=YN_BOOL_CHOICES),
@@ -99,7 +98,5 @@ class EvidenceEditForm(ModelForm):
             "typing_method_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
             "p_value_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
             "multiple_testing_correction_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
-            "odds_ratio_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
-            "relative_risk_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
-            "beta_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
+            "effect_size_statistic_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
         }

@@ -257,16 +257,16 @@ class TypingMethod:
 TYPING_METHOD_CHOICES = {
     TypingMethod.TAG_SNPS: "Tagging / Tag SNPs",
     TypingMethod.MICROARRAYS: "Microarrays",
-    TypingMethod.SEROLOGICAL: "Serological typing",
+    TypingMethod.SEROLOGICAL: "Serological Typing",
     TypingMethod.IMPUTATION: "Imputation",
-    TypingMethod.LOW_RES_TYPING: "Low-resolution molecular genotyping",
-    TypingMethod.HIGH_RES_TYPING: "High-resolution molecular genotyping",
-    TypingMethod.WHOLE_EXOME_SEQ: "Whole exome sequencing",
-    TypingMethod.RNA_SEQ: "RNA sequencing",
-    TypingMethod.SANGER_SEQ: "Sanger-sequencing-based typing",
-    TypingMethod.WHOLE_GENOME_SEQ: "Whole genome sequencing",
-    TypingMethod.NEXT_GENERATION_SEQ: "Next generation sequencing",
-    TypingMethod.LONG_READ_SEQ: "Long read sequencing",
+    TypingMethod.LOW_RES_TYPING: "Low-Resolution Molecular Genotyping",
+    TypingMethod.HIGH_RES_TYPING: "High-Resolution Molecular Genotyping",
+    TypingMethod.WHOLE_EXOME_SEQ: "Whole Exome Sequencing",
+    TypingMethod.RNA_SEQ: "RNA Sequencing",
+    TypingMethod.SANGER_SEQ: "Sanger-Sequencing-Based Typing",
+    TypingMethod.WHOLE_GENOME_SEQ: "Whole Genome Sequencing",
+    TypingMethod.NEXT_GENERATION_SEQ: "Next Generation Sequencing",
+    TypingMethod.LONG_READ_SEQ: "Long Read Sequencing",
 }
 
 
@@ -278,8 +278,25 @@ class MultipleTestingCorrection:
 
 
 MULTIPLE_TESTING_CORRECTION_CHOICES = {
-    MultipleTestingCorrection.OVERALL: "Overall correction for multiple testing",
-    MultipleTestingCorrection.TWO_STEP: "2-step p-value correction",
+    MultipleTestingCorrection.OVERALL: "Overall Correction for Multiple Testing",
+    MultipleTestingCorrection.TWO_STEP: "2-step p-value Correction",
+}
+
+
+class EffectSizeStatistic:
+    """Defines the effect size statistic codes."""
+
+    ODDS_RATIO = "OR"
+    RELATIVE_RISK = "RR"
+    BETA = "BE"
+    OTHER = "OT"
+
+
+EFFECT_SIZE_STATISTIC_CHOICES = {
+    EffectSizeStatistic.ODDS_RATIO: "Odds Ratio (OR)",
+    EffectSizeStatistic.RELATIVE_RISK: "Relative Risk (RR)",
+    EffectSizeStatistic.BETA: "Beta",
+    EffectSizeStatistic.OTHER: "Other",
 }
 
 
@@ -401,12 +418,25 @@ class Evidence(models.Model):
         default="",
         verbose_name="Notes",
     )
+    effect_size_statistic = models.CharField(
+        blank=True,
+        choices=EFFECT_SIZE_STATISTIC_CHOICES,
+        default="",
+        max_length=3,
+        verbose_name="Effect Size Statistic",
+        help_text="Select a statistic for the effect size.",
+    )
+    effect_size_statistic_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Notes",
+    )
     odds_ratio_string = models.CharField(
         blank=True,
         default="",
         max_length=10,
         verbose_name="Odds Ratio (OR)",
-        help_text="The odds ratio.",
+        help_text="The odds ratio as a decimal (e.g. 0.5).",
     )
     odds_ratio = models.DecimalField(
         decimal_places=5,
@@ -415,17 +445,12 @@ class Evidence(models.Model):
         verbose_name="Odds Ratio (OR) Decimal",
         help_text="The odds ratio represented as a decimal.",
     )
-    odds_ratio_notes = models.TextField(
-        blank=True,
-        default="",
-        verbose_name="Odds Ratio (OR) Notes",
-    )
     relative_risk_string = models.CharField(
         blank=True,
         default="",
         max_length=10,
         verbose_name="Relative Risk (RR)",
-        help_text="The relative risk.",
+        help_text="The relative risk as a decimal (e.g. 0.5).",
     )
     relative_risk = models.DecimalField(
         decimal_places=5,
@@ -434,17 +459,12 @@ class Evidence(models.Model):
         verbose_name="Relative Risk (RR) Decimal",
         help_text="The relative risk represented as a decimal.",
     )
-    relative_risk_notes = models.TextField(
-        blank=True,
-        default="",
-        verbose_name="Relative Risk (RR) Notes",
-    )
     beta_string = models.CharField(
         blank=True,
         default="",
         max_length=10,
         verbose_name="Beta Coefficient",
-        help_text="The beta coefficient.",
+        help_text="The beta coefficient as a decimal (e.g. 0.5).",
     )
     beta = models.DecimalField(
         decimal_places=5,
@@ -452,11 +472,6 @@ class Evidence(models.Model):
         null=True,
         verbose_name="Beta Coefficient",
         help_text="The beta coefficient represented as a decimal.",
-    )
-    beta_notes = models.TextField(
-        blank=True,
-        default="",
-        verbose_name="Beta Notes",
     )
     added_by = models.ForeignKey(
         User,
@@ -494,6 +509,24 @@ class Evidence(models.Model):
                 "evidence_pk": self.pk,
             },
         )
+
+    def clean_effect_size_statistic(self) -> None:
+        """Makes sure there is only one effect size statistic."""
+        if self.effect_size_statistic == EffectSizeStatistic.ODDS_RATIO:
+            self.relative_risk_string = ""
+            self.relative_risk = None
+            self.beta_string = ""
+            self.beta = None
+        elif self.effect_size_statistic == EffectSizeStatistic.RELATIVE_RISK:
+            self.odds_ratio_string = ""
+            self.odds_ratio = None
+            self.beta_string = ""
+            self.beta = None
+        elif self.beta_string == EffectSizeStatistic.BETA:
+            self.relative_risk_string = ""
+            self.relative_risk = None
+            self.odds_ratio_string = ""
+            self.odds_ratio = None
 
     def clean_p_value_string(self) -> None:
         """Makes sure the p-value string is valid.
