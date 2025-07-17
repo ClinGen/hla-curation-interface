@@ -130,6 +130,17 @@
                 </td>
                 <td>{{ object.cohort_size_notes }}</td>
             </tr>
+            <tr>
+                <td>Additional Phenotypes</td>
+                <td>
+                    {% if object.additional_phenotypes %}
+                        {{ object.additional_phenotypes }}
+                    {% else %}
+                        Not Provided
+                    {% endif %}
+                </td>
+                <td>{{ object.additional_phenotypes_notes }}</td>
+            </tr>
         </tbody>
     </table>
 </div>

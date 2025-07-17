@@ -92,6 +92,8 @@ class EvidenceEditForm(ModelForm):
             "ci_notes",
             "cohort_size",
             "cohort_size_notes",
+            "additional_phenotypes",
+            "additional_phenotypes_notes",
         ]
         widgets = {
             "is_gwas": forms.RadioSelect(choices=YN_BOOL_CHOICES),
@@ -106,4 +108,5 @@ class EvidenceEditForm(ModelForm):
             "effect_size_statistic_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
             "ci_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
             "cohort_size_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
+            "additional_phenotypes_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
         }

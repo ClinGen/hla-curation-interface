@@ -311,6 +311,19 @@ EFFECT_SIZE_STATISTIC_CHOICES = {
 }
 
 
+class AdditionalPhenotypes:
+    """Defines the codes for the additional phenotypes options."""
+
+    SPECIFIC_DISEASE_RELATED = "SDR"
+    ONLY_DISEASE_TESTED = "ODT"
+
+
+ADDITIONAL_PHENOTYPES_CHOICES = {
+    AdditionalPhenotypes.SPECIFIC_DISEASE_RELATED: "Has specific disease-related phenotype",
+    AdditionalPhenotypes.ONLY_DISEASE_TESTED: "Only disease tested",
+}
+
+
 class Evidence(models.Model):
     """Contains evidence derived from a publication."""
 
@@ -524,6 +537,19 @@ class Evidence(models.Model):
         help_text="The number of cases added to the number of controls.",
     )
     cohort_size_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Notes",
+    )
+    additional_phenotypes = models.CharField(
+        blank=True,
+        choices=ADDITIONAL_PHENOTYPES_CHOICES,
+        default="",
+        max_length=3,
+        verbose_name="Additional Phenotypes",
+        help_text="Whether there is a specific disease-related phenotype.",
+    )
+    additional_phenotypes_notes = models.TextField(
         blank=True,
         default="",
         verbose_name="Notes",
@@ -852,4 +878,20 @@ class Evidence(models.Model):
         for interval, points in intervals:
             if interval.contains(self.cohort_size):
                 return points
+        return None
+
+    @property
+    def score_step_5(self) -> float | None:
+        """Returns the score for step 5."""
+        has_additional_phenotypes = self.additional_phenotypes
+        has_specific_disease_related = (
+            self.additional_phenotypes == AdditionalPhenotypes.SPECIFIC_DISEASE_RELATED
+        )
+        has_only_disease_tested = (
+            self.additional_phenotypes == AdditionalPhenotypes.ONLY_DISEASE_TESTED
+        )
+        if has_additional_phenotypes and has_specific_disease_related:
+            return Points.S5_SPECIFIC_PHENOTYPE
+        if has_additional_phenotypes and has_only_disease_tested:
+            return Points.S5_ONLY_DISEASE_TESTED
         return None

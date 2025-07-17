@@ -114,6 +114,11 @@
                     {% include "common/form/textarea.html" with field=form.cohort_size_notes %}
                 </div>
                 <div class="box">
+                    <h2 id="additional-phenotypes" class="title is-4">Additional Phenotypes</h2>
+                    {% include "common/form/select.html" with field=form.additional_phenotypes hide_label=True show_help=False %}
+                    {% include "common/form/textarea.html" with field=form.additional_phenotypes_notes %}
+                </div>
+                <div class="box">
                     <h2 id="save" class="title is-4">Save</h2>
                     <div class="field is-grouped">
                         <div class="control">
