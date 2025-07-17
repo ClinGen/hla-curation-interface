@@ -10,6 +10,7 @@ from django.urls import reverse
 
 from allele.models import Allele
 from curation.score import (
+    Interval,
     Points,
     step_3a_gwas_interval_1,
     step_3a_gwas_interval_2,
@@ -25,7 +26,6 @@ from curation.score import (
 from disease.models import Disease
 from haplotype.models import Haplotype
 from publication.models import Publication
-from curation.score import Interval
 
 
 class Status:
@@ -784,8 +784,8 @@ class Evidence(models.Model):
         has_ci = self.ci_start and self.ci_end
         if has_stat and stat_is_odds_ratio_or_relative_risk and has_ci:
             confidence_interval = Interval(
-                start=self.ci_start,
-                end=self.ci_end,
+                start=self.ci_start,  # type: ignore
+                end=self.ci_end,  # type: ignore
                 start_inclusive=True,
                 end_inclusive=True,
                 variable="CI",
@@ -794,8 +794,8 @@ class Evidence(models.Model):
                 return Points.S3C_CI_DOES_NOT_CROSS
         if has_stat and stat_is_beta and has_ci:
             confidence_interval = Interval(
-                start=self.ci_start,
-                end=self.ci_end,
+                start=self.ci_start,  # type: ignore
+                end=self.ci_end,  # type: ignore
                 start_inclusive=True,
                 end_inclusive=True,
                 variable="CI",
