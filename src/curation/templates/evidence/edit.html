@@ -51,6 +51,7 @@
                     <li><a href="#multiple-testing-correction">Multiple Testing Correction</a></li>
                     <li><a href="#effect-size">Effect Size</a></li>
                     <li><a href="#confidence-interval">Confidence Interval</a></li>
+                    <li><a href="#cohort-size">Cohort Size</a></li>
                     <li><a href="#save">Save</a></li>
                 </ul>
             </aside>
@@ -106,6 +107,11 @@
                     {% include "common/form/input_text.html" with field=form.ci_start_string show_help=True %}
                     {% include "common/form/input_text.html" with field=form.ci_end_string show_help=True %}
                     {% include "common/form/textarea.html" with field=form.ci_notes %}
+                </div>
+                <div class="box">
+                    <h2 id="cohort-size" class="title is-4">Cohort Size</h2>
+                    {% include "common/form/input_text.html" with field=form.cohort_size hide_label=True show_help=True %}
+                    {% include "common/form/textarea.html" with field=form.cohort_size_notes %}
                 </div>
                 <div class="box">
                     <h2 id="save" class="title is-4">Save</h2>

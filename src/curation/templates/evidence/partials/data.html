@@ -119,6 +119,17 @@
                 </td>
                 <td>{{ object.ci_notes }}</td>
             </tr>
+            <tr>
+                <td>Cohort Size</td>
+                <td>
+                    {% if object.cohort_size %}
+                        {{ object.cohort_size }}
+                    {% else %}
+                        Not Provided
+                    {% endif %}
+                </td>
+                <td>{{ object.cohort_size_notes }}</td>
+            </tr>
         </tbody>
     </table>
 </div>

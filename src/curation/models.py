@@ -22,6 +22,16 @@ from curation.score import (
     step_3a_non_gwas_interval_3,
     step_3a_non_gwas_interval_4,
     step_3a_non_gwas_interval_5,
+    step_4_gwas_interval_1,
+    step_4_gwas_interval_2,
+    step_4_gwas_interval_3,
+    step_4_gwas_interval_4,
+    step_4_gwas_interval_5,
+    step_4_non_gwas_interval_1,
+    step_4_non_gwas_interval_2,
+    step_4_non_gwas_interval_3,
+    step_4_non_gwas_interval_4,
+    step_4_non_gwas_interval_5,
 )
 from disease.models import Disease
 from haplotype.models import Haplotype
@@ -507,6 +517,17 @@ class Evidence(models.Model):
         default="",
         verbose_name="Notes",
     )
+    cohort_size = models.IntegerField(
+        blank=True,
+        null=True,
+        verbose_name="Cohort Size",
+        help_text="The number of cases added to the number of controls.",
+    )
+    cohort_size_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Notes",
+    )
     added_by = models.ForeignKey(
         User,
         blank=True,
@@ -722,30 +743,30 @@ class Evidence(models.Model):
     @property
     def score_step_3a(self) -> float | None:  # noqa: C901
         """Returns the score for step 3A."""
-        if not self.p_value:
+        if self.p_value is None:
             return None
-        if self.is_gwas:
-            if step_3a_gwas_interval_1.contains(self.p_value):
-                return Points.S3A_INTERVAL_1
-            if step_3a_gwas_interval_2.contains(self.p_value):
-                return Points.S3A_INTERVAL_2
-            if step_3a_gwas_interval_3.contains(self.p_value):
-                return Points.S3A_INTERVAL_3
-            if step_3a_gwas_interval_4.contains(self.p_value):
-                return Points.S3A_INTERVAL_4
-            if step_3a_gwas_interval_5.contains(self.p_value):
-                return Points.S3A_INTERVAL_5
-        else:
-            if step_3a_non_gwas_interval_1.contains(self.p_value):
-                return Points.S3A_INTERVAL_1
-            if step_3a_non_gwas_interval_2.contains(self.p_value):
-                return Points.S3A_INTERVAL_2
-            if step_3a_non_gwas_interval_3.contains(self.p_value):
-                return Points.S3A_INTERVAL_3
-            if step_3a_non_gwas_interval_4.contains(self.p_value):
-                return Points.S3A_INTERVAL_4
-            if step_3a_non_gwas_interval_5.contains(self.p_value):
-                return Points.S3A_INTERVAL_5
+
+        gwas_intervals = [
+            (step_3a_gwas_interval_1, Points.S3A_INTERVAL_1),
+            (step_3a_gwas_interval_2, Points.S3A_INTERVAL_2),
+            (step_3a_gwas_interval_3, Points.S3A_INTERVAL_3),
+            (step_3a_gwas_interval_4, Points.S3A_INTERVAL_4),
+            (step_3a_gwas_interval_5, Points.S3A_INTERVAL_5),
+        ]
+
+        non_gwas_intervals = [
+            (step_3a_non_gwas_interval_1, Points.S3A_INTERVAL_1),
+            (step_3a_non_gwas_interval_2, Points.S3A_INTERVAL_2),
+            (step_3a_non_gwas_interval_3, Points.S3A_INTERVAL_3),
+            (step_3a_non_gwas_interval_4, Points.S3A_INTERVAL_4),
+            (step_3a_non_gwas_interval_5, Points.S3A_INTERVAL_5),
+        ]
+
+        intervals = gwas_intervals if self.is_gwas else non_gwas_intervals
+
+        for interval, points in intervals:
+            if interval.contains(self.p_value):
+                return points
         return None
 
     @property
@@ -802,4 +823,33 @@ class Evidence(models.Model):
             )
             if not confidence_interval.contains(0):
                 return Points.S3C_CI_DOES_NOT_CROSS
+        return None
+
+    @property
+    def score_step_4(self) -> float | None:  # noqa: C901
+        """Returns the score for step 4."""
+        if self.cohort_size is None:
+            return None
+
+        gwas_intervals = [
+            (step_4_gwas_interval_1, Points.S4_INTERVAL_1),
+            (step_4_gwas_interval_2, Points.S4_INTERVAL_2),
+            (step_4_gwas_interval_3, Points.S4_INTERVAL_3),
+            (step_4_gwas_interval_4, Points.S4_INTERVAL_4),
+            (step_4_gwas_interval_5, Points.S4_INTERVAL_5),
+        ]
+
+        non_gwas_intervals = [
+            (step_4_non_gwas_interval_1, Points.S4_INTERVAL_1),
+            (step_4_non_gwas_interval_2, Points.S4_INTERVAL_2),
+            (step_4_non_gwas_interval_3, Points.S4_INTERVAL_3),
+            (step_4_non_gwas_interval_4, Points.S4_INTERVAL_4),
+            (step_4_non_gwas_interval_5, Points.S4_INTERVAL_5),
+        ]
+
+        intervals = gwas_intervals if self.is_gwas else non_gwas_intervals
+
+        for interval, points in intervals:
+            if interval.contains(self.cohort_size):
+                return points
         return None
