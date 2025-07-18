@@ -693,7 +693,7 @@ class Evidence(models.Model):
         the allele. If the curation is a haplotype curation, this returns the number
         of fields in the allele with the lowest number of fields.
         """
-        num_fields = None
+        num_fields = 1  # Default to the lowest possible number of fields to be safe.
         if (
             self.curation
             and self.curation.curation_type == CurationTypes.ALLELE
@@ -705,12 +705,13 @@ class Evidence(models.Model):
             and self.curation.curation_type == CurationTypes.HAPLOTYPE
             and self.curation.haplotype
         ):
-            min_num_fields = float("inf")
+            large_int = 1000
+            min_num_fields = large_int
             for allele in self.curation.haplotype.alleles.all():
                 allele_num_fields = allele.name.count(":") + 1
                 if allele_num_fields < min_num_fields:
                     min_num_fields = allele_num_fields
-            if min_num_fields != float("inf"):
+            if min_num_fields != large_int:
                 num_fields = min_num_fields
         return num_fields
 
