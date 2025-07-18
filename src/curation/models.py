@@ -319,7 +319,7 @@ class AdditionalPhenotypes:
 
 
 ADDITIONAL_PHENOTYPES_CHOICES = {
-    AdditionalPhenotypes.SPECIFIC_DISEASE_RELATED: "Has specific disease-related phenotype",
+    AdditionalPhenotypes.SPECIFIC_DISEASE_RELATED: "Has specific disease-related phenotype",  # noqa: E501
     AdditionalPhenotypes.ONLY_DISEASE_TESTED: "Only disease tested",
 }
 
@@ -554,6 +554,16 @@ class Evidence(models.Model):
         default="",
         verbose_name="Notes",
     )
+    has_association = models.BooleanField(
+        default=True,
+        verbose_name="Weighing Association",
+        help_text="Is there a significant association with the disease?",
+    )
+    has_association_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Notes",
+    )
     added_by = models.ForeignKey(
         User,
         blank=True,
@@ -678,7 +688,13 @@ class Evidence(models.Model):
     @property
     def score(self) -> float:
         """Returns the score for the evidence."""
-        return self.score_step_1 + self.score_step_2 + self.score_step_3
+        return (
+            self.score_step_1
+            + self.score_step_2
+            + self.score_step_3
+            + self.score_step_4
+            + self.score_step_5
+        ) * self.score_step_6a
 
     @property
     def score_step_1(self) -> float:
@@ -852,10 +868,10 @@ class Evidence(models.Model):
         return None
 
     @property
-    def score_step_4(self) -> float | None:  # noqa: C901
+    def score_step_4(self) -> float:  # noqa: C901
         """Returns the score for step 4."""
         if self.cohort_size is None:
-            return None
+            return 0.0
 
         gwas_intervals = [
             (step_4_gwas_interval_1, Points.S4_INTERVAL_1),
@@ -878,10 +894,10 @@ class Evidence(models.Model):
         for interval, points in intervals:
             if interval.contains(self.cohort_size):
                 return points
-        return None
+        return 0.0
 
     @property
-    def score_step_5(self) -> float | None:
+    def score_step_5(self) -> float:
         """Returns the score for step 5."""
         has_additional_phenotypes = self.additional_phenotypes
         has_specific_disease_related = (
@@ -894,4 +910,11 @@ class Evidence(models.Model):
             return Points.S5_SPECIFIC_PHENOTYPE
         if has_additional_phenotypes and has_only_disease_tested:
             return Points.S5_ONLY_DISEASE_TESTED
-        return None
+        return 0.0
+
+    @property
+    def score_step_6a(self) -> int:
+        """Returns the score for step 6A."""
+        if self.has_association:
+            return 1
+        return 0

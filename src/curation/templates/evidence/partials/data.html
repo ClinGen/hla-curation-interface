@@ -134,12 +134,17 @@
                 <td>Additional Phenotypes</td>
                 <td>
                     {% if object.additional_phenotypes %}
-                        {{ object.additional_phenotypes }}
+                        {{ object.get_additional_phenotypes_display }}
                     {% else %}
                         Not Provided
                     {% endif %}
                 </td>
                 <td>{{ object.additional_phenotypes_notes }}</td>
+            </tr>
+            <tr>
+                <td>Significant Association</td>
+                <td>{{ object.has_association }}</td>
+                <td>{{ object.has_association_notes }}</td>
             </tr>
         </tbody>
     </table>
