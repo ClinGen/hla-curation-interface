@@ -686,15 +686,48 @@ class Evidence(models.Model):
                 raise ValidationError({"beta_string": message}) from exc
 
     @property
+    def num_fields(self) -> int:
+        """Returns the number of fields.
+
+        If the curation is an allele curation, this returns the number of fields in
+        the allele. If the curation is a haplotype curation, this returns the number
+        of fields in the allele with the lowest number of fields.
+        """
+        num_fields = None
+        if (
+            self.curation
+            and self.curation.curation_type == CurationTypes.ALLELE
+            and self.curation.allele
+        ):
+            num_fields = self.curation.allele.name.count(":") + 1
+        elif (
+            self.curation
+            and self.curation.curation_type == CurationTypes.HAPLOTYPE
+            and self.curation.haplotype
+        ):
+            min_num_fields = float("inf")
+            for allele in self.curation.haplotype.alleles.all():
+                allele_num_fields = allele.name.count(":") + 1
+                if allele_num_fields < min_num_fields:
+                    min_num_fields = allele_num_fields
+            if min_num_fields != float("inf"):
+                num_fields = min_num_fields
+        return num_fields
+
+    @property
     def score(self) -> float:
         """Returns the score for the evidence."""
         return (
-            self.score_step_1
-            + self.score_step_2
-            + self.score_step_3
-            + self.score_step_4
-            + self.score_step_5
-        ) * self.score_step_6a
+            (
+                self.score_step_1
+                + self.score_step_2
+                + self.score_step_3
+                + self.score_step_4
+                + self.score_step_5
+            )
+            * self.score_step_6a
+            * self.score_step_6b
+        )
 
     @property
     def score_step_1(self) -> float:
@@ -718,20 +751,13 @@ class Evidence(models.Model):
     @property
     def score_step_1b(self) -> float | None:
         """Returns the score for step 1B."""
-        if (
-            self.curation
-            and self.curation.curation_type == CurationTypes.ALLELE
-            and self.curation.allele
-        ):
-            num_fields = self.curation.allele.name.count(":") + 1
-            score = {
-                1: Points.S1B_1_FIELD,
-                2: Points.S1B_2_FIELD,
-                3: Points.S1B_3_FIELD,
-                4: Points.S1B_4_FIELD,
-            }
-            return score.get(num_fields)
-        return None
+        score = {
+            1: Points.S1B_1_FIELD,
+            2: Points.S1B_2_FIELD,
+            3: Points.S1B_3_FIELD,
+            4: Points.S1B_4_FIELD,
+        }
+        return score.get(self.num_fields)
 
     @property
     def score_step_1c(self) -> float | None:
@@ -918,3 +944,10 @@ class Evidence(models.Model):
         if self.has_association:
             return 1
         return 0
+
+    @property
+    def score_step_6b(self) -> float:
+        """Returns the score for step 6B."""
+        if self.num_fields == 1:
+            return 0.5
+        return 1
