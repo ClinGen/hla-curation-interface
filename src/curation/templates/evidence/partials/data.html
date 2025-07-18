@@ -42,6 +42,21 @@
                 <td>{{ object.typing_method_notes }}</td>
             </tr>
             <tr>
+                <td>Demographics</td>
+                <td>
+                    {% if object.demographics.all %}
+                        <ul>
+                            {% for group in object.demographics.all %}
+                                <li>{{ group }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        Not Provided
+                    {% endif %}
+                </td>
+                <td>{{ object.demographics_notes }}</td>
+            </tr>
+            <tr>
                 <td>p-value</td>
                 <td>
                     {% if object.p_value_string %}

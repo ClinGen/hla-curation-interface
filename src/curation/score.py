@@ -305,7 +305,7 @@ FRAMEWORK = [
     },
     {
         "text": "Step 1B: Allele Resolution",
-        "category": "1-field (see Step 6B)",
+        "category": "1-field",
         "split_horizontal": False,
         "split_vertical": False,
         "score": "score_step_1b",

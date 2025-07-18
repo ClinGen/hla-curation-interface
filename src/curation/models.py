@@ -234,6 +234,33 @@ class Curation(models.Model):
         return total
 
 
+class Demographic(models.Model):
+    """Contains the biogeographic groups in Huddart et al. 2019.
+
+    There is a fixture in the fixtures directory that can be used to load the groups
+    into the database.
+    """
+
+    group = models.CharField(
+        blank=False,
+        max_length=20,  # Accommodates the human-readable group name.
+        unique=True,
+        verbose_name="Group",
+        help_text="The bio-geographical group for a population.",
+    )
+
+    class Meta:
+        """Provides metadata."""
+
+        db_table = "demographic"
+        verbose_name = "Demographic"
+        verbose_name_plural = "Demographics"
+
+    def __str__(self) -> str:
+        """Returns a string representation of the demographic."""
+        return self.group
+
+
 class Zygosity:
     """Defines zygosity status codes."""
 
@@ -403,6 +430,18 @@ class Evidence(models.Model):
         help_text="The typing method used to determine HLA sequence.",
     )
     typing_method_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Notes",
+    )
+    demographics = models.ManyToManyField(
+        Demographic,
+        blank=True,
+        db_table="evidence_demographic_map",
+        related_name="evidence",
+        help_text="The biogeographic groups for the populations in the evidence.",
+    )
+    demographics_notes = models.TextField(
         blank=True,
         default="",
         verbose_name="Notes",
@@ -600,6 +639,29 @@ class Evidence(models.Model):
                 "evidence_pk": self.pk,
             },
         )
+
+    def clean(self) -> None:
+        """Makes sure the data being submitted is valid."""
+        self.clean_typing_method()
+        self.clean_p_value_string()
+        self.clean_odds_ratio_string()
+        self.clean_relative_risk_string()
+        self.clean_beta_string()
+
+    def clean_typing_method(self) -> None:
+        """Makes sure demographics are provided if the typing method is imputation.
+
+        Raises:
+            ValidationError: If the user selected imputation as the typing method
+                             without providing demographics.
+        """
+        if (
+            self.typing_method
+            and self.typing_method == TypingMethod.IMPUTATION
+            and not self.demographics.all()
+        ):
+            message = "Demographics must be provided if typing method is imputation."
+            raise ValidationError({"demographics": message})
 
     def clean_effect_size_statistic(self) -> None:
         """Makes sure there is only one effect size statistic."""

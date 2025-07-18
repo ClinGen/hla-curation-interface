@@ -223,14 +223,21 @@ class EvidenceEdit(UpdateView):
     template_name = "evidence/edit.html"
     pk_url_kwarg = "evidence_pk"
 
+    def form_invalid(self, form: EvidenceEditForm) -> HttpResponse:
+        """Returns the form with errors and flashes a message about the errors."""
+        message = (
+            "There was an issue with your submission. Please check the form fields."
+        )
+        messages.error(self.request, message)
+        return super().form_invalid(form)
+
     def form_valid(self, form: EvidenceEditForm) -> HttpResponse:
         """Sets the value for several fields that don't appear in the form.
 
         Also makes sure there is only one effect size statistic.
 
         Returns:
-             The details page for the evidence if the form is valid, or the form with
-             errors if the form isn't valid.
+             The details page for the evidence.
         """
         effect_size_statistic = form.cleaned_data["effect_size_statistic"]
         if effect_size_statistic == EffectSizeStatistic.ODDS_RATIO:
