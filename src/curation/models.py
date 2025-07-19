@@ -603,6 +603,16 @@ class Evidence(models.Model):
         default="",
         verbose_name="Notes",
     )
+    needs_review = models.BooleanField(
+        default=False,
+        verbose_name="Needs Manual Review",
+        help_text="Does this evidence need to be reviewed manually?",
+    )
+    needs_review_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Notes",
+    )
     added_by = models.ForeignKey(
         User,
         blank=True,

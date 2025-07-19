@@ -232,12 +232,21 @@ class CurationDetailTest(TestCase):
         )
         self.assertEqual(publication_th, "Publication")
 
+    def test_shows_needs_review_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        evidence_table = soup.find(id="evidence-table")
+        needs_review_th = (
+            evidence_table.find("thead").find("tr").find_all("th")[2].get_text().strip()
+        )
+        self.assertEqual(needs_review_th, "Needs Review")
+
     def test_shows_status_in_thead(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
         status_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[2].get_text().strip()
+            evidence_table.find("thead").find("tr").find_all("th")[3].get_text().strip()
         )
         self.assertEqual(status_th, "Status")
 
@@ -246,7 +255,7 @@ class CurationDetailTest(TestCase):
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
         conflicting_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[3].get_text().strip()
+            evidence_table.find("thead").find("tr").find_all("th")[4].get_text().strip()
         )
         self.assertEqual(conflicting_th, "Conflicting")
 
@@ -255,7 +264,7 @@ class CurationDetailTest(TestCase):
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
         included_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[4].get_text().strip()
+            evidence_table.find("thead").find("tr").find_all("th")[5].get_text().strip()
         )
         self.assertEqual(included_th, "Included")
 
@@ -264,7 +273,7 @@ class CurationDetailTest(TestCase):
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
         score_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[5].get_text().strip()
+            evidence_table.find("thead").find("tr").find_all("th")[6].get_text().strip()
         )
         self.assertEqual(score_th, "Score")
 
@@ -297,6 +306,15 @@ class CurationDetailTest(TestCase):
         title = "Diseases in grass type Pokémon in the Kanto region"
         self.assertIn(title, publication_anchor)
 
+    def test_shows_needs_review_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        evidence_table = soup.find(id="evidence-table")
+        needs_review = (
+            evidence_table.find("tbody").find("tr").find_all("td")[2].get_text().strip()
+        )
+        self.assertEqual(needs_review, "False")
+
     def test_shows_status_in_tbody(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
@@ -304,7 +322,7 @@ class CurationDetailTest(TestCase):
         status = (
             evidence_table.find("tbody")
             .find("tr")
-            .find_all("td")[2]
+            .find_all("td")[3]
             .find("span")
             .get_text()
             .strip()
@@ -318,7 +336,7 @@ class CurationDetailTest(TestCase):
         conflicting = (
             evidence_table.find("tbody")
             .find("tr")
-            .find_all("td")[3]
+            .find_all("td")[4]
             .find("label")
             .find("input")
         )
@@ -331,7 +349,7 @@ class CurationDetailTest(TestCase):
         included = (
             evidence_table.find("tbody")
             .find("tr")
-            .find_all("td")[4]
+            .find_all("td")[5]
             .find("label")
             .find("input")
         )
@@ -342,7 +360,7 @@ class CurationDetailTest(TestCase):
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
         score = (
-            evidence_table.find("tbody").find("tr").find_all("td")[5].get_text().strip()
+            evidence_table.find("tbody").find("tr").find_all("td")[6].get_text().strip()
         )
         self.assertEqual(score, "2.0")
 
@@ -569,12 +587,21 @@ class CurationEditEvidenceTest(TestCase):
         )
         self.assertEqual(publication_th, "Publication")
 
+    def test_shows_needs_review_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        evidence_table = soup.find(id="evidence-table")
+        needs_review_th = (
+            evidence_table.find("thead").find("tr").find_all("th")[2].get_text().strip()
+        )
+        self.assertEqual(needs_review_th, "Needs Review")
+
     def test_shows_status_in_thead(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
         status_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[2].get_text().strip()
+            evidence_table.find("thead").find("tr").find_all("th")[3].get_text().strip()
         )
         self.assertEqual(status_th, "Status")
 
@@ -583,7 +610,7 @@ class CurationEditEvidenceTest(TestCase):
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
         conflicting_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[3].get_text().strip()
+            evidence_table.find("thead").find("tr").find_all("th")[4].get_text().strip()
         )
         self.assertEqual(conflicting_th, "Conflicting")
 
@@ -592,7 +619,7 @@ class CurationEditEvidenceTest(TestCase):
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
         included_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[4].get_text().strip()
+            evidence_table.find("thead").find("tr").find_all("th")[5].get_text().strip()
         )
         self.assertEqual(included_th, "Included")
 
@@ -601,7 +628,7 @@ class CurationEditEvidenceTest(TestCase):
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
         score_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[5].get_text().strip()
+            evidence_table.find("thead").find("tr").find_all("th")[6].get_text().strip()
         )
         self.assertEqual(score_th, "Score")
 
@@ -634,12 +661,21 @@ class CurationEditEvidenceTest(TestCase):
         title = "Diseases in grass type Pokémon in the Kanto region"
         self.assertIn(title, publication_anchor)
 
+    def test_shows_needs_review_in_tbody(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        evidence_table = soup.find(id="evidence-table")
+        needs_review = (
+            evidence_table.find("tbody").find("tr").find_all("td")[2].get_text().strip()
+        )
+        self.assertEqual(needs_review, "False")
+
     def test_shows_status_in_tbody(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
         status = (
-            evidence_table.find("tbody").find("tr").find_all("td")[2].find("select")
+            evidence_table.find("tbody").find("tr").find_all("td")[3].find("select")
         )
         self.assertIsNotNone(status)
 
@@ -648,7 +684,7 @@ class CurationEditEvidenceTest(TestCase):
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
         conflicting = (
-            evidence_table.find("tbody").find("tr").find_all("td")[3].find("input")
+            evidence_table.find("tbody").find("tr").find_all("td")[4].find("input")
         )
         self.assertIsNotNone(conflicting)
 
@@ -657,7 +693,7 @@ class CurationEditEvidenceTest(TestCase):
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
         included = (
-            evidence_table.find("tbody").find("tr").find_all("td")[4].find("input")
+            evidence_table.find("tbody").find("tr").find_all("td")[5].find("input")
         )
         self.assertIsNotNone(included)
 
@@ -666,6 +702,6 @@ class CurationEditEvidenceTest(TestCase):
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
         score = (
-            evidence_table.find("tbody").find("tr").find_all("td")[5].get_text().strip()
+            evidence_table.find("tbody").find("tr").find_all("td")[6].get_text().strip()
         )
         self.assertEqual(score, "2.0")

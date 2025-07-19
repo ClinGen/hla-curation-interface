@@ -98,6 +98,8 @@ class EvidenceEditForm(ModelForm):
             "additional_phenotypes_notes",
             "has_association",
             "has_association_notes",
+            "needs_review",
+            "needs_review_notes",
         ]
         widgets = {
             "is_gwas": forms.RadioSelect(choices=YN_BOOL_CHOICES),
@@ -117,4 +119,6 @@ class EvidenceEditForm(ModelForm):
             "additional_phenotypes_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
             "has_association": forms.RadioSelect(choices=YN_BOOL_CHOICES),
             "has_association_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
+            "needs_review": forms.RadioSelect(choices=YN_BOOL_CHOICES),
+            "needs_review_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
         }

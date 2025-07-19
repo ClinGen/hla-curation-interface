@@ -54,6 +54,7 @@
                     <li><a href="#confidence-interval">Confidence Interval</a></li>
                     <li><a href="#cohort-size">Cohort Size</a></li>
                     <li><a href="#significant-association">Significant Association</a></li>
+                    <li><a href="#needs-review">Needs Review</a></li>
                     <li><a href="#save">Save</a></li>
                 </ul>
             </aside>
@@ -129,6 +130,11 @@
                     <h2 id="significant-association" class="title is-4">Significant Association</h2>
                     {% include "common/form/input_radio.html" with field=form.has_association hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.has_association_notes %}
+                </div>
+                <div class="box">
+                    <h2 id="needs-review" class="title is-4">Needs Review</h2>
+                    {% include "common/form/input_radio.html" with field=form.needs_review hide_label=True show_help=True %}
+                    {% include "common/form/textarea.html" with field=form.needs_review_notes %}
                 </div>
                 <div class="box">
                     <h2 id="save" class="title is-4">Save</h2>

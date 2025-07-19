@@ -161,6 +161,11 @@
                 <td>{{ object.has_association }}</td>
                 <td>{{ object.has_association_notes }}</td>
             </tr>
+            <tr>
+                <td {% if object.needs_review %}class="is-danger"{% endif %}>Needs Review</td>
+                <td {% if object.needs_review %}class="is-danger"{% endif %}>{{ object.needs_review }}</td>
+                <td {% if object.needs_review %}class="is-danger"{% endif %}>{{ object.needs_review_notes }}</td>
+            </tr>
         </tbody>
     </table>
 </div>

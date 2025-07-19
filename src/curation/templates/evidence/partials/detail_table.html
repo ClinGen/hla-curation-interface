@@ -20,6 +20,16 @@
             <td>Publication</td>
             <td id="publication">{{ object.publication }}</td>
         </tr>
+        <tr>
+            <td>Needs Review</td>
+            <td>
+                {% if object.needs_review %}
+                    {% include "common/tags/needs_review.html" with text=object.needs_review %}
+                {% else %}
+                    {{ object.needs_review }}
+                {% endif %}
+            </td>
+        </tr>
         {% if object.status == "INP" %}
             <tr>
                 <td>Status</td>

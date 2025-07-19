@@ -49,6 +49,7 @@
                         <tr>
                             <th>ID</th>
                             <th>Publication</th>
+                            <th>Needs Review</th>
                             <th>Status</th>
                             <th>Conflicting</th>
                             <th>Included</th>
@@ -70,6 +71,13 @@
                                     <a href="{% url 'publication-detail' form.instance.publication.pk %}">
                                         {{ form.instance.publication }}
                                     </a>
+                                </td>
+                                <td>
+                                    {% if form.instance.needs_review %}
+                                        {% include "common/tags/needs_review.html" with text=form.instance.needs_review %}
+                                    {% else %}
+                                        {{ form.instance.needs_review }}
+                                    {% endif %}
                                 </td>
                                 {% for field in form.visible_fields %}
                                     <td>
