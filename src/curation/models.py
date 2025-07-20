@@ -802,7 +802,7 @@ class Evidence(models.Model):
         return (
             (
                 self.score_step_1
-                + self.score_step_2
+                + (self.score_step_2 if self.score_step_2 else 0)
                 + self.score_step_3
                 + self.score_step_4
                 + self.score_step_5
@@ -858,9 +858,8 @@ class Evidence(models.Model):
         return Points.S1D_PHASE_NOT_CONFIRMED
 
     @property
-    def score_step_2(self) -> float:
+    def score_step_2(self) -> float | None:
         """Returns the score for step 2."""
-        total = 0.0
         typing_method_points = {
             TypingMethod.TAG_SNPS: Points.S2_TAG_SNPS,
             TypingMethod.MICROARRAYS: Points.S2_MICROARRAYS,
@@ -877,8 +876,8 @@ class Evidence(models.Model):
             TypingMethod.LONG_READ_SEQ: Points.S2_LONG_READ_SEQ,
         }
         if self.typing_method != "":
-            total += typing_method_points.get(self.typing_method, 0)
-        return total
+            return typing_method_points.get(self.typing_method)
+        return None
 
     @property
     def score_step_3(self) -> float:
