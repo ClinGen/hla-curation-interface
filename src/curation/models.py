@@ -186,11 +186,11 @@ class Curation(models.Model):
             ValidationError: If the curation isn't in a valid state.
         """
         super().clean()
-        if self.curation_type == CurationTypes.ALLELE and not self.allele:
+        if self.curation_type == CurationTypes.ALLELE and self.allele is None:
             raise ValidationError(
                 {"allele": "An allele is required for an allele curation."}
             )
-        if self.curation_type == CurationTypes.HAPLOTYPE and not self.haplotype:
+        if self.curation_type == CurationTypes.HAPLOTYPE and self.haplotype is None:
             raise ValidationError(
                 {"haplotype": "A haplotype is required for a haplotype curation."}
             )

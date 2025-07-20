@@ -1,4 +1,4 @@
-"""Houses tests for the curation app."""
+"""Houses tests for the curation app's views."""
 
 from bs4 import BeautifulSoup
 from django.contrib.auth.models import User
