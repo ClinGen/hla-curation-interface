@@ -804,7 +804,7 @@ class Evidence(models.Model):
                 self.score_step_1
                 + (self.score_step_2 if self.score_step_2 else 0)
                 + self.score_step_3
-                + self.score_step_4
+                + (self.score_step_4 if self.score_step_4 else 0)
                 + self.score_step_5
             )
             * self.score_step_6a
@@ -975,10 +975,10 @@ class Evidence(models.Model):
         return None
 
     @property
-    def score_step_4(self) -> float:  # noqa: C901
+    def score_step_4(self) -> float | None:  # noqa: C901
         """Returns the score for step 4."""
         if self.cohort_size is None:
-            return 0.0
+            return None
 
         gwas_intervals = [
             (step_4_gwas_interval_1, Points.S4_INTERVAL_1),
@@ -1001,7 +1001,7 @@ class Evidence(models.Model):
         for interval, points in intervals:
             if interval.contains(self.cohort_size):
                 return points
-        return 0.0
+        return None
 
     @property
     def score_step_5(self) -> float:
