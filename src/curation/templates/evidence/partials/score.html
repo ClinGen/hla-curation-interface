@@ -1,5 +1,5 @@
 <div class="block table-container mt-4">
-    <table class="table is-fullwidth is-hoverable">
+    <table class="table is-fullwidth is-hoverable" id="evidence-score-table">
         <thead>
             <tr>
                 <th>Step</th>
@@ -29,7 +29,7 @@
             {% endfor %}
             <tr class="is-info">
                 <td colspan="2"><b>Total</b></td>
-                <td><b>{{ object.score }}</b></td>
+                <td id="total-score"><b>{{ object.score }}</b></td>
             </tr>
         </tbody>
     </table>

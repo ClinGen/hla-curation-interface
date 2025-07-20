@@ -902,8 +902,81 @@ class EvidenceCreateTest(TestCase):
 
 
 class EvidenceDetailTest(TestCase):
-    pass
+    fixtures = [
+        "test_alleles.json",
+        "test_diseases.json",
+        "test_publications.json",
+        "test_curations.json",
+        "test_evidence.json",
+    ]
+
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse(
+            "evidence-detail", kwargs={"curation_pk": 1, "evidence_pk": 1}
+        )
+
+    def test_shows_menu(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        menu = soup.find(id="menu")
+        self.assertIsNotNone(menu)
+
+    def test_shows_evidence_data_table(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        table = soup.find(id="evidence-data-table")
+        self.assertIsNotNone(table)
+
+    def test_shows_evidence_score_table(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        table = soup.find(id="evidence-score-table")
+        self.assertIsNotNone(table)
+
+    def test_shows_total_score(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        total_score = soup.find(id="total-score").find("b").get_text().strip()
+        self.assertIsNotNone(total_score)
 
 
 class EvidenceEditTest(TestCase):
-    pass
+    fixtures = [
+        "test_alleles.json",
+        "test_diseases.json",
+        "test_publications.json",
+        "test_curations.json",
+        "test_evidence.json",
+    ]
+
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse("evidence-edit", kwargs={"curation_pk": 1, "evidence_pk": 1})
+
+    def test_shows_menu(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        menu = soup.find(id="menu")
+        self.assertIsNotNone(menu)
+
+    def test_shows_data_headings(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        heading_ids = [
+            "gwas",
+            "zygosity",
+            "phase",
+            "typing-method",
+            "demographics",
+            "multiple-testing-correction",
+            "effect-size",
+            "confidence-interval",
+            "cohort-size",
+            "significant-association",
+            "needs-review",
+            "save",
+        ]
+        for heading_id in heading_ids:
+            heading = soup.find(id=heading_id)
+            self.assertIsNotNone(heading)
