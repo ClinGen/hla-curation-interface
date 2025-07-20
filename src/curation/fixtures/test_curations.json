@@ -3,7 +3,9 @@
     "model": "curation.curation",
     "pk": 1,
     "fields": {
+      "status": "INP",
       "curation_type": "ALL",
+      "classification": "LIM",
       "allele": 1,
       "haplotype": null,
       "disease": 1,

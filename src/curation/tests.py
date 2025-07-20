@@ -172,6 +172,12 @@ class CurationDetailTest(TestCase):
         status = soup.find(id="status").get_text().strip()
         self.assertEqual(status, "In Progress")
 
+    def test_shows_classification(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        classification = soup.find(id="classification").get_text().strip()
+        self.assertEqual(classification, "Limited")
+
     def test_shows_score(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
@@ -514,62 +520,143 @@ class CurationEditEvidenceTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = reverse("curation-edit-evidence", kwargs={"curation_pk": 1})
+        self.active_user = User.objects.create(
+            username="ash",
+            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
+            is_active=True,
+        )
+        self.inactive_user = User.objects.create(
+            username="misty",
+            password="togepi",  # noqa: S106 (Hard-coded for testing.)
+            is_active=False,
+        )
+        self.user_with_unverified_email = User.objects.create(
+            username="brock",
+            password="onix",  # noqa: S106 (Hard-coded for testing.)
+            is_active=True,
+        )
+        UserProfile.objects.create(
+            user=self.user_with_unverified_email,
+            firebase_email_verified=False,
+        )
+        self.user_who_can_create = User.objects.create(
+            username="meowth",
+            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
+            is_active=True,
+        )
+        UserProfile.objects.create(
+            user=self.user_who_can_create,
+            firebase_email_verified=True,
+        )
+
+    def test_redirects_anonymous_user_to_login(self):
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
+
+    def test_permission_denied_if_not_active(self):
+        self.client.force_login(self.inactive_user)
+        # If DEBUG is true, this will print a warning and a stack trace.
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_permission_denied_if_no_user_profile(self):
+        self.client.force_login(self.active_user)
+        # If DEBUG is true, this will print a warning and a stack trace.
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_permission_denied_if_email_not_verified(self):
+        self.client.force_login(self.user_with_unverified_email)
+        # If DEBUG is true, this will print a warning and a stack trace.
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
 
     def test_shows_breadcrumb(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         breadcrumb = soup.find("nav", {"class": "breadcrumb"})
         self.assertIsNotNone(breadcrumb)
 
     def test_shows_allele_name(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         allele = soup.find(id="allele").get_text().strip()
         self.assertEqual(allele, "A*01:02:03")
 
     def test_shows_disease_name(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         allele = soup.find(id="disease").get_text().strip()
         self.assertEqual(allele, "acute oran berry intoxication")
 
+    def test_shows_status(self):
+        self.client.force_login(self.user_who_can_create)
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        status = soup.find(id="status").get_text().strip()
+        self.assertEqual(status, "In Progress")
+
+    def test_shows_classification(self):
+        self.client.force_login(self.user_who_can_create)
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        classification = soup.find(id="classification").get_text().strip()
+        self.assertEqual(classification, "Limited")
+
+    def test_shows_score(self):
+        self.client.force_login(self.user_who_can_create)
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        score = soup.find(id="score").get_text().strip()
+        self.assertIsNotNone(score)
+
     def test_shows_curation_id(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         curation_id = soup.find(id="curation-id").get_text().strip()
         self.assertEqual(curation_id, "1")
 
     def test_shows_added_at(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         added_at = soup.find(id="added-at").get_text().strip()
         self.assertEqual(added_at, "1970-01-01")
 
     def test_shows_search_button(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         search_button = soup.find(id="search-button").get_text().strip()
         self.assertIn("Search", search_button)
 
     def test_shows_add_button(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         add_button = soup.find(id="add-button").get_text().strip()
         self.assertIn("Add", add_button)
 
     def test_shows_save_button(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         save_button = soup.find(id="save-edit-button")
         self.assertIsNotNone(save_button)
 
     def test_shows_cancel_button(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         cancel_button = soup.find(id="cancel-edit-button")
         self.assertIsNotNone(cancel_button)
 
     def test_shows_id_in_thead(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -579,6 +666,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertEqual(id_th, "ID")
 
     def test_shows_publication_in_thead(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -588,6 +676,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertEqual(publication_th, "Publication")
 
     def test_shows_needs_review_in_thead(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -597,6 +686,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertEqual(needs_review_th, "Needs Review")
 
     def test_shows_status_in_thead(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -606,6 +696,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertEqual(status_th, "Status")
 
     def test_shows_conflicting_in_thead(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -615,6 +706,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertEqual(conflicting_th, "Conflicting")
 
     def test_shows_included_in_thead(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -624,6 +716,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertEqual(included_th, "Included")
 
     def test_shows_score_in_thead(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -633,6 +726,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertEqual(score_th, "Score")
 
     def test_shows_id_in_tbody(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -647,6 +741,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertIn("1", id_anchor)
 
     def test_shows_publication_in_tbody(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -662,6 +757,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertIn(title, publication_anchor)
 
     def test_shows_needs_review_in_tbody(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -671,6 +767,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertEqual(needs_review, "False")
 
     def test_shows_status_in_tbody(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -680,6 +777,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertIsNotNone(status)
 
     def test_shows_conflicting_in_tbody(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -689,6 +787,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertIsNotNone(conflicting)
 
     def test_shows_included_in_tbody(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -698,6 +797,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertIsNotNone(included)
 
     def test_shows_score_in_tbody(self):
+        self.client.force_login(self.user_who_can_create)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")

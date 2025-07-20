@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, UpdateView
 from django.views.generic.edit import CreateView
 
-from core.permissions import CreateAccessMixin
+from core.permissions import CreateAccessMixin, has_create_access
 from curation.forms import (
     CurationCreateForm,
     CurationEditForm,
@@ -63,6 +63,7 @@ class CurationEdit(UpdateView):
     pk_url_kwarg = "curation_pk"
 
 
+@has_create_access
 def curation_edit_evidence(request: HttpRequest, curation_pk: int) -> HttpResponse:
     """Returns the editable curation details page with editable top-level evidence.
 
@@ -215,7 +216,7 @@ class EvidenceDetail(DetailView):
         return context
 
 
-class EvidenceEdit(UpdateView):
+class EvidenceEdit(UpdateView, CreateAccessMixin):
     """Allows the user to edit evidence."""
 
     model = Evidence

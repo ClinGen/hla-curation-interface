@@ -66,7 +66,7 @@ def has_create_access(view_function: Callable) -> Callable:
             Otherwise, the user is redirected to the login view.
         """
         if not request.user.is_authenticated:
-            return redirect(LOGIN_URL)
+            return redirect(f"{LOGIN_URL}?next={request.path}")
         if hasattr(request.user, "profile") and request.user.profile.can_create:
             return view_function(request, *args, **kwargs)
         raise PermissionDenied(PERMISSION_DENIED_MESSAGE)
