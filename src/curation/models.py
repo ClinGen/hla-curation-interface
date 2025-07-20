@@ -658,6 +658,15 @@ class Evidence(models.Model):
         self.clean_relative_risk_string()
         self.clean_beta_string()
 
+    def clean_publication(self) -> None:
+        """Makes sure the evidence has a publication.
+
+        Raises:
+            ValidationError: If the publication is None.
+        """
+        if self.publication is None:
+            raise ValidationError({"publication": "Please select a publication."})
+
     def clean_typing_method(self) -> None:
         """Makes sure demographics are provided if the typing method is imputation.
 

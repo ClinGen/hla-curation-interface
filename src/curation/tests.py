@@ -7,9 +7,10 @@ from django.urls import reverse
 
 from allele.models import Allele
 from core.models import UserProfile
-from curation.models import Curation
+from curation.models import Curation, Evidence, Status
 from disease.models import Disease
 from haplotype.models import Haplotype
+from publication.models import Publication
 
 
 class CurationCreateTest(TestCase):
@@ -805,3 +806,104 @@ class CurationEditEvidenceTest(TestCase):
             evidence_table.find("tbody").find("tr").find_all("td")[6].get_text().strip()
         )
         self.assertEqual(score, "2.0")
+
+
+class EvidenceCreateTest(TestCase):
+    fixtures = [
+        "test_alleles.json",
+        "test_diseases.json",
+        "test_publications.json",
+        "test_curations.json",
+    ]
+
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse("evidence-create", kwargs={"curation_pk": 1})
+        self.active_user = User.objects.create(
+            username="ash",
+            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
+            is_active=True,
+        )
+        self.inactive_user = User.objects.create(
+            username="misty",
+            password="togepi",  # noqa: S106 (Hard-coded for testing.)
+            is_active=False,
+        )
+        self.user_with_unverified_email = User.objects.create(
+            username="brock",
+            password="onix",  # noqa: S106 (Hard-coded for testing.)
+            is_active=True,
+        )
+        UserProfile.objects.create(
+            user=self.user_with_unverified_email,
+            firebase_email_verified=False,
+        )
+        self.user_who_can_create = User.objects.create(
+            username="meowth",
+            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
+            is_active=True,
+        )
+        UserProfile.objects.create(
+            user=self.user_who_can_create,
+            firebase_email_verified=True,
+        )
+
+    def test_redirects_anonymous_user_to_login(self):
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
+
+    def test_permission_denied_if_not_active(self):
+        self.client.force_login(self.inactive_user)
+        # If DEBUG is true, this will print a warning and a stack trace.
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_permission_denied_if_no_user_profile(self):
+        self.client.force_login(self.active_user)
+        # If DEBUG is true, this will print a warning and a stack trace.
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_permission_denied_if_email_not_verified(self):
+        self.client.force_login(self.user_with_unverified_email)
+        # If DEBUG is true, this will print a warning and a stack trace.
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_shows_publication_input(self):
+        self.client.force_login(self.user_who_can_create)
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        publication_input = soup.find(id="id_publication")
+        self.assertIsNotNone(publication_input)
+
+    def test_shows_submit_button(self):
+        self.client.force_login(self.user_who_can_create)
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        submit_button = soup.find("button", {"type": "submit"}).get_text().strip()
+        self.assertEqual(submit_button, "Submit")
+
+    def test_creates_evidence_with_valid_form_data(self):
+        self.client.force_login(self.user_who_can_create)
+        initial_evidence_count = Evidence.objects.count()
+        data = {"publication": "1"}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Evidence.objects.count(), initial_evidence_count + 1)
+        new_evidence = Evidence.objects.first()
+        self.assertIsNotNone(new_evidence)
+        self.assertEqual(new_evidence.curation.allele, Allele.objects.get(pk=1))  # type: ignore[union-attr]
+        self.assertEqual(new_evidence.curation.disease, Disease.objects.get(pk=1))  # type: ignore[union-attr]
+        self.assertEqual(new_evidence.publication, Publication.objects.get(pk=1))  # type: ignore[union-attr]
+        self.assertFalse(new_evidence.needs_review)  # type: ignore[union-attr]
+        self.assertEqual(new_evidence.status, Status.IN_PROGRESS)  # type: ignore[union-attr]
+        self.assertEqual(new_evidence.added_by, self.user_who_can_create)  # type: ignore[union-attr]
+
+
+class EvidenceDetailTest(TestCase):
+    pass
+
+
+class EvidenceEditTest(TestCase):
+    pass
