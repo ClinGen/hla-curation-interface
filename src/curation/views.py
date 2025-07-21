@@ -16,6 +16,7 @@ from curation.forms import (
     EvidenceEditForm,
     EvidenceTopLevelEditFormSet,
 )
+from curation.framework import FRAMEWORK
 from curation.models import (
     Curation,
     CurationTypes,
@@ -23,7 +24,6 @@ from curation.models import (
     Evidence,
     Status,
 )
-from curation.framework import FRAMEWORK
 from datatable.constants import FieldTypes, Filters, SortDirections
 from datatable.views import datatable
 

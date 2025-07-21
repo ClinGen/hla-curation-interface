@@ -279,6 +279,7 @@ TYPING_METHOD_CHOICES = {
     TypingMethod.HIGH_RES_TYPING: "High-Resolution Molecular Genotyping",
     TypingMethod.WHOLE_EXOME_SEQ: "Whole Exome Sequencing",
     TypingMethod.RNA_SEQ: "RNA Sequencing",
+    TypingMethod.WHOLE_GENE_SEQ: "Whole Gene Sequencing",
     TypingMethod.SANGER_SEQ: "Sanger-Sequencing-Based Typing",
     TypingMethod.WHOLE_GENOME_SEQ: "Whole Genome Sequencing",
     TypingMethod.NEXT_GENERATION_SEQ: "Next Generation Sequencing",
@@ -977,7 +978,7 @@ class Evidence(models.Model):
         intervals = gwas_intervals if self.is_gwas else non_gwas_intervals
 
         for interval, points in intervals:
-            if interval.contains(self.cohort_size):
+            if interval.contains(Decimal(self.cohort_size)):
                 return points
         return None
 
