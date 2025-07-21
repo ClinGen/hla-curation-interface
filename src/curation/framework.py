@@ -1,6 +1,8 @@
-"""Houses code related to scoring evidence."""
+"""Houses code related to the HLA scoring framework."""
 
 from decimal import Decimal
+
+from curation.interval import Interval
 
 
 class Points:
@@ -51,241 +53,204 @@ class Points:
     S6B_MORE_THAN_1_FIELD = 1
 
 
-class Interval:
-    """Defines an interval."""
+class Step3AIntervals:
+    """Defines intervals for scoring step 3A."""
 
-    def __init__(
-        self,
-        *,
-        start: float | Decimal,
-        end: float | Decimal,
-        start_inclusive: bool,
-        end_inclusive: bool,
-        variable: str,
-    ) -> None:
-        """Sets the interval's start, end, and variable."""
-        self.start = start
-        self.end = end
-        self.start_inclusive = start_inclusive
-        self.end_inclusive = end_inclusive
-        self.variable = variable
+    def __init__(self) -> None:
+        """Sets the intervals based on the framework."""
+        self.GWAS_1 = Interval(
+            start=Decimal("1e-4"),
+            end=Decimal("Infinity"),
+            start_inclusive=True,
+            end_inclusive=False,
+            variable="p-value",
+        )
+        self.GWAS_2 = Interval(
+            start=Decimal("5e-8"),
+            end=self.GWAS_1.start,
+            start_inclusive=True,
+            end_inclusive=False,
+            variable="p-value",
+        )
+        self.GWAS_3 = Interval(
+            start=Decimal("1e-11"),
+            end=self.GWAS_2.start,
+            start_inclusive=True,
+            end_inclusive=False,
+            variable="p-value",
+        )
+        self.GWAS_4 = Interval(
+            start=Decimal("1e-14"),
+            end=self.GWAS_3.start,
+            start_inclusive=True,
+            end_inclusive=False,
+            variable="p-value",
+        )
+        self.GWAS_5 = Interval(
+            start=Decimal("-Infinity"),
+            end=self.GWAS_4.start,
+            start_inclusive=False,
+            end_inclusive=False,
+            variable="p-value",
+        )
+        self.NON_GWAS_1 = Interval(
+            start=Decimal("0.05"),
+            end=Decimal("Infinity"),
+            start_inclusive=True,
+            end_inclusive=False,
+            variable="p-value",
+        )
+        self.NON_GWAS_2 = Interval(
+            start=Decimal("0.01"),
+            end=self.NON_GWAS_1.start,
+            start_inclusive=True,
+            end_inclusive=False,
+            variable="p-value",
+        )
+        self.NON_GWAS_3 = Interval(
+            start=Decimal("0.0005"),
+            end=self.NON_GWAS_2.start,
+            start_inclusive=True,
+            end_inclusive=False,
+            variable="p-value",
+        )
+        self.NON_GWAS_4 = Interval(
+            start=Decimal("0.0001"),
+            end=self.NON_GWAS_3.start,
+            start_inclusive=True,
+            end_inclusive=False,
+            variable="p-value",
+        )
+        self.NON_GWAS_5 = Interval(
+            start=Decimal("-Infinity"),
+            end=self.NON_GWAS_4.start,
+            start_inclusive=False,
+            end_inclusive=False,
+            variable="p-value",
+        )
 
-    def __str__(self) -> str:
-        """Returns a string representation of the Interval object for the user."""
-        start_operator = "≤" if self.start_inclusive else "<"
-        end_operator = "≤" if self.end_inclusive else "<"
 
-        if self.start == float("inf"):
-            start = "∞"
-        elif self.start == float("-inf"):
-            start = "-∞"
-        else:
-            start = str(self.start)
+class Step3CIntervals:
+    """Defines intervals for scoring step 3C."""
 
-        if self.end == float("inf"):
-            end = "∞"
-        elif self.end == float("-inf"):
-            end = "-∞"
-        else:
-            end = str(self.end)
-
-        return f"{start} {start_operator} {self.variable} {end_operator} {end}"
-
-    def __repr__(self) -> str:
-        """Returns a string representation of the Interval object for the developer."""
-        start_bracket = "[" if self.start_inclusive else "("
-        end_bracket = "]" if self.end_inclusive else ")"
-        return f"Interval({start_bracket}{self.start}, {self.end}{end_bracket})"
-
-    def contains(self, number: float | Decimal) -> bool:
-        """Returns whether the given number falls within the interval."""
-        if self.start_inclusive:
-            lower_bound_check = number >= self.start
-        else:
-            lower_bound_check = number > self.start
-
-        if self.end_inclusive:
-            upper_bound_check = number <= self.end
-        else:
-            upper_bound_check = number < self.end
-
-        return lower_bound_check and upper_bound_check
+    def __init__(self) -> None:
+        """Sets the intervals based on the framework."""
+        self.OR_RR_1 = Interval(
+            start=Decimal("2.0"),
+            end=Decimal("Infinity"),
+            start_inclusive=True,
+            end_inclusive=False,
+            variable="OR/RR",
+        )
+        self.OR_RR_2 = Interval(
+            start=Decimal("-Infinity"),
+            end=Decimal("0.5"),
+            start_inclusive=False,
+            end_inclusive=True,
+            variable="OR/RR",
+        )
+        self.BETA_1 = Interval(
+            start=Decimal("0.5"),
+            end=Decimal("Infinity"),
+            start_inclusive=True,
+            end_inclusive=False,
+            variable="Beta",
+        )
+        self.BETA_2 = Interval(
+            start=Decimal("-Infinity"),
+            end=Decimal("-0.5"),
+            start_inclusive=False,
+            end_inclusive=True,
+            variable="Beta",
+        )
 
 
-step_3a_gwas_interval_1 = Interval(
-    start=1 * 10e-5,
-    end=float("inf"),
-    start_inclusive=True,
-    end_inclusive=False,
-    variable="p-value",
-)
-step_3a_gwas_interval_2 = Interval(
-    start=5 * 10e-8,
-    end=step_3a_gwas_interval_1.start,
-    start_inclusive=True,
-    end_inclusive=False,
-    variable="p-value",
-)
-step_3a_gwas_interval_3 = Interval(
-    start=1 * 10e-11,
-    end=step_3a_gwas_interval_2.start,
-    start_inclusive=True,
-    end_inclusive=False,
-    variable="p-value",
-)
-step_3a_gwas_interval_4 = Interval(
-    start=1 * 10e-14,
-    end=step_3a_gwas_interval_3.start,
-    start_inclusive=True,
-    end_inclusive=False,
-    variable="p-value",
-)
-step_3a_gwas_interval_5 = Interval(
-    start=float("-inf"),
-    end=step_3a_gwas_interval_4.start,
-    start_inclusive=False,
-    end_inclusive=False,
-    variable="p-value",
-)
+class Step4Intervals:
+    """Defines intervals for scoring step 4."""
 
-step_3a_non_gwas_interval_1 = Interval(
-    start=0.05,
-    end=float("inf"),
-    start_inclusive=True,
-    end_inclusive=False,
-    variable="p-value",
-)
-step_3a_non_gwas_interval_2 = Interval(
-    start=0.01,
-    end=step_3a_non_gwas_interval_1.start,
-    start_inclusive=True,
-    end_inclusive=False,
-    variable="p-value",
-)
-step_3a_non_gwas_interval_3 = Interval(
-    start=0.0005,
-    end=step_3a_non_gwas_interval_2.start,
-    start_inclusive=True,
-    end_inclusive=False,
-    variable="p-value",
-)
-step_3a_non_gwas_interval_4 = Interval(
-    start=0.0001,
-    end=step_3a_non_gwas_interval_3.start,
-    start_inclusive=True,
-    end_inclusive=False,
-    variable="p-value",
-)
-step_3a_non_gwas_interval_5 = Interval(
-    start=float("-inf"),
-    end=step_3a_non_gwas_interval_4.start,
-    start_inclusive=False,
-    end_inclusive=False,
-    variable="p-value",
-)
+    def __init__(self) -> None:
+        """Sets the intervals based on the framework."""
+        self.GWAS_1 = Interval(
+            start=Decimal("-Infinity"),
+            end=Decimal("1000"),
+            start_inclusive=False,
+            end_inclusive=False,
+            variable="size",
+        )
+        self.GWAS_2 = Interval(
+            start=self.GWAS_1.end,
+            end=Decimal("2499"),
+            start_inclusive=True,
+            end_inclusive=True,
+            variable="size",
+        )
+        self.GWAS_3 = Interval(
+            start=self.GWAS_2.end + Decimal("1"),
+            end=Decimal("4999"),
+            start_inclusive=True,
+            end_inclusive=True,
+            variable="size",
+        )
+        self.GWAS_4 = Interval(
+            start=self.GWAS_3.end + Decimal("1"),
+            end=Decimal("9999"),
+            start_inclusive=True,
+            end_inclusive=True,
+            variable="size",
+        )
+        self.GWAS_5 = Interval(
+            start=self.GWAS_4.end + Decimal("1"),
+            end=Decimal("Infinity"),
+            start_inclusive=True,
+            end_inclusive=False,
+            variable="size",
+        )
+        self.NON_GWAS_1 = Interval(
+            start=Decimal("-Infinity"),
+            end=Decimal("50"),
+            start_inclusive=False,
+            end_inclusive=False,
+            variable="size",
+        )
+        self.NON_GWAS_2 = Interval(
+            start=self.NON_GWAS_1.end,
+            end=Decimal("99"),
+            start_inclusive=True,
+            end_inclusive=True,
+            variable="size",
+        )
+        self.NON_GWAS_3 = Interval(
+            start=self.NON_GWAS_2.end + Decimal("1"),
+            end=Decimal("249"),
+            start_inclusive=True,
+            end_inclusive=True,
+            variable="size",
+        )
+        self.NON_GWAS_4 = Interval(
+            start=self.NON_GWAS_3.end + Decimal("1"),
+            end=Decimal("499"),
+            start_inclusive=True,
+            end_inclusive=True,
+            variable="size",
+        )
+        self.NON_GWAS_5 = Interval(
+            start=self.NON_GWAS_4.end + Decimal("1"),
+            end=Decimal("Infinity"),
+            start_inclusive=True,
+            end_inclusive=False,
+            variable="size",
+        )
 
-step_3c_or_rr_interval_1 = Interval(
-    start=2,
-    end=float("inf"),
-    start_inclusive=True,
-    end_inclusive=False,
-    variable="OR/RR",
-)
-step_3c_or_rr_interval_2 = Interval(
-    start=float("-inf"),
-    end=0.5,
-    start_inclusive=False,
-    end_inclusive=True,
-    variable="OR/RR",
-)
-step_3c_beta_interval_1 = Interval(
-    start=0.5,
-    end=float("inf"),
-    start_inclusive=True,
-    end_inclusive=False,
-    variable="Beta",
-)
-step_3c_beta_interval_2 = Interval(
-    start=float("-inf"),
-    end=-0.5,
-    start_inclusive=False,
-    end_inclusive=True,
-    variable="Beta",
-)
 
-step_4_gwas_interval_1 = Interval(
-    start=float("-inf"),
-    end=1000,
-    start_inclusive=False,
-    end_inclusive=False,
-    variable="size",
-)
-step_4_gwas_interval_2 = Interval(
-    start=step_4_gwas_interval_1.end,
-    end=2499,
-    start_inclusive=True,
-    end_inclusive=True,
-    variable="size",
-)
-step_4_gwas_interval_3 = Interval(
-    start=step_4_gwas_interval_2.end + 1,
-    end=4999,
-    start_inclusive=True,
-    end_inclusive=True,
-    variable="size",
-)
-step_4_gwas_interval_4 = Interval(
-    start=step_4_gwas_interval_3.end + 1,
-    end=9999,
-    start_inclusive=True,
-    end_inclusive=True,
-    variable="size",
-)
-step_4_gwas_interval_5 = Interval(
-    start=step_4_gwas_interval_4.end + 1,
-    end=float("inf"),
-    start_inclusive=True,
-    end_inclusive=False,
-    variable="size",
-)
+class Intervals:
+    """Defines all intervals used in scoring."""
 
-step_4_non_gwas_interval_1 = Interval(
-    start=float("-inf"),
-    end=50,
-    start_inclusive=False,
-    end_inclusive=False,
-    variable="size",
-)
-step_4_non_gwas_interval_2 = Interval(
-    start=step_4_non_gwas_interval_1.end,
-    end=99,
-    start_inclusive=True,
-    end_inclusive=True,
-    variable="size",
-)
-step_4_non_gwas_interval_3 = Interval(
-    start=step_4_non_gwas_interval_2.end + 1,
-    end=249,
-    start_inclusive=True,
-    end_inclusive=True,
-    variable="size",
-)
-step_4_non_gwas_interval_4 = Interval(
-    start=step_4_non_gwas_interval_3.end + 1,
-    end=499,
-    start_inclusive=True,
-    end_inclusive=True,
-    variable="size",
-)
-step_4_non_gwas_interval_5 = Interval(
-    start=step_4_non_gwas_interval_4.end + 1,
-    end=float("inf"),
-    start_inclusive=True,
-    end_inclusive=False,
-    variable="size",
-)
+    S3A = Step3AIntervals()
+    S3C = Step3CIntervals()
+    S4 = Step4Intervals()
 
-# This is used to render the score table.
+
+# This is used to render the evidence score table.
 FRAMEWORK = [
     {
         "text": "Step 1A: Allele or Haplotype",
@@ -417,7 +382,7 @@ FRAMEWORK = [
     },
     {
         "text": None,
-        "category": [step_3a_gwas_interval_1, step_3a_non_gwas_interval_1],
+        "category": [Intervals.S3A.GWAS_1, Intervals.S3A.NON_GWAS_1],
         "split_horizontal": True,
         "split_vertical": False,
         "score": "score_step_3a",
@@ -425,7 +390,7 @@ FRAMEWORK = [
     },
     {
         "text": None,
-        "category": [step_3a_gwas_interval_2, step_3a_non_gwas_interval_2],
+        "category": [Intervals.S3A.GWAS_2, Intervals.S3A.NON_GWAS_2],
         "split_horizontal": True,
         "split_vertical": False,
         "score": "score_step_3a",
@@ -433,7 +398,7 @@ FRAMEWORK = [
     },
     {
         "text": None,
-        "category": [step_3a_gwas_interval_3, step_3a_non_gwas_interval_3],
+        "category": [Intervals.S3A.GWAS_3, Intervals.S3A.NON_GWAS_3],
         "split_horizontal": True,
         "split_vertical": False,
         "score": "score_step_3a",
@@ -441,7 +406,7 @@ FRAMEWORK = [
     },
     {
         "text": None,
-        "category": [step_3a_gwas_interval_4, step_3a_non_gwas_interval_4],
+        "category": [Intervals.S3A.GWAS_4, Intervals.S3A.NON_GWAS_4],
         "split_horizontal": True,
         "split_vertical": False,
         "score": "score_step_3a",
@@ -449,7 +414,7 @@ FRAMEWORK = [
     },
     {
         "text": None,
-        "category": [step_3a_gwas_interval_5, step_3a_non_gwas_interval_5],
+        "category": [Intervals.S3A.GWAS_5, Intervals.S3A.NON_GWAS_5],
         "split_horizontal": True,
         "split_vertical": False,
         "score": "score_step_3a",
@@ -474,10 +439,10 @@ FRAMEWORK = [
     {
         "text": "Step 3C: Statistics (Effect Size)*",
         "category": [
-            step_3c_or_rr_interval_1,
-            step_3c_or_rr_interval_2,
-            step_3c_beta_interval_1,
-            step_3c_beta_interval_2,
+            Intervals.S3C.OR_RR_1,
+            Intervals.S3C.OR_RR_2,
+            Intervals.S3C.BETA_1,
+            Intervals.S3C.BETA_2,
         ],
         "split_horizontal": False,
         "split_vertical": True,
@@ -502,7 +467,7 @@ FRAMEWORK = [
     },
     {
         "text": None,
-        "category": [step_4_gwas_interval_1, step_4_non_gwas_interval_1],
+        "category": [Intervals.S4.GWAS_1, Intervals.S4.NON_GWAS_1],
         "split_horizontal": True,
         "split_vertical": False,
         "score": "score_step_4",
@@ -510,7 +475,7 @@ FRAMEWORK = [
     },
     {
         "text": None,
-        "category": [step_4_gwas_interval_2, step_4_non_gwas_interval_2],
+        "category": [Intervals.S4.GWAS_2, Intervals.S4.NON_GWAS_2],
         "split_horizontal": True,
         "split_vertical": False,
         "score": "score_step_4",
@@ -518,7 +483,7 @@ FRAMEWORK = [
     },
     {
         "text": None,
-        "category": [step_4_gwas_interval_3, step_4_non_gwas_interval_3],
+        "category": [Intervals.S4.GWAS_3, Intervals.S4.NON_GWAS_3],
         "split_horizontal": True,
         "split_vertical": False,
         "score": "score_step_4",
@@ -526,7 +491,7 @@ FRAMEWORK = [
     },
     {
         "text": None,
-        "category": [step_4_gwas_interval_4, step_4_non_gwas_interval_4],
+        "category": [Intervals.S4.GWAS_4, Intervals.S4.NON_GWAS_4],
         "split_horizontal": True,
         "split_vertical": False,
         "score": "score_step_4",
@@ -534,7 +499,7 @@ FRAMEWORK = [
     },
     {
         "text": None,
-        "category": [step_4_gwas_interval_5, step_4_non_gwas_interval_5],
+        "category": [Intervals.S4.GWAS_5, Intervals.S4.NON_GWAS_5],
         "split_horizontal": True,
         "split_vertical": False,
         "score": "score_step_4",

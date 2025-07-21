@@ -27,16 +27,16 @@ class Interval:
         start_operator = "≤" if self.start_inclusive else "<"
         end_operator = "≤" if self.end_inclusive else "<"
 
-        if self.start == float("inf"):
+        if self.start == Decimal("Infinity"):
             start = "∞"
-        elif self.start == float("-inf"):
+        elif self.start == Decimal("-Infinity"):
             start = "-∞"
         else:
             start = str(self.start)
 
-        if self.end == float("inf"):
+        if self.end == Decimal("Infinity"):
             end = "∞"
-        elif self.end == float("-inf"):
+        elif self.end == Decimal("-Infinity"):
             end = "-∞"
         else:
             end = str(self.end)
@@ -49,7 +49,7 @@ class Interval:
         end_bracket = "]" if self.end_inclusive else ")"
         return f"Interval({start_bracket}{self.start}, {self.end}{end_bracket})"
 
-    def contains(self, number: float | Decimal) -> bool:
+    def contains(self, number: Decimal) -> bool:
         """Returns whether the given number falls within the interval."""
         if self.start_inclusive:
             lower_bound_check = self.start <= number

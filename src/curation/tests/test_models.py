@@ -142,8 +142,8 @@ class TestEvidence(TestCase):
 
     def test_score_increases_when_p_value_provided(self):
         initial_points = self.evidence.score
-        p_value_string = "1e-13"
+        p_value_string = "0.0004"
         self.evidence.p_value = Decimal(p_value_string)
         self.evidence.save()
         self.assertGreater(self.evidence.score, initial_points)
-        self.assertEqual(self.evidence.score, initial_points + Points.S3A_INTERVAL_5)
+        self.assertEqual(self.evidence.score, initial_points + Points.S3A_INTERVAL_4)

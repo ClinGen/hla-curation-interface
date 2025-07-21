@@ -23,7 +23,7 @@ from curation.models import (
     Evidence,
     Status,
 )
-from curation.score import FRAMEWORK
+from curation.framework import FRAMEWORK
 from datatable.constants import FieldTypes, Filters, SortDirections
 from datatable.views import datatable
 

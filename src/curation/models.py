@@ -9,30 +9,8 @@ from django.http import HttpResponseBase
 from django.urls import reverse
 
 from allele.models import Allele
-from curation.score import (
-    Interval,
-    Points,
-    step_3a_gwas_interval_1,
-    step_3a_gwas_interval_2,
-    step_3a_gwas_interval_3,
-    step_3a_gwas_interval_4,
-    step_3a_gwas_interval_5,
-    step_3a_non_gwas_interval_1,
-    step_3a_non_gwas_interval_2,
-    step_3a_non_gwas_interval_3,
-    step_3a_non_gwas_interval_4,
-    step_3a_non_gwas_interval_5,
-    step_4_gwas_interval_1,
-    step_4_gwas_interval_2,
-    step_4_gwas_interval_3,
-    step_4_gwas_interval_4,
-    step_4_gwas_interval_5,
-    step_4_non_gwas_interval_1,
-    step_4_non_gwas_interval_2,
-    step_4_non_gwas_interval_3,
-    step_4_non_gwas_interval_4,
-    step_4_non_gwas_interval_5,
-)
+from curation.framework import Intervals, Points
+from curation.interval import Interval
 from disease.models import Disease
 from haplotype.models import Haplotype
 from publication.models import Publication
@@ -896,19 +874,19 @@ class Evidence(models.Model):
             return None
 
         gwas_intervals = [
-            (step_3a_gwas_interval_1, Points.S3A_INTERVAL_1),
-            (step_3a_gwas_interval_2, Points.S3A_INTERVAL_2),
-            (step_3a_gwas_interval_3, Points.S3A_INTERVAL_3),
-            (step_3a_gwas_interval_4, Points.S3A_INTERVAL_4),
-            (step_3a_gwas_interval_5, Points.S3A_INTERVAL_5),
+            (Intervals.S3A.GWAS_1, Points.S3A_INTERVAL_1),
+            (Intervals.S3A.GWAS_2, Points.S3A_INTERVAL_2),
+            (Intervals.S3A.GWAS_3, Points.S3A_INTERVAL_3),
+            (Intervals.S3A.GWAS_4, Points.S3A_INTERVAL_4),
+            (Intervals.S3A.GWAS_5, Points.S3A_INTERVAL_5),
         ]
 
         non_gwas_intervals = [
-            (step_3a_non_gwas_interval_1, Points.S3A_INTERVAL_1),
-            (step_3a_non_gwas_interval_2, Points.S3A_INTERVAL_2),
-            (step_3a_non_gwas_interval_3, Points.S3A_INTERVAL_3),
-            (step_3a_non_gwas_interval_4, Points.S3A_INTERVAL_4),
-            (step_3a_non_gwas_interval_5, Points.S3A_INTERVAL_5),
+            (Intervals.S3A.NON_GWAS_1, Points.S3A_INTERVAL_1),
+            (Intervals.S3A.NON_GWAS_2, Points.S3A_INTERVAL_2),
+            (Intervals.S3A.NON_GWAS_3, Points.S3A_INTERVAL_3),
+            (Intervals.S3A.NON_GWAS_4, Points.S3A_INTERVAL_4),
+            (Intervals.S3A.NON_GWAS_5, Points.S3A_INTERVAL_5),
         ]
 
         intervals = gwas_intervals if self.is_gwas else non_gwas_intervals
@@ -960,7 +938,7 @@ class Evidence(models.Model):
                 end_inclusive=True,
                 variable="CI",
             )
-            if not confidence_interval.contains(1):
+            if not confidence_interval.contains(Decimal("1.0")):
                 return Points.S3C_CI_DOES_NOT_CROSS
         if has_stat and stat_is_beta and has_ci:
             confidence_interval = Interval(
@@ -970,7 +948,7 @@ class Evidence(models.Model):
                 end_inclusive=True,
                 variable="CI",
             )
-            if not confidence_interval.contains(0):
+            if not confidence_interval.contains(Decimal("0.0")):
                 return Points.S3C_CI_DOES_NOT_CROSS
         return None
 
@@ -981,19 +959,19 @@ class Evidence(models.Model):
             return None
 
         gwas_intervals = [
-            (step_4_gwas_interval_1, Points.S4_INTERVAL_1),
-            (step_4_gwas_interval_2, Points.S4_INTERVAL_2),
-            (step_4_gwas_interval_3, Points.S4_INTERVAL_3),
-            (step_4_gwas_interval_4, Points.S4_INTERVAL_4),
-            (step_4_gwas_interval_5, Points.S4_INTERVAL_5),
+            (Intervals.S4.GWAS_1, Points.S4_INTERVAL_1),
+            (Intervals.S4.GWAS_2, Points.S4_INTERVAL_2),
+            (Intervals.S4.GWAS_3, Points.S4_INTERVAL_3),
+            (Intervals.S4.GWAS_4, Points.S4_INTERVAL_4),
+            (Intervals.S4.GWAS_5, Points.S4_INTERVAL_5),
         ]
 
         non_gwas_intervals = [
-            (step_4_non_gwas_interval_1, Points.S4_INTERVAL_1),
-            (step_4_non_gwas_interval_2, Points.S4_INTERVAL_2),
-            (step_4_non_gwas_interval_3, Points.S4_INTERVAL_3),
-            (step_4_non_gwas_interval_4, Points.S4_INTERVAL_4),
-            (step_4_non_gwas_interval_5, Points.S4_INTERVAL_5),
+            (Intervals.S4.NON_GWAS_1, Points.S4_INTERVAL_1),
+            (Intervals.S4.NON_GWAS_2, Points.S4_INTERVAL_2),
+            (Intervals.S4.NON_GWAS_3, Points.S4_INTERVAL_3),
+            (Intervals.S4.NON_GWAS_4, Points.S4_INTERVAL_4),
+            (Intervals.S4.NON_GWAS_5, Points.S4_INTERVAL_5),
         ]
 
         intervals = gwas_intervals if self.is_gwas else non_gwas_intervals
