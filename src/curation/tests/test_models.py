@@ -1,5 +1,7 @@
 """Houses tests for the curation app's models."""
 
+from decimal import Decimal
+
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
@@ -131,3 +133,17 @@ class TestEvidence(TestCase):
 
     def test_p_value_is_empty_when_created(self):
         self.assertIsNone(self.evidence.p_value)
+
+    def test_can_add_p_value(self):
+        p_value_string = "1e-13"
+        self.evidence.p_value = Decimal(p_value_string)
+        self.evidence.save()
+        self.assertIsNotNone(self.evidence.p_value)
+
+    def test_score_increases_when_p_value_provided(self):
+        initial_points = self.evidence.score
+        p_value_string = "1e-13"
+        self.evidence.p_value = Decimal(p_value_string)
+        self.evidence.save()
+        self.assertGreater(self.evidence.score, initial_points)
+        self.assertEqual(self.evidence.score, initial_points + Points.S3A_INTERVAL_5)
