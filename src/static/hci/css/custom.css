@@ -6,10 +6,3 @@
 .footer-logo-container {
   padding: 20px;
 }
-
-@media (prefers-color-scheme: dark) {
-  .footer-logo-container {
-    background-color: black;
-    padding: 20px;
-  }
-}

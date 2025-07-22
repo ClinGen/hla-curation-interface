@@ -1,0 +1,171 @@
+{% load custom_filters %}
+<div class="block table-container mt-4">
+    <table class="table is-fullwidth is-hoverable" id="evidence-data-table">
+        <thead>
+            <tr>
+                <th>Field</th>
+                <th>Value</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Genome-Wide Association Study</td>
+                <td>{{ object.is_gwas }}</td>
+                <td>{{ object.is_gwas_notes }}</td>
+            </tr>
+            <tr>
+                <td>Zygosity</td>
+                <td>
+                    {% if object.zygosity == "MO" %}
+                        Monoallelic (heterozygous)
+                    {% elif object.zygosity == "BI" %}
+                        Biallelic (homozygous)
+                    {% endif %}
+                </td>
+                <td>{{ object.zygosity_notes }}</td>
+            </tr>
+            <tr>
+                <td>Phase Confirmed</td>
+                <td>{{ object.phase_confirmed }}</td>
+                <td>{{ object.phase_confirmed_notes }}</td>
+            </tr>
+            <tr>
+                <td>Typing Method</td>
+                <td>
+                    {% if object.typing_method %}
+                        {{ object.get_typing_method_display }}
+                    {% else %}
+                        Not Provided
+                    {% endif %}
+                </td>
+                <td>{{ object.typing_method_notes }}</td>
+            </tr>
+            <tr>
+                <td>Demographics</td>
+                <td>
+                    {% if object.demographics.all %}
+                        <ul>
+                            {% for group in object.demographics.all %}
+                                <li>{{ group }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        Not Provided
+                    {% endif %}
+                </td>
+                <td>{{ object.demographics_notes }}</td>
+            </tr>
+            <tr>
+                <td>p-value</td>
+                <td>
+                    {% if object.p_value_string %}
+                        {{ object.p_value_string }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>{{ object.p_value.notes }}</td>
+            </tr>
+            <tr>
+                <td>Multiple Testing Correction</td>
+                <td>
+                    {% if object.multiple_testing_correction %}
+                        {{ object.get_multiple_testing_correction_display }}
+                    {% else %}
+                        Not Selected
+                    {% endif %}
+                </td>
+                <td>{{ object.multiple_testing_correction_notes }}</td>
+            </tr>
+            <tr>
+                <td>Odds Ratio</td>
+                <td>
+                    {% if object.odds_ratio_string %}
+                        {{ object.odds_ratio_string }}
+                    {% else %}
+                        Not Provided
+                    {% endif %}
+                </td>
+                <td>
+                    {% if effect_size_statistic == "OR" %}
+                        {{ object.effect_size_statistic_notes }}
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>Relative Risk</td>
+                <td>
+                    {% if object.relative_risk_string %}
+                        {{ object.relative_risk_string }}
+                    {% else %}
+                        Not Provided
+                    {% endif %}
+                </td>
+                <td>
+                    {% if effect_size_statistic == "RR" %}
+                        {{ object.effect_size_statistic_notes }}
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>Beta Coefficient</td>
+                <td>
+                    {% if object.beta_string %}
+                        {{ object.beta_string }}
+                    {% else %}
+                        Not Provided
+                    {% endif %}
+                </td>
+                <td>
+                    {% if effect_size_statistic == "BT" %}
+                        {{ object.effect_size_statistic_notes }}
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>Confidence Interval</td>
+                <td>
+                    {% if object.ci_start_string and object.ci_end_string %}
+                        [{{ object.ci_start_string }}, {{ object.ci_end_string }}]
+                    {% else %}
+                        Not Provided
+                    {% endif %}
+                </td>
+                <td>{{ object.ci_notes }}</td>
+            </tr>
+            <tr>
+                <td>Cohort Size</td>
+                <td>
+                    {% if object.cohort_size %}
+                        {{ object.cohort_size }}
+                    {% else %}
+                        Not Provided
+                    {% endif %}
+                </td>
+                <td>{{ object.cohort_size_notes }}</td>
+            </tr>
+            <tr>
+                <td>Additional Phenotypes</td>
+                <td>
+                    {% if object.additional_phenotypes %}
+                        {{ object.get_additional_phenotypes_display }}
+                    {% else %}
+                        Not Provided
+                    {% endif %}
+                </td>
+                <td>{{ object.additional_phenotypes_notes }}</td>
+            </tr>
+            <tr>
+                <td>Significant Association</td>
+                <td>{{ object.has_association }}</td>
+                <td>{{ object.has_association_notes }}</td>
+            </tr>
+            <tr>
+                <td {% if object.needs_review %}class="is-danger"{% endif %}>Needs Review</td>
+                <td {% if object.needs_review %}class="is-danger"{% endif %}>{{ object.needs_review }}</td>
+                <td {% if object.needs_review %}class="is-danger"{% endif %}>{{ object.needs_review_notes }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

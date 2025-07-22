@@ -1,0 +1,29 @@
+{% extends "layouts/base.html" %}
+{% block title %}Curation #{{ object.pk }} Details{% endblock %}
+{% block description %}View information about curation #{{ object.pk }}.{% endblock %}
+{% block main %}
+    <div class="box mt-6 mb-6">
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li>
+                    <a href="{% url 'home' %}">
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'curation-search' %}">
+                        Curations
+                    </a>
+                </li>
+                <li class="is-active">
+                    <a href="" aria-current="page">
+                        Curation #{{ object.pk }}
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        {% include "curation/partials/curation_detail_table.html" %}
+        {% include "curation/partials/buttons.html" %}
+    </div>
+    {% include "curation/partials/evidence_detail_table.html" %}
+{% endblock %}

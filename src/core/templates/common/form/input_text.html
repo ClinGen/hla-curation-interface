@@ -6,7 +6,7 @@
         <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
         <div class="has-text-danger">{{ field.errors }}</div>
     {% endif %}
-    {% if field.help_text %}
+    {% if show_help and field.help_text %}
         <p class="help">{{ field.help_text }}</p>
     {% endif %}
     <div class="control">

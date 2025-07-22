@@ -37,8 +37,12 @@ def datatable(
     queryset = model.objects.all().order_by(order_by)  # type: ignore
 
     for field in fields:
+        if field.get("is_foreign_key"):
+            field_name = f"{field['param_name']}__name"
+        else:
+            field_name = None
         if field["type"] == FieldTypes.SEARCH:
-            queryset = search(request, queryset, field["param_name"])
+            queryset = search(request, queryset, field["param_name"], field_name)
         elif field["type"] == FieldTypes.SORT:
             queryset = sort(request, queryset, field["param_name"])
         elif field["type"] == FieldTypes.FILTER:

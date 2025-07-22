@@ -1,0 +1,6 @@
+{% load custom_filters %}
+{% if object|get_val:step.score is None %}
+    {% include "common/tags/in_progress.html" with text=step.text %}
+{% else %}
+    {% include "common/tags/done.html" with text=step.text %}
+{% endif %}

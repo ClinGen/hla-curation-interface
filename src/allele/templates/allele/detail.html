@@ -1,27 +1,106 @@
 {% extends "layouts/base.html" %}
+{% load static %}
 {% block title %}Allele #{{ object.pk }} Details{% endblock %}
-{% block description %}View information about allele {{ object.pk }}.{% endblock %}
+{% block description %}View information about allele #{{ object.pk }}.{% endblock %}
 {% block main %}
-    {% include "allele/partials/detail_content.html" with object=object %}
-    {% if object.haplotypes.all %}
-        <div class="box mt-6 mb-6">
-            <h1 class="title">Haplotypes</h1>
+    <div class="box mt-6 mb-6">
+
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li>
+                    <a href="{% url 'home' %}">
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'allele-search' %}">
+                        Alleles
+                    </a>
+                </li>
+                <li class="is-active">
+                    <a href="" aria-current="page">
+                        Allele #{{ object.pk }}
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="level">
+            <div class="level-left">
+                <h1 class="title">Allele Details</h1>
+            </div>
+            <div class="level-right">
+                <a href="https://reg.clinicalgenome.org/" target="_blank" rel="noopener noreferrer">
+                    <div class="box">
+                        <img src="{% static 'hci/img/car-logo.png' %}"
+                             alt="The ClinGen Allele Registry logo."
+                             class="entity-type-logo"
+                        >
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <h2 class="subtitle"><i id="allele-{{ object.pk }}-name">{{ object.name }}</i></h2>
+
+        <div class="block table-container">
             <table class="table">
-                {% for haplotype in object.haplotypes.all %}
-                    <tr>
-                        <td>
-                            <a id="haplotype-anchor"
-                               href="{% url 'haplotype-detail' haplotype.pk %}"
-                            >
-                                #{{ haplotype.pk }}
-                            </a>
-                        </td>
-                        <td id="haplotype-name">
-                            {{ haplotype.name }}
-                        </td>
-                    </tr>
-                {% endfor %}
+                <tbody>
+                <tr>
+                    <td>ClinGen Allele Registry ID</td>
+                    <td id="allele-{{ object.pk }}-car-id">
+                        <a href="https://reg.clinicalgenome.org/car/ui/id/xahla/detail/{{ object.car_id }}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                        >
+                            {% include "common/icon.html" with icon_name="box-arrow-up-right" %}
+                            {{ object.car_id }}
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>HCI Allele ID</td>
+                    <td>{{ object.pk }}</td>
+                </tr>
+                <tr>
+                    <td>Added</td>
+                    <td id="allele-{{ object.pk }}-added-at">{{ object.added_at|date:"Y-m-d" }}</td>
+                </tr>
+                </tbody>
             </table>
         </div>
-    {% endif %}
+
+        <div class="buttons">
+            <a href="{% url 'allele-search' %}" class="button" id="search-button">
+                {% include "common/icon.html" with icon_name="search" %}
+                Search Alleles
+            </a>
+            <a href="{% url 'allele-create' %}" class="button" id="add-button">
+                {% include "common/icon.html" with icon_name="plus-circle" %}
+                Add Another Allele
+            </a>
+        </div>
+
+        {% if object.haplotypes.all %}
+            <div class="mt-6">
+                <h1 class="title is-4">Haplotypes</h1>
+                <table class="table">
+                    {% for haplotype in object.haplotypes.all %}
+                        <tr>
+                            <td>
+                                <a id="haplotype-anchor"
+                                   href="{% url 'haplotype-detail' haplotype.pk %}"
+                                >
+                                    #{{ haplotype.pk }}
+                                </a>
+                            </td>
+                            <td id="haplotype-name">
+                                {{ haplotype.name }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}

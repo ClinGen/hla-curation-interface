@@ -1,0 +1,87 @@
+<div class="box mt-6 mb-6">
+    <h1 class="title">Evidence</h1>
+    <div class="buttons">
+        {% if object.evidence.all %}
+            <a href="{% url 'curation-edit-evidence' object.pk %}"
+               class="button"
+               id="edit-evidence-button"
+            >
+                {% include "common/icon.html" with icon_name="pencil" %}
+                Edit
+            </a>
+        {% endif %}
+        <a href="{% url 'evidence-create' object.pk %}"
+           class="button"
+           id="add-evidence-button"
+        >
+            {% include "common/icon.html" with icon_name="plus-circle" %}
+            Add Evidence
+        </a>
+    </div>
+    {% if object.evidence.all %}
+        <div class="block table-container mt-4">
+            <table class="table is-fullwidth" id="evidence-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Publication</th>
+                    <th>Needs Review</th>
+                    <th>Status</th>
+                    <th>Conflicting</th>
+                    <th>Included</th>
+                    <th>Score</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for evidence in object.evidence.all %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'evidence-detail' curation_pk=object.pk evidence_pk=evidence.pk %}">
+                                #{{ evidence.pk }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{% url 'publication-detail' evidence.publication.pk %}">
+                                {{ evidence.publication }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if evidence.needs_review %}
+                                {% include "common/tags/needs_review.html" with text=evidence.needs_review %}
+                            {% else %}
+                                {{ evidence.needs_review }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if evidence.status == "INP" %}
+                                {% include "common/tags/in_progress.html" %}
+                            {% elif evidence.status == "DNE" %}
+                                {% include "common/tags/done.html" %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <label class="checkbox" disabled>
+                                {% if evidence.is_conflicting %}
+                                    <input type="checkbox" disabled checked/>
+                                {% else %}
+                                    <input type="checkbox" disabled />
+                                {% endif %}
+                            </label>
+                        </td>
+                        <td>
+                            <label class="checkbox" disabled>
+                                {% if evidence.is_included %}
+                                    <input type="checkbox" disabled checked/>
+                                {% else %}
+                                    <input type="checkbox" disabled />
+                                {% endif %}
+                            </label>
+                        </td>
+                        <td>{{ evidence.score }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>

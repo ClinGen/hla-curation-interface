@@ -1,0 +1,58 @@
+<div class="block table-container">
+    <table class="table">
+        <tbody>
+        {% if object.curation.curation_type == "ALL" %}
+            <tr>
+                <td>Allele</td>
+                <td id="allele">{{ object.curation.allele }}</td>
+            </tr>
+        {% elif object.curation.curation_type == "HAP" %}
+            <tr>
+                <td>Haplotype</td>
+                <td id="haplotype">{{ object.curation.haplotype }}</td>
+            </tr>
+        {% endif %}
+        <tr>
+            <td>Disease</td>
+            <td id="disease">{{ object.curation.disease }}</td>
+        </tr>
+        <tr>
+            <td>Publication</td>
+            <td id="publication">{{ object.publication }}</td>
+        </tr>
+        <tr>
+            <td>Needs Review</td>
+            <td>
+                {% if object.needs_review %}
+                    {% include "common/tags/needs_review.html" with text=object.needs_review %}
+                {% else %}
+                    {{ object.needs_review }}
+                {% endif %}
+            </td>
+        </tr>
+        {% if object.status == "INP" %}
+            <tr>
+                <td>Status</td>
+                <td id="status">
+                    {% include "common/tags/in_progress.html" %}
+                </td>
+            </tr>
+        {% elif object.status == "DNE" %}
+            <tr>
+                <td>Status</td>
+                <td id="status">
+                    {% include "common/tags/done.html" %}
+                </td>
+            </tr>
+        {% endif %}
+        <tr>
+            <td>HCI Evidence ID</td>
+            <td id="evidence-id">{{ object.pk }}</td>
+        </tr>
+        <tr>
+            <td>Added</td>
+            <td id="added-at">{{ object.added_at|date:"Y-m-d" }}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

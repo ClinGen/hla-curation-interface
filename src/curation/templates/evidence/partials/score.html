@@ -1,0 +1,45 @@
+<div class="block table-container mt-4">
+    <table class="table is-fullwidth is-hoverable" id="evidence-score-table">
+        <thead>
+            <tr>
+                <th>Step</th>
+                <th>Category</th>
+                <th>Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for step in framework %}
+                <tr>
+                    <td>
+                        {% if step.text %}
+                            {% include "evidence/partials/step.html" %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if step.split_horizontal %}
+                            {% include "evidence/partials/split_horizontal.html" %}
+                        {% elif step.split_vertical %}
+                            {% include "evidence/partials/split_vertical.html" %}
+                        {% else %}
+                            {{ step.category }}
+                        {% endif %}
+                    </td>
+                    {% include "evidence/partials/points.html" %}
+                </tr>
+            {% endfor %}
+            <tr class="is-info">
+                <td colspan="2"><b>Total</b></td>
+                <td id="total-score"><b>{{ object.score }}</b></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="block">
+        <p>
+            *OR (Odds Ratio), RR (Relative Risk), CI (Confidence Interval).
+        </p>
+        <p>
+            *Step 3C can award points for both categories (OR/RR/Beta and CI), granting
+            a total of up to 2.
+        </p>
+    </div>
+</div>

@@ -73,23 +73,6 @@ class HelpViewTests(TestCase):
         self.assertContains(response, "helpdesk@clinicalgenome.org")
 
 
-class DownloadsViewTest(TestCase):
-    def setUp(self):
-        self.client = Client()
-        self.url = reverse("downloads")
-
-    def test_response_code(self):
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_content(self):
-        response = self.client.get(self.url)
-        self.assertContains(response, "Downloads")
-        self.assertContains(response, "CC BY-SA 4.0")
-        self.assertContains(response, "CSV")
-        self.assertContains(response, "JSON")
-
-
 class CitingViewTest(TestCase):
     def setUp(self):
         self.client = Client()

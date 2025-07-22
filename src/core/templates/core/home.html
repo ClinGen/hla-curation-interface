@@ -14,4 +14,126 @@
             </div>
         </section>
     </div>
+    <div class="block mt-6 ">
+        <div class="fixed-grid has-5-cols has-text-centered">
+            <div class="grid">
+                <div class="cell">
+                    <a href="{% url 'allele-search' %}" class="button" id="search-button">
+                        {% include "common/icon.html" with icon_name="search" %}
+                        Search Alleles
+                    </a>
+                </div>
+                <div class="cell">
+                    <a href="{% url 'haplotype-search' %}" class="button" id="search-button">
+                        {% include "common/icon.html" with icon_name="search" %}
+                        Search Haplotypes
+                    </a>
+                </div>
+                <div class="cell">
+                    <a href="{% url 'disease-search' %}" class="button" id="search-button">
+                        {% include "common/icon.html" with icon_name="search" %}
+                        Search Diseases
+                    </a>
+                </div>
+                <div class="cell">
+                    <a href="{% url 'publication-search' %}" class="button" id="search-button">
+                        {% include "common/icon.html" with icon_name="search" %}
+                        Search Publications
+                    </a>
+                </div>
+                <div class="cell">
+                    <a href="{% url 'curation-search' %}" class="button" id="search-button">
+                        {% include "common/icon.html" with icon_name="search" %}
+                        Search Curations
+                    </a>
+                </div>
+                <div class="cell">
+                    <a href="{% url 'allele-create' %}" class="button" id="plus-circle-button">
+                        {% include "common/icon.html" with icon_name="plus-circle" %}
+                        Add Allele
+                    </a>
+                </div>
+                <div class="cell">
+                    <a href="{% url 'haplotype-create' %}" class="button" id="plus-circle-button">
+                        {% include "common/icon.html" with icon_name="plus-circle" %}
+                        Add Haplotype
+                    </a>
+                </div>
+                <div class="cell">
+                    <a href="{% url 'disease-create' %}" class="button" id="plus-circle-button">
+                        {% include "common/icon.html" with icon_name="plus-circle" %}
+                        Add Disease
+                    </a>
+                </div>
+                <div class="cell">
+                    <a href="{% url 'publication-create' %}" class="button" id="plus-circle-button">
+                        {% include "common/icon.html" with icon_name="plus-circle" %}
+                        Add Publication
+                    </a>
+                </div>
+                <div class="cell">
+                    <a href="{% url 'curation-create' %}" class="button" id="plus-circle-button">
+                        {% include "common/icon.html" with icon_name="plus-circle" %}
+                        Add Curation
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="mt-6 mb-6">
+            {% if user.is_authenticated %}
+                {% if user.curations_added.all %}
+                    <h1 class="title">Your Curations</h1>
+                    <div class="block table-container">
+                        <table class="table is-fullwidth">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Allele</th>
+                                    <th>Haplotype</th>
+                                    <th>Disease</th>
+                                    <th>Status</th>
+                                    <th>Added</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for curation in user.curations_added.all %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'curation-detail' curation.pk %}">#{{ curation.pk }}</a>
+                                        </td>
+                                        <td>
+                                            {{ curation.allele|default:"------" }}
+                                        </td>
+                                        <td>
+                                            {{ curation.haplotype|default:"------" }}
+                                        </td>
+                                        <td>
+                                            {{ curation.disease }}
+                                        </td>
+                                        <td>
+                                            {% if curation.status == "INP" %}
+                                                {% include "common/tags/in_progress.html" %}
+                                            {% elif curation.status == "DNE" %}
+                                                {% include "common/tags/done.html" %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {{ curation.added_at|date:"Y-m-d" }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="box">
+                    <p class="has-text-centered">
+                        <a href="{% url 'login' %}">Log in</a> or
+                        <a href="{% url 'signup' %}">sign up</a> to curate.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

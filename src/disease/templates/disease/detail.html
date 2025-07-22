@@ -1,9 +1,28 @@
 {% extends "layouts/base.html" %}
 {% load static %}
 {% block title %}Disease #{{ object.pk }} Details{% endblock %}
-{% block description %}View information about disease {{ object.pk }}.{% endblock %}
+{% block description %}View information about disease #{{ object.pk }}.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li>
+                    <a href="{% url 'home' %}">
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'disease-search' %}">
+                        Diseases
+                    </a>
+                </li>
+                <li class="is-active">
+                    <a href="" aria-current="page">
+                        Disease #{{ object.pk }}
+                    </a>
+                </li>
+            </ul>
+        </nav>
         <div class="level">
             <div class="level-left">
                 <h1 class="title">Disease Details</h1>

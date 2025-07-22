@@ -1,0 +1,51 @@
+[
+  {
+    "model": "curation.demographic",
+    "pk": 1,
+    "fields": {
+      "group": "American"
+    }
+  },
+  {
+    "model": "curation.demographic",
+    "pk": 2,
+    "fields": {
+      "group": "East Asian"
+    }
+  },
+  {
+    "model": "curation.demographic",
+    "pk": 3,
+    "fields": {
+      "group": "European"
+    }
+  },
+  {
+    "model": "curation.demographic",
+    "pk": 4,
+    "fields": {
+      "group": "Central/South Asian"
+    }
+  },
+  {
+    "model": "curation.demographic",
+    "pk": 5,
+    "fields": {
+      "group": "Near Eastern"
+    }
+  },
+  {
+    "model": "curation.demographic",
+    "pk": 6,
+    "fields": {
+      "group": "Oceanian"
+    }
+  },
+  {
+    "model": "curation.demographic",
+    "pk": 7,
+    "fields": {
+      "group": "Sub-Saharan African"
+    }
+  }
+]
