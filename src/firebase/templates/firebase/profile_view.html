@@ -55,7 +55,12 @@
                     <td>Profile Picture URL</td>
                     {% if user_profile.firebase_photo_url %}
                         <td>
-                            {{ user_profile.firebase_photo_url }}
+                            <span class="has-text-success">
+                                {% with icon_name="check-circle" %}
+                                    {% include "common/icon.html" %}
+                                {% endwith %}
+                                Profile picture URL is set.
+                            </span>
                         </td>
                     {% else %}
                         <td>
