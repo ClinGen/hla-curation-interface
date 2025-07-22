@@ -92,338 +92,45 @@ Branch Naming
 Branches should be named with an issue number followed by a brief description of the
 branch's purpose. For example: ``123-fix-foobar``.
 
---------------
-The Allele App
---------------
-
-The allele app houses code related to allele information needed for curations.
-
-``allele.admin``
-================
-
-.. automodule:: allele.admin
-   :members:
-
-``allele.apps``
-===============
-
-.. automodule:: allele.apps
-   :members:
-
-``allele.clients``
-==================
-
-.. automodule:: allele.clients
-   :members:
-
-``allele.forms``
-================
-
-.. automodule:: allele.forms
-   :members:
-
-``allele.models``
-=================
-
-.. automodule:: allele.models
-   :members:
-
-``allele.urls``
-===============
-
-.. automodule:: allele.urls
-   :members:
-
-``allele.views``
-================
-
-.. automodule:: allele.views
-   :members:
-
 ------------
-The Core App
+Applications
 ------------
+
+The HCI's code is split into applications with different responsibilities.
+
+Core App
+========
 
 The core app is where the home page and the pages found in the HCI's footer are housed.
 It is also used to house modules that aren't app-specific. For example, it houses a
 custom ``UserProfile`` model that extends the Django ``User`` model. This
-``UserProfile`` model isn't specific to any app.
+``UserProfile`` model isn't specific to any app. The core app's ``templates`` directory
+has a ``common`` subdirectory containing partials that are used throughout the HCI.
 
-``core.admin``
-==============
+Allele App
+==========
 
-.. automodule:: core.admin
-   :members:
+The allele app handles the basic CRUD operations for alleles.
 
-``core.apps``
+Haplotype App
 =============
 
-.. automodule:: core.apps
-   :members:
+The haplotype app handles the basic CRUD operations for haplotypes.
 
-``core.crud``
+Curation App
+============
+
+The haplotype app handles the basic CRUD operations for curations. It also handles
+the basic CRUD operations for evidence, and code related to the scoring framework.
+
+Datatable App
 =============
-
-.. automodule:: core.crud
-   :members:
-
-``core.models``
-===============
-
-.. automodule:: core.models
-   :members:
-
-``core.permissions``
-====================
-
-.. automodule:: core.permissions
-   :members:
-
-``core.urls``
-=============
-
-.. automodule:: core.urls
-   :members:
-
-``core.views``
-==============
-
-.. automodule:: core.views
-   :members:
-
------------------
-The Datatable App
------------------
 
 The datatable app provides a reusable ``datatable`` view that provides an interactive
 searchable, sortable, and filterable table. It uses HTMX for interactivity. The
 searching, sorting, and filtering are done on the backend.
 
-``datatable.templatetags.custom_filters``
-=========================================
+Publication App
+===============
 
-.. automodule:: datatable.templatetags.custom_filters
-   :members:
-
-``datatable.admin``
-===================
-
-.. automodule:: datatable.admin
-   :members:
-
-``datatable.apps``
-==================
-
-.. automodule:: datatable.apps
-   :members:
-
-``datatable.constants``
-=======================
-
-.. automodule:: datatable.constants
-   :members:
-
-``datatable.metadata``
-======================
-
-.. automodule:: datatable.metadata
-   :members:
-
-``datatable.models``
-====================
-
-.. automodule:: datatable.models
-   :members:
-
-``datatable.queries``
-=====================
-
-.. automodule:: datatable.queries
-   :members:
-
-``datatable.urls``
-==================
-
-.. automodule:: datatable.urls
-   :members:
-
-``datatable.views``
-===================
-
-.. automodule:: datatable.views
-   :members:
-
----------------
-The Disease App
----------------
-
-The disease app houses code related to disease information needed for curations.
-
-``disease.admin``
-=================
-
-.. automodule:: disease.admin
-   :members:
-
-``disease.apps``
-================
-
-.. automodule:: disease.apps
-   :members:
-
-``disease.clients``
-===================
-
-.. automodule:: disease.clients
-   :members:
-
-``disease.forms``
-=================
-
-.. automodule:: disease.forms
-   :members:
-
-``disease.models``
-==================
-
-.. automodule:: disease.models
-   :members:
-
-``disease.urls``
-================
-
-.. automodule:: disease.urls
-   :members:
-
-``disease.views``
-=================
-
-.. automodule:: disease.views
-   :members:
-
-----------------
-The Firebase App
-----------------
-
-The firebase app houses code related to using Google's Firebase service for
-authentication.
-
-``firebase.apps``
-=================
-
-.. automodule:: firebase.apps
-   :members:
-
-``firebase.backends``
-=====================
-
-.. automodule:: firebase.backends
-   :members:
-
-``firebase.clients``
-====================
-
-.. automodule:: firebase.clients
-   :members:
-
-``firebase.crud``
-=================
-
-.. automodule:: firebase.crud
-   :members:
-
-``firebase.urls``
-=================
-
-.. automodule:: firebase.urls
-   :members:
-
-``firebase.views``
-==================
-
-.. automodule:: firebase.views
-   :members:
-
------------------
-The Haplotype App
------------------
-
-The haplotype app houses code related to haplotype information needed for curations.
-
-``haplotype.admin``
-===================
-
-.. automodule:: haplotype.admin
-   :members:
-
-``haplotype.apps``
-==================
-
-.. automodule:: haplotype.apps
-   :members:
-
-``haplotype.forms``
-===================
-
-.. automodule:: haplotype.forms
-   :members:
-
-``haplotype.models``
-====================
-
-.. automodule:: haplotype.models
-   :members:
-
-``haplotype.urls``
-==================
-
-.. automodule:: haplotype.urls
-   :members:
-
-``haplotype.views``
-===================
-
-.. automodule:: haplotype.views
-   :members:
-
--------------------
-The Publication App
--------------------
-
-The publication app houses code related to publication information needed for curations.
-
-``publication.admin``
-=====================
-
-.. automodule:: publication.admin
-   :members:
-
-``publication.apps``
-====================
-
-.. automodule:: publication.apps
-   :members:
-
-``publication.forms``
-=====================
-
-.. automodule:: publication.forms
-   :members:
-
-``publication.models``
-======================
-
-.. automodule:: publication.models
-   :members:
-
-``publication.urls``
-====================
-
-.. automodule:: publication.urls
-   :members:
-
-``publication.views``
-=====================
-
-.. automodule:: publication.views
-   :members:
+The publication app handles the basic CRUD operations for publications.
