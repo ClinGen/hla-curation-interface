@@ -7,7 +7,17 @@ from django.urls import reverse
 
 from allele.models import Allele
 from core.models import UserProfile
-from curation.models import Curation, Evidence, Status
+from curation.models import (
+    AdditionalPhenotypes,
+    Curation,
+    Demographic,
+    EffectSizeStatistic,
+    Evidence,
+    MultipleTestingCorrection,
+    Status,
+    TypingMethod,
+    Zygosity,
+)
 from disease.models import Disease
 from haplotype.models import Haplotype
 from publication.models import Publication
@@ -953,6 +963,15 @@ class EvidenceEditTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = reverse("evidence-edit", kwargs={"curation_pk": 1, "evidence_pk": 1})
+        self.user_who_can_create = User.objects.create(
+            username="meowth",
+            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
+            is_active=True,
+        )
+        UserProfile.objects.create(
+            user=self.user_who_can_create,
+            firebase_email_verified=True,
+        )
 
     def test_shows_menu(self):
         response = self.client.get(self.url)
@@ -980,3 +999,42 @@ class EvidenceEditTest(TestCase):
         for heading_id in heading_ids:
             heading = soup.find(id=heading_id)
             self.assertIsNotNone(heading)
+
+    def test_edits_evidence_with_valid_form_data(self):
+        self.client.force_login(self.user_who_can_create)
+        data = {
+            "is_gwas": True,
+            "is_gwas_notes": "",
+            "zygosity": Zygosity.BIALLELIC,
+            "zygosity_notes": "",
+            "phase_confirmed": True,
+            "phase_confirmed_notes": "",
+            "typing_method": TypingMethod.LONG_READ_SEQ,
+            "typing_method_notes": "",
+            "demographics": Demographic.objects.all(),
+            "demographics_notes": "",
+            "p_value_string": "1e-15",
+            "p_value_notes": "",
+            "multiple_testing_correction": MultipleTestingCorrection.TWO_STEP,
+            "multiple_testing_correction_notes": "",
+            "effect_size_statistic": EffectSizeStatistic.ODDS_RATIO,
+            "effect_size_statistic_notes": "",
+            "odds_ratio_string": "3.1",
+            "relative_risk_string": "",
+            "beta_string": "",
+            "ci_start_string": "2.8",
+            "ci_end_string": "3.5",
+            "ci_notes": "",
+            "cohort_size": 11111,
+            "cohort_size_notes": "",
+            "additional_phenotypes": AdditionalPhenotypes.SPECIFIC_DISEASE_RELATED,
+            "additional_phenotypes_notes": "",
+            "has_association": True,
+            "has_association_notes": "",
+            "needs_review": False,
+            "needs_review_notes": "",
+        }
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        evidence = Evidence.objects.get(pk=1)
+        self.assertEqual(evidence.score, 20.0)
