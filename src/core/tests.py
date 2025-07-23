@@ -53,7 +53,7 @@ class ContactViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertContains(response, "Contact")
         self.assertContains(response, "email")
-        self.assertContains(response, "helpdesk@clinicalgenome.org")
+        self.assertContains(response, "hci@clinicalgenome.org")
 
 
 class HelpViewTests(TestCase):
@@ -70,7 +70,7 @@ class HelpViewTests(TestCase):
         self.assertContains(response, "Help")
         self.assertContains(response, "user documentation")
         self.assertContains(response, "email")
-        self.assertContains(response, "helpdesk@clinicalgenome.org")
+        self.assertContains(response, "hci@clinicalgenome.org")
 
 
 class CitingViewTest(TestCase):
