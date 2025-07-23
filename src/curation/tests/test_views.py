@@ -944,10 +944,16 @@ class EvidenceDetailTest(TestCase):
         table = soup.find(id="evidence-score-table")
         self.assertIsNotNone(table)
 
+    def test_shows_total_score_before_multipliers(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        total_score = soup.find(id="total-score-before-multipliers")
+        self.assertIsNotNone(total_score)
+
     def test_shows_total_score(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        total_score = soup.find(id="total-score").find("b").get_text().strip()
+        total_score = soup.find(id="total-score")
         self.assertIsNotNone(total_score)
 
 

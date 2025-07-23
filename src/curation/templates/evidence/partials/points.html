@@ -1,6 +1,16 @@
 {% load custom_filters %}
-{% if object|get_val:step.score == step.points %}
-    <td class="is-success">{{ step.points }}</td>
+{% if step.points == "" %}
+    <td></td>
 {% else %}
-    <td>{{ step.points }}</td>
+    {% if object|get_val:step.score == step.points %}
+        <td>
+            <span class="tag is-success is-medium">
+                {{ step.operator }}{{ step.points }}
+            </span>
+        </td>
+    {% else %}
+        <td>
+            {{ step.operator }}{{ step.points }}
+        </td>
+    {% endif %}
 {% endif %}

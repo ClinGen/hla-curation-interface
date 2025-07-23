@@ -809,16 +809,17 @@ class Evidence(models.Model):
     @property
     def score(self) -> float:
         """Returns the score for the evidence."""
+        return self.score_before_multipliers * self.score_step_6a * self.score_step_6b
+
+    @property
+    def score_before_multipliers(self) -> float:
+        """Returns the score for the evidence before multipliers are applied."""
         return (
-            (
-                self.score_step_1
-                + (self.score_step_2 if self.score_step_2 else 0)
-                + self.score_step_3
-                + (self.score_step_4 if self.score_step_4 else 0)
-                + self.score_step_5
-            )
-            * self.score_step_6a
-            * self.score_step_6b
+            self.score_step_1
+            + (self.score_step_2 if self.score_step_2 else 0)
+            + self.score_step_3
+            + (self.score_step_4 if self.score_step_4 else 0)
+            + self.score_step_5
         )
 
     @property

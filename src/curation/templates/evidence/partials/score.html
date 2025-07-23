@@ -1,3 +1,4 @@
+{% load custom_filters %}
 <div class="block table-container mt-4">
     <table class="table is-fullwidth is-hoverable" id="evidence-score-table">
         <thead>
@@ -9,28 +10,29 @@
         </thead>
         <tbody>
             {% for step in framework %}
-                <tr>
-                    <td>
-                        {% if step.text %}
-                            {% include "evidence/partials/step.html" %}
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if step.split_horizontal %}
-                            {% include "evidence/partials/split_horizontal.html" %}
-                        {% elif step.split_vertical %}
-                            {% include "evidence/partials/split_vertical.html" %}
-                        {% else %}
-                            {{ step.category }}
-                        {% endif %}
-                    </td>
-                    {% include "evidence/partials/points.html" %}
+                <tr style="background-color: {{ step.style }}">
+                    {% if step.is_total_row %}
+                        <td colspan="2"><b>{{ step.text }}</b></td>
+                        <td id="{{ step.id }}"><b>{{ object|get_val:step.score }}</b></td>
+                    {% else %}
+                        <td>
+                            {% if step.text %}
+                                {{ step.text }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if step.split_horizontal %}
+                                {% include "evidence/partials/split_horizontal.html" %}
+                            {% elif step.split_vertical %}
+                                {% include "evidence/partials/split_vertical.html" %}
+                            {% else %}
+                                {{ step.category }}
+                            {% endif %}
+                        </td>
+                        {% include "evidence/partials/points.html" %}
+                    {% endif %}
                 </tr>
             {% endfor %}
-            <tr class="is-info">
-                <td colspan="2"><b>Total</b></td>
-                <td id="total-score"><b>{{ object.score }}</b></td>
-            </tr>
         </tbody>
     </table>
     <div class="block">

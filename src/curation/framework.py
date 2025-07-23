@@ -259,6 +259,9 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_1a",
         "points": Points.S1A_ALLELE,
+        "operator": "+",
+        "style": "white",
+        "rowspan": 2,
     },
     {
         "text": None,
@@ -267,6 +270,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_1a",
         "points": Points.S1A_HAPLOTYPE,
+        "operator": "+",
+        "style": "white",
     },
     {
         "text": "Step 1B: Allele Resolution",
@@ -275,6 +280,9 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_1b",
         "points": Points.S1B_1_FIELD,
+        "operator": "+",
+        "style": "whitesmoke",
+        "rowspan": 4,
     },
     {
         "text": None,
@@ -283,6 +291,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_1b",
         "points": Points.S1B_2_FIELD,
+        "operator": "+",
+        "style": "whitesmoke",
     },
     {
         "text": None,
@@ -291,6 +301,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_1b",
         "points": Points.S1B_3_FIELD,
+        "operator": "+",
+        "style": "whitesmoke",
     },
     {
         "text": None,
@@ -299,6 +311,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_1b",
         "points": Points.S1B_4_FIELD,
+        "operator": "+",
+        "style": "whitesmoke",
     },
     {
         "text": "Step 1C: Zygosity",
@@ -307,6 +321,9 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_1c",
         "points": Points.S1C_MONOALLELIC,
+        "operator": "+",
+        "style": "white",
+        "rowspan": 2,
     },
     {
         "text": None,
@@ -315,6 +332,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_1c",
         "points": Points.S1C_BIALLELIC,
+        "operator": "+",
+        "style": "white",
     },
     {
         "text": "Step 1D: Phase",
@@ -323,6 +342,9 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_1d",
         "points": Points.S1D_PHASE_CONFIRMED,
+        "operator": "+",
+        "style": "whitesmoke",
+        "rowspan": 1,
     },
     {
         "text": "Step 2: Typing Method",
@@ -331,6 +353,9 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_2",
         "points": Points.S2_TAG_SNPS,
+        "operator": "+",
+        "style": "white",
+        "rowspan": 6,
     },
     {
         "text": None,
@@ -339,6 +364,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_2",
         "points": Points.S2_SEROLOGICAL,
+        "operator": "+",
+        "style": "white",
     },
     {
         "text": None,
@@ -347,6 +374,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_2",
         "points": Points.S2_IMPUTATION,
+        "operator": "+",
+        "style": "white",
     },
     {
         "text": None,
@@ -355,6 +384,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_2",
         "points": Points.S2_LOW_RES_TYPING,
+        "operator": "+",
+        "style": "white",
     },
     {
         "text": None,
@@ -363,6 +394,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_2",
         "points": Points.S2_SANGER_SEQ,
+        "operator": "+",
+        "style": "white",
     },
     {
         "text": None,
@@ -371,6 +404,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_2",
         "points": Points.S2_WHOLE_GENOME_SEQ,
+        "operator": "+",
+        "style": "white",
     },
     {
         "text": "Step 3A: Statistics (p-value)",
@@ -379,6 +414,9 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_3a",
         "points": "",
+        "operator": "",
+        "style": "whitesmoke",
+        "rowspan": 6,
     },
     {
         "text": None,
@@ -387,6 +425,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_3a",
         "points": Points.S3A_INTERVAL_1,
+        "operator": "+",
+        "style": "whitesmoke",
     },
     {
         "text": None,
@@ -395,6 +435,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_3a",
         "points": Points.S3A_INTERVAL_2,
+        "operator": "+",
+        "style": "whitesmoke",
     },
     {
         "text": None,
@@ -403,6 +445,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_3a",
         "points": Points.S3A_INTERVAL_3,
+        "operator": "+",
+        "style": "whitesmoke",
     },
     {
         "text": None,
@@ -411,6 +455,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_3a",
         "points": Points.S3A_INTERVAL_4,
+        "operator": "+",
+        "style": "whitesmoke",
     },
     {
         "text": None,
@@ -419,6 +465,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_3a",
         "points": Points.S3A_INTERVAL_5,
+        "operator": "+",
+        "style": "whitesmoke",
     },
     {
         "text": "Step 3B: Multiple Testing Correction",
@@ -427,6 +475,9 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_3b",
         "points": Points.S3B_OVERALL,
+        "operator": "+",
+        "style": "white",
+        "rowspan": 2,
     },
     {
         "text": None,
@@ -435,6 +486,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_3b",
         "points": Points.S3B_TWO_STEP,
+        "operator": "+",
+        "style": "white",
     },
     {
         "text": "Step 3C: Statistics (Effect Size)*",
@@ -448,6 +501,9 @@ FRAMEWORK = [
         "split_vertical": True,
         "score": "score_step_3c1",
         "points": Points.S3C_OR_RR_BETA,
+        "operator": "+",
+        "style": "whitesmoke",
+        "rowspan": 2,
     },
     {
         "text": None,
@@ -456,6 +512,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_3c2",
         "points": Points.S3C_CI_DOES_NOT_CROSS,
+        "operator": "+",
+        "style": "whitesmoke",
     },
     {
         "text": "Step 4: Cohort Size",
@@ -464,6 +522,9 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_4",
         "points": "",
+        "operator": "",
+        "style": "white",
+        "rowspan": 6,
     },
     {
         "text": None,
@@ -472,6 +533,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_4",
         "points": Points.S4_INTERVAL_1,
+        "operator": "+",
+        "style": "white",
     },
     {
         "text": None,
@@ -480,6 +543,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_4",
         "points": Points.S4_INTERVAL_2,
+        "operator": "+",
+        "style": "white",
     },
     {
         "text": None,
@@ -488,6 +553,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_4",
         "points": Points.S4_INTERVAL_3,
+        "operator": "+",
+        "style": "white",
     },
     {
         "text": None,
@@ -496,6 +563,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_4",
         "points": Points.S4_INTERVAL_4,
+        "operator": "+",
+        "style": "white",
     },
     {
         "text": None,
@@ -504,6 +573,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_4",
         "points": Points.S4_INTERVAL_5,
+        "operator": "+",
+        "style": "white",
     },
     {
         "text": "Step 5: Additional Phenotypes",
@@ -512,6 +583,9 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_5",
         "points": Points.S5_SPECIFIC_PHENOTYPE,
+        "operator": "+",
+        "style": "whitesmoke",
+        "rowspan": 2,
     },
     {
         "text": None,
@@ -520,6 +594,15 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_5",
         "points": Points.S5_ONLY_DISEASE_TESTED,
+        "operator": "+",
+        "style": "whitesmoke",
+    },
+    {
+        "is_total_row": True,
+        "score": "score_before_multipliers",
+        "text": "Total Before Multipliers",
+        "style": "lightblue",
+        "id": "total-score-before-multipliers",
     },
     {
         "text": "Step 6A: Weighing Association (multiplier)",
@@ -528,6 +611,9 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_6a",
         "points": Points.S6A_ASSOCIATION,
+        "operator": "×",  # noqa: RUF001 (I want a multiplication sign here.)
+        "style": "white",
+        "rowspan": 2,
     },
     {
         "text": None,
@@ -536,6 +622,8 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_6a",
         "points": Points.S6A_NO_ASSOCIATION,
+        "operator": "×",  # noqa: RUF001 (I want a multiplication sign here.)
+        "style": "white",
     },
     {
         "text": "Step 6B: Low Field Resolution (multiplier)",
@@ -544,6 +632,9 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_6b",
         "points": Points.S6B_1_FIELD,
+        "operator": "×",  # noqa: RUF001 (I want a multiplication sign here.)
+        "style": "whitesmoke",
+        "rowspan": 2,
     },
     {
         "text": None,
@@ -552,5 +643,14 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_6b",
         "points": Points.S6B_MORE_THAN_1_FIELD,
+        "operator": "×",  # noqa: RUF001 (I want a multiplication sign here.)
+        "style": "whitesmoke",
+    },
+    {
+        "is_total_row": True,
+        "score": "score",
+        "text": "Total",
+        "style": "lightblue",
+        "id": "total-score",
     },
 ]
