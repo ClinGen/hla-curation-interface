@@ -34,7 +34,7 @@
         <h2 class="subtitle"><i id="haplotype-{{ object.pk }}-name">{{ object.name }}</i></h2>
 
         <div class="block table-container">
-            <table class="table">
+            <table class="table is-hoverable">
                 <tbody>
                 <tr>
                     <td>HCI Haplotype ID</td>
@@ -62,7 +62,7 @@
         {% if object.alleles.all %}
             <div class="mt-6">
                 <h1 class="title is-4">Alleles</h1>
-                <table class="table">
+                <table class="table is-hoverable">
                     {% for allele in object.alleles.all %}
                         <tr>
                             <td>

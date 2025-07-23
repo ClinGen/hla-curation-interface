@@ -9,7 +9,7 @@
                 <a href="{% url 'curation-detail' object.pk %}" class="button is-link is-light">Cancel</a>
             </div>
         </div>
-        <table class="table">
+        <table class="table is-hoverable">
             <tbody>
             {% if object.curation_type == "ALL" %}
                 <tr>
