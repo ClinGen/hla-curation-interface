@@ -4,6 +4,7 @@
         <thead>
             <tr>
                 <th>Field</th>
+                <th>Status</th>
                 <th>Value</th>
                 <th>Notes</th>
             </tr>
@@ -11,22 +12,19 @@
         <tbody>
             <tr>
                 <td>Genome-Wide Association Study</td>
+                <td>{% include "common/tags/provided.html" %}</td>
                 <td>{{ object.is_gwas }}</td>
                 <td>{{ object.is_gwas_notes }}</td>
             </tr>
             <tr>
                 <td>Zygosity</td>
-                <td>
-                    {% if object.zygosity == "MO" %}
-                        Monoallelic (heterozygous)
-                    {% elif object.zygosity == "BI" %}
-                        Biallelic (homozygous)
-                    {% endif %}
-                </td>
+                <td>{% include "common/tags/provided.html" %}</td>
+                <td>{{ object.get_zygosity_display }}</td>
                 <td>{{ object.zygosity_notes }}</td>
             </tr>
             <tr>
                 <td>Phase Confirmed</td>
+                <td>{% include "common/tags/provided.html" %}</td>
                 <td>{{ object.phase_confirmed }}</td>
                 <td>{{ object.phase_confirmed_notes }}</td>
             </tr>
@@ -34,9 +32,13 @@
                 <td>Typing Method</td>
                 <td>
                     {% if object.typing_method %}
-                        {{ object.get_typing_method_display }}
+                        {% include "common/tags/provided.html" %}
                     {% else %}
-                        Not Provided
+                        {% include "common/tags/not_provided.html" %}
+                    {% endif %}
+                <td>
+                    {% if object.typing_method %}
+                        {{ object.get_typing_method_display }}
                     {% endif %}
                 </td>
                 <td>{{ object.typing_method_notes }}</td>
@@ -45,13 +47,18 @@
                 <td>Demographics</td>
                 <td>
                     {% if object.demographics.all %}
+                        {% include "common/tags/provided.html" %}
+                    {% else %}
+                        {% include "common/tags/not_provided.html" %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if object.demographics.all %}
                         <ul>
                             {% for group in object.demographics.all %}
                                 <li>{{ group }}</li>
                             {% endfor %}
                         </ul>
-                    {% else %}
-                        Not Provided
                     {% endif %}
                 </td>
                 <td>{{ object.demographics_notes }}</td>
@@ -60,9 +67,14 @@
                 <td>p-value</td>
                 <td>
                     {% if object.p_value_string %}
-                        {{ object.p_value_string }}
+                        {% include "common/tags/provided.html" %}
                     {% else %}
-                        N/A
+                        {% include "common/tags/not_provided.html" %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if object.p_value_string %}
+                        {{ object.p_value_string }}
                     {% endif %}
                 </td>
                 <td>{{ object.p_value.notes }}</td>
@@ -71,9 +83,14 @@
                 <td>Multiple Testing Correction</td>
                 <td>
                     {% if object.multiple_testing_correction %}
-                        {{ object.get_multiple_testing_correction_display }}
+                        {% include "common/tags/provided.html" %}
                     {% else %}
-                        Not Selected
+                        {% include "common/tags/not_provided.html" %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if object.multiple_testing_correction %}
+                        {{ object.get_multiple_testing_correction_display }}
                     {% endif %}
                 </td>
                 <td>{{ object.multiple_testing_correction_notes }}</td>
@@ -82,9 +99,14 @@
                 <td>Odds Ratio</td>
                 <td>
                     {% if object.odds_ratio_string %}
-                        {{ object.odds_ratio_string }}
+                        {% include "common/tags/provided.html" %}
                     {% else %}
-                        Not Provided
+                        {% include "common/tags/not_provided.html" %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if object.odds_ratio_string %}
+                        {{ object.odds_ratio_string }}
                     {% endif %}
                 </td>
                 <td>
@@ -97,9 +119,14 @@
                 <td>Relative Risk</td>
                 <td>
                     {% if object.relative_risk_string %}
-                        {{ object.relative_risk_string }}
+                        {% include "common/tags/provided.html" %}
                     {% else %}
-                        Not Provided
+                        {% include "common/tags/not_provided.html" %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if object.relative_risk_string %}
+                        {{ object.relative_risk_string }}
                     {% endif %}
                 </td>
                 <td>
@@ -112,9 +139,14 @@
                 <td>Beta Coefficient</td>
                 <td>
                     {% if object.beta_string %}
-                        {{ object.beta_string }}
+                        {% include "common/tags/provided.html" %}
                     {% else %}
-                        Not Provided
+                        {% include "common/tags/not_provided.html" %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if object.beta_string %}
+                        {{ object.beta_string }}
                     {% endif %}
                 </td>
                 <td>
@@ -127,9 +159,14 @@
                 <td>Confidence Interval</td>
                 <td>
                     {% if object.ci_start_string and object.ci_end_string %}
-                        [{{ object.ci_start_string }}, {{ object.ci_end_string }}]
+                        {% include "common/tags/provided.html" %}
                     {% else %}
-                        Not Provided
+                        {% include "common/tags/not_provided.html" %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if object.ci_start_string and object.ci_end_string %}
+                        [{{ object.ci_start_string }}, {{ object.ci_end_string }}]
                     {% endif %}
                 </td>
                 <td>{{ object.ci_notes }}</td>
@@ -138,9 +175,14 @@
                 <td>Cohort Size</td>
                 <td>
                     {% if object.cohort_size %}
-                        {{ object.cohort_size }}
+                        {% include "common/tags/provided.html" %}
                     {% else %}
-                        Not Provided
+                        {% include "common/tags/not_provided.html" %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if object.cohort_size %}
+                        {{ object.cohort_size }}
                     {% endif %}
                 </td>
                 <td>{{ object.cohort_size_notes }}</td>
@@ -149,22 +191,29 @@
                 <td>Additional Phenotypes</td>
                 <td>
                     {% if object.additional_phenotypes %}
-                        {{ object.get_additional_phenotypes_display }}
+                        {% include "common/tags/provided.html" %}
                     {% else %}
-                        Not Provided
+                        {% include "common/tags/not_provided.html" %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if object.additional_phenotypes %}
+                        {{ object.get_additional_phenotypes_display }}
                     {% endif %}
                 </td>
                 <td>{{ object.additional_phenotypes_notes }}</td>
             </tr>
             <tr>
                 <td>Significant Association</td>
+                <td>{% include "common/tags/provided.html" %}</td>
                 <td>{{ object.has_association }}</td>
                 <td>{{ object.has_association_notes }}</td>
             </tr>
-            <tr>
-                <td {% if object.needs_review %}class="is-danger"{% endif %}>Needs Review</td>
-                <td {% if object.needs_review %}class="is-danger"{% endif %}>{{ object.needs_review }}</td>
-                <td {% if object.needs_review %}class="is-danger"{% endif %}>{{ object.needs_review_notes }}</td>
+            <tr {% if object.needs_review %}style="background-color: lightpink"{% endif %}>
+                <td>Needs Review</td>
+                <td>{% include "common/tags/provided.html" %}</td>
+                <td>{{ object.needs_review }}</td>
+                <td>{{ object.needs_review_notes }}</td>
             </tr>
         </tbody>
     </table>

@@ -1,4 +1,3 @@
-<span class="tag is-danger is-light">
-    {% include "common/icon.html" with icon_name="flag-fill" %}
-    {{ text|default:"Needs Review" }}
-</span>
+{% with color="is-danger" icon_name="flag-fill" text=text|default:"Needs Review" %}
+    {% include "common/tags/generic.html" %}
+{% endwith %}

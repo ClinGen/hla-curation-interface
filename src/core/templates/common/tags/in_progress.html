@@ -1,4 +1,3 @@
-<span class="tag is-warning is-light">
-    {% include "common/icon.html" with icon_name="cone-striped" %}
-    {{ text|default:"In Progress" }}
-</span>
+{% with color="is-warning" icon_name="cone-striped" text=text|default:"In Progress" %}
+    {% include "common/tags/generic.html" %}
+{% endwith %}
