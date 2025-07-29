@@ -1,9 +1,8 @@
 """Houses database models for the curation app."""
 
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import HttpResponseBase
 from django.urls import reverse
@@ -34,6 +33,15 @@ from curation.validators.models.curation import (
     validate_classification,
     validate_curation_type,
     validate_status,
+)
+from curation.validators.models.evidence import (
+    validate_beta_string,
+    validate_effect_size_statistic,
+    validate_odds_ratio_string,
+    validate_p_value_string,
+    validate_publication,
+    validate_relative_risk_string,
+    validate_typing_method,
 )
 from disease.models import Disease
 from haplotype.models import Haplotype
@@ -473,119 +481,13 @@ class Evidence(models.Model):
 
     def clean(self) -> None:
         """Makes sure the data being submitted is valid."""
-        self.clean_typing_method()
-        self.clean_p_value_string()
-        self.clean_odds_ratio_string()
-        self.clean_relative_risk_string()
-        self.clean_beta_string()
-
-    def clean_publication(self) -> None:
-        """Makes sure the evidence has a publication.
-
-        Raises:
-            ValidationError: If the publication is None.
-        """
-        if self.publication is None:
-            raise ValidationError({"publication": "Please select a publication."})
-
-    def clean_typing_method(self) -> None:
-        """Makes sure demographics are provided if the typing method is imputation.
-
-        Raises:
-            ValidationError: If the user selected imputation as the typing method
-                             without providing demographics.
-        """
-        if (
-            self.typing_method
-            and self.typing_method == TypingMethod.IMPUTATION
-            and not self.demographics.all()
-        ):
-            message = "Demographics must be provided if typing method is imputation."
-            raise ValidationError({"demographics": message})
-
-    def clean_effect_size_statistic(self) -> None:
-        """Makes sure there is only one effect size statistic."""
-        if self.effect_size_statistic == EffectSizeStatistic.ODDS_RATIO:
-            self.relative_risk_string = ""
-            self.relative_risk = None
-            self.beta_string = ""
-            self.beta = None
-        elif self.effect_size_statistic == EffectSizeStatistic.RELATIVE_RISK:
-            self.odds_ratio_string = ""
-            self.odds_ratio = None
-            self.beta_string = ""
-            self.beta = None
-        elif self.beta_string == EffectSizeStatistic.BETA:
-            self.relative_risk_string = ""
-            self.relative_risk = None
-            self.odds_ratio_string = ""
-            self.odds_ratio = None
-
-    def clean_p_value_string(self) -> None:
-        """Makes sure the p-value string is valid.
-
-        Raises:
-             ValidationError: When we can't convert the p-value string to a decimal.
-        """
-        if self.p_value_string != "":
-            try:
-                Decimal(self.p_value_string)
-            except InvalidOperation as exc:
-                message = (
-                    "Unable to save p-value as written. "
-                    "Make sure it is written as a decimal (e.g. 0.05) "
-                    "or in scientific notation (e.g. 5e-8)."
-                )
-                raise ValidationError({"p_value_string": message}) from exc
-
-    def clean_odds_ratio_string(self) -> None:
-        """Makes sure the odds ratio string is valid.
-
-        Raises:
-             ValidationError: When we can't convert the odds ratio string to a decimal.
-        """
-        if self.odds_ratio_string != "":
-            try:
-                Decimal(self.odds_ratio_string)
-            except InvalidOperation as exc:
-                message = (
-                    "Unable to save odds ratio as written. "
-                    "Make sure it is written as an integer or decimal."
-                )
-                raise ValidationError({"odds_ratio_string": message}) from exc
-
-    def clean_relative_risk_string(self) -> None:
-        """Makes sure the relative risk string is valid.
-
-        Raises:
-             ValidationError: When we can't convert the relative risk string to a
-                              decimal.
-        """
-        if self.relative_risk_string != "":
-            try:
-                Decimal(self.relative_risk_string)
-            except InvalidOperation as exc:
-                message = (
-                    "Unable to save relative risk as written. "
-                    "Make sure it is written as an integer or decimal."
-                )
-                raise ValidationError({"relative_risk_string": message}) from exc
-
-    def clean_beta_string(self) -> None:
-        """Makes sure the beta string is valid.
-
-        Raises:
-             ValidationError: When we can't convert the beta string to a decimal.
-        """
-        if self.beta_string != "":
-            try:
-                Decimal(self.beta_string)
-            except InvalidOperation as exc:
-                message = (
-                    "Unable to save beta coefficient as written. "
-                    "Make sure it is written as an integer or decimal."
-                )
-                raise ValidationError({"beta_string": message}) from exc
+        validate_publication(self)
+        validate_typing_method(self)
+        validate_p_value_string(self)
+        validate_effect_size_statistic(self)
+        validate_odds_ratio_string(self)
+        validate_relative_risk_string(self)
+        validate_beta_string(self)
 
     @property
     def num_fields(self) -> int:

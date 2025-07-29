@@ -6,7 +6,7 @@ from curation.constants.models.common import Status
 from curation.constants.models.curation import Classification, CurationTypes
 
 
-def validate_status(curation) -> None:  # noqa: ANN001
+def validate_status(curation) -> None:
     """Makes sure a curation isn't marked done if evidence marked in progress.
 
     Raises:
@@ -21,7 +21,7 @@ def validate_status(curation) -> None:  # noqa: ANN001
                 )
 
 
-def validate_curation_type(curation) -> None:  # noqa: ANN001
+def validate_curation_type(curation) -> None:
     """Makes sure the curation has either an allele or a haplotype.
 
     Raises:
@@ -42,7 +42,7 @@ def validate_curation_type(curation) -> None:  # noqa: ANN001
         curation.allele = None
 
 
-def validate_classification(curation) -> None:  # noqa: ANN001
+def validate_classification(curation) -> None:
     """Makes sure the classification is correct for the score.
 
     Raises:

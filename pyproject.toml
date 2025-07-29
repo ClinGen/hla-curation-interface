@@ -112,6 +112,9 @@ convention = "google"
     "D101", # Tests should be obvious enough not to require docstrings.
     "D102", # Tests should be obvious enough not to require docstrings.
 ]
+"*/validators/*" = [
+    "ANN001", # Don't want to cause a circular import issue, and don't want to do forward declarations.
+]
 
 [tool.coverage.run]
 data_file = "coverage.db"
