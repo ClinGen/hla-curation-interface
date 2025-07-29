@@ -1,4 +1,4 @@
-"""Houses constants related to the HLA scoring framework."""
+"""Houses constants used in the curation app's score module."""
 
 from decimal import Decimal
 
