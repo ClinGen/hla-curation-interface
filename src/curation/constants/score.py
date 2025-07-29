@@ -1,4 +1,4 @@
-"""Houses code related to the HLA scoring framework."""
+"""Houses constants related to the HLA scoring framework."""
 
 from decimal import Decimal
 

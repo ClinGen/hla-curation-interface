@@ -28,7 +28,7 @@ from curation.constants.models.evidence import (
     TypingMethod,
     Zygosity,
 )
-from curation.framework import Intervals, Points
+from curation.constants.score import Intervals, Points
 from curation.interval import Interval
 from disease.models import Disease
 from haplotype.models import Haplotype

@@ -9,6 +9,7 @@ from django.views.generic import DetailView, UpdateView
 from django.views.generic.edit import CreateView
 
 from core.permissions import CreateAccessMixin, has_create_access
+from curation.constants.score import Intervals, Points
 from curation.forms import (
     CurationCreateForm,
     CurationEditForm,
@@ -16,7 +17,6 @@ from curation.forms import (
     EvidenceEditForm,
     EvidenceTopLevelEditFormSet,
 )
-from curation.framework import Intervals, Points
 from curation.models import (
     Curation,
     CurationTypes,
