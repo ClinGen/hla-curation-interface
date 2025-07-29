@@ -30,6 +30,11 @@ from curation.constants.models.evidence import (
 )
 from curation.constants.score import Intervals, Points
 from curation.interval import Interval
+from curation.validators.models.curation import (
+    validate_classification,
+    validate_curation_type,
+    validate_status,
+)
 from disease.models import Disease
 from haplotype.models import Haplotype
 from publication.models import Publication
@@ -122,84 +127,11 @@ class Curation(models.Model):
         return reverse("curation-detail", kwargs={"curation_pk": self.pk})
 
     def clean(self) -> None:
-        """Makes sure the curation is saved in a valid state.
-
-        Calls individual validation methods for each field/constraint.
-        """
+        """Makes sure the curation is saved in a valid state."""
         super().clean()
-        self.clean_allele_haplotype_requirements()
-        self.clean_allele_haplotype_exclusivity()
-        self.clean_status_evidence_consistency()
-        self.clean_classification_score_consistency()
-
-    def clean_allele_haplotype_requirements(self) -> None:
-        """Validates that required allele or haplotype is present.
-
-        Raises:
-            ValidationError: If allele curation lacks allele or haplotype curation lacks
-                             haplotype.
-        """
-        if self.curation_type == CurationTypes.ALLELE and self.allele is None:
-            raise ValidationError(
-                {"allele": "An allele is required for an allele curation."}
-            )
-        if self.curation_type == CurationTypes.HAPLOTYPE and self.haplotype is None:
-            raise ValidationError(
-                {"haplotype": "A haplotype is required for a haplotype curation."}
-            )
-
-    def clean_allele_haplotype_exclusivity(self) -> None:
-        """Ensures only the appropriate field is set based on the curation type.
-
-        Automatically clears the inappropriate field (haplotype for allele curations,
-        allele for haplotype curations).
-        """
-        if self.curation_type == CurationTypes.ALLELE and self.haplotype:
-            self.haplotype = None
-        if self.curation_type == CurationTypes.HAPLOTYPE and self.allele:
-            self.allele = None
-
-    def clean_status_evidence_consistency(self) -> None:
-        """Validates that finished curations don't have in-progress included evidence.
-
-        Raises:
-            ValidationError: If curation is marked as done but has included evidence
-                            that is still in progress.
-        """
-        if self.status == Status.DONE:
-            for evidence in self.evidence.all():
-                if evidence.status == Status.IN_PROGRESS and evidence.is_included:
-                    raise ValidationError(
-                        {"status": "All included evidence must be marked as done."}
-                    )
-
-    def clean_classification_score_consistency(self) -> None:
-        """Validates that classification matches the calculated score.
-
-        Only validates if the curation has been saved (has a primary key).
-
-        Raises:
-            ValidationError: If classification doesn't match score ranges.
-        """
-        if not self.pk:
-            return
-
-        score = self.score
-
-        if self.classification == Classification.NO_KNOWN and score != 0:
-            raise ValidationError({"classification": "Score must be 0."})
-
-        if self.classification == Classification.LIMITED and score >= 25:
-            raise ValidationError({"classification": "Score must be less than 25."})
-
-        if self.classification == Classification.MODERATE and not (25 <= score <= 50):
-            raise ValidationError({"classification": "Score must be in 25-50."})
-
-        if self.classification == Classification.STRONG and score < 50:
-            raise ValidationError({"classification": "Score must be greater than 50."})
-
-        if self.classification == Classification.DEFINITIVE and score < 50:
-            raise ValidationError({"classification": "Score must be greater than 50."})
+        validate_status(self)
+        validate_curation_type(self)
+        validate_classification(self)
 
     @property
     def score(self) -> float:
