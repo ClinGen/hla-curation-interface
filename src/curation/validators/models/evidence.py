@@ -100,3 +100,21 @@ def validate_beta_string(evidence) -> None:
         "Make sure it is written as an integer or decimal."
     )
     to_decimal(evidence.beta_string, "beta_string", message)
+
+
+def validate_ci_start_string(evidence) -> None:
+    """Makes sure the CI start string is valid."""
+    message = (
+        "Unable to save confidence interval start as written. "
+        "Make sure it is written as a decimal."
+    )
+    to_decimal(evidence.ci_start_string, "ci_start_string", message)
+
+
+def validate_ci_end_string(evidence) -> None:
+    """Makes sure the CI end string is valid."""
+    message = (
+        "Unable to save confidence interval end as written. "
+        "Make sure it is written as a decimal."
+    )
+    to_decimal(evidence.ci_end_string, "ci_end_string", message)

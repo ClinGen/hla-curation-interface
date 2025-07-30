@@ -36,6 +36,8 @@ from curation.validators.models.curation import (
 )
 from curation.validators.models.evidence import (
     validate_beta_string,
+    validate_ci_end_string,
+    validate_ci_start_string,
     validate_effect_size_statistic,
     validate_odds_ratio_string,
     validate_p_value_string,
@@ -488,6 +490,8 @@ class Evidence(models.Model):
         validate_odds_ratio_string(self)
         validate_relative_risk_string(self)
         validate_beta_string(self)
+        validate_ci_start_string(self)
+        validate_ci_end_string(self)
 
     @property
     def num_fields(self) -> int:
