@@ -9,6 +9,7 @@ from django.views.generic import DetailView, UpdateView
 from django.views.generic.edit import CreateView
 
 from core.permissions import CreateAccessMixin, has_create_access
+from curation.constants.models.evidence import EffectSizeStatistic
 from curation.constants.views import CURATION_SEARCH_FIELDS, FRAMEWORK
 from curation.forms import (
     CurationCreateForm,
@@ -19,7 +20,6 @@ from curation.forms import (
 )
 from curation.models import (
     Curation,
-    EffectSizeStatistic,
     Evidence,
 )
 from datatable.views import datatable

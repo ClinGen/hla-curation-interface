@@ -6,19 +6,23 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from allele.models import Allele
-from curation.models import (
-    AdditionalPhenotypes,
+from curation.constants.models.common import Status
+from curation.constants.models.curation import (
     Classification,
-    Curation,
     CurationTypes,
-    Demographic,
+)
+from curation.constants.models.evidence import (
+    AdditionalPhenotypes,
     EffectSizeStatistic,
-    Evidence,
     MultipleTestingCorrection,
-    Points,
-    Status,
     TypingMethod,
     Zygosity,
+)
+from curation.constants.score import Points
+from curation.models import (
+    Curation,
+    Demographic,
+    Evidence,
 )
 from disease.models import Disease
 from publication.models import Publication
@@ -182,6 +186,7 @@ class TestEvidence(TestCase):
 
     def test_score_increases_when_odds_ratio_provided_high(self):
         initial_points = self.evidence.score
+        self.evidence.effect_size_statistic = EffectSizeStatistic.ODDS_RATIO
         self.evidence.odds_ratio = Decimal("2.5")
         self.evidence.save()
         self.assertGreater(self.evidence.score, initial_points)
@@ -189,6 +194,7 @@ class TestEvidence(TestCase):
 
     def test_score_increases_when_odds_ratio_provided_low(self):
         initial_points = self.evidence.score
+        self.evidence.effect_size_statistic = EffectSizeStatistic.ODDS_RATIO
         self.evidence.odds_ratio = Decimal("0.4")
         self.evidence.save()
         self.assertGreater(self.evidence.score, initial_points)
@@ -205,6 +211,7 @@ class TestEvidence(TestCase):
 
     def test_score_increases_when_relative_risk_provided_high(self):
         initial_points = self.evidence.score
+        self.evidence.effect_size_statistic = EffectSizeStatistic.RELATIVE_RISK
         self.evidence.relative_risk = Decimal("2.1")
         self.evidence.save()
         self.assertGreater(self.evidence.score, initial_points)
@@ -212,6 +219,7 @@ class TestEvidence(TestCase):
 
     def test_score_increases_when_relative_risk_provided_low(self):
         initial_points = self.evidence.score
+        self.evidence.effect_size_statistic = EffectSizeStatistic.RELATIVE_RISK
         self.evidence.relative_risk = Decimal("0.3")
         self.evidence.save()
         self.assertGreater(self.evidence.score, initial_points)
@@ -228,6 +236,7 @@ class TestEvidence(TestCase):
 
     def test_score_increases_when_beta_provided_high(self):
         initial_points = self.evidence.score
+        self.evidence.effect_size_statistic = EffectSizeStatistic.BETA
         self.evidence.beta = Decimal("0.6")
         self.evidence.save()
         self.assertGreater(self.evidence.score, initial_points)
@@ -235,6 +244,7 @@ class TestEvidence(TestCase):
 
     def test_score_increases_when_beta_provided_low(self):
         initial_points = self.evidence.score
+        self.evidence.effect_size_statistic = EffectSizeStatistic.BETA
         self.evidence.beta = Decimal("-0.7")
         self.evidence.save()
         self.assertGreater(self.evidence.score, initial_points)
@@ -256,8 +266,10 @@ class TestEvidence(TestCase):
         self.assertEqual(self.evidence.ci_end, ci_end_value)
 
     def test_score_increases_when_ci_does_not_cross_one_for_odds_ratio(self):
-        initial_points = self.evidence.score
+        self.evidence.odds_ratio = Decimal("2.5")
         self.evidence.effect_size_statistic = EffectSizeStatistic.ODDS_RATIO
+        self.evidence.save()
+        initial_points = self.evidence.score
         self.evidence.ci_start = Decimal("1.2")
         self.evidence.ci_end = Decimal("3.8")
         self.evidence.save()
@@ -267,8 +279,10 @@ class TestEvidence(TestCase):
         )
 
     def test_score_increases_when_ci_does_not_cross_zero_for_beta(self):
-        initial_points = self.evidence.score
+        self.evidence.beta = Decimal("0.5")
         self.evidence.effect_size_statistic = EffectSizeStatistic.BETA
+        self.evidence.save()
+        initial_points = self.evidence.score
         self.evidence.ci_start = Decimal("0.2")
         self.evidence.ci_end = Decimal("0.8")
         self.evidence.save()

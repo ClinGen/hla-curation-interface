@@ -7,16 +7,18 @@ from django.urls import reverse
 
 from allele.models import Allele
 from core.models import UserProfile
-from curation.models import (
+from curation.constants.models.common import Status
+from curation.constants.models.evidence import (
     AdditionalPhenotypes,
-    Curation,
-    Demographic,
     EffectSizeStatistic,
-    Evidence,
     MultipleTestingCorrection,
-    Status,
     TypingMethod,
     Zygosity,
+)
+from curation.models import (
+    Curation,
+    Demographic,
+    Evidence,
 )
 from disease.models import Disease
 from haplotype.models import Haplotype

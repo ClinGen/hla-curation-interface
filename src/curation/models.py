@@ -1,7 +1,5 @@
 """Houses database models for the curation app."""
 
-from decimal import Decimal
-
 from django.contrib.auth.models import User
 from django.db import models
 from django.http import HttpResponseBase
@@ -21,14 +19,23 @@ from curation.constants.models.evidence import (
     MULTIPLE_TESTING_CORRECTION_CHOICES,
     TYPING_METHOD_CHOICES,
     ZYGOSITY_CHOICES,
-    AdditionalPhenotypes,
-    EffectSizeStatistic,
-    MultipleTestingCorrection,
-    TypingMethod,
     Zygosity,
 )
-from curation.constants.score import Intervals, Points
-from curation.interval import Interval
+from curation.score import (
+    get_step_1a_points,
+    get_step_1b_points,
+    get_step_1c_points,
+    get_step_1d_points,
+    get_step_2_points,
+    get_step_3a_points,
+    get_step_3b_points,
+    get_step_3c1_points,
+    get_step_3c2_points,
+    get_step_4_points,
+    get_step_5_points,
+    get_step_6a_multiplier,
+    get_step_6b_multiplier,
+)
 from curation.validators.models.curation import (
     validate_classification,
     validate_curation_type,
@@ -532,231 +539,80 @@ class Evidence(models.Model):
     def score_before_multipliers(self) -> float:
         """Returns the score for the evidence before multipliers are applied."""
         return (
-            self.score_step_1
+            (self.score_step_1a if self.score_step_1a else 0)
+            + (self.score_step_1b if self.score_step_1b else 0)
+            + (self.score_step_1c if self.score_step_1c else 0)
+            + (self.score_step_1d if self.score_step_1d else 0)
             + (self.score_step_2 if self.score_step_2 else 0)
-            + self.score_step_3
+            + (self.score_step_3a if self.score_step_3a else 0)
+            + (self.score_step_3b if self.score_step_3b else 0)
+            + (self.score_step_3c1 if self.score_step_3c1 else 0)
+            + (self.score_step_3c2 if self.score_step_3c2 else 0)
             + (self.score_step_4 if self.score_step_4 else 0)
-            + self.score_step_5
+            + (self.score_step_5 if self.score_step_5 else 0)
         )
-
-    @property
-    def score_step_1(self) -> float:
-        """Returns the score for step 1."""
-        total = 0.0
-        total += self.score_step_1a if self.score_step_1a else 0
-        total += self.score_step_1b if self.score_step_1b else 0
-        total += self.score_step_1c if self.score_step_1c else 0
-        total += self.score_step_1d if self.score_step_1d else 0
-        return total
 
     @property
     def score_step_1a(self) -> float | None:
         """Returns the score for step 1A."""
-        if self.curation and self.curation.curation_type == CurationTypes.ALLELE:
-            return Points.S1A_ALLELE
-        if self.curation and self.curation.curation_type == CurationTypes.HAPLOTYPE:
-            return Points.S1A_HAPLOTYPE
-        return None
+        return get_step_1a_points(self)
 
     @property
     def score_step_1b(self) -> float | None:
         """Returns the score for step 1B."""
-        score = {
-            1: Points.S1B_1_FIELD,
-            2: Points.S1B_2_FIELD,
-            3: Points.S1B_3_FIELD,
-            4: Points.S1B_4_FIELD,
-        }
-        return score.get(self.num_fields)
+        return get_step_1b_points(self)
 
     @property
     def score_step_1c(self) -> float | None:
         """Returns the score for step 1C."""
-        if self.zygosity == Zygosity.MONOALLELIC:
-            return Points.S1C_MONOALLELIC
-        if self.zygosity == Zygosity.BIALLELIC:
-            return Points.S1C_BIALLELIC
-        return None
+        return get_step_1c_points(self)
 
     @property
-    def score_step_1d(self) -> float:
+    def score_step_1d(self) -> float | None:
         """Returns the score for step 1D."""
-        if self.phase_confirmed:
-            return Points.S1D_PHASE_CONFIRMED
-        return Points.S1D_PHASE_NOT_CONFIRMED
+        return get_step_1d_points(self)
 
     @property
     def score_step_2(self) -> float | None:
         """Returns the score for step 2."""
-        typing_method_points = {
-            TypingMethod.TAG_SNPS: Points.S2_TAG_SNPS,
-            TypingMethod.MICROARRAYS: Points.S2_MICROARRAYS,
-            TypingMethod.SEROLOGICAL: Points.S2_SEROLOGICAL,
-            TypingMethod.IMPUTATION: Points.S2_IMPUTATION,
-            TypingMethod.LOW_RES_TYPING: Points.S2_LOW_RES_TYPING,
-            TypingMethod.HIGH_RES_TYPING: Points.S2_HIGH_RES_TYPING,
-            TypingMethod.WHOLE_EXOME_SEQ: Points.S2_WHOLE_EXOME_SEQ,
-            TypingMethod.RNA_SEQ: Points.S2_RNA_SEQ,
-            TypingMethod.SANGER_SEQ: Points.S2_SANGER_SEQ,
-            TypingMethod.WHOLE_GENE_SEQ: Points.S2_WHOLE_GENE_SEQ,
-            TypingMethod.WHOLE_GENOME_SEQ: Points.S2_WHOLE_GENOME_SEQ,
-            TypingMethod.NEXT_GENERATION_SEQ: Points.S2_NEXT_GENERATION_SEQ,
-            TypingMethod.LONG_READ_SEQ: Points.S2_LONG_READ_SEQ,
-        }
-        if self.typing_method != "":
-            return typing_method_points.get(self.typing_method)
-        return None
+        return get_step_2_points(self)
 
     @property
-    def score_step_3(self) -> float:
-        """Returns the score for step 3."""
-        total = 0.0
-        total += self.score_step_3a if self.score_step_3a else 0
-        total += self.score_step_3b if self.score_step_3b else 0
-        total += self.score_step_3c1 if self.score_step_3c1 else 0
-        total += self.score_step_3c2 if self.score_step_3c2 else 0
-        return total
-
-    @property
-    def score_step_3a(self) -> float | None:  # noqa: C901
+    def score_step_3a(self) -> float | None:
         """Returns the score for step 3A."""
-        if self.p_value is None:
-            return None
-
-        gwas_intervals = [
-            (Intervals.S3A.GWAS_1, Points.S3A_INTERVAL_1),
-            (Intervals.S3A.GWAS_2, Points.S3A_INTERVAL_2),
-            (Intervals.S3A.GWAS_3, Points.S3A_INTERVAL_3),
-            (Intervals.S3A.GWAS_4, Points.S3A_INTERVAL_4),
-            (Intervals.S3A.GWAS_5, Points.S3A_INTERVAL_5),
-        ]
-
-        non_gwas_intervals = [
-            (Intervals.S3A.NON_GWAS_1, Points.S3A_INTERVAL_1),
-            (Intervals.S3A.NON_GWAS_2, Points.S3A_INTERVAL_2),
-            (Intervals.S3A.NON_GWAS_3, Points.S3A_INTERVAL_3),
-            (Intervals.S3A.NON_GWAS_4, Points.S3A_INTERVAL_4),
-            (Intervals.S3A.NON_GWAS_5, Points.S3A_INTERVAL_5),
-        ]
-
-        intervals = gwas_intervals if self.is_gwas else non_gwas_intervals
-
-        for interval, points in intervals:
-            if interval.contains(self.p_value):
-                return points
-        return None
+        return get_step_3a_points(self)
 
     @property
     def score_step_3b(self) -> float | None:
         """Returns the score for step 3B."""
-        if self.multiple_testing_correction == "":
-            return None
-        if self.multiple_testing_correction == MultipleTestingCorrection.OVERALL:
-            return Points.S3B_OVERALL
-        if self.multiple_testing_correction == MultipleTestingCorrection.TWO_STEP:
-            return Points.S3B_TWO_STEP
-        return None
+        return get_step_3b_points(self)
 
     @property
     def score_step_3c1(self) -> float | None:
         """Returns the first score for step 3C."""
-        if self.odds_ratio and (self.odds_ratio >= 2 or self.odds_ratio <= 0.5):
-            return Points.S3C_OR_RR_BETA
-        if self.relative_risk and (
-            self.relative_risk >= 2 or self.relative_risk <= 0.5
-        ):
-            return Points.S3C_OR_RR_BETA
-        if self.beta and (self.beta >= 0.5 or self.beta <= -0.5):
-            return Points.S3C_OR_RR_BETA
-        return None
+        return get_step_3c1_points(self)
 
     @property
     def score_step_3c2(self) -> float | None:
         """Returns the second score for step 3C."""
-        has_stat = self.effect_size_statistic
-        stat_is_odds_ratio_or_relative_risk = (
-            self.effect_size_statistic == EffectSizeStatistic.ODDS_RATIO
-            or self.effect_size_statistic == EffectSizeStatistic.RELATIVE_RISK
-        )
-        stat_is_beta = self.effect_size_statistic == EffectSizeStatistic.BETA
-        has_ci = self.ci_start and self.ci_end
-        if has_stat and stat_is_odds_ratio_or_relative_risk and has_ci:
-            confidence_interval = Interval(
-                start=self.ci_start,  # type: ignore
-                end=self.ci_end,  # type: ignore
-                start_inclusive=True,
-                end_inclusive=True,
-                variable="CI",
-            )
-            if not confidence_interval.contains(Decimal("1.0")):
-                return Points.S3C_CI_DOES_NOT_CROSS
-        if has_stat and stat_is_beta and has_ci:
-            confidence_interval = Interval(
-                start=self.ci_start,  # type: ignore
-                end=self.ci_end,  # type: ignore
-                start_inclusive=True,
-                end_inclusive=True,
-                variable="CI",
-            )
-            if not confidence_interval.contains(Decimal("0.0")):
-                return Points.S3C_CI_DOES_NOT_CROSS
-        return None
+        return get_step_3c2_points(self)
 
     @property
-    def score_step_4(self) -> float | None:  # noqa: C901
+    def score_step_4(self) -> float | None:
         """Returns the score for step 4."""
-        if self.cohort_size is None:
-            return None
-
-        gwas_intervals = [
-            (Intervals.S4.GWAS_1, Points.S4_INTERVAL_1),
-            (Intervals.S4.GWAS_2, Points.S4_INTERVAL_2),
-            (Intervals.S4.GWAS_3, Points.S4_INTERVAL_3),
-            (Intervals.S4.GWAS_4, Points.S4_INTERVAL_4),
-            (Intervals.S4.GWAS_5, Points.S4_INTERVAL_5),
-        ]
-
-        non_gwas_intervals = [
-            (Intervals.S4.NON_GWAS_1, Points.S4_INTERVAL_1),
-            (Intervals.S4.NON_GWAS_2, Points.S4_INTERVAL_2),
-            (Intervals.S4.NON_GWAS_3, Points.S4_INTERVAL_3),
-            (Intervals.S4.NON_GWAS_4, Points.S4_INTERVAL_4),
-            (Intervals.S4.NON_GWAS_5, Points.S4_INTERVAL_5),
-        ]
-
-        intervals = gwas_intervals if self.is_gwas else non_gwas_intervals
-
-        for interval, points in intervals:
-            if interval.contains(Decimal(self.cohort_size)):
-                return points
-        return None
+        return get_step_4_points(self)
 
     @property
-    def score_step_5(self) -> float:
+    def score_step_5(self) -> float | None:
         """Returns the score for step 5."""
-        has_additional_phenotypes = self.additional_phenotypes
-        has_specific_disease_related = (
-            self.additional_phenotypes == AdditionalPhenotypes.SPECIFIC_DISEASE_RELATED
-        )
-        has_only_disease_tested = (
-            self.additional_phenotypes == AdditionalPhenotypes.ONLY_DISEASE_TESTED
-        )
-        if has_additional_phenotypes and has_specific_disease_related:
-            return Points.S5_SPECIFIC_PHENOTYPE
-        if has_additional_phenotypes and has_only_disease_tested:
-            return Points.S5_ONLY_DISEASE_TESTED
-        return 0.0
+        return get_step_5_points(self)
 
     @property
-    def score_step_6a(self) -> int:
+    def score_step_6a(self) -> float:
         """Returns the score for step 6A."""
-        if self.has_association:
-            return Points.S6A_ASSOCIATION
-        return Points.S6A_NO_ASSOCIATION
+        return get_step_6a_multiplier(self)
 
     @property
     def score_step_6b(self) -> float:
         """Returns the score for step 6B."""
-        if self.num_fields == 1:
-            return Points.S6B_1_FIELD
-        return Points.S6B_MORE_THAN_1_FIELD
+        return get_step_6b_multiplier(self)
