@@ -6,10 +6,10 @@ from django.shortcuts import redirect
 from django.views.generic import CreateView, DetailView
 
 from allele.clients import fetch_allele_data, get_car_id
+from allele.constants.views import ALLELE_SEARCH_FIELDS
 from allele.forms import AlleleForm
 from allele.models import Allele
 from core.permissions import CreateAccessMixin
-from datatable.constants import FieldTypes, SortDirections
 from datatable.views import datatable
 
 
@@ -47,48 +47,13 @@ class AlleleDetail(DetailView):
     template_name = "allele/detail.html"
 
 
-FIELDS = [
-    {
-        "text": "ID",
-        "param_name": "pk",
-        "id": "pk",
-        "default_value": "",
-        "type": FieldTypes.SEARCH,
-        "placeholder": "",
-    },
-    {
-        "text": "Name",
-        "param_name": "name",
-        "id": "allele-name",
-        "default_value": "",
-        "type": FieldTypes.SEARCH,
-        "placeholder": "",
-    },
-    {
-        "text": "CAR ID",
-        "param_name": "car_id",
-        "id": "car-id",
-        "default_value": "",
-        "type": FieldTypes.SEARCH,
-        "placeholder": "",
-    },
-    {
-        "text": "Added",
-        "param_name": "added_at",
-        "id": "added-at",
-        "default_value": SortDirections.DEFAULT,
-        "type": FieldTypes.SORT,
-    },
-]
-
-
 def allele_search(request: HttpRequest) -> HttpResponse:
     """Returns an interactive datatable for searching alleles."""
     return datatable(
         request=request,
         model=Allele,
         order_by="pk",
-        fields=FIELDS,
+        fields=ALLELE_SEARCH_FIELDS,
         data_title="Alleles",
         partial="allele/partials/search.html",
     )
