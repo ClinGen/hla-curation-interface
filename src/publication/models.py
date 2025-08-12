@@ -6,20 +6,7 @@ from django.db import models
 from django.http import HttpResponseBase
 from django.urls import reverse
 
-
-class PublicationTypes:
-    """Defines the publication type codes."""
-
-    PUBMED = "PUB"
-    BIORXIV = "BIO"
-    MEDRXIV = "MED"
-
-
-PUBLICATION_TYPE_CHOICES = {
-    PublicationTypes.PUBMED: "PubMed Article",
-    PublicationTypes.BIORXIV: "bioRxiv Paper",
-    PublicationTypes.MEDRXIV: "medRxiv Paper",
-}
+from publication.constants.models import PUBLICATION_TYPE_CHOICES, PublicationTypes
 
 
 class Publication(models.Model):
