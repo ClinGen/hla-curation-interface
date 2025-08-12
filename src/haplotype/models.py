@@ -7,58 +7,6 @@ from django.urls import reverse
 
 from allele.models import Allele
 
-# Genes on chromosome 6 ordered by location in ascending order.
-GENE_LIST = [
-    "HFE",
-    "F",
-    "V",
-    "P",
-    "G",
-    "H",
-    "T",
-    "K",
-    "U",
-    "A",
-    "W",
-    "Y",
-    "R",
-    "J",
-    "L",
-    "N",
-    "E",
-    "C",
-    "B",
-    "S",
-    "MICA",
-    "MICB",
-    "DRA",
-    "DRB9",
-    "DRB8",
-    "DRB7",
-    "DRB6",
-    "DRB5",
-    "DRB4",
-    "DRB3",
-    "DRB2",
-    "DRB1",
-    "DQA1",
-    "DQB1",
-    "DQB3",
-    "DQA2",
-    "DQB2",
-    "DOB",
-    "TAP2",
-    "TAP1",
-    "Z",
-    "DMB",
-    "DMA",
-    "DOA",
-    "DPA1",
-    "DPB1",
-    "DPA2",
-    "DPB2",
-]
-
 
 class Haplotype(models.Model):
     """Contains information about a haplotype that has been added to the HCI."""

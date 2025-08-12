@@ -5,10 +5,11 @@ from django.views.generic import DetailView
 from django.views.generic.edit import CreateView
 
 from core.permissions import CreateAccessMixin
-from datatable.constants.views import FieldTypes, SortDirections
 from datatable.views import datatable
+from haplotype.constants.models import GENE_LIST
+from haplotype.constants.views import HAPLOTYPE_SEARCH_FIELDS
 from haplotype.forms import HaplotypeForm
-from haplotype.models import GENE_LIST, Haplotype
+from haplotype.models import Haplotype
 
 
 class HaplotypeCreate(CreateAccessMixin, CreateView):  # type: ignore
@@ -44,41 +45,13 @@ class HaplotypeDetail(DetailView):
     template_name = "haplotype/detail.html"
 
 
-# Define fields for use in the datatable.
-FIELDS = [
-    {
-        "text": "ID",
-        "param_name": "pk",
-        "id": "pk",
-        "default_value": "",
-        "type": FieldTypes.SEARCH,
-        "placeholder": "",
-    },
-    {
-        "text": "Name",
-        "param_name": "name",
-        "id": "haplotype-name",
-        "default_value": "",
-        "type": FieldTypes.SEARCH,
-        "placeholder": "",
-    },
-    {
-        "text": "Added",
-        "param_name": "added_at",
-        "id": "added-at",
-        "default_value": SortDirections.DEFAULT,
-        "type": FieldTypes.SORT,
-    },
-]
-
-
 def haplotype_search(request: HttpRequest) -> HttpResponse:
     """Returns an interactive datatable for searching haplotypes."""
     return datatable(
         request=request,
         model=Haplotype,
         order_by="pk",
-        fields=FIELDS,  # type: ignore
+        fields=HAPLOTYPE_SEARCH_FIELDS,  # type: ignore
         data_title="Haplotypes",
         partial="haplotype/partials/search.html",
     )
