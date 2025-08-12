@@ -6,12 +6,13 @@ from django.db.models import Model
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
-from datatable.constants import FieldTypes
-from datatable.metadata import FIELDS
+from datatable.constants.views import (
+    DEFAULT_ITEMS_PER_PAGE,
+    POKEMON_SEARCH_FIELDS,
+    FieldTypes,
+)
 from datatable.models import Pokemon
 from datatable.queries import filter_, search, sort
-
-DEFAULT_ITEMS_PER_PAGE = 50
 
 
 def datatable(
@@ -76,6 +77,6 @@ def pokemon(request: HttpRequest) -> HttpResponse:
         request=request,
         model=Pokemon,
         order_by="pokedex_number",
-        fields=FIELDS,  # type: ignore
+        fields=POKEMON_SEARCH_FIELDS,  # type: ignore
         data_title="Pokémon",
     )

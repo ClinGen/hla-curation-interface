@@ -3,7 +3,7 @@
 from curation.constants.models.common import Status
 from curation.constants.models.curation import CurationTypes
 from curation.constants.score import Intervals, Points
-from datatable.constants import FieldTypes, Filters, SortDirections
+from datatable.constants.views import FieldTypes, Filters, SortDirections
 
 CURATION_TYPE_OPTIONS = [
     Filters.DEFAULT,

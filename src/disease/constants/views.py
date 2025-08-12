@@ -1,6 +1,6 @@
 """Houses constants used in the views module of the disease app."""
 
-from datatable.constants import FieldTypes, SortDirections
+from datatable.constants.views import FieldTypes, SortDirections
 
 DISEASE_SEARCH_FIELDS = [
     {

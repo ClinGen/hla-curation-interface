@@ -1,6 +1,36 @@
-"""Houses the metadata for the columns of the datatable."""
+"""Houses the constants used in the views module of the datatable app."""
 
-from datatable.constants import FieldTypes, Filters, SortDirections
+
+class FieldTypes:
+    """Defines the string values for the types of columns in a datatable."""
+
+    SEARCH = "search"
+    SORT = "sort"
+    FILTER = "filter"
+
+
+class SortDirections:
+    """Defines the string values for sort directions."""
+
+    ASCENDING = "asc"
+    DESCENDING = "desc"
+    DEFAULT = "none"
+
+
+class Filters:
+    """Defines the default and none values for filtering."""
+
+    DEFAULT = "any"  # When you don't want a filter.
+    NONE = "none"  # When you want to filter on a value of none/empty/null.
+
+
+DEFAULT_ITEMS_PER_PAGE = 50
+
+
+# ======================================================================================
+# Pokémon View Constants
+# ======================================================================================
+
 
 TYPE_OPTIONS = [
     Filters.DEFAULT,
@@ -29,7 +59,7 @@ GENERATION_OPTIONS = [Filters.DEFAULT, "1", "2", "3", "4", "5", "6"]
 
 LEGENDARY_OPTIONS = [Filters.DEFAULT, "True", "False"]
 
-FIELDS = [
+POKEMON_SEARCH_FIELDS = [
     {
         "text": "Number",
         "param_name": "pokedex_number",

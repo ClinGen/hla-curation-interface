@@ -5,7 +5,7 @@ from django.views.generic import DetailView
 from django.views.generic.edit import CreateView
 
 from core.permissions import CreateAccessMixin
-from datatable.constants import FieldTypes, SortDirections
+from datatable.constants.views import FieldTypes, SortDirections
 from datatable.views import datatable
 from haplotype.forms import HaplotypeForm
 from haplotype.models import GENE_LIST, Haplotype

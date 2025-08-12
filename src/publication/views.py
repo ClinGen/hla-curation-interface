@@ -7,7 +7,7 @@ from django.views.generic import DetailView
 from django.views.generic.edit import CreateView
 
 from core.permissions import CreateAccessMixin
-from datatable.constants import FieldTypes, Filters, SortDirections
+from datatable.constants.views import FieldTypes, Filters, SortDirections
 from datatable.views import datatable
 from publication.clients import (
     fetch_pubmed_data,

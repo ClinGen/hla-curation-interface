@@ -3,7 +3,7 @@
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest
 
-from datatable.constants import Filters, SortDirections
+from datatable.constants.views import Filters, SortDirections
 
 
 def search(

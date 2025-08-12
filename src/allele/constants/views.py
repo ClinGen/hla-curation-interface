@@ -1,6 +1,6 @@
 """Houses constants used in the allele app's views module."""
 
-from datatable.constants import FieldTypes, SortDirections
+from datatable.constants.views import FieldTypes, SortDirections
 
 ALLELE_SEARCH_FIELDS = [
     {
