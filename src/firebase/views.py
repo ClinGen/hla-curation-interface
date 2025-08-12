@@ -9,20 +9,11 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
 from core.crud import read_user_profile
-
-# The messages below are potentially user-facing.
-VERIFICATION_SUCCESS = {
-    "valid": True,
-    "message": "Verified ID the token from the OAuth provider.",
-}
-VERIFICATION_FAILURE = {
-    "valid": False,
-    "message": "Unable to verify the ID token from the OAuth provider.",
-}
-INVALID_JSON = {
-    "valid": False,
-    "message": "The JSON sent to the backend to verify the ID token was not valid.",
-}
+from firebase.constants.views import (
+    INVALID_JSON,
+    VERIFICATION_FAILURE,
+    VERIFICATION_SUCCESS,
+)
 
 
 @require_http_methods(["POST"])
