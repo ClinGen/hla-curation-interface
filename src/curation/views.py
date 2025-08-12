@@ -1,7 +1,5 @@
 """Provides views for the curation app."""
 
-from decimal import Decimal
-
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -9,7 +7,6 @@ from django.views.generic import DetailView, UpdateView
 from django.views.generic.edit import CreateView
 
 from core.permissions import CreateAccessMixin, has_create_access
-from curation.constants.models.evidence import EffectSizeStatistic
 from curation.constants.views import CURATION_SEARCH_FIELDS, FRAMEWORK
 from curation.forms import (
     CurationCreateForm,
@@ -21,6 +18,15 @@ from curation.forms import (
 from curation.models import (
     Curation,
     Evidence,
+)
+from curation.validators.views import (
+    validate_beta,
+    validate_ci_end,
+    validate_ci_start,
+    validate_effect_size_statistic,
+    validate_odds_ratio,
+    validate_p_value,
+    validate_relative_risk,
 )
 from datatable.views import datatable
 
@@ -162,57 +168,11 @@ class EvidenceEdit(UpdateView, CreateAccessMixin):  # type: ignore
         Returns:
              The details page for the evidence.
         """
-        effect_size_statistic = form.cleaned_data["effect_size_statistic"]
-        if effect_size_statistic == EffectSizeStatistic.ODDS_RATIO:
-            form.instance.relative_risk_string = ""
-            form.instance.relative_risk = None
-            form.instance.beta_string = ""
-            form.instance.beta = None
-        elif effect_size_statistic == EffectSizeStatistic.RELATIVE_RISK:
-            form.instance.odds_ratio_string = ""
-            form.instance.odds_ratio = None
-            form.instance.beta_string = ""
-            form.instance.beta = None
-        elif effect_size_statistic == EffectSizeStatistic.BETA:
-            form.instance.relative_risk_string = ""
-            form.instance.relative_risk = None
-            form.instance.odds_ratio_string = ""
-            form.instance.odds_ratio = None
-
-        p_value_string = form.cleaned_data["p_value_string"]
-        if p_value_string == "":
-            form.instance.p_value = None
-        else:
-            form.instance.p_value = Decimal(p_value_string)
-
-        odds_ratio_string = form.cleaned_data["odds_ratio_string"]
-        if odds_ratio_string == "":
-            form.instance.odds_ratio = None
-        else:
-            form.instance.odds_ratio = Decimal(odds_ratio_string)
-
-        relative_risk_string = form.cleaned_data["relative_risk_string"]
-        if relative_risk_string == "":
-            form.instance.relative_risk = None
-        else:
-            form.instance.relative_risk = Decimal(relative_risk_string)
-
-        beta_string = form.cleaned_data["beta_string"]
-        if beta_string == "":
-            form.instance.beta = None
-        else:
-            form.instance.beta = Decimal(beta_string)
-
-        ci_start_string = form.cleaned_data["ci_start_string"]
-        if ci_start_string == "":
-            form.instance.ci_start = None
-        else:
-            form.instance.ci_start = Decimal(ci_start_string)
-
-        ci_end_string = form.cleaned_data["ci_end_string"]
-        if ci_end_string == "":
-            form.instance.ci_end = None
-        else:
-            form.instance.ci_end = Decimal(ci_end_string)
-
+        validate_effect_size_statistic(form)
+        validate_p_value(form)
+        validate_odds_ratio(form)
+        validate_relative_risk(form)
+        validate_beta(form)
+        validate_ci_start(form)
+        validate_ci_end(form)
         return super().form_valid(form)
