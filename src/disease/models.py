@@ -6,16 +6,7 @@ from django.db import models
 from django.http import HttpResponseBase
 from django.urls import reverse
 
-
-class DiseaseTypes:
-    """Defines the disease ontology type codes."""
-
-    MONDO = "MON"
-
-
-DISEASE_TYPE_CHOICES = {
-    DiseaseTypes.MONDO: "Mondo",
-}
+from disease.constants.models import DISEASE_TYPE_CHOICES, DiseaseTypes
 
 
 class Disease(models.Model):
