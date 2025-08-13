@@ -17,7 +17,7 @@ set dotenv-load := true
 # Pre-Commit Recipe
 #=====================================================================
 
-# Run all checks and tests. -----------------------------------------
+# Run all checks and tests. ------------------------------------------
 pre-commit: src-all test-all infra-all
 alias pre := pre-commit
 
@@ -244,11 +244,17 @@ alias djsh := django-shell
 
 # Load test data into the database. ----------------------------------
 [group('django')]
-django-loaddata:
+django-loaddata-test:
     cd src && uv run manage.py loaddata allele/fixtures/test_alleles.json
     cd src && uv run manage.py loaddata disease/fixtures/test_diseases.json
     cd src && uv run manage.py loaddata publication/fixtures/test_publications.json
-alias djld := django-loaddata
+alias djlt := django-loaddata-test
+
+# Load production data into the database. ----------------------------
+[group('django')]
+django-loaddata-prod:
+    cd src && uv run manage.py loaddata curation/fixtures/demographics.json
+alias djlp := django-loaddata-prod
 
 #=====================================================================
 # Docs Recipes
