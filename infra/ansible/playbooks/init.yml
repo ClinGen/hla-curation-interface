@@ -12,6 +12,12 @@
       ansible.builtin.include_tasks: ../tasks/install/bun.yml
     - name: Install | project
       ansible.builtin.include_tasks: ../tasks/install/project.yml
+    - name: Admin | Django migrate
+      ansible.builtin.include_tasks: ../tasks/admin/django_migrate.yml
+    - name: Admin | Django collectstatic
+      ansible.builtin.include_tasks: ../tasks/admin/django_collectstatic.yml
+    - name: Admin | Django loaddata
+      ansible.builtin.include_tasks: ../tasks/admin/django_loaddata.yml
     - name: Placement | Gunicorn files
       ansible.builtin.include_tasks: ../tasks/placement/gunicorn.yml
     - name: Admin | Gunicorn start
