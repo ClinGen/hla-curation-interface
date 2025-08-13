@@ -5,12 +5,11 @@ from django.core.exceptions import ValidationError
 from disease.constants.models import DiseaseTypes
 
 
-def validate_disease_type(disease) -> None:
-    """Makes sure we get the correct ID given the disease type.
+def validate_disease_type_mondo(disease) -> None:
+    """Makes sure we get a Mondo ID if the disease type is set to Mondo.
 
     Raises:
-        ValidationError: If the ID for the disease isn't provided. For example, a Mondo
-                         disease requires a Mondo ID.
+        ValidationError: If the Mondo ID for the Mondo disease isn't provided.
     """
     if disease.disease_type == DiseaseTypes.MONDO and not disease.mondo_id:
         raise ValidationError(

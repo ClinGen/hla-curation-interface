@@ -1,12 +1,16 @@
 """Houses database models for the publication app."""
 
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import HttpResponseBase
 from django.urls import reverse
 
 from publication.constants.models import PUBLICATION_TYPE_CHOICES, PublicationTypes
+from publication.validators.models import (
+    validate_publication_type_biorxiv,
+    validate_publication_type_medrxiv,
+    validate_publication_type_pubmed,
+)
 
 
 class Publication(models.Model):
@@ -88,18 +92,8 @@ class Publication(models.Model):
         return reverse("publication-detail", kwargs={"pk": self.pk})
 
     def clean(self) -> None:
-        """Makes sure PubMed articles have PubMed IDs.
-
-        Raises:
-            ValidationError: When the publication is a PubMed article and a PubMed ID
-                             wasn't supplied.
-        """
+        """Makes sure the publication is valid."""
         super().clean()
-        if self.publication_type == PublicationTypes.PUBMED and not self.pubmed_id:
-            raise ValidationError(
-                {"pubmed_id": "The PubMed ID is required for PubMed articles."}
-            )
-        if self.publication_type == PublicationTypes.BIORXIV and not self.doi:
-            raise ValidationError({"doi": "The DOI is required for bioRxiv papers."})
-        if self.publication_type == PublicationTypes.MEDRXIV and not self.doi:
-            raise ValidationError({"doi": "The DOI is required for medRxiv papers."})
+        validate_publication_type_pubmed(self)
+        validate_publication_type_biorxiv(self)
+        validate_publication_type_medrxiv(self)

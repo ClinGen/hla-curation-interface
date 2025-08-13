@@ -6,7 +6,7 @@ from django.http import HttpResponseBase
 from django.urls import reverse
 
 from disease.constants.models import DISEASE_TYPE_CHOICES, DiseaseTypes
-from disease.validators.models import validate_disease_type, validate_mondo_id
+from disease.validators.models import validate_disease_type_mondo, validate_mondo_id
 
 
 class Disease(models.Model):
@@ -76,5 +76,5 @@ class Disease(models.Model):
     def clean(self) -> None:
         """Makes sure the disease is valid."""
         super().clean()
-        validate_disease_type(self)
+        validate_disease_type_mondo(self)
         validate_mondo_id(self)
