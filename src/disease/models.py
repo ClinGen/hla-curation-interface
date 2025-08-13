@@ -1,12 +1,12 @@
 """Houses database models for the disease app."""
 
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import HttpResponseBase
 from django.urls import reverse
 
 from disease.constants.models import DISEASE_TYPE_CHOICES, DiseaseTypes
+from disease.validators.models import validate_disease_type, validate_mondo_id
 
 
 class Disease(models.Model):
@@ -74,18 +74,7 @@ class Disease(models.Model):
         return reverse("disease-detail", kwargs={"pk": self.pk})
 
     def clean(self) -> None:
-        """Makes sure the disease is valid.
-
-        Raises:
-            ValidationError: If a field that is necessary isn't supplied or if data is
-                             not properly formed.
-        """
+        """Makes sure the disease is valid."""
         super().clean()
-        if self.disease_type == DiseaseTypes.MONDO and not self.mondo_id:
-            raise ValidationError(
-                {"mondo_id": "The Mondo ID is required for Mondo disease."}
-            )
-        if self.mondo_id and "MONDO:" not in self.mondo_id[:6]:
-            raise ValidationError(
-                {"mondo_id": "The prefix 'MONDO:' is required for Mondo IDs."}
-            )
+        validate_disease_type(self)
+        validate_mondo_id(self)
