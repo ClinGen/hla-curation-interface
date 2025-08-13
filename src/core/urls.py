@@ -11,6 +11,5 @@ urlpatterns = [
     path("citing", views.citing, name="citing"),
     path("collaborators", views.collaborators, name="collaborators"),
     path("contact", views.contact, name="contact"),
-    path("downloads", views.downloads, name="downloads"),
     path("help", views.help_, name="help"),
 ]

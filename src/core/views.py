@@ -24,11 +24,6 @@ def help_(request: HttpRequest) -> HttpResponse:
     return render(request, "core/help.html")
 
 
-def downloads(request: HttpRequest) -> HttpResponse:
-    """Returns the downloads page."""
-    return render(request, "core/downloads.html")
-
-
 def citing(request: HttpRequest) -> HttpResponse:
     """Returns the citing page."""
     return render(request, "core/citing.html")
