@@ -7,7 +7,7 @@ from curation import views
 urlpatterns = [
     path("create", views.CurationCreate.as_view(), name="curation-create"),
     path(
-        "detail/<int:curation_pk>",
+        "<int:curation_pk>/detail",
         views.CurationDetail.as_view(),
         name="curation-detail",
     ),
@@ -28,7 +28,7 @@ urlpatterns = [
         name="evidence-create",
     ),
     path(
-        "<int:curation_pk>/evidence/<int:evidence_pk>",
+        "<int:curation_pk>/evidence/<int:evidence_pk>/detail",
         views.EvidenceDetail.as_view(),
         name="evidence-detail",
     ),
