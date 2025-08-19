@@ -7,7 +7,7 @@ from publication import views
 urlpatterns = [
     path("create", views.PublicationCreate.as_view(), name="publication-create"),
     path(
-        "<int:pk>/detail",
+        "<slug:slug>/detail",
         views.PublicationDetail.as_view(),
         name="publication-detail",
     ),

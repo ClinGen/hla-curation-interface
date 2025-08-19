@@ -209,7 +209,7 @@ class PublicationDetailTest(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.url = reverse("publication-detail", kwargs={"pk": 1})
+        self.url = reverse("publication-detail", kwargs={"slug": "P000001"})
 
     def test_shows_publication_type(self):
         response = self.client.get(self.url)
@@ -270,9 +270,9 @@ class PublicationSearchTest(TestCase):
     def test_shows_id_in_thead(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        id_label = soup.find("label", {"for": "search-pk-input"}).get_text().strip()
+        id_label = soup.find("label", {"for": "search-slug-input"}).get_text().strip()
         self.assertEqual(id_label, "ID")
-        id_input = soup.find(id="search-pk-input")
+        id_input = soup.find(id="search-slug-input")
         self.assertIsNotNone(id_input)
 
     def test_shows_type_in_thead(self):
@@ -323,7 +323,7 @@ class PublicationSearchTest(TestCase):
         id_anchor = (
             soup.find("tbody").find("tr").find_all("td")[0].find("a").get_text().strip()
         )
-        self.assertIn("1", id_anchor)
+        self.assertIn("P000001", id_anchor)
 
     def test_shows_type_in_tbody(self):
         response = self.client.get(self.url)

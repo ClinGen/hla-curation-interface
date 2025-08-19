@@ -16,6 +16,12 @@ from publication.validators.models import (
 class Publication(models.Model):
     """Contains information about a publication that has been added to the HCI."""
 
+    slug = models.SlugField(
+        default="",
+        max_length=7,
+        verbose_name="Human-Readable ID",
+        help_text="The human-readable ID for the object.",
+    )
     publication_type = models.CharField(
         blank=False,
         choices=PUBLICATION_TYPE_CHOICES,
@@ -87,9 +93,16 @@ class Publication(models.Model):
             return f"{self.author}. {title}. {self.pubmed_id}."
         return f"{self.author}. {title}. {self.doi}."
 
+    def save(self, *args, **kwargs) -> None:  # noqa: ANN002, ANN003
+        """Adds a human-readable ID."""
+        super().save(*args, **kwargs)
+        if not self.slug:
+            self.slug = f"P{self.id:06d}"
+            self.save(update_fields=["slug"])
+
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         """Returns the details page for a specific publication."""
-        return reverse("publication-detail", kwargs={"pk": self.pk})
+        return reverse("publication-detail", kwargs={"slug": self.slug})
 
     def clean(self) -> None:
         """Makes sure the publication is valid."""

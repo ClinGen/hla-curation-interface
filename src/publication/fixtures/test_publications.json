@@ -3,6 +3,7 @@
     "model": "publication.publication",
     "pk": 1,
     "fields": {
+      "slug": "P000001",
       "publication_type": "PUB",
       "pubmed_id": "123",
       "doi": "10.1000/123",
@@ -16,6 +17,7 @@
     "model": "publication.publication",
     "pk": 2,
     "fields": {
+      "slug": "P000002",
       "publication_type": "BIO",
       "pubmed_id": null,
       "doi": "10.1000/456",
@@ -29,6 +31,7 @@
     "model": "publication.publication",
     "pk": 3,
     "fields": {
+      "slug": "P000003",
       "publication_type": "MED",
       "pubmed_id": null,
       "doi": "10.1000/789",
