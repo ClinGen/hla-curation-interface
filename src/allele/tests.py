@@ -133,7 +133,7 @@ class AlleleDetailTest(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.url = reverse("allele-detail", kwargs={"pk": 1})
+        self.url = reverse("allele-detail", kwargs={"slug": "A000001"})
 
     def test_shows_car_logo(self):
         response = self.client.get(self.url)
@@ -196,9 +196,9 @@ class AlleleSearchTest(TestCase):
     def test_shows_id_in_thead(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        id_label = soup.find("label", {"for": "search-pk-input"}).get_text().strip()
+        id_label = soup.find("label", {"for": "search-slug-input"}).get_text().strip()
         self.assertEqual(id_label, "ID")
-        id_input = soup.find(id="search-pk-input")
+        id_input = soup.find(id="search-slug-input")
         self.assertIsNotNone(id_input)
 
     def test_shows_allele_name_in_thead(self):
@@ -237,7 +237,7 @@ class AlleleSearchTest(TestCase):
         id_anchor = (
             soup.find("tbody").find("tr").find_all("td")[0].find("a").get_text().strip()
         )
-        self.assertIn("1", id_anchor)
+        self.assertIn("A000001", id_anchor)
 
     def test_shows_allele_name_in_tbody(self):
         response = self.client.get(self.url)

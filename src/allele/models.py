@@ -9,6 +9,12 @@ from django.urls import reverse
 class Allele(models.Model):
     """Contains information about an allele that has been added to the HCI."""
 
+    slug = models.SlugField(
+        default="",
+        max_length=7,
+        verbose_name="Human-Readable ID",
+        help_text="The human-readable ID for the object.",
+    )
     name = models.CharField(
         blank=False,
         default="",
@@ -54,6 +60,13 @@ class Allele(models.Model):
         """Returns a string representation of the allele."""
         return self.name
 
+    def save(self, *args, **kwargs) -> None:  # noqa: ANN002, ANN003
+        """Adds a human-readable ID."""
+        super().save(*args, **kwargs)
+        if not self.slug:
+            self.slug = f"A{self.id:06d}"
+            self.save(update_fields=["slug"])
+
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         """Returns the details page for a specific allele."""
-        return reverse("allele-detail", kwargs={"pk": self.pk})
+        return reverse("allele-detail", kwargs={"slug": self.slug})

@@ -1,7 +1,7 @@
 {% extends "layouts/base.html" %}
 {% load static %}
-{% block title %}Allele #{{ object.pk }} Details{% endblock %}
-{% block description %}View information about allele #{{ object.pk }}.{% endblock %}
+{% block title %}{{ object.slug }} Details{% endblock %}
+{% block description %}View information about {{ object.slug }}.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
 
@@ -19,7 +19,7 @@
                 </li>
                 <li class="is-active">
                     <a href="" aria-current="page">
-                        Allele #{{ object.pk }}
+                        {{ object.slug }}
                     </a>
                 </li>
             </ul>
@@ -60,7 +60,7 @@
                 </tr>
                 <tr>
                     <td>HCI Allele ID</td>
-                    <td>{{ object.pk }}</td>
+                    <td>{{ object.slug }}</td>
                 </tr>
                 <tr>
                     <td>Added</td>
