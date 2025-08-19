@@ -12,6 +12,12 @@ from disease.validators.models import validate_disease_type_mondo, validate_mond
 class Disease(models.Model):
     """Contains information about a disease that has been added to the HCI."""
 
+    slug = models.SlugField(
+        default="",
+        max_length=7,
+        verbose_name="Human-Readable ID",
+        help_text="The human-readable ID for the object.",
+    )
     disease_type = models.CharField(
         blank=True,
         choices=DISEASE_TYPE_CHOICES,
@@ -69,9 +75,16 @@ class Disease(models.Model):
         """Returns a string representation of the disease."""
         return self.name
 
+    def save(self, *args, **kwargs) -> None:  # noqa: ANN002, ANN003
+        """Adds a human-readable ID."""
+        super().save(*args, **kwargs)
+        if not self.slug:
+            self.slug = f"D{self.id:06d}"
+            self.save(update_fields=["slug"])
+
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         """Returns the details page for a specific disease."""
-        return reverse("disease-detail", kwargs={"pk": self.pk})
+        return reverse("disease-detail", kwargs={"slug": self.slug})
 
     def clean(self) -> None:
         """Makes sure the disease is valid."""

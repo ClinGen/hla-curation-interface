@@ -5,8 +5,8 @@ from datatable.constants.views import FieldTypes, SortDirections
 DISEASE_SEARCH_FIELDS = [
     {
         "text": "ID",
-        "param_name": "pk",
-        "id": "pk",
+        "param_name": "slug",
+        "id": "slug",
         "default_value": "",
         "type": FieldTypes.SEARCH,
         "placeholder": "",

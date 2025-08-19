@@ -3,6 +3,7 @@
     "model": "disease.disease",
     "pk": 1,
     "fields": {
+      "slug": "D000001",
       "disease_type": "MON",
       "mondo_id": "MONDO:123",
       "iri": "http://purl.obolibrary.org/obo/MONDO_123",
@@ -15,6 +16,7 @@
     "model": "disease.disease",
     "pk": 2,
     "fields": {
+      "slug": "D000002",
       "disease_type": "MON",
       "mondo_id": "MONDO:456",
       "iri": "http://purl.obolibrary.org/obo/MONDO_456",
@@ -27,6 +29,7 @@
     "model": "disease.disease",
     "pk": 3,
     "fields": {
+      "slug": "D000003",
       "disease_type": "MON",
       "mondo_id": "MONDO:789",
       "iri": "http://purl.obolibrary.org/obo/MONDO_789",
