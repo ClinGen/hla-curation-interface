@@ -89,9 +89,11 @@
                         <tr>
                             <td>
                                 <a id="haplotype-anchor"
-                                   href="{% url 'haplotype-detail' haplotype.pk %}"
+                                   href="{% url 'haplotype-detail' haplotype.slug %}"
+                                   class="button is-small"
                                 >
-                                    #{{ haplotype.pk }}
+                                    {% include "common/icon.html" with icon_name="eye" %}
+                                    {{ haplotype.slug }}
                                 </a>
                             </td>
                             <td id="haplotype-name">

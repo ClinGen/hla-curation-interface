@@ -3,6 +3,7 @@
     "model": "haplotype.haplotype",
     "pk": 1,
     "fields": {
+      "slug": "H000001",
       "alleles": ["1", "2"],
       "name": "A*01:02:03~B*04:05:06",
       "added_by": null,

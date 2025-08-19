@@ -11,6 +11,12 @@ from allele.models import Allele
 class Haplotype(models.Model):
     """Contains information about a haplotype that has been added to the HCI."""
 
+    slug = models.SlugField(
+        default="",
+        max_length=7,
+        verbose_name="Human-Readable ID",
+        help_text="The human-readable ID for the object.",
+    )
     alleles = models.ManyToManyField(
         Allele,
         blank=False,
@@ -55,6 +61,13 @@ class Haplotype(models.Model):
         """Returns a string representation of a specific haplotype."""
         return self.name
 
+    def save(self, *args, **kwargs) -> None:  # noqa: ANN002, ANN003
+        """Adds a human-readable ID."""
+        super().save(*args, **kwargs)
+        if not self.slug:
+            self.slug = f"H{self.id:06d}"
+            self.save(update_fields=["slug"])
+
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         """Returns the details page for a specific haplotype."""
-        return reverse("haplotype-detail", kwargs={"pk": self.pk})
+        return reverse("haplotype-detail", kwargs={"slug": self.slug})

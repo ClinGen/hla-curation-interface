@@ -1,7 +1,7 @@
 {% extends "layouts/base.html" %}
 {% load static %}
-{% block title %}Haplotype #{{ object.pk }} Details{% endblock %}
-{% block description %}View information about haplotype #{{ object.pk }}.{% endblock %}
+{% block title %}{{ object.slug }} Details{% endblock %}
+{% block description %}View information about haplotype {{ object.slug }}.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
 
@@ -19,7 +19,7 @@
                 </li>
                 <li class="is-active">
                     <a href="" aria-current="page">
-                        Haplotype #{{ object.pk }}
+                        {{ object.slug }}
                     </a>
                 </li>
             </ul>
@@ -38,7 +38,7 @@
                 <tbody>
                 <tr>
                     <td>HCI Haplotype ID</td>
-                    <td>{{ object.pk }}</td>
+                    <td>{{ object.slug }}</td>
                 </tr>
                 <tr>
                     <td>Added</td>
@@ -67,9 +67,11 @@
                         <tr>
                             <td>
                                 <a id="allele-{{ allele.pk }}-anchor"
-                                   href="{% url 'allele-detail' allele.pk %}"
+                                   href="{% url 'allele-detail' allele.slug %}"
+                                   class="button is-small"
                                 >
-                                    #{{ allele.pk }}
+                                    {% include "common/icon.html" with icon_name="eye" %}
+                                    {{ allele.slug }}
                                 </a>
                             </td>
                             <td id="allele-{{ allele.pk }}-name">

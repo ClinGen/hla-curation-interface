@@ -40,10 +40,11 @@
                         <tr>
                             {% for field in fields %}
                                 {% with value=object|get_val:field.param_name %}
-                                    {% if field.param_name == "pk" %}
+                                    {% if field.param_name == "slug" %}
                                         <td>
-                                            <a hx-boost="true" href="{% url 'haplotype-detail' value %}">
-                                                #{{ value }}
+                                            <a hx-boost="true" class="button is-small" href="{% url 'haplotype-detail' value %}">
+                                                {% include "common/icon.html" with icon_name="eye" %}
+                                                {{ value }}
                                             </a>
                                         </td>
                                     {% elif field.param_name == "added_at" %}
