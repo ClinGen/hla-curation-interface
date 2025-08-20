@@ -63,7 +63,10 @@
                             {% endfor %}
                             <tr>
                                 <td>
-                                    <a href="{% url 'evidence-detail' curation_slug=curation.slug evidence_slug=form.instance.slug %}">
+                                    <a href="{% url 'evidence-detail' curation_slug=curation.slug evidence_slug=form.instance.slug %}"
+                                       class="button is-small"
+                                    >
+                                        {% include "common/icon.html" with icon_name="eye" %}
                                         {{ form.instance.slug }}
                                     </a>
                                 </td>
