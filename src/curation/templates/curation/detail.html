@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
-{% block title %}Curation #{{ object.pk }} Details{% endblock %}
-{% block description %}View information about curation #{{ object.pk }}.{% endblock %}
+{% block title %}{{ object.slug }} Details{% endblock %}
+{% block description %}View information about {{ object.slug }}.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
         <nav class="breadcrumb" aria-label="breadcrumbs">
@@ -17,7 +17,7 @@
                 </li>
                 <li class="is-active">
                     <a href="" aria-current="page">
-                        Curation #{{ object.pk }}
+                        {{ object.slug }}
                     </a>
                 </li>
             </ul>

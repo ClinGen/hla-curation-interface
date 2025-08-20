@@ -20,8 +20,8 @@ STATUS_OPTIONS = [
 CURATION_SEARCH_FIELDS = [
     {
         "text": "ID",
-        "param_name": "pk",
-        "id": "pk",
+        "param_name": "slug",
+        "id": "slug",
         "default_value": "",
         "type": FieldTypes.SEARCH,
         "placeholder": "",

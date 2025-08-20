@@ -1,5 +1,5 @@
 <h1 class="title">Curation Details</h1>
-<a href="{% url 'curation-edit' object.pk %}" class="button" id="edit-curation-button">
+<a href="{% url 'curation-edit' object.slug %}" class="button" id="edit-curation-button">
     {% include "common/icon.html" with icon_name="pencil" %}
     Edit
 </a>
@@ -57,7 +57,7 @@
         </tr>
         <tr>
             <td>HCI Curation ID</td>
-            <td id="curation-id">{{ object.pk }}</td>
+            <td id="curation-id">{{ object.slug }}</td>
         </tr>
         <tr>
             <td>Added</td>

@@ -6,7 +6,7 @@
                 <button type="submit" class="button is-link">Save</button>
             </div>
             <div class="control">
-                <a href="{% url 'curation-detail' object.pk %}" class="button is-link is-light">Cancel</a>
+                <a href="{% url 'curation-detail' object.slug %}" class="button is-link is-light">Cancel</a>
             </div>
         </div>
         <table class="table is-hoverable">
@@ -44,7 +44,7 @@
             </tr>
             <tr>
                 <td>HCI Curation ID</td>
-                <td id="curation-id">{{ object.pk }}</td>
+                <td id="curation-id">{{ object.slug }}</td>
             </tr>
             <tr>
                 <td>Added</td>

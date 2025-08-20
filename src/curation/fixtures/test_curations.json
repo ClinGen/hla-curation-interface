@@ -3,6 +3,7 @@
     "model": "curation.curation",
     "pk": 1,
     "fields": {
+      "slug": "C000001",
       "status": "INP",
       "curation_type": "ALL",
       "classification": "LIM",

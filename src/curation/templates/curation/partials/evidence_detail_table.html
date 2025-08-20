@@ -2,7 +2,7 @@
     <h1 class="title">Evidence</h1>
     <div class="buttons">
         {% if object.evidence.all %}
-            <a href="{% url 'curation-edit-evidence' object.pk %}"
+            <a href="{% url 'curation-edit-evidence' object.slug %}"
                class="button"
                id="edit-evidence-button"
             >
@@ -36,12 +36,15 @@
                 {% for evidence in object.evidence.all %}
                     <tr>
                         <td>
-                            <a href="{% url 'evidence-detail' curation_pk=object.pk evidence_pk=evidence.pk %}">
-                                #{{ evidence.pk }}
+                            <a href="{% url 'evidence-detail' curation_slug=object.slug evidence_slug=evidence.slug %}"
+                               class="button is-small"
+                            >
+                                {% include "common/icon.html" with icon_name="eye" %}
+                                {{ evidence.slug }}
                             </a>
                         </td>
                         <td>
-                            <a href="{% url 'publication-detail' evidence.publication.pk %}">
+                            <a href="{% url 'publication-detail' evidence.publication.slug %}">
                                 {{ evidence.publication }}
                             </a>
                         </td>

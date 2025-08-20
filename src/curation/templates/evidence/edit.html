@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 {% block title %}Edit Evidence{% endblock %}
-{% block description %}Edit evidence #{{ object.pk }}.{% endblock %}
+{% block description %}Edit {{ object.slug }}.{% endblock %}
 {% block main %}
 <div class="box mt-6 mb-6">
     <nav class="breadcrumb" aria-label="breadcrumbs">
@@ -16,13 +16,13 @@
                 </a>
             </li>
             <li>
-                <a href="{% url 'curation-detail' object.curation.pk %}">
-                    Curation #{{ object.curation.pk }}
+                <a href="{% url 'curation-detail' object.curation.slug %}">
+                    {{ object.curation.slug }}
                 </a>
             </li>
             <li>
-                <a href="{% url 'evidence-detail' object.curation.pk object.pk %}">
-                    Evidence #{{ object.pk }}
+                <a href="{% url 'evidence-detail' object.curation.slug object.slug %}">
+                    {{ object.slug }}
                 </a>
             </li>
             <li class="is-active">
@@ -34,7 +34,7 @@
     </nav>
     <h1 class="title">Edit Evidence Data</h1>
     {% include "evidence/partials/detail_table.html" %}
-    <a href="{% url 'evidence-detail' object.curation.pk object.pk %}" class="button" id="back-button">
+    <a href="{% url 'evidence-detail' object.curation.slug object.slug %}" class="button" id="back-button">
         {% include "common/icon.html" with icon_name="arrow-left" %}
         Back to Evidence Details
     </a>
@@ -147,7 +147,7 @@
                             </button>
                         </div>
                         <div class="control">
-                            <a href="{% url 'evidence-detail' object.curation.pk object.pk %}"
+                            <a href="{% url 'evidence-detail' object.curation.slug object.slug %}"
                                class="button is-link is-light"
                             >
                                 Cancel

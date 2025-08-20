@@ -3,6 +3,7 @@
     "model": "curation.evidence",
     "pk": 1,
     "fields": {
+      "slug": "E000001",
       "needs_review": false,
       "status": "INP",
       "curation": 1,

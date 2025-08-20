@@ -99,7 +99,12 @@
                                 {% for curation in user.curations_added.all %}
                                     <tr>
                                         <td>
-                                            <a href="{% url 'curation-detail' curation.pk %}">#{{ curation.pk }}</a>
+                                            <a href="{% url 'curation-detail' curation.slug %}"
+                                               class="button is-small"
+                                            >
+                                                {% include "common/icon.html" with icon_name="eye" %}
+                                                {{ curation.slug }}
+                                            </a>
                                         </td>
                                         <td>
                                             {{ curation.allele|default:"------" }}

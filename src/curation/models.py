@@ -60,6 +60,12 @@ from publication.models import Publication
 class Curation(models.Model):
     """Contains top-level information about a curation."""
 
+    slug = models.SlugField(
+        default="",
+        max_length=7,
+        verbose_name="Human-Readable ID",
+        help_text="The human-readable ID for the object.",
+    )
     status = models.CharField(
         blank=False,
         choices=STATUS_CHOICES,
@@ -139,9 +145,16 @@ class Curation(models.Model):
         """Returns a string representation of the curation."""
         return f"Curation #{self.pk} ({self.curation_type})"
 
+    def save(self, *args, **kwargs) -> None:  # noqa: ANN002, ANN003
+        """Adds a human-readable ID."""
+        super().save(*args, **kwargs)
+        if not self.slug:
+            self.slug = f"C{self.id:06d}"
+            self.save(update_fields=["slug"])
+
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         """Returns the details page for a specific publication."""
-        return reverse("curation-detail", kwargs={"curation_pk": self.pk})
+        return reverse("curation-detail", kwargs={"curation_slug": self.slug})
 
     def clean(self) -> None:
         """Makes sure the curation is saved in a valid state."""
@@ -192,6 +205,12 @@ class Demographic(models.Model):
 class Evidence(models.Model):
     """Contains evidence derived from a publication."""
 
+    slug = models.SlugField(
+        default="",
+        max_length=7,
+        verbose_name="Human-Readable ID",
+        help_text="The human-readable ID for the object.",
+    )
     status = models.CharField(
         blank=False,
         choices=STATUS_CHOICES,
@@ -477,14 +496,21 @@ class Evidence(models.Model):
         """Returns a string representation of the curation."""
         return f"Evidence #{self.pk}"
 
+    def save(self, *args, **kwargs) -> None:  # noqa: ANN002, ANN003
+        """Adds a human-readable ID."""
+        super().save(*args, **kwargs)
+        if not self.slug:
+            self.slug = f"E{self.id:06d}"
+            self.save(update_fields=["slug"])
+
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         """Returns the details page for an evidence item."""
-        curation_pk = self.curation.pk if self.curation else None
+        curation_pk = self.curation.slug if self.curation else None
         return reverse(
             "evidence-detail",
             kwargs={
-                "curation_pk": curation_pk,
-                "evidence_pk": self.pk,
+                "curation_slug": curation_pk,
+                "evidence_slug": self.slug,
             },
         )
 

@@ -159,7 +159,7 @@ class CurationDetailTest(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.url = reverse("curation-detail", kwargs={"curation_pk": 1})
+        self.url = reverse("curation-detail", kwargs={"curation_slug": "C000001"})
 
     def test_shows_breadcrumb(self):
         response = self.client.get(self.url)
@@ -201,7 +201,7 @@ class CurationDetailTest(TestCase):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         curation_id = soup.find(id="curation-id").get_text().strip()
-        self.assertEqual(curation_id, "1")
+        self.assertEqual(curation_id, "C000001")
 
     def test_shows_added_at(self):
         response = self.client.get(self.url)
@@ -400,9 +400,9 @@ class CurationSearchTest(TestCase):
     def test_shows_id_in_thead(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        id_label = soup.find("label", {"for": "search-pk-input"}).get_text().strip()
+        id_label = soup.find("label", {"for": "search-slug-input"}).get_text().strip()
         self.assertEqual(id_label, "ID")
-        id_input = soup.find(id="search-pk-input")
+        id_input = soup.find(id="search-slug-input")
         self.assertIsNotNone(id_input)
 
     def test_shows_type_in_thead(self):
@@ -532,7 +532,9 @@ class CurationEditEvidenceTest(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.url = reverse("curation-edit-evidence", kwargs={"curation_pk": 1})
+        self.url = reverse(
+            "curation-edit-evidence", kwargs={"curation_slug": "C000001"}
+        )
         self.active_user = User.objects.create(
             username="ash",
             password="pikachu",  # noqa: S106 (Hard-coded for testing.)
@@ -631,7 +633,7 @@ class CurationEditEvidenceTest(TestCase):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         curation_id = soup.find(id="curation-id").get_text().strip()
-        self.assertEqual(curation_id, "1")
+        self.assertEqual(curation_id, "C000001")
 
     def test_shows_added_at(self):
         self.client.force_login(self.user_who_can_create)
@@ -830,7 +832,7 @@ class EvidenceCreateTest(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.url = reverse("evidence-create", kwargs={"curation_pk": 1})
+        self.url = reverse("evidence-create", kwargs={"curation_slug": "C000001"})
         self.active_user = User.objects.create(
             username="ash",
             password="pikachu",  # noqa: S106 (Hard-coded for testing.)
@@ -925,7 +927,8 @@ class EvidenceDetailTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = reverse(
-            "evidence-detail", kwargs={"curation_pk": 1, "evidence_pk": 1}
+            "evidence-detail",
+            kwargs={"curation_slug": "C000001", "evidence_slug": "E000001"},
         )
 
     def test_shows_menu(self):
@@ -970,7 +973,10 @@ class EvidenceEditTest(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.url = reverse("evidence-edit", kwargs={"curation_pk": 1, "evidence_pk": 1})
+        self.url = reverse(
+            "evidence-edit",
+            kwargs={"curation_slug": "C000001", "evidence_slug": "E000001"},
+        )
         self.user_who_can_create = User.objects.create(
             username="meowth",
             password="pikachu",  # noqa: S106 (Hard-coded for testing.)

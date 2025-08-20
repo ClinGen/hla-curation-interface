@@ -7,33 +7,33 @@ from curation import views
 urlpatterns = [
     path("create", views.CurationCreate.as_view(), name="curation-create"),
     path(
-        "<int:curation_pk>/detail",
+        "<slug:curation_slug>/detail",
         views.CurationDetail.as_view(),
         name="curation-detail",
     ),
     path("search", views.curation_search, name="curation-search"),
     path(
-        "<int:curation_pk>/edit-curation",
+        "<slug:curation_slug>/edit-curation",
         views.CurationEdit.as_view(),
         name="curation-edit",
     ),
     path(
-        "<int:curation_pk>/edit-evidence",
+        "<slug:curation_slug>/edit-evidence",
         views.curation_edit_evidence,
         name="curation-edit-evidence",
     ),
     path(
-        "<int:curation_pk>/evidence/create",
+        "<slug:curation_slug>/evidence/create",
         views.EvidenceCreate.as_view(),
         name="evidence-create",
     ),
     path(
-        "<int:curation_pk>/evidence/<int:evidence_pk>/detail",
+        "<slug:curation_slug>/evidence/<slug:evidence_slug>/detail",
         views.EvidenceDetail.as_view(),
         name="evidence-detail",
     ),
     path(
-        "<int:curation_pk>/evidence/<int:evidence_pk>/edit",
+        "<slug:curation_slug>/evidence/<slug:evidence_slug>/edit",
         views.EvidenceEdit.as_view(),
         name="evidence-edit",
     ),

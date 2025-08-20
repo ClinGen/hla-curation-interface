@@ -37,6 +37,8 @@ class CurationCreate(CreateAccessMixin, CreateView):  # type: ignore
     model = Curation
     form_class = CurationCreateForm
     template_name = "curation/create.html"
+    slug_field = "slug"
+    slug_url_kwarg = "curation_slug"
 
     def form_valid(self, form: CurationCreateForm) -> HttpResponse:
         """Makes sure the user who added the curation is recorded.
@@ -54,7 +56,8 @@ class CurationDetail(DetailView):
 
     model = Curation
     template_name = "curation/detail.html"
-    pk_url_kwarg = "curation_pk"
+    slug_field = "slug"
+    slug_url_kwarg = "curation_slug"
 
 
 class CurationEdit(UpdateView):
@@ -63,25 +66,26 @@ class CurationEdit(UpdateView):
     model = Curation
     form_class = CurationEditForm
     template_name = "curation/edit_curation.html"
-    pk_url_kwarg = "curation_pk"
+    slug_field = "slug"
+    slug_url_kwarg = "curation_slug"
 
 
 @has_create_access
-def curation_edit_evidence(request: HttpRequest, curation_pk: int) -> HttpResponse:
+def curation_edit_evidence(request: HttpRequest, curation_slug: str) -> HttpResponse:
     """Returns the editable curation details page with editable top-level evidence.
 
     Args:
          request: The Django request object.
-         curation_pk: The primary key for the curation.
+         curation_slug: The curation object's slug (human-readable ID).
     """
-    curation = get_object_or_404(Curation, pk=curation_pk)
+    curation = get_object_or_404(Curation, slug=curation_slug)
     evidence = Evidence.objects.filter(curation=curation)
     if request.method == "POST":
         evidence_formset = EvidenceTopLevelEditFormSet(request.POST, queryset=evidence)
         if evidence_formset.is_valid():
             evidence_formset.save()
             messages.success(request, "Changes saved successfully.")
-            return redirect("curation-detail", curation_pk=curation.pk)
+            return redirect("curation-detail", curation_slug=curation.slug)
     else:
         evidence_formset = EvidenceTopLevelEditFormSet(queryset=evidence)
 
@@ -110,6 +114,8 @@ class EvidenceCreate(CreateAccessMixin, CreateView):  # type: ignore
     model = Evidence
     form_class = EvidenceCreateForm
     template_name = "evidence/create.html"
+    slug_field = "slug"
+    slug_url_kwarg = "evidence_slug"
 
     def form_valid(self, form: EvidenceCreateForm) -> HttpResponse:
         """Makes sure the user who added the evidence is recorded.
@@ -118,15 +124,15 @@ class EvidenceCreate(CreateAccessMixin, CreateView):  # type: ignore
              The details page for the evidence if the form is valid, or the form with
              errors otherwise.
         """
-        curation = Curation.objects.get(pk=self.kwargs["curation_pk"])
+        curation = Curation.objects.get(slug=self.kwargs["curation_slug"])
         form.instance.curation = curation
         form.instance.added_by = self.request.user
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):  # noqa
-        """Returns the context with the curation ID."""
+        """Returns the context with the human-readable curation ID."""
         context = super().get_context_data(**kwargs)
-        context["curation_pk"] = self.kwargs["curation_pk"]
+        context["curation_slug"] = self.kwargs["curation_slug"]
         return context
 
 
@@ -135,7 +141,8 @@ class EvidenceDetail(DetailView):
 
     model = Evidence
     template_name = "evidence/detail.html"
-    pk_url_kwarg = "evidence_pk"
+    slug_field = "slug"
+    slug_url_kwarg = "evidence_slug"
 
     def get_context_data(self, **kwargs):  # noqa
         """Returns the context with the framework."""
@@ -150,7 +157,8 @@ class EvidenceEdit(UpdateView, CreateAccessMixin):  # type: ignore
     model = Evidence
     form_class = EvidenceEditForm
     template_name = "evidence/edit.html"
-    pk_url_kwarg = "evidence_pk"
+    slug_field = "slug"
+    slug_url_kwarg = "evidence_slug"
 
     def form_invalid(self, form: EvidenceEditForm) -> HttpResponse:
         """Returns the form with errors and flashes a message about the errors."""
