@@ -24,12 +24,12 @@ Configure Firebase
 */
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD_TLzPJT3IxX59b_7raOyLka11kLYGYg0",
-  authDomain: "som-clingen-projects.firebaseapp.com",
-  projectId: "som-clingen-projects",
-  storageBucket: "som-clingen-projects.firebasestorage.app",
-  messagingSenderId: "653902215137",
-  appId: "1:653902215137:web:d054a272e88ab9ca2644a0",
+  apiKey: "AIzaSyChrr3ndMeK7_y2OZhdpq3gtUgkjLGCosg",
+  authDomain: "som-clingen-prod.firebaseapp.com",
+  projectId: "som-clingen-prod",
+  storageBucket: "som-clingen-prod.firebasestorage.app",
+  messagingSenderId: "597465048181",
+  appId: "1:597465048181:web:066d7dceb948b85fa6843c",
 };
 const app = initializeApp(firebaseConfig);
 
