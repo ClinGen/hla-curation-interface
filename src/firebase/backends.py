@@ -1,5 +1,6 @@
 """Provides authentication backends for the firebase app."""
 
+import logging
 from typing import Any
 
 from django.contrib.auth.backends import BaseBackend
@@ -9,6 +10,8 @@ from django.http import HttpRequest
 from core.crud import create_user_profile, update_user_profile
 from firebase.clients import get_token_info
 from firebase.crud import create_firebase_user, read_firebase_user, update_firebase_user
+
+logger = logging.getLogger(__name__)
 
 
 class FirebaseBackend(BaseBackend):
@@ -30,11 +33,14 @@ class FirebaseBackend(BaseBackend):
              The User object for the authenticated user or None if we were unable to
              authenticate the user.
         """
+        logger.info("Got request to authenticate user")
         id_token = kwargs.get("id_token")
         if id_token is None:
+            logger.warning("Unable to get the ID token")
             return None
         info: Any = get_token_info(id_token)
         if info is None:
+            logger.warning("Unable to get info from the ID token")
             return None
         user = read_firebase_user(info.get("username"))
         if user is None:
@@ -62,4 +68,5 @@ class FirebaseBackend(BaseBackend):
         try:
             return User.objects.get(pk=user_id)
         except User.DoesNotExist:
+            logger.warning(f"User with user ID {user_id} does not exist")
             return None
