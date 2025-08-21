@@ -58,6 +58,7 @@ function extractQueryParameterPath(
     return null;
   } catch (error) {
     message.error("Oops, something went wrong trying to parse the URL.");
+    console.error(error);
     return null;
   }
 }
@@ -99,11 +100,13 @@ async function continueWithProvider(providerString) {
       redirect();
     } else {
       message.error(data.message);
+      console.error(data.message);
     }
   } catch (error) {
     let errorMessage = "Oops, something went wrong. ";
     errorMessage += "Please try again later.";
     message.error(errorMessage);
+    console.error(error);
   }
 }
 
@@ -176,11 +179,13 @@ async function signUpWithEmail() {
       redirect();
     } else {
       message.error(data.message);
+      console.error(data.message);
     }
   } catch (error) {
     let errorMessage = "Oops, something went wrong trying to sign you up.";
     errorMessage += " Please try again later.";
     message.error(errorMessage);
+    console.error(error);
   }
 }
 
@@ -261,11 +266,13 @@ async function logInWithEmail() {
       redirect();
     } else {
       message.error(data.message);
+      console.error(data.message);
     }
   } catch (error) {
     let errorMessage = "Oops, something went wrong trying to log you in.";
     errorMessage += " Please check your information and try again.";
     message.error(errorMessage);
+    console.error(error);
   }
 }
 
@@ -338,6 +345,7 @@ async function logOut() {
     let errorMessage = "Oops, something went wrong trying to log you out.";
     errorMessage += " Please try again later.";
     message.error(errorMessage);
+    console.error(error);
   }
 }
 
@@ -383,6 +391,7 @@ async function resendVerificationEmail() {
         "Oops, something went wrong trying to send the verification email.";
       errorMessage += " Please try again later.";
       message.error(errorMessage);
+      console.error(error);
     }
   } else {
     let errorMessage =
@@ -450,6 +459,7 @@ async function editUserProfile() {
       "Oops, something went wrong trying to update your display name." +
         " Please try again later.",
     );
+    console.error(error);
   }
 }
 
@@ -488,6 +498,7 @@ async function sendResetEmail() {
       "Oops, something went wrong trying to send a password reset email." +
         " Please try again later",
     );
+    console.error(error);
   }
 }
 
