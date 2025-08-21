@@ -39,12 +39,12 @@ LOGGING = {
     },
     "handlers": {
         "console": {
-            "level": "WARNING",
+            "level": "INFO",
             "class": "logging.StreamHandler",
             "formatter": "simple",
         },
         "file": {
-            "level": "WARNING",
+            "level": "INFO",
             "class": "logging.handlers.RotatingFileHandler",
             "filename": LOG_FILE,
             "maxBytes": 1024 * 1024 * 5,  # 1024 * 1024 * 5 = 5 MB.
@@ -54,6 +54,6 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console", "file"],
-        "level": "WARNING",
+        "level": "INFO",
     },
 }
