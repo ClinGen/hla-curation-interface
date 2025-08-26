@@ -354,6 +354,14 @@ class TestEvidence(TestCase):
         self.evidence.save()
         self.assertEqual(self.evidence.score, 0.0)
 
+    def test_is_protective_is_false_when_created(self):
+        self.assertFalse(self.evidence.is_protective)
+
+    def test_can_change_is_protective(self):
+        self.evidence.is_protective = True
+        self.evidence.save()
+        self.assertTrue(self.evidence.is_protective)
+
     def test_needs_review_is_false_when_created(self):
         self.assertFalse(self.evidence.needs_review)
 

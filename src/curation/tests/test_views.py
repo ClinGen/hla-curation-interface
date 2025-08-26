@@ -1007,6 +1007,7 @@ class EvidenceEditTest(TestCase):
             "confidence-interval",
             "cohort-size",
             "significant-association",
+            "protective",
             "needs-review",
             "save",
         ]
@@ -1045,6 +1046,8 @@ class EvidenceEditTest(TestCase):
             "additional_phenotypes_notes": "",
             "has_association": True,
             "has_association_notes": "",
+            "is_protective": False,
+            "is_protective_notes": "",
             "needs_review": False,
             "needs_review_notes": "",
         }

@@ -98,6 +98,8 @@ class EvidenceEditForm(ModelForm):
             "additional_phenotypes_notes",
             "has_association",
             "has_association_notes",
+            "is_protective",
+            "is_protective_notes",
             "needs_review",
             "needs_review_notes",
         ]
@@ -119,6 +121,8 @@ class EvidenceEditForm(ModelForm):
             "additional_phenotypes_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
             "has_association": forms.RadioSelect(choices=YN_BOOL_CHOICES),
             "has_association_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
+            "is_protective": forms.RadioSelect(choices=YN_BOOL_CHOICES),
+            "is_protective_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
             "needs_review": forms.RadioSelect(choices=YN_BOOL_CHOICES),
             "needs_review_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
         }

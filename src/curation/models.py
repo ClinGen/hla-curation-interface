@@ -460,6 +460,16 @@ class Evidence(models.Model):
         default="",
         verbose_name="Notes",
     )
+    is_protective = models.BooleanField(
+        default=False,
+        verbose_name="Protective",
+        help_text="Is the HLA-disease pair protective? Does it decrease risk?",
+    )
+    is_protective_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Notes",
+    )
     needs_review = models.BooleanField(
         default=False,
         verbose_name="Needs Manual Review",

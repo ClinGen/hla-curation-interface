@@ -209,6 +209,12 @@
                 <td>{{ object.has_association }}</td>
                 <td>{{ object.has_association_notes }}</td>
             </tr>
+            <tr>
+                <td>Protective</td>
+                <td>{% include "common/tags/provided.html" %}</td>
+                <td>{{ object.is_protective }}</td>
+                <td>{{ object.is_protective_notes }}</td>
+            </tr>
             <tr {% if object.needs_review %}style="background-color: lightpink"{% endif %}>
                 <td>Needs Review</td>
                 <td>{% include "common/tags/provided.html" %}</td>
