@@ -132,11 +132,20 @@ class TestEvidence(TestCase):
     def test_demographics_is_empty_when_created(self):
         self.assertEqual(len(self.evidence.demographics.all()), 0)
 
-    def test_can_add_demographic(self):
+    def test_can_add_single_demographic(self):
         demographic = Demographic.objects.get(pk=1)
         self.evidence.demographics.add(demographic)
         self.evidence.save()
         self.assertIn(demographic, self.evidence.demographics.all())
+
+    def test_can_add_multiple_demographics(self):
+        demographic_1 = Demographic.objects.get(pk=1)
+        demographic_2 = Demographic.objects.get(pk=2)
+        self.evidence.demographics.add(demographic_1)
+        self.evidence.demographics.add(demographic_2)
+        self.evidence.save()
+        self.assertIn(demographic_1, self.evidence.demographics.all())
+        self.assertIn(demographic_2, self.evidence.demographics.all())
 
     def test_p_value_is_empty_when_created(self):
         self.assertIsNone(self.evidence.p_value)
