@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "firebase",
     "haplotype",
     "publication",
+    "repo",
 ]
 
 # This needs to be set to "same-origin-allow-popups" for logging in with Google and

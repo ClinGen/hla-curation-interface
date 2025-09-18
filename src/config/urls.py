@@ -13,4 +13,5 @@ urlpatterns = [
     path("firebase/", include("firebase.urls")),
     path("haplotype/", include("haplotype.urls")),
     path("publication/", include("publication.urls")),
+    path("repo/", include("repo.urls")),
 ]

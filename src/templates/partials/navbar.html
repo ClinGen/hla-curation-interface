@@ -99,6 +99,12 @@
                             Sign Up
                         </a>
                     {% endif %}
+                    <a id="hla-repo-button" href="{% url 'repo-home' %}" class="button">
+                        {% with icon_name="database" %}
+                            {% include "common/icon.html" %}
+                        {% endwith %}
+                        HLARepo
+                    </a>
                 </div>
             </div>
         </div>
