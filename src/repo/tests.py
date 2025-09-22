@@ -15,5 +15,5 @@ class RepoHomeViewTest(TestCase):
 
     def test_content(self):
         response = self.client.get(self.url)
-        self.assertContains(response, "HLARepo")
+        self.assertContains(response, "HLArepo")
         self.assertContains(response, "under construction")

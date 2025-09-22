@@ -5,5 +5,5 @@ from django.shortcuts import render
 
 
 def repo_home(request: HttpRequest) -> HttpResponse:
-    """Returns the HLARepo's home page."""
+    """Returns the HLArepo's home page."""
     return render(request, "repo/home.html")
