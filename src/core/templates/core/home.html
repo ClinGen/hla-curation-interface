@@ -1,16 +1,24 @@
 {% extends "layouts/base.html" %}
+{% load static %}
 {% block title %}Home{% endblock %}
 {% block description %}Curate information about HLA alleles and haplotypes.{% endblock %}
 {% block main %}
     <div class="block mt-6">
         <section class="hero is-light">
             <div class="hero-body">
-                <p class="title">HLA Curation Interface</p>
-                {% if user.is_authenticated %}
-                    <p class="subtitle">You are logged in as {{ user.email }}.</p>
-                {% else %}
-                    <p class="subtitle">You are not logged in.</p>
-                {% endif %}
+                <div class="columns">
+                    <div class="column is-1">
+                        <img src="{% static 'hci/img/hci-logo-circle.png' %}" alt="The HCI logo.">
+                    </div>
+                    <div class="column">
+                        <p class="title">HLA Curation Interface</p>
+                        {% if user.is_authenticated %}
+                            <p class="subtitle">You are logged in as {{ user.email }}.</p>
+                        {% else %}
+                            <p class="subtitle">You are not logged in.</p>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </section>
     </div>
