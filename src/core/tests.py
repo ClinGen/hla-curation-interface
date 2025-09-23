@@ -118,7 +118,7 @@ class CollaboratorsViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertContains(response, "Collaborators")
         self.assertContains(response, "The Baylor College of Medicine ClinGen Team")
-        self.assertContains(response, "PharmGKB")
+        self.assertContains(response, "ClinPGx")
 
 
 class CRUDTest(TestCase):
