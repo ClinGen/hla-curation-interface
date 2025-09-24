@@ -3,10 +3,20 @@
     <form method="post">{% csrf_token %}
         <div class="field is-grouped">
             <div class="control">
-                <button type="submit" class="button is-link">Save</button>
+                <button type="submit"
+                        class="button is-link"
+                        id="curation-edit-save-button"
+                >
+                    Save
+                </button>
             </div>
             <div class="control">
-                <a href="{% url 'curation-detail' object.slug %}" class="button is-link is-light">Cancel</a>
+                <a href="{% url 'curation-detail' object.slug %}"
+                   class="button is-link is-light"
+                   id="curation-edit-cancel-button"
+                >
+                    Cancel
+                </a>
             </div>
         </div>
         <table class="table is-hoverable">

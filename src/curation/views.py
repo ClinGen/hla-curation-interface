@@ -60,7 +60,7 @@ class CurationDetail(DetailView):
     slug_url_kwarg = "curation_slug"
 
 
-class CurationEdit(UpdateView):
+class CurationEdit(CreateAccessMixin, UpdateView):  # type: ignore
     """Shows the user information about a curation."""
 
     model = Curation
