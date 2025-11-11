@@ -68,7 +68,7 @@ class HelpViewTests(TestCase):
     def test_content(self):
         response = self.client.get(self.url)
         self.assertContains(response, "Help")
-        self.assertContains(response, "user documentation")
+        self.assertContains(response, "standard operating procedure")
         self.assertContains(response, "email")
         self.assertContains(response, "hci@clinicalgenome.org")
 
