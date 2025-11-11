@@ -22,8 +22,8 @@ class CreateAccessMixin(AccessMixin):
     def dispatch(
         self,
         request: HttpRequest,
-        *args,  # noqa: ANN002 (Don't care.)
-        **kwargs,  # noqa: ANN003 (Don't care.)
+        *args,
+        **kwargs,
     ) -> HttpResponse | HttpResponseRedirect | None:
         """Defines permission logic.
 
@@ -53,8 +53,8 @@ def has_create_access(view_function: Callable) -> Callable:
     @wraps(view_function)
     def _wrapped_view(
         request: HttpRequest,
-        *args,  # noqa: ANN002 (Don't care.)
-        **kwargs,  # noqa: ANN003 (Don't care.)
+        *args,
+        **kwargs,
     ) -> HttpResponse | HttpResponseRedirect | None:
         """Defines permission logic.
 

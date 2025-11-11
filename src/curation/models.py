@@ -145,7 +145,7 @@ class Curation(models.Model):
         """Returns a string representation of the curation."""
         return f"Curation #{self.pk} ({self.curation_type})"
 
-    def save(self, *args, **kwargs) -> None:  # noqa: ANN002, ANN003
+    def save(self, *args, **kwargs) -> None:
         """Adds a human-readable ID."""
         super().save(*args, **kwargs)
         if not self.slug:
@@ -506,7 +506,7 @@ class Evidence(models.Model):
         """Returns a string representation of the curation."""
         return f"Evidence #{self.pk}"
 
-    def save(self, *args, **kwargs) -> None:  # noqa: ANN002, ANN003
+    def save(self, *args, **kwargs) -> None:
         """Adds a human-readable ID."""
         super().save(*args, **kwargs)
         if not self.slug:

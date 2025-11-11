@@ -98,6 +98,8 @@ ignore = [
     "RUF100", # With Ruff 0.11.5, I'm seeing false positives.
     "S314",   # While I agree with this rule, it suggests using an outdated third-party package.
     "S405",   # While I agree with this rule, it suggests using an outdated third-party package.
+    "ANN002",  # I almost always ignore these checks when overriding a method on a Django class.
+    "ANN003",  # I almost always ignore these checks when overriding a method on a Django class.
 ]
 
 [tool.ruff.lint.pydocstyle]

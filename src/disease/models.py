@@ -75,7 +75,7 @@ class Disease(models.Model):
         """Returns a string representation of the disease."""
         return self.name
 
-    def save(self, *args, **kwargs) -> None:  # noqa: ANN002, ANN003
+    def save(self, *args, **kwargs) -> None:
         """Adds a human-readable ID."""
         super().save(*args, **kwargs)
         if not self.slug:
