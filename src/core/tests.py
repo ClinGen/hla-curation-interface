@@ -219,3 +219,85 @@ class CRUDTest(TestCase):
         self.assertEqual(new_photo_url, user_profile.firebase_photo_url)
         self.assertEqual(new_display_name, user_profile.firebase_display_name)
         self.assertEqual(new_provider, user_profile.firebase_sign_in_provider)
+
+
+class AccountActivationMessageTest(TestCase):
+    def setUp(self):
+        self.user1_not_active_not_verified = User.objects.create(
+            username="user1",
+            password="user1pw",  # noqa: S106 (Hard-coded for testing.)
+            is_active=False,
+        )
+        self.user1_profile = UserProfile.objects.create(
+            user=self.user1_not_active_not_verified,
+            firebase_uid=self.user1_not_active_not_verified.username,
+            firebase_email_verified=False,
+            firebase_photo_url="https://foobar.org/img/user2.jpg",
+            firebase_display_name="User 1",
+            firebase_sign_in_provider="password",
+        )
+        self.user2_is_active_not_verified = User.objects.create(
+            username="user2",
+            password="user2pw",  # noqa: S106 (Hard-coded for testing.)
+            is_active=True,
+        )
+        self.user2_profile = UserProfile.objects.create(
+            user=self.user2_is_active_not_verified,
+            firebase_uid=self.user2_is_active_not_verified.username,
+            firebase_email_verified=False,
+            firebase_photo_url="https://foobar.org/img/user2.jpg",
+            firebase_display_name="User 2",
+            firebase_sign_in_provider="password",
+        )
+        self.user3_not_active_is_verified = User.objects.create(
+            username="user3",
+            password="user3pw",  # noqa: S106 (Hard-coded for testing.)
+            is_active=False,
+        )
+        self.user3_profile = UserProfile.objects.create(
+            user=self.user3_not_active_is_verified,
+            firebase_uid=self.user3_not_active_is_verified.username,
+            firebase_email_verified=True,
+            firebase_photo_url="https://foobar.org/img/user3.jpg",
+            firebase_display_name="User 3",
+            firebase_sign_in_provider="password",
+        )
+        self.user4_is_active_is_verified = User.objects.create(
+            username="user4",
+            password="user4pw",  # noqa: S106 (Hard-coded for testing.)
+            is_active=True,
+        )
+        self.user4_profile = UserProfile.objects.create(
+            user=self.user4_is_active_is_verified,
+            firebase_uid=self.user4_is_active_is_verified.username,
+            firebase_email_verified=True,
+            firebase_photo_url="https://foobar.org/img/user4.jpg",
+            firebase_display_name="User 4",
+            firebase_sign_in_provider="password",
+        )
+        self.client = Client()
+        self.url = reverse("home")
+
+    def test_message_for_not_active_not_verified(self):
+        self.client.force_login(self.user1_not_active_not_verified)
+        response = self.client.get(self.url)
+        self.assertContains(response, "not marked as active")
+        self.assertContains(response, "not verified")
+
+    def test_message_for_is_active_not_verified(self):
+        self.client.force_login(self.user2_is_active_not_verified)
+        response = self.client.get(self.url)
+        self.assertNotContains(response, "not marked as active")
+        self.assertContains(response, "not verified")
+
+    def test_message_for_not_active_is_verified(self):
+        self.client.force_login(self.user3_not_active_is_verified)
+        response = self.client.get(self.url)
+        self.assertContains(response, "not marked as active")
+        self.assertNotContains(response, "not verified")
+
+    def test_message_for_is_active_is_verified(self):
+        self.client.force_login(self.user4_is_active_is_verified)
+        response = self.client.get(self.url)
+        self.assertNotContains(response, "not marked as active")
+        self.assertNotContains(response, "not verified")

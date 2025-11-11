@@ -1,0 +1,75 @@
+{% if user.is_authenticated %}
+    {% if not request.user.is_active and not request.user.profile.firebase_email_verified %}
+        <div class="block mt-4">
+            <article class="message is-info">
+                <div class="message-header">
+                    {% with icon_name="info-square" %}
+                        <p>{% include "common/icon.html" %}Account Activation</p>
+                    {% endwith %}
+                </div>
+                <div class="message-body">
+                    <ul>
+                        <li>
+                            Your user account is not marked as active. Please email
+                            <a href="mailto:hci@clinicalgenome.org">hci@clinicalgenome.org</a>
+                            to request activation for your account.
+                        </li>
+                        <li>
+                            Your email is not verified. Please check your inbox and your
+                            spam folder for a verification email.
+                        </li>
+                        <li>
+                            If you haven't done so already, please read the
+                            <a href="https://docs.google.com/document/d/1iZnCEf4nnTbQlvuWOSwIeNU_5Nsd56w26lV6hYJOALU/edit?tab=t.0#heading=h.mvjbqvgggx1r">standard operating procedure for HLA curation</a>.
+                        </li>
+                    </ul>
+                </div>
+            </article>
+        </div>
+    {% elif request.user.is_active and not request.user.profile.firebase_email_verified %}
+        <div class="block mt-4">
+            <article class="message is-info">
+                <div class="message-header">
+                    {% with icon_name="info-square" %}
+                        <p>{% include "common/icon.html" %}Account Activation</p>
+                    {% endwith %}
+                </div>
+                <div class="message-body">
+                    <ul>
+                        <li>
+                            Your email is not verified. Please check your inbox and your
+                            spam folder for a verification email.
+                        </li>
+                        <li>
+                            If you haven't done so already, please read the
+                            <a href="https://docs.google.com/document/d/1iZnCEf4nnTbQlvuWOSwIeNU_5Nsd56w26lV6hYJOALU/edit?tab=t.0#heading=h.mvjbqvgggx1r">standard operating procedure for HLA curation</a>.
+                        </li>
+                    </ul>
+                </div>
+            </article>
+        </div>
+    {% elif not request.user.is_active and request.user.profile.firebase_email_verified %}
+        <div class="block mt-4">
+            <article class="message is-info">
+                <div class="message-header">
+                    {% with icon_name="info-square" %}
+                        <p>{% include "common/icon.html" %}Account Activation</p>
+                    {% endwith %}
+                </div>
+                <div class="message-body">
+                    <ul>
+                        <li>
+                            Your user account is not marked as active. Please email
+                            <a href="mailto:hci@clinicalgenome.org">hci@clinicalgenome.org</a>
+                            to request activation for your account.
+                        </li>
+                        <li>
+                            If you haven't done so already, please read the
+                            <a href="https://docs.google.com/document/d/1iZnCEf4nnTbQlvuWOSwIeNU_5Nsd56w26lV6hYJOALU/edit?tab=t.0#heading=h.mvjbqvgggx1r">standard operating procedure for HLA curation</a>.
+                        </li>
+                    </ul>
+                </div>
+            </article>
+        </div>
+    {% endif %}
+{% endif %}
