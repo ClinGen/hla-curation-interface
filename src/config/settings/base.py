@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "allele",
+    "auth_",
     "core",
     "curation",
     "datatable",
