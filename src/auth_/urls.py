@@ -6,4 +6,5 @@ from auth_ import views
 
 urlpatterns = [
     path("login", views.login, name="woslogin"),
+    path("callback", views.callback, name="woscallback"),
 ]
