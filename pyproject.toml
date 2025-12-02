@@ -14,6 +14,7 @@ dependencies = [
     "requests>=2.32.3",
     "sentry-sdk[django]>=2.29.1",
     "whitenoise[brotli]>=6.9.0",
+    "workos>=5.33.0",
 ]
 
 [dependency-groups]
