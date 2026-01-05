@@ -17,22 +17,6 @@ def validate_publication(evidence) -> None:
         raise ValidationError({"publication": "Please select a publication."})
 
 
-def validate_typing_method(evidence) -> None:
-    """Makes sure demographics are provided if the typing method is imputation.
-
-    Raises:
-        ValidationError: If the user selected imputation as the typing method
-                         without providing demographics.
-    """
-    if (
-        evidence.typing_method
-        and evidence.typing_method == TypingMethod.IMPUTATION
-        and not evidence.demographics.all()
-    ):
-        message = "Demographics must be provided if typing method is imputation."
-        raise ValidationError({"demographics": message})
-
-
 def to_decimal(string_value: str, field: str, message: str) -> None:
     """Returns the Decimal object for the given string.
 

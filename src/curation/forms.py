@@ -126,3 +126,25 @@ class EvidenceEditForm(ModelForm):
             "needs_review": forms.RadioSelect(choices=YN_BOOL_CHOICES),
             "needs_review_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
         }
+
+    def clean(self) -> dict | None:
+        """Returns cleaned data.
+
+        Raises:
+            ValidationError: If demographics are not provided when imputation is typing
+                             method.
+        """
+        cleaned_data = super().clean()
+        typing_method = cleaned_data.get("typing_method")
+        demographics = cleaned_data.get("demographics")
+
+        # Import here to avoid circular imports.
+        from curation.constants.models.evidence import TypingMethod
+
+        if typing_method == TypingMethod.IMPUTATION and (
+            not demographics or not demographics.exists()
+        ):
+            error = "Demographics must be provided if typing method is imputation."
+            raise forms.ValidationError({"demographics": error})
+
+        return cleaned_data

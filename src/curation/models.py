@@ -50,7 +50,6 @@ from curation.validators.models.evidence import (
     validate_p_value_string,
     validate_publication,
     validate_relative_risk_string,
-    validate_typing_method,
 )
 from disease.models import Disease
 from haplotype.models import Haplotype
@@ -527,7 +526,6 @@ class Evidence(models.Model):
     def clean(self) -> None:
         """Makes sure the data being submitted is valid."""
         validate_publication(self)
-        validate_typing_method(self)
         validate_p_value_string(self)
         validate_effect_size_statistic(self)
         validate_odds_ratio_string(self)
