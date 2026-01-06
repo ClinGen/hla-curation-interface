@@ -11,6 +11,8 @@ workos = WorkOSClient(
     client_id=os.getenv("WORKOS_CLIENT_ID"),
 )
 
+cookie_password = os.getenv("WORKOS_COOKIE_PASSWORD")
+
 
 def login(request: HttpRequest) -> HttpResponseRedirect:
     """Logs the user in.
@@ -34,11 +36,20 @@ def callback(request: HttpRequest) -> HttpResponseRedirect:
     code = request.GET.get("code")
     try:
         auth_response = workos.user_management.authenticate_with_code(
-            code=code  # type: ignore
+            code=code,  # type: ignore
+            session={"seal_session": True, "cookie_password": cookie_password},  # type: ignore
         )
         print(auth_response)  # noqa
-        return redirect("home")
-
+        response = redirect("/")
+        response.set_cookie(
+            "wos_session",
+            auth_response.sealed_session,
+            secure=True,
+            httponly=True,
+            samesite="Lax",
+        )
     except Exception as e:
         print("Error authenticating with code", e)  # noqa
         return redirect("woslogin")
+    else:
+        return response
