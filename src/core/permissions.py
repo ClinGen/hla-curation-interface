@@ -36,7 +36,7 @@ class CreateAccessMixin(AccessMixin):
         """
         if not request.user.is_authenticated:
             return self.handle_no_permission()
-        if hasattr(request.user, "profile") and request.user.profile.can_create:
+        if hasattr(request.user, "profile") and request.user.profile.can_curate:
             return super().dispatch(request, *args, **kwargs)  # type: ignore
         raise PermissionDenied(PERMISSION_DENIED_MESSAGE)
 
@@ -67,7 +67,7 @@ def has_create_access(view_function: Callable) -> Callable:
         """
         if not request.user.is_authenticated:
             return redirect(f"{LOGIN_URL}?next={request.path}")
-        if hasattr(request.user, "profile") and request.user.profile.can_create:
+        if hasattr(request.user, "profile") and request.user.profile.can_curate:
             return view_function(request, *args, **kwargs)
         raise PermissionDenied(PERMISSION_DENIED_MESSAGE)
 

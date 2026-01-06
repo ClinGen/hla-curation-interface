@@ -9,39 +9,15 @@ class UserProfile(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
 
-    firebase_uid = models.CharField(
-        blank=True,
-        max_length=128,
-        null=True,
-        unique=True,
-        verbose_name="Firebase User ID",
-        help_text="The user ID from Firebase.",
-    )
-    firebase_email_verified = models.BooleanField(
+    has_curation_permissions = models.BooleanField(
         default=False,
-        verbose_name="Firebase Email Verified",
-        help_text="Whether the email address has been verified by Firebase.",
+        verbose_name="Curation Permissions",
+        help_text="Whether the user should be able to curate.",
     )
-    firebase_photo_url = models.URLField(
-        blank=True,
-        default="",
-        max_length=500,
-        verbose_name="Firebase Photo URL",
-        help_text="The URL of the user's profile picture from Firebase.",
-    )
-    firebase_display_name = models.CharField(
-        blank=True,
-        default="",
-        max_length=255,
-        verbose_name="Firebase Display Name",
-        help_text="The user's display name from Firebase.",
-    )
-    firebase_sign_in_provider = models.CharField(
-        blank=True,
-        default="",
-        max_length=255,
-        verbose_name="Firebase Sign-In Provider",
-        help_text="The provider used to sign the user in.",
+    has_signed_phi_agreement = models.BooleanField(
+        default=False,
+        verbose_name="PHI Agreement",
+        help_text="Whether the user has signed the PHI agreement.",
     )
 
     class Meta:
@@ -53,13 +29,13 @@ class UserProfile(models.Model):
 
     def __str__(self) -> str:
         """Returns a string representation of the UserProfile object."""
-        return f"{self.user.email}/{self.user.username}"
+        return self.user.email
 
     @property
-    def can_create(self) -> bool:
+    def can_curate(self) -> bool:
         """Returns whether the user is allowed to create stuff in the HCI."""
         return (
             self.user.is_authenticated
-            and self.user.is_active
-            and self.firebase_email_verified
+            and self.user.is_curator
+            and self.has_signed_phi_agreement
         )

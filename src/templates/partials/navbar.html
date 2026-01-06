@@ -79,7 +79,7 @@
                             {% endwith %}
                             Log Out
                         </a>
-                        <a href="{% url 'view-profile' %}" class="button">
+                        <a href="{% url 'profile' %}" class="button">
                             {% with icon_name="person-check" %}
                                 {% include "common/icon.html" %}
                             {% endwith %}
@@ -91,12 +91,6 @@
                                 {% include "common/icon.html" %}
                             {% endwith %}
                             Log In
-                        </a>
-                        <a href="{% url 'signup' %}" class="button">
-                            {% with icon_name="person" %}
-                                {% include "common/icon.html" %}
-                            {% endwith %}
-                            Sign Up
                         </a>
                     {% endif %}
                     <a id="hla-repo-button" href="{% url 'repo-home' %}" class="button">

@@ -31,7 +31,6 @@ INSTALLED_APPS = [
     "curation",
     "datatable",
     "disease",
-    "firebase",
     "haplotype",
     "publication",
     "repo",
@@ -94,7 +93,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    "firebase.backends.FirebaseBackend",
+    "auth_.backends.WorkOSBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 

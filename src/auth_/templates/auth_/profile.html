@@ -1,0 +1,55 @@
+{% extends "layouts/base.html" %}
+{% block title %}View Profile{% endblock %}
+{% block description %}View your user profile in the HLA Curation Interface.{% endblock %}
+{% block main %}
+    <div class="block mt-6 mb-6" xmlns="http://www.w3.org/1999/html">
+        <h1 class="title">User Profile</h1>
+        <h2 class="subtitle">{{ request.user.email }}</h2>
+        <div class="block table-container">
+            <table class="table is-hoverable">
+                <tbody>
+                    <tr>
+                        <td>PHI Agreement Signed</td>
+                        <td>
+                            {% if request.user.profile.has_signed_phi_agreement %}
+                                <div class="has-text-success">
+                                    {% include "common/icon.html" with icon_name="check-circle-fill" %}
+                                    True
+                                </div>
+                            {% else %}
+                                <div class="has-text-danger">
+                                    {% include "common/icon.html" with icon_name="x-circle-fill" %}
+                                    False
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            Sign the PHI agreement <a href="{% url 'phi' %}">here</a>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Curation Permissions</td>
+                        <td>
+                            {% if request.user.profile.has_curation_permissions %}
+                                <div class="has-text-success">
+                                    {% include "common/icon.html" with icon_name="check-circle-fill" %}
+                                    Granted
+                                </div>
+                            {% else %}
+                                <div class="has-text-danger">
+                                    {% include "common/icon.html" with icon_name="x-circle-fill" %}
+                                    Not Granted
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            Please email
+                            <a href="mailto:hci@clinicalgenome.org">hci@clinicalgenome.org</a>
+                            to request curation permissions.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

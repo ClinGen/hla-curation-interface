@@ -7,7 +7,7 @@ from django.urls import reverse
 class LoginTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.url = reverse("woslogin")
+        self.url = reverse("login")
 
     def test_redirects_to_workos(self):
         response = self.client.get(self.url)
@@ -17,7 +17,7 @@ class LoginTest(TestCase):
 class CallbackTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.url = reverse("woscallback")
+        self.url = reverse("callback")
 
     def test_redirects(self):
         response = self.client.get(self.url)

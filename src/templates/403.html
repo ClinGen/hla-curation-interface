@@ -14,14 +14,13 @@
                 You are not logged in. Please <a href="{% url 'login' %}">log in</a> or
                 <a href="{% url 'signup' %}">sign up</a> to view this page.
             {% elif not request.user.is_active %}
-                Your user account is not approved for the HLA Curation Interface.
+                Your user account is not active.
                 Please email
                 <a href="mailto:hci@clinicalgenome.org">hci@clinicalgenome.org</a>
-                to request approval.
-            {% elif not request.user.profile.firebase_email_verified %}
-                Your email is not verified. Please check your inbox for the verification
-                email. If you need to resend the verification email, you can do so
-                <a href="{% url 'view-profile' %}">here</a>.
+                to request activation.
+            {% elif not request.user.profile.can_curate %}
+                Before you can curate, you need to request curation permissions and
+                sign the PHI agreement.
             {% else %}
                 You don't have permission to access this page.
                 Return to the <a href="{% url 'home' %}">home page</a>.
