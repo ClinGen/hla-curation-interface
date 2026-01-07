@@ -36,6 +36,13 @@ PUBLICATION_SEARCH_FIELDS = [
         "placeholder": "",
     },
     {
+        "text": "Year",
+        "param_name": "publication_year",
+        "id": "publication-year",
+        "default_value": SortDirections.DEFAULT,
+        "type": FieldTypes.SORT,
+    },
+    {
         "text": "Title",
         "param_name": "title",
         "id": "title",

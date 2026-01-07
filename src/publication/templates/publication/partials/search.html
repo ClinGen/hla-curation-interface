@@ -64,6 +64,10 @@
                                         <td>
                                             <i>{{ value }}</i>
                                         </td>
+                                    {% elif field.param_name == "publication_year" %}
+                                        <td>
+                                            {{ value|default:"" }}
+                                        </td>
                                     {% elif field.param_name == "added_at" %}
                                         <td>
                                             {{ value|date:"Y-m-d H:i" }}

@@ -9,6 +9,7 @@
       "doi": "10.1000/123",
       "title": "Diseases in grass type Pokémon in the Kanto region",
       "author": "Oak",
+      "publication_year": 1990,
       "added_by": null,
       "added_at": "1990-01-01"
     }
@@ -23,6 +24,7 @@
       "doi": "10.1000/456",
       "title": "Diseases in fire type Pokémon in the Johto region",
       "author": "Elm",
+      "publication_year": 1970,
       "added_by": null,
       "added_at": "1970-01-01"
     }
@@ -37,6 +39,7 @@
       "doi": "10.1000/789",
       "title": "Diseases in water type Pokémon in the Hoenn region",
       "author": "Birch",
+      "publication_year": 1980,
       "added_by": null,
       "added_at": "1980-01-01"
     }

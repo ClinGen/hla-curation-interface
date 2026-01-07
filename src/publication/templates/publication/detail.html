@@ -68,6 +68,12 @@
                     <td>Primary Author</td>
                     <td id="author">{{ object.author }}</td>
                 </tr>
+                {% if object.publication_year %}
+                    <tr>
+                        <td>Publication Year</td>
+                        <td id="publication-year">{{ object.publication_year }}</td>
+                    </tr>
+                {% endif %}
                 {% if object.pubmed_id %}
                     <tr>
                         <td>PubMed ID</td>

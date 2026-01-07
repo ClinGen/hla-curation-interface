@@ -79,6 +79,29 @@ def get_pubmed_author(soup: BeautifulSoup) -> str:
     return author
 
 
+def get_pubmed_year(soup: BeautifulSoup) -> int | None:
+    """Extracts the publication year from the PubMed response.
+
+    Args:
+        soup: The BeautifulSoup object representing the PubMed response.
+
+    Returns:
+        The year of publication if it can be found as an integer, or None otherwise.
+    """
+    year = soup.find("Year")
+    if isinstance(year, PageElement):
+        year_text = year.get_text(strip=True)
+        try:
+            return int(year_text)
+        except (ValueError, TypeError):
+            logger.warning(
+                f"Unable to convert year '{year_text}' to integer; returning None"
+            )
+            return None
+    logger.warning("Unable to get year from PubMed data; returning None")
+    return None
+
+
 def fetch_rxiv_data(rxiv_type: str, doi: str, timeout: int = 5) -> dict | None:
     """Fetches data about bioRxiv or medRxiv paper.
 
@@ -152,3 +175,29 @@ def get_rxiv_author(data: dict) -> str:
             authors_list = data["collection"][collection_length - 1]["authors"]
             author = authors_list.split(";")[0]
     return author
+
+
+def get_rxiv_year(data: dict) -> int | None:
+    """Extracts the publication year from the Rxiv response.
+
+    Args:
+        data: The data fetched from Rxiv.
+
+    Returns:
+        The publication year if it can be found or None otherwise.
+    """
+    if "collection" in data:
+        collection_length = len(data["collection"])
+        if (
+            collection_length > 0
+            and "date" in data["collection"][collection_length - 1]
+        ):
+            try:
+                # The format is typically yyyy-mm-dd.
+                date_str = data["collection"][collection_length - 1]["date"]
+                year_str = date_str.split("-")[0]
+                return int(year_str)
+            except (ValueError, TypeError, IndexError):
+                logger.warning("Unable to extract year from date; returning None")
+    logger.warning("Unable to get year from Rxiv data; returning None")
+    return None

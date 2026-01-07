@@ -70,6 +70,9 @@ class PublicationCreateTest(CreateTestMixin, TestCase):
           </Author>
         </AuthorList>
       </Article>
+      <PubDate>
+        <Year>1999</Year>
+      </PubDate>
     </MedlineCitation>
   </PubmedArticle>
 </PubmedArticleSet>
@@ -85,6 +88,7 @@ class PublicationCreateTest(CreateTestMixin, TestCase):
         self.assertEqual(new_publication.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
         self.assertEqual(new_publication.author, "Oak")  # type: ignore[union-attr]
         self.assertEqual(new_publication.title, "Common diseases in Pokémon")  # type: ignore[union-attr]
+        self.assertEqual(new_publication.publication_year, 1999)  # type: ignore[union-attr]
 
     @patch("publication.views.fetch_rxiv_data")
     def test_creates_biorxiv_publication_with_valid_form_data(
@@ -98,6 +102,7 @@ class PublicationCreateTest(CreateTestMixin, TestCase):
                 {
                     "title": "Common diseases in Pokémon",
                     "authors": "Oak, P.; Birch, P.",
+                    "date": "2020-05-15",
                 }
             ]
         }
@@ -111,6 +116,7 @@ class PublicationCreateTest(CreateTestMixin, TestCase):
         self.assertEqual(new_publication.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
         self.assertEqual(new_publication.author, "Oak, P.")  # type: ignore[union-attr]
         self.assertEqual(new_publication.title, "Common diseases in Pokémon")  # type: ignore[union-attr]
+        self.assertEqual(new_publication.publication_year, 2020)  # type: ignore[union-attr]
 
     @patch("publication.views.fetch_rxiv_data")
     def test_creates_medrxiv_publication_with_valid_form_data(
@@ -124,6 +130,7 @@ class PublicationCreateTest(CreateTestMixin, TestCase):
                 {
                     "title": "Diseases in Johto region Pokémon",
                     "authors": "Elm, P.; Juniper, P.",
+                    "date": "2021-03-20",
                 }
             ]
         }
@@ -137,6 +144,7 @@ class PublicationCreateTest(CreateTestMixin, TestCase):
         self.assertEqual(new_publication.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
         self.assertEqual(new_publication.author, "Elm, P.")  # type: ignore[union-attr]
         self.assertEqual(new_publication.title, "Diseases in Johto region Pokémon")  # type: ignore[union-attr]
+        self.assertEqual(new_publication.publication_year, 2021)  # type: ignore[union-attr]
 
     def test_does_not_create_publication_with_invalid_form_data(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
@@ -293,14 +301,24 @@ class PublicationSearchTest(TestCase):
         author = soup.find("tbody").find("tr").find_all("td")[2].get_text().strip()
         self.assertEqual(author, "Oak")
 
+    def test_shows_year_in_thead(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        year_label = (
+            soup.find("label", {"for": "sort-publication-year-button"}).get_text().strip()
+        )
+        self.assertEqual(year_label, "Year")
+        year_button = soup.find(id="sort-publication-year-button")
+        self.assertIsNotNone(year_button)
+
     def test_shows_title_in_tbody(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        title = soup.find("tbody").find("tr").find_all("td")[3].get_text().strip()
+        title = soup.find("tbody").find("tr").find_all("td")[4].get_text().strip()
         self.assertEqual(title, "Diseases in grass type Pokémon in the Kanto region")
 
     def test_shows_added_in_tbody(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        added_at = soup.find("tbody").find("tr").find_all("td")[4].get_text().strip()
+        added_at = soup.find("tbody").find("tr").find_all("td")[5].get_text().strip()
         self.assertIn("1990-01-01", added_at)

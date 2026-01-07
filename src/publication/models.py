@@ -64,6 +64,12 @@ class Publication(models.Model):
         verbose_name="Author",
         help_text="The surname of the primary author of the publication.",
     )
+    publication_year = models.IntegerField(
+        blank=True,
+        null=True,
+        verbose_name="Publication Year",
+        help_text="The year the publication was published, e.g., 1999.",
+    )
     added_by = models.ForeignKey(
         User,
         blank=True,
@@ -89,9 +95,10 @@ class Publication(models.Model):
     def __str__(self) -> str:
         """Returns a string representation of the publication."""
         title = self.title[:-1] if self.title.endswith(".") else self.title
+        year_str = f" ({self.publication_year})" if self.publication_year else ""
         if self.publication_type == PublicationTypes.PUBMED:
-            return f"{self.author}. {title}. {self.pubmed_id}."
-        return f"{self.author}. {title}. {self.doi}."
+            return f"{self.author}. {title}{year_str}. {self.pubmed_id}."
+        return f"{self.author}. {title}{year_str}. {self.doi}."
 
     def save(self, *args, **kwargs) -> None:
         """Adds a human-readable ID."""
