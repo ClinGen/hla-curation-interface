@@ -1,0 +1,32 @@
+{% extends "layouts/base.html" %}
+{% block title %}PHI Agreement{% endblock %}
+{% block description %}Sign the PHI agreement for the HLA Curation Interface.{% endblock %}
+{% block main %}
+    <div class="box mt-6 mb-6">
+        <h1 class="title">PHI Agreement</h1>
+        <form method="post">{% csrf_token %}
+            <p class="mb-2">
+                By checking the checkbox below, you agree not to store
+                <a href="https://www.hipaajournal.com/considered-phi-hipaa/">protected health information (PHI)</a>
+                or equivalent identifiable information as defined by
+                regulations in your country or region in the HLA Curation Interface.
+            </p>
+            <div class="field">
+                <div class="control">
+                    <label class="checkbox" for="agree">
+                        <input type="checkbox" id="agree" required>
+                        I agree to the above terms and conditions.
+                    </label>
+                </div>
+            </div>
+            <div class="field is-grouped">
+                <div class="control">
+                    <button class="button is-link">Submit</button>
+                </div>
+                <div class="control">
+                    <a href="{% url 'profile' %}" class="button is-link is-light">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

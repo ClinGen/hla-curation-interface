@@ -8,15 +8,6 @@ import { copyFile } from "node:fs/promises";
 
 const CSS_STATIC_DIR = "./src/static/hci/css";
 const JS_STATIC_DIR = "./src/static/hci/js";
-const JS_SRC_DIR = "./src/js";
-
-// Build JavaScript dependencies.
-await Bun.build({
-  entrypoints: [`${JS_SRC_DIR}/firebase.js`],
-  outdir: JS_STATIC_DIR,
-  minify: true,
-  sourcemap: "linked",
-});
 
 // Copy HTMX into our Django static directory.
 const htmxPath = "./node_modules/htmx.org/dist/htmx.min.js";

@@ -26,11 +26,11 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "allele",
+    "auth_",
     "core",
     "curation",
     "datatable",
     "disease",
-    "firebase",
     "haplotype",
     "publication",
     "repo",
@@ -93,7 +93,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    "firebase.backends.FirebaseBackend",
+    "auth_.backends.WorkOSBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 
@@ -119,4 +119,4 @@ STORAGES = {
     },
 }
 
-LOGIN_URL = "/firebase/login"
+LOGIN_URL = "/auth/login"

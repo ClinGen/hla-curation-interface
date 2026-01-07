@@ -50,17 +50,4 @@ class UserAdmin(admin.ModelAdmin):
 class UserProfileAdmin(admin.ModelAdmin):
     """Configures the UserProfile model in the admin site."""
 
-    def has_add_permission(self, request: HttpRequest) -> bool:  # noqa: ARG002 (The request argument is expected.)
-        """Returns false because we delegate adding to Firebase."""
-        return False
-
-    # We don't want admins to modify the Firebase fields of UserProfile objects because
-    # Firebase should be the source of truth for users.
-    readonly_fields = [
-        "user",
-        "firebase_uid",
-        "firebase_email_verified",
-        "firebase_photo_url",
-        "firebase_display_name",
-        "firebase_sign_in_provider",
-    ]
+    list_display = ["user", "has_curation_permissions", "has_signed_phi_agreement"]

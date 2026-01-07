@@ -151,7 +151,7 @@ class EvidenceDetail(DetailView):
         return context
 
 
-class EvidenceEdit(UpdateView, CreateAccessMixin):  # type: ignore
+class EvidenceEdit(CreateAccessMixin, UpdateView):  # type: ignore
     """Allows the user to edit evidence."""
 
     model = Evidence

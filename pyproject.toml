@@ -14,6 +14,7 @@ dependencies = [
     "requests>=2.32.3",
     "sentry-sdk[django]>=2.29.1",
     "whitenoise[brotli]>=6.9.0",
+    "workos>=5.33.0",
 ]
 
 [dependency-groups]
@@ -119,6 +120,9 @@ convention = "google"
 ]
 "score.py" = [
     "ANN001", # Don't want to cause a circular import issue, and don't want to do forward declarations.
+]
+"views.py" = [
+    "ARG001", # Sometimes you need a default parameter that goes unused.
 ]
 
 [tool.coverage.run]
