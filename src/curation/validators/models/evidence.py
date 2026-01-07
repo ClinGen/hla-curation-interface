@@ -4,7 +4,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.core.exceptions import ValidationError
 
-from curation.constants.models.evidence import EffectSizeStatistic, TypingMethod
+from curation.constants.models.evidence import EffectSizeStatistic
 
 
 def validate_publication(evidence) -> None:

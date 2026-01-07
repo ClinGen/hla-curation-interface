@@ -135,15 +135,13 @@ class EvidenceEditForm(ModelForm):
                              method.
         """
         cleaned_data = super().clean()
-        typing_method = cleaned_data.get("typing_method")
-        demographics = cleaned_data.get("demographics")
+        typing_method = cleaned_data.get("typing_method")  # type: ignore
+        demographics = cleaned_data.get("demographics")  # type: ignore
 
-        # Import here to avoid circular imports.
+        # Avoid circular imports.
         from curation.constants.models.evidence import TypingMethod
 
-        if typing_method == TypingMethod.IMPUTATION and (
-            not demographics or not demographics.exists()
-        ):
+        if typing_method == TypingMethod.IMPUTATION and not demographics:
             error = "Demographics must be provided if typing method is imputation."
             raise forms.ValidationError({"demographics": error})
 
