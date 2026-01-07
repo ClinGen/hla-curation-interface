@@ -3,71 +3,20 @@
 from unittest.mock import MagicMock, patch
 
 from bs4 import BeautifulSoup
-from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from core.models import UserProfile
+from common.tests import CreateTestMixin
 from publication.models import Publication
 
 
-class PublicationCreateTest(TestCase):
+class PublicationCreateTest(CreateTestMixin, TestCase):
     def setUp(self):
-        self.client = Client()
         self.url = reverse("publication-create")
-        self.active_user = User.objects.create(
-            username="ash",
-            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        self.inactive_user = User.objects.create(
-            username="misty",
-            password="togepi",  # noqa: S106 (Hard-coded for testing.)
-            is_active=False,
-        )
-        self.user_with_unverified_email = User.objects.create(
-            username="brock",
-            password="onix",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        UserProfile.objects.create(
-            user=self.user_with_unverified_email,
-            firebase_email_verified=False,
-        )
-        self.user_who_can_create = User.objects.create(
-            username="meowth",
-            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        UserProfile.objects.create(
-            user=self.user_who_can_create,
-            firebase_email_verified=True,
-        )
-
-    def test_redirects_anonymous_user_to_login(self):
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
-
-    def test_permission_denied_if_not_active(self):
-        self.client.force_login(self.inactive_user)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
-
-    def test_permission_denied_if_no_user_profile(self):
-        self.client.force_login(self.active_user)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
-
-    def test_permission_denied_if_email_not_verified(self):
-        self.client.force_login(self.user_with_unverified_email)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
+        super().setUp()
 
     def test_shows_radio_buttons(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         pubmed_radio = (
@@ -84,7 +33,7 @@ class PublicationCreateTest(TestCase):
         self.assertIn("medRxiv", medrxiv_radio)
 
     def test_shows_inputs(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         pubmed_input = soup.find(id="id_pubmed_id")
@@ -93,7 +42,7 @@ class PublicationCreateTest(TestCase):
         self.assertIsNotNone(doi_input)
 
     def test_shows_submit_button(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         submit_button = soup.find("button", {"type": "submit"}).get_text().strip()
@@ -103,7 +52,7 @@ class PublicationCreateTest(TestCase):
     def test_creates_pubmed_publication_with_valid_form_data(
         self, mock_fetch_pubmed_data: MagicMock
     ):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_publication_count = Publication.objects.count()
         data = {"publication_type": "PUB", "pubmed_id": "123"}
         mock_pubmed_response = """
@@ -133,7 +82,7 @@ class PublicationCreateTest(TestCase):
         self.assertIsNotNone(new_publication)
         self.assertEqual(new_publication.publication_type, "PUB")  # type: ignore[union-attr]
         self.assertEqual(new_publication.pubmed_id, "123")  # type: ignore[union-attr]
-        self.assertEqual(new_publication.added_by, self.user_who_can_create)  # type: ignore[union-attr]
+        self.assertEqual(new_publication.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
         self.assertEqual(new_publication.author, "Oak")  # type: ignore[union-attr]
         self.assertEqual(new_publication.title, "Common diseases in Pokémon")  # type: ignore[union-attr]
 
@@ -141,7 +90,7 @@ class PublicationCreateTest(TestCase):
     def test_creates_biorxiv_publication_with_valid_form_data(
         self, mock_fetch_rxiv_data: MagicMock
     ):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_publication_count = Publication.objects.count()
         data = {"publication_type": "BIO", "doi": "10.1101/123"}
         mock_fetch_rxiv_data.return_value = {
@@ -159,7 +108,7 @@ class PublicationCreateTest(TestCase):
         self.assertIsNotNone(new_publication)
         self.assertEqual(new_publication.publication_type, "BIO")  # type: ignore[union-attr]
         self.assertEqual(new_publication.doi, "10.1101/123")  # type: ignore[union-attr]
-        self.assertEqual(new_publication.added_by, self.user_who_can_create)  # type: ignore[union-attr]
+        self.assertEqual(new_publication.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
         self.assertEqual(new_publication.author, "Oak, P.")  # type: ignore[union-attr]
         self.assertEqual(new_publication.title, "Common diseases in Pokémon")  # type: ignore[union-attr]
 
@@ -167,7 +116,7 @@ class PublicationCreateTest(TestCase):
     def test_creates_medrxiv_publication_with_valid_form_data(
         self, mock_fetch_rxiv_data: MagicMock
     ):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_publication_count = Publication.objects.count()
         data = {"publication_type": "MED", "doi": "10.1101/456"}
         mock_fetch_rxiv_data.return_value = {
@@ -185,12 +134,12 @@ class PublicationCreateTest(TestCase):
         self.assertIsNotNone(new_publication)
         self.assertEqual(new_publication.publication_type, "MED")  # type: ignore[union-attr]
         self.assertEqual(new_publication.doi, "10.1101/456")  # type: ignore[union-attr]
-        self.assertEqual(new_publication.added_by, self.user_who_can_create)  # type: ignore[union-attr]
+        self.assertEqual(new_publication.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
         self.assertEqual(new_publication.author, "Elm, P.")  # type: ignore[union-attr]
         self.assertEqual(new_publication.title, "Diseases in Johto region Pokémon")  # type: ignore[union-attr]
 
     def test_does_not_create_publication_with_invalid_form_data(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_publication_count = Publication.objects.count()
         data = {"publication_type": ""}  # The publication_type field is required.
         response = self.client.post(self.url, data)

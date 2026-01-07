@@ -119,4 +119,4 @@ STORAGES = {
     },
 }
 
-LOGIN_URL = "/firebase/login"
+LOGIN_URL = "/auth/login"

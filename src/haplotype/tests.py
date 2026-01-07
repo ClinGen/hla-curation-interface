@@ -1,87 +1,36 @@
 """Houses tests for the haplotype app."""
 
 from bs4 import BeautifulSoup
-from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from core.models import UserProfile
+from common.tests import CreateTestMixin
 from haplotype.models import Haplotype
 
 
-class HaplotypeCreateTest(TestCase):
+class HaplotypeCreateTest(CreateTestMixin, TestCase):
     fixtures = ["test_alleles.json"]
 
     def setUp(self):
-        self.client = Client()
         self.url = reverse("haplotype-create")
-        self.active_user = User.objects.create(
-            username="ash",
-            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        self.inactive_user = User.objects.create(
-            username="misty",
-            password="togepi",  # noqa: S106 (Hard-coded for testing.)
-            is_active=False,
-        )
-        self.user_with_unverified_email = User.objects.create(
-            username="brock",
-            password="onix",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        UserProfile.objects.create(
-            user=self.user_with_unverified_email,
-            firebase_email_verified=False,
-        )
-        self.user_who_can_create = User.objects.create(
-            username="meowth",
-            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        UserProfile.objects.create(
-            user=self.user_who_can_create,
-            firebase_email_verified=True,
-        )
-
-    def test_redirects_anonymous_user_to_login(self):
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
-
-    def test_permission_denied_if_not_active(self):
-        self.client.force_login(self.inactive_user)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
-
-    def test_permission_denied_if_no_user_profile(self):
-        self.client.force_login(self.active_user)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
-
-    def test_permission_denied_if_email_not_verified(self):
-        self.client.force_login(self.user_with_unverified_email)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
+        super().setUp()
 
     def test_alleles_select_is_in_html(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         alleles_select = soup.find(id="id_alleles")
         self.assertIsNotNone(alleles_select)
 
     def test_shows_submit_button(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         submit_button = soup.find("button", {"type": "submit"}).get_text().strip()
         self.assertEqual(submit_button, "Submit")
 
     def test_creates_haplotype_with_valid_form_data(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_haplotype_count = Haplotype.objects.count()
         data = {"alleles": ["1", "2"]}
         response = self.client.post(self.url, data)
@@ -90,10 +39,10 @@ class HaplotypeCreateTest(TestCase):
         new_haplotype = Haplotype.objects.first()
         self.assertIsNotNone(new_haplotype)
         self.assertEqual(new_haplotype.name, "A*01:02:03~B*04:05:06")  # type: ignore[union-attr]
-        self.assertEqual(new_haplotype.added_by, self.user_who_can_create)  # type: ignore[union-attr]
+        self.assertEqual(new_haplotype.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
 
     def test_does_not_create_haplotype_with_invalid_form_data(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_haplotype_count = Haplotype.objects.count()
         data = {"alleles": []}  # The alleles field is required.
         response = self.client.post(self.url, data)

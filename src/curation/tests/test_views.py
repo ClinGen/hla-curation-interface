@@ -1,12 +1,11 @@
 """Houses tests for the curation app's views."""
 
 from bs4 import BeautifulSoup
-from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from allele.models import Allele
-from core.models import UserProfile
+from common.tests import CreateTestMixin
 from curation.constants.models.common import Status
 from curation.constants.models.evidence import (
     AdditionalPhenotypes,
@@ -25,72 +24,22 @@ from haplotype.models import Haplotype
 from publication.models import Publication
 
 
-class CurationCreateTest(TestCase):
+class CurationCreateTest(CreateTestMixin, TestCase):
     fixtures = ["test_alleles.json", "test_haplotypes.json", "test_diseases.json"]
 
     def setUp(self):
-        self.client = Client()
         self.url = reverse("curation-create")
-        self.active_user = User.objects.create(
-            username="ash",
-            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        self.inactive_user = User.objects.create(
-            username="misty",
-            password="togepi",  # noqa: S106 (Hard-coded for testing.)
-            is_active=False,
-        )
-        self.user_with_unverified_email = User.objects.create(
-            username="brock",
-            password="onix",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        UserProfile.objects.create(
-            user=self.user_with_unverified_email,
-            firebase_email_verified=False,
-        )
-        self.user_who_can_create = User.objects.create(
-            username="meowth",
-            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        UserProfile.objects.create(
-            user=self.user_who_can_create,
-            firebase_email_verified=True,
-        )
-
-    def test_redirects_anonymous_user_to_login(self):
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
-
-    def test_permission_denied_if_not_active(self):
-        self.client.force_login(self.inactive_user)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
-
-    def test_permission_denied_if_no_user_profile(self):
-        self.client.force_login(self.active_user)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
-
-    def test_permission_denied_if_email_not_verified(self):
-        self.client.force_login(self.user_with_unverified_email)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
+        super().setUp()
 
     def test_shows_breadcrumb(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         breadcrumb = soup.find("nav", {"class": "breadcrumb"})
         self.assertIsNotNone(breadcrumb)
 
     def test_shows_radio_buttons(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         allele_radio_button = soup.find(id="id_curation_type_0")
@@ -99,28 +48,28 @@ class CurationCreateTest(TestCase):
         self.assertIsNotNone(haplotype_radio_button)
 
     def test_shows_allele_select(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         allele_select = soup.find(id="id_allele")
         self.assertIsNotNone(allele_select)
 
     def test_shows_disease_select(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         disease_select = soup.find(id="id_disease")
         self.assertIsNotNone(disease_select)
 
     def test_shows_submit_button(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         submit_button = soup.find("button", {"type": "submit"})
         self.assertIsNotNone(submit_button)
 
     def test_creates_allele_curation_with_valid_form_data(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_curation_count = Curation.objects.count()
         data = {"curation_type": "ALL", "allele": "1", "disease": "1"}
         response = self.client.post(self.url, data)
@@ -131,10 +80,10 @@ class CurationCreateTest(TestCase):
         self.assertEqual(new_curation.curation_type, "ALL")  # type: ignore[union-attr]
         self.assertEqual(new_curation.allele, Allele.objects.get(pk=1))  # type: ignore[union-attr]
         self.assertEqual(new_curation.disease, Disease.objects.get(pk=1))  # type: ignore[union-attr]
-        self.assertEqual(new_curation.added_by, self.user_who_can_create)  # type: ignore[union-attr]
+        self.assertEqual(new_curation.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
 
     def test_creates_haplotype_curation_with_valid_form_data(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_curation_count = Curation.objects.count()
         data = {"curation_type": "HAP", "haplotype": "1", "disease": "1"}
         response = self.client.post(self.url, data)
@@ -145,7 +94,7 @@ class CurationCreateTest(TestCase):
         self.assertEqual(new_curation.curation_type, "HAP")  # type: ignore[union-attr]
         self.assertEqual(new_curation.haplotype, Haplotype.objects.get(pk=1))  # type: ignore[union-attr]
         self.assertEqual(new_curation.disease, Disease.objects.get(pk=1))  # type: ignore[union-attr]
-        self.assertEqual(new_curation.added_by, self.user_who_can_create)  # type: ignore[union-attr]
+        self.assertEqual(new_curation.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
 
 
 class CurationDetailTest(TestCase):
@@ -384,7 +333,7 @@ class CurationDetailTest(TestCase):
         self.assertEqual(score, "2.0")
 
 
-class CurationEditTest(TestCase):
+class CurationEditTest(CreateTestMixin, TestCase):
     fixtures = [
         "test_alleles.json",
         "test_diseases.json",
@@ -394,145 +343,95 @@ class CurationEditTest(TestCase):
     ]
 
     def setUp(self):
-        self.client = Client()
         self.url = reverse("curation-edit", kwargs={"curation_slug": "C000001"})
-        self.active_user = User.objects.create(
-            username="ash",
-            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        self.inactive_user = User.objects.create(
-            username="misty",
-            password="togepi",  # noqa: S106 (Hard-coded for testing.)
-            is_active=False,
-        )
-        self.user_with_unverified_email = User.objects.create(
-            username="brock",
-            password="onix",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        UserProfile.objects.create(
-            user=self.user_with_unverified_email,
-            firebase_email_verified=False,
-        )
-        self.user_who_can_create = User.objects.create(
-            username="meowth",
-            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        UserProfile.objects.create(
-            user=self.user_who_can_create,
-            firebase_email_verified=True,
-        )
-
-    def test_redirects_anonymous_user_to_login(self):
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
-
-    def test_permission_denied_if_not_active(self):
-        self.client.force_login(self.inactive_user)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
-
-    def test_permission_denied_if_no_user_profile(self):
-        self.client.force_login(self.active_user)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
-
-    def test_permission_denied_if_email_not_verified(self):
-        self.client.force_login(self.user_with_unverified_email)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
+        super().setUp()
 
     def test_shows_breadcrumb(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         breadcrumb = soup.find("nav", {"class": "breadcrumb"})
         self.assertIsNotNone(breadcrumb)
 
     def test_shows_save_button(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         save_button = soup.find(id="curation-edit-save-button").get_text().strip()
         self.assertEqual(save_button, "Save")
 
     def test_shows_cancel_button(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         cancel_button = soup.find(id="curation-edit-cancel-button").get_text().strip()
         self.assertEqual(cancel_button, "Cancel")
 
     def test_shows_allele(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         allele = soup.find(id="allele").get_text().strip()
         self.assertEqual(allele, "A*01:02:03")
 
     def test_shows_disease(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         disease = soup.find(id="disease").get_text().strip()
         self.assertEqual(disease, "acute oran berry intoxication")
 
     def test_shows_status(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         status = soup.find(id="status")
         self.assertIsNotNone(status)
 
     def test_shows_classification(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         classification = soup.find(id="classification")
         self.assertIsNotNone(classification)
 
     def test_shows_score(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         score = soup.find(id="score")
         self.assertIsNotNone(score)
 
     def test_shows_curation_id(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         curation_id = soup.find(id="curation-id").get_text().strip()
         self.assertEqual(curation_id, "C000001")
 
     def test_shows_added_at(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         added_at = soup.find(id="added-at").get_text().strip()
         self.assertEqual(added_at, "1970-01-01")
 
     def test_shows_search_button(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         search_button = soup.find(id="search-button").get_text().strip()
         self.assertIn("Search", search_button)
 
     def test_shows_add_button(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         add_button = soup.find(id="add-button").get_text().strip()
         self.assertIn("Add", add_button)
 
 
-class CurationEditEvidenceTest(TestCase):
+class CurationEditEvidenceTest(CreateTestMixin, TestCase):
     fixtures = [
         "test_alleles.json",
         "test_diseases.json",
@@ -542,147 +441,97 @@ class CurationEditEvidenceTest(TestCase):
     ]
 
     def setUp(self):
-        self.client = Client()
         self.url = reverse(
             "curation-edit-evidence", kwargs={"curation_slug": "C000001"}
         )
-        self.active_user = User.objects.create(
-            username="ash",
-            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        self.inactive_user = User.objects.create(
-            username="misty",
-            password="togepi",  # noqa: S106 (Hard-coded for testing.)
-            is_active=False,
-        )
-        self.user_with_unverified_email = User.objects.create(
-            username="brock",
-            password="onix",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        UserProfile.objects.create(
-            user=self.user_with_unverified_email,
-            firebase_email_verified=False,
-        )
-        self.user_who_can_create = User.objects.create(
-            username="meowth",
-            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        UserProfile.objects.create(
-            user=self.user_who_can_create,
-            firebase_email_verified=True,
-        )
-
-    def test_redirects_anonymous_user_to_login(self):
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
-
-    def test_permission_denied_if_not_active(self):
-        self.client.force_login(self.inactive_user)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
-
-    def test_permission_denied_if_no_user_profile(self):
-        self.client.force_login(self.active_user)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
-
-    def test_permission_denied_if_email_not_verified(self):
-        self.client.force_login(self.user_with_unverified_email)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
+        super().setUp()
 
     def test_shows_breadcrumb(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         breadcrumb = soup.find("nav", {"class": "breadcrumb"})
         self.assertIsNotNone(breadcrumb)
 
     def test_shows_allele_name(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         allele = soup.find(id="allele").get_text().strip()
         self.assertEqual(allele, "A*01:02:03")
 
     def test_shows_disease_name(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         allele = soup.find(id="disease").get_text().strip()
         self.assertEqual(allele, "acute oran berry intoxication")
 
     def test_shows_status(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         status = soup.find(id="status").get_text().strip()
         self.assertEqual(status, "In Progress")
 
     def test_shows_classification(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         classification = soup.find(id="classification").get_text().strip()
         self.assertEqual(classification, "Limited")
 
     def test_shows_score(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         score = soup.find(id="score").get_text().strip()
         self.assertIsNotNone(score)
 
     def test_shows_curation_id(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         curation_id = soup.find(id="curation-id").get_text().strip()
         self.assertEqual(curation_id, "C000001")
 
     def test_shows_added_at(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         added_at = soup.find(id="added-at").get_text().strip()
         self.assertEqual(added_at, "1970-01-01")
 
     def test_shows_search_button(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         search_button = soup.find(id="search-button").get_text().strip()
         self.assertIn("Search", search_button)
 
     def test_shows_add_button(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         add_button = soup.find(id="add-button").get_text().strip()
         self.assertIn("Add", add_button)
 
     def test_shows_save_button(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         save_button = soup.find(id="save-edit-button")
         self.assertIsNotNone(save_button)
 
     def test_shows_cancel_button(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         cancel_button = soup.find(id="cancel-edit-button")
         self.assertIsNotNone(cancel_button)
 
     def test_shows_id_in_thead(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -692,7 +541,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertEqual(id_th, "ID")
 
     def test_shows_publication_in_thead(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -702,7 +551,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertEqual(publication_th, "Publication")
 
     def test_shows_needs_review_in_thead(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -712,7 +561,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertEqual(needs_review_th, "Needs Review")
 
     def test_shows_status_in_thead(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -722,7 +571,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertEqual(status_th, "Status")
 
     def test_shows_conflicting_in_thead(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -732,7 +581,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertEqual(conflicting_th, "Conflicting")
 
     def test_shows_included_in_thead(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -742,7 +591,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertEqual(included_th, "Included")
 
     def test_shows_score_in_thead(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -752,7 +601,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertEqual(score_th, "Score")
 
     def test_shows_id_in_tbody(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -767,7 +616,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertIn("1", id_anchor)
 
     def test_shows_publication_in_tbody(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -783,7 +632,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertIn(title, publication_anchor)
 
     def test_shows_needs_review_in_tbody(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -793,7 +642,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertEqual(needs_review, "False")
 
     def test_shows_status_in_tbody(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -803,7 +652,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertIsNotNone(status)
 
     def test_shows_conflicting_in_tbody(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -813,7 +662,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertIsNotNone(conflicting)
 
     def test_shows_included_in_tbody(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -823,7 +672,7 @@ class CurationEditEvidenceTest(TestCase):
         self.assertIsNotNone(included)
 
     def test_shows_score_in_tbody(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         evidence_table = soup.find(id="evidence-table")
@@ -970,7 +819,7 @@ class CurationSearchTest(TestCase):
         self.assertIn("1970-01-01", added_at)
 
 
-class EvidenceCreateTest(TestCase):
+class EvidenceCreateTest(CreateTestMixin, TestCase):
     fixtures = [
         "test_alleles.json",
         "test_diseases.json",
@@ -979,75 +828,25 @@ class EvidenceCreateTest(TestCase):
     ]
 
     def setUp(self):
-        self.client = Client()
         self.url = reverse("evidence-create", kwargs={"curation_slug": "C000001"})
-        self.active_user = User.objects.create(
-            username="ash",
-            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        self.inactive_user = User.objects.create(
-            username="misty",
-            password="togepi",  # noqa: S106 (Hard-coded for testing.)
-            is_active=False,
-        )
-        self.user_with_unverified_email = User.objects.create(
-            username="brock",
-            password="onix",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        UserProfile.objects.create(
-            user=self.user_with_unverified_email,
-            firebase_email_verified=False,
-        )
-        self.user_who_can_create = User.objects.create(
-            username="meowth",
-            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        UserProfile.objects.create(
-            user=self.user_who_can_create,
-            firebase_email_verified=True,
-        )
-
-    def test_redirects_anonymous_user_to_login(self):
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
-
-    def test_permission_denied_if_not_active(self):
-        self.client.force_login(self.inactive_user)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
-
-    def test_permission_denied_if_no_user_profile(self):
-        self.client.force_login(self.active_user)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
-
-    def test_permission_denied_if_email_not_verified(self):
-        self.client.force_login(self.user_with_unverified_email)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
+        super().setUp()
 
     def test_shows_publication_input(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         publication_input = soup.find(id="id_publication")
         self.assertIsNotNone(publication_input)
 
     def test_shows_submit_button(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         submit_button = soup.find("button", {"type": "submit"}).get_text().strip()
         self.assertEqual(submit_button, "Submit")
 
     def test_creates_evidence_with_valid_form_data(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_evidence_count = Evidence.objects.count()
         data = {"publication": "1"}
         response = self.client.post(self.url, data)
@@ -1060,7 +859,7 @@ class EvidenceCreateTest(TestCase):
         self.assertEqual(new_evidence.publication, Publication.objects.get(pk=1))  # type: ignore[union-attr]
         self.assertFalse(new_evidence.needs_review)  # type: ignore[union-attr]
         self.assertEqual(new_evidence.status, Status.IN_PROGRESS)  # type: ignore[union-attr]
-        self.assertEqual(new_evidence.added_by, self.user_who_can_create)  # type: ignore[union-attr]
+        self.assertEqual(new_evidence.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
 
 
 class EvidenceDetailTest(TestCase):
@@ -1110,7 +909,7 @@ class EvidenceDetailTest(TestCase):
         self.assertIsNotNone(total_score)
 
 
-class EvidenceEditTest(TestCase):
+class EvidenceEditTest(CreateTestMixin, TestCase):
     fixtures = [
         "test_alleles.json",
         "test_diseases.json",
@@ -1120,28 +919,21 @@ class EvidenceEditTest(TestCase):
     ]
 
     def setUp(self):
-        self.client = Client()
         self.url = reverse(
             "evidence-edit",
             kwargs={"curation_slug": "C000001", "evidence_slug": "E000001"},
         )
-        self.user_who_can_create = User.objects.create(
-            username="meowth",
-            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        UserProfile.objects.create(
-            user=self.user_who_can_create,
-            firebase_email_verified=True,
-        )
+        super().setUp()
 
     def test_shows_menu(self):
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         menu = soup.find(id="menu")
         self.assertIsNotNone(menu)
 
     def test_shows_data_headings(self):
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         heading_ids = [
@@ -1164,7 +956,7 @@ class EvidenceEditTest(TestCase):
             self.assertIsNotNone(heading)
 
     def test_edits_evidence_with_valid_form_data(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         data = {
             "is_gwas": True,
             "is_gwas_notes": "",

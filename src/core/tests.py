@@ -154,7 +154,7 @@ class AccountActivationMessageTest(TestCase):
             password="user4pw",  # noqa: S106 (Hard-coded for testing.)
         )
         self.user4_profile = UserProfile.objects.create(
-            user=self.user4_is_active_is_verified,
+            user=self.user4_yes_phi_yes_perms,
             has_signed_phi_agreement=True,
             has_curation_permissions=True,
         )

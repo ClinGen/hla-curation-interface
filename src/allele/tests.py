@@ -3,79 +3,28 @@
 from unittest.mock import MagicMock, patch
 
 from bs4 import BeautifulSoup
-from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from allele.models import Allele
-from core.models import UserProfile
+from common.tests import CreateTestMixin
 from haplotype.models import Haplotype
 
 
-class AlleleCreateTest(TestCase):
+class AlleleCreateTest(CreateTestMixin, TestCase):
     def setUp(self):
-        self.client = Client()
         self.url = reverse("allele-create")
-        self.active_user = User.objects.create(
-            username="ash",
-            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        self.inactive_user = User.objects.create(
-            username="misty",
-            password="togepi",  # noqa: S106 (Hard-coded for testing.)
-            is_active=False,
-        )
-        self.user_with_unverified_email = User.objects.create(
-            username="brock",
-            password="onix",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        UserProfile.objects.create(
-            user=self.user_with_unverified_email,
-            firebase_email_verified=False,
-        )
-        self.user_who_can_create = User.objects.create(
-            username="meowth",
-            password="pikachu",  # noqa: S106 (Hard-coded for testing.)
-            is_active=True,
-        )
-        UserProfile.objects.create(
-            user=self.user_who_can_create,
-            firebase_email_verified=True,
-        )
-
-    def test_redirects_anonymous_user_to_login(self):
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
-
-    def test_permission_denied_if_not_active(self):
-        self.client.force_login(self.inactive_user)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
-
-    def test_permission_denied_if_no_user_profile(self):
-        self.client.force_login(self.active_user)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
-
-    def test_permission_denied_if_email_not_verified(self):
-        self.client.force_login(self.user_with_unverified_email)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
+        super().setUp()
 
     def test_shows_allele_name_input(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         allele_name = soup.find(id="id_name")
         self.assertIsNotNone(allele_name)
 
     def test_shows_submit_button(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         submit_button = soup.find("button", {"type": "submit"}).get_text().strip()
@@ -85,7 +34,7 @@ class AlleleCreateTest(TestCase):
     def test_creates_allele_with_valid_form_data(
         self, mock_fetch_allele_data: MagicMock
     ):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_allele_count = Allele.objects.count()
         data = {"name": "ASH*01:02:03"}
         mock_fetch_allele_data.return_value = [  # Mock the CAR API response.
@@ -111,10 +60,10 @@ class AlleleCreateTest(TestCase):
         self.assertIsNotNone(new_allele)
         self.assertEqual(new_allele.name, "ASH*01:02:03")  # type: ignore[union-attr]
         self.assertEqual(new_allele.car_id, "XAHLA123")  # type: ignore[union-attr]
-        self.assertEqual(new_allele.added_by, self.user_who_can_create)  # type: ignore[union-attr]
+        self.assertEqual(new_allele.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
 
     def test_does_not_create_allele_with_invalid_form_data(self):
-        self.client.force_login(self.user_who_can_create)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_allele_count = Allele.objects.count()
         data = {"name": ""}  # The name field is required.
         response = self.client.post(self.url, data)
