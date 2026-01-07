@@ -40,7 +40,7 @@ class WorkOSBackend(BaseBackend):
              authenticate the user.
         """
         # Check if sealed_session was passed directly, e.g., during the initial login.
-        sealed_session = kwargs.get("sealed_session") or request.COOKIES.get(
+        sealed_session = kwargs.get("sealed_session") or request.COOKIES.get(  # type: ignore
             "wos_session"
         )
         if not sealed_session:
@@ -50,7 +50,7 @@ class WorkOSBackend(BaseBackend):
             logger.warning("Attempting to load session")
             session = workos.user_management.load_sealed_session(
                 sealed_session=sealed_session,
-                cookie_password=cookie_password,
+                cookie_password=cookie_password,  # type: ignore
             )
             auth_response = session.authenticate()
             if not auth_response.authenticated:

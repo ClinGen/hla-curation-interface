@@ -1,5 +1,6 @@
 """Provides views for the auth_ app."""
 
+import logging
 import os
 
 from django.contrib import messages
@@ -10,6 +11,8 @@ from workos import WorkOSClient
 
 from auth_.forms import PHIForm
 from core.models import UserProfile
+
+logger = logging.getLogger(__name__)
 
 workos = WorkOSClient(
     api_key=os.getenv("WORKOS_API_KEY"),
@@ -50,7 +53,7 @@ def callback(request: HttpRequest) -> HttpResponseRedirect:
         response = redirect("home")
         response.set_cookie(
             "wos_session",
-            auth_response.sealed_session,
+            auth_response.sealed_session,  # type: ignore
             secure=True,
             httponly=True,
             samesite="Lax",
@@ -93,7 +96,7 @@ def phi(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = PHIForm(request.POST)
         if form.is_valid() and form.agree:
-            p = UserProfile.objects.get(user=request.user)
+            p = UserProfile.objects.get(user=request.user)  # type: ignore
             p.has_signed_phi_agreement = True
             p.save()
             messages.success(request, "PHI agreement signed.")
