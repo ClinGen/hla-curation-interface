@@ -5,9 +5,11 @@
     <div class="box mt-6 mb-6">
         <h1 class="title">PHI Agreement</h1>
         <form method="post">{% csrf_token %}
-            <p class="container">
-                By checking the checkbox below, you agree not to store protected health
-                information (PHI) in the HLA Curation Interface.
+            <p class="mb-2">
+                By checking the checkbox below, you agree not to store
+                <a href="https://www.hipaajournal.com/considered-phi-hipaa/">protected health information (PHI)</a>
+                or equivalent identifiable information as defined by
+                regulations in your country or region in the HLA Curation Interface.
             </p>
             <div class="field">
                 <div class="control">

@@ -98,7 +98,7 @@ def phi(request: HttpRequest) -> HttpResponse:
             p.has_signed_phi_agreement = True
             p.save()
             messages.success(request, "PHI agreement signed.")
-            return redirect("home")
+            return redirect("profile")
     else:
         form = PHIForm()
     return render(request, "auth_/phi.html", {"form": form})

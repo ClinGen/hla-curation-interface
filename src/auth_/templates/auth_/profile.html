@@ -1,5 +1,5 @@
 {% extends "layouts/base.html" %}
-{% block title %}View Profile{% endblock %}
+{% block title %}User Profile{% endblock %}
 {% block description %}View your user profile in the HLA Curation Interface.{% endblock %}
 {% block main %}
     <div class="block mt-6 mb-6" xmlns="http://www.w3.org/1999/html">
@@ -24,7 +24,11 @@
                             {% endif %}
                         </td>
                         <td>
-                            Sign the PHI agreement <a href="{% url 'phi' %}">here</a>.
+                            {% if request.user.profile.has_signed_phi_agreement %}
+                                Agreement signed.
+                            {% else %}
+                                Sign the PHI agreement <a href="{% url 'phi' %}">here</a>.
+                            {% endif %}
                         </td>
                     </tr>
                     <tr>
@@ -43,9 +47,13 @@
                             {% endif %}
                         </td>
                         <td>
-                            Please email
-                            <a href="mailto:hci@clinicalgenome.org">hci@clinicalgenome.org</a>
-                            to request curation permissions.
+                            {% if request.user.profile.has_curation_permissions %}
+                                You have full curation permissions.
+                            {% else %}
+                                Please email
+                                <a href="mailto:hci@clinicalgenome.org">hci@clinicalgenome.org</a>
+                                to request curation permissions.
+                            {% endif %}
                         </td>
                     </tr>
                 </tbody>

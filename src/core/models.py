@@ -36,6 +36,6 @@ class UserProfile(models.Model):
         """Returns whether the user is allowed to create stuff in the HCI."""
         return (
             self.user.is_authenticated
-            and self.user.is_curator
+            and self.has_curation_permissions
             and self.has_signed_phi_agreement
         )
