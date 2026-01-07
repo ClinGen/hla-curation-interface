@@ -44,8 +44,10 @@ class WorkOSBackend(BaseBackend):
             "wos_session"
         )
         if not sealed_session:
+            logger.warning("Unable to find sealed session")
             return None
         try:
+            logger.warning("Attempting to load session")
             session = workos.user_management.load_sealed_session(
                 sealed_session=sealed_session,
                 cookie_password=cookie_password,
@@ -53,13 +55,13 @@ class WorkOSBackend(BaseBackend):
             auth_response = session.authenticate()
             if not auth_response.authenticated:
                 try:
-                    logger.info("Attempting to refresh WorkOS session")
+                    logger.info("Attempting to refresh session")
                     refresh_result = session.refresh()
                     if not refresh_result.authenticated:
                         return None
                     auth_response = refresh_result
-                except Exception:
-                    logger.exception("Error refreshing WorkOS session")
+                except Exception:  # noqa (Normally I don't like doing this, but this is how WorkOS does it.)
+                    logger.exception("Error refreshing session")
                     return None
             user_info = auth_response.user
             user, created_user = User.objects.get_or_create(
@@ -75,8 +77,8 @@ class WorkOSBackend(BaseBackend):
                 logger.info(f"Created new user: {user}")
             if created_profile:
                 logger.info(f"Created new profile: {profile}")
-        except Exception:
-            logger.exception("Error authenticating with WorkOS")
+        except Exception:  # noqa (Normally I don't like doing this, but this is how WorkOS does it.)
+            logger.exception("Error authenticating")
             return None
         else:
             return user

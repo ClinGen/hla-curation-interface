@@ -6,7 +6,6 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
-from django.views.generic import CreateView
 from workos import WorkOSClient
 
 from auth_.forms import PHIForm
@@ -59,7 +58,7 @@ def callback(request: HttpRequest) -> HttpResponseRedirect:
         user = authenticate(request, sealed_session=auth_response.sealed_session)
         if user is not None:
             login(request, user)
-    except Exception:
+    except Exception:  # noqa (Normally I don't like doing this, but this is how WorkOS does it.)
         logger.exception("Error authenticating with code")  # noqa
         message = (
             "Oops, an error occurred while trying to log you in."
@@ -82,8 +81,8 @@ def logout_(request: HttpRequest) -> HttpResponseRedirect:
 def profile(request: HttpRequest) -> HttpResponse:
     """Returns the view profile page for the user."""
     if request.user.is_authenticated:
-        profile, _ = UserProfile.objects.get_or_create(user=request.user)
-        context = {"user_profile": profile}
+        p, _ = UserProfile.objects.get_or_create(user=request.user)
+        context = {"user_profile": p}
         return render(request, "auth_/profile.html", context)
     messages.info(request, "Not logged in.")
     return redirect("login")
