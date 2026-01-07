@@ -6,3 +6,10 @@
 .footer-logo-container {
   padding: 20px;
 }
+
+.scroll-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  width: 100%;
+}

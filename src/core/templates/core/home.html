@@ -8,7 +8,7 @@
             <div class="hero-body">
                 <div class="columns">
                     <div class="column is-1">
-                        <img src="{% static 'hci/img/hci-logo-circle.png' %}" alt="The HCI logo.">
+                        <img src="{% static 'hci/img/hci-logo-circle.png' %}" alt="The HCI logo." style="max-width: 50px;">
                     </div>
                     <div class="column">
                         <p class="title">HLA Curation Interface</p>
@@ -23,7 +23,7 @@
         </section>
     </div>
     <div class="block mt-6 ">
-        <div class="fixed-grid has-5-cols has-text-centered">
+        <div class="fixed-grid has-5-cols has-text-centered scroll-container">
             <div class="grid">
                 <div class="cell">
                     <a href="{% url 'allele-search' %}" class="button" id="search-button">
