@@ -54,6 +54,7 @@ jobs:
       DJANGO_SETTINGS_MODULE: "config.settings.prod"
       SECRET_KEY: "dummy"
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      WORKOS_API_KEY: ${{ secrets.TEST_WORKOS_API_KEY }}
       WORKOS_CLIENT_ID: ${{ secrets.TEST_WORKOS_CLIENT_ID }}
       SENTRY_ENV: "ci"
     steps:
@@ -68,6 +69,7 @@ jobs:
       DJANGO_SETTINGS_MODULE: "config.settings.prod"
       SECRET_KEY: "dummy"
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      WORKOS_API_KEY: ${{ secrets.TEST_WORKOS_API_KEY }}
       WORKOS_CLIENT_ID: ${{ secrets.TEST_WORKOS_CLIENT_ID }}
       SENTRY_ENV: "ci"
     steps:
