@@ -23,6 +23,11 @@ urlpatterns = [
         name="curation-edit-evidence",
     ),
     path(
+        "<slug:curation_slug>/publish",
+        views.curation_publish,
+        name="curation-publish",
+    ),
+    path(
         "<slug:curation_slug>/evidence/create",
         views.EvidenceCreate.as_view(),
         name="evidence-create",

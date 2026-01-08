@@ -1,0 +1,104 @@
+{% load custom_filters %}
+<div id="datatable-content">
+    <div class="box mt-6 mb-6">
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li>
+                    <a href="{% url 'home' %}">Home</a>
+                </li>
+                <li class="is-active">
+                    <a href="" aria-current="page">Repository</a>
+                </li>
+            </ul>
+        </nav>
+
+        <h1 class="title" id="main-heading">{{ data_title }}</h1>
+
+        <div class="buttons">
+            <a href="{% url 'repo-download-all' %}"
+               class="button is-primary"
+               id="download-all-button">
+                {% include "common/icon.html" with icon_name="download" %}
+                Download All as JSON
+            </a>
+        </div>
+
+        {% include "datatable/partials/number.html" %}
+        {% include "datatable/partials/pagination.html" %}
+        {% include "datatable/partials/clear.html" %}
+
+        <div class="table-container">
+            <table class="table is-fullwidth is-hoverable">
+                <thead>
+                <tr>
+                    {% for field in fields %}
+                        {% if field.type == "search" %}
+                            <th>{% include "datatable/partials/queries/search.html" %}</th>
+                        {% elif field.type == "sort" %}
+                            <th>{% include "datatable/partials/queries/sort.html" %}</th>
+                        {% elif field.type == "filter" %}
+                            <th>{% include "datatable/partials/queries/filter.html" %}</th>
+                        {% endif %}
+                    {% endfor %}
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% if page %}
+                    {% for object in page.object_list %}
+                        <tr>
+                            {% for field in fields %}
+                                {% with value=object|get_val:field.param_name curation=object.curation %}
+                                    {% if field.param_name == "curation__slug" %}
+                                        <td>
+                                            <a hx-boost="true"
+                                               class="button is-small"
+                                               href="{% url 'repo-detail' curation.slug %}">
+                                                {% include "common/icon.html" with icon_name="eye" %}
+                                                {{ curation.slug }}
+                                            </a>
+                                        </td>
+                                    {% elif field.param_name == "curation__curation_type" %}
+                                        <td>
+                                            <span class="tag">
+                                                {% include "common/icon.html" with icon_name="card-checklist" %}
+                                                {% if curation.curation_type == "ALL" %}
+                                                    Allele
+                                                {% elif curation.curation_type == "HAP" %}
+                                                    Haplotype
+                                                {% endif %}
+                                            </span>
+                                        </td>
+                                    {% elif field.param_name == "curation__allele" %}
+                                        <td>{{ curation.allele|default:"------" }}</td>
+                                    {% elif field.param_name == "curation__haplotype" %}
+                                        <td>{{ curation.haplotype|default:"------" }}</td>
+                                    {% elif field.param_name == "curation__disease" %}
+                                        <td>{{ curation.disease }}</td>
+                                    {% elif field.param_name == "published_at" %}
+                                        <td>{{ object.published_at|date:"Y-m-d H:i" }}</td>
+                                    {% else %}
+                                        <td>{{ value }}</td>
+                                    {% endif %}
+                                {% endwith %}
+                            {% endfor %}
+                            <td>
+                                <a href="{% url 'repo-download-single' object.curation.slug %}"
+                                   class="button is-small is-primary">
+                                    {% include "common/icon.html" with icon_name="download" %}
+                                    JSON
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="{{ fields|length|add:1 }}">No published curations yet.</td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+        {% include "datatable/partials/pagination.html" %}
+    </div>
+</div>

@@ -15,6 +15,7 @@ from curation.forms import (
     EvidenceEditForm,
     EvidenceTopLevelEditFormSet,
 )
+from curation.constants.models.common import Status
 from curation.models import (
     Curation,
     Evidence,
@@ -69,6 +70,18 @@ class CurationEdit(CreateAccessMixin, UpdateView):  # type: ignore
     slug_field = "slug"
     slug_url_kwarg = "curation_slug"
 
+    def dispatch(self, request, *args, **kwargs):
+        """Check if curation is published before allowing edit."""
+        self.object = self.get_object()
+        if hasattr(self.object, "publication"):
+            messages.error(
+                request,
+                "This curation has been published and cannot be edited. "
+                "It is now read-only.",
+            )
+            return redirect("curation-detail", curation_slug=self.object.slug)
+        return super().dispatch(request, *args, **kwargs)
+
 
 @has_create_access
 def curation_edit_evidence(request: HttpRequest, curation_slug: str) -> HttpResponse:
@@ -79,6 +92,16 @@ def curation_edit_evidence(request: HttpRequest, curation_slug: str) -> HttpResp
          curation_slug: The curation object's slug (human-readable ID).
     """
     curation = get_object_or_404(Curation, slug=curation_slug)
+
+    # Check if published
+    if hasattr(curation, "publication"):
+        messages.error(
+            request,
+            "This curation has been published and cannot be edited. "
+            "It is now read-only.",
+        )
+        return redirect("curation-detail", curation_slug=curation.slug)
+
     evidence = Evidence.objects.filter(curation=curation)
     if request.method == "POST":
         evidence_formset = EvidenceTopLevelEditFormSet(request.POST, queryset=evidence)
@@ -160,6 +183,22 @@ class EvidenceEdit(CreateAccessMixin, UpdateView):  # type: ignore
     slug_field = "slug"
     slug_url_kwarg = "evidence_slug"
 
+    def dispatch(self, request, *args, **kwargs):
+        """Check if parent curation is published before allowing edit."""
+        self.object = self.get_object()
+        if hasattr(self.object.curation, "publication"):
+            messages.error(
+                request,
+                "This evidence belongs to a published curation and cannot be edited. "
+                "It is now read-only.",
+            )
+            return redirect(
+                "evidence-detail",
+                curation_slug=self.object.curation.slug,
+                evidence_slug=self.object.slug,
+            )
+        return super().dispatch(request, *args, **kwargs)
+
     def form_invalid(self, form: EvidenceEditForm) -> HttpResponse:
         """Returns the form with errors and flashes a message about the errors."""
         message = (
@@ -184,3 +223,48 @@ class EvidenceEdit(CreateAccessMixin, UpdateView):  # type: ignore
         validate_ci_start(form)
         validate_ci_end(form)
         return super().form_valid(form)
+
+
+@has_create_access
+def curation_publish(request: HttpRequest, curation_slug: str) -> HttpResponse:
+    """Publishes a curation to the repository.
+
+    Args:
+        request: The Django request object.
+        curation_slug: The curation object's slug (human-readable ID).
+
+    Returns:
+        Redirect to the repository detail page if successful, otherwise redirect to
+        the curation detail page with an error message.
+    """
+    from repo.models import PublishedCuration
+
+    curation = get_object_or_404(Curation, slug=curation_slug)
+
+    # Validation: Only DNE curations can be published
+    if curation.status != Status.DONE:
+        messages.error(
+            request,
+            "Only curations with status 'Done' can be published.",
+        )
+        return redirect("curation-detail", curation_slug=curation.slug)
+
+    # Check if already published
+    if hasattr(curation, "publication"):
+        messages.info(
+            request,
+            f"Curation {curation.slug} is already published.",
+        )
+        return redirect("curation-detail", curation_slug=curation.slug)
+
+    # Create publication
+    PublishedCuration.objects.create(
+        curation=curation,
+        published_by=request.user,
+    )
+
+    messages.success(
+        request,
+        f"Curation {curation.slug} has been published to the repository.",
+    )
+    return redirect("repo-detail", curation_slug=curation.slug)

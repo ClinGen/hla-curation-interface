@@ -76,6 +76,11 @@
                                             {% elif value == "DNE" %}
                                                 {% include "common/tags/done.html" %}
                                             {% endif %}
+                                            {% if object.publication %}
+                                                <span class="tag is-success is-light ml-1" title="Published to repository">
+                                                    {% include "common/icon.html" with icon_name="book" %}
+                                                </span>
+                                            {% endif %}
                                         </td>
                                     {% elif field.param_name == "added_at" %}
                                         <td>

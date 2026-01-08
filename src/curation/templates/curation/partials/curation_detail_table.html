@@ -1,8 +1,19 @@
 <h1 class="title">Curation Details</h1>
-<a href="{% url 'curation-edit' object.slug %}" class="button" id="edit-curation-button">
-    {% include "common/icon.html" with icon_name="pencil" %}
-    Edit
-</a>
+{% if object.publication %}
+    <div class="notification is-info is-light">
+        <p>
+            <strong>This curation has been published and is read-only.</strong>
+        </p>
+        <p class="mt-2">
+            <a href="{% url 'repo-detail' object.slug %}">View in Repository</a>
+        </p>
+    </div>
+{% else %}
+    <a href="{% url 'curation-edit' object.slug %}" class="button" id="edit-curation-button">
+        {% include "common/icon.html" with icon_name="pencil" %}
+        Edit
+    </a>
+{% endif %}
 <div class="block table-container mt-4">
     <table class="table is-hoverable">
         <tbody>
@@ -28,6 +39,12 @@
                     {% include "common/tags/in_progress.html" %}
                 {% elif object.status == "DNE" %}
                     {% include "common/tags/done.html" %}
+                {% endif %}
+                {% if object.publication %}
+                    <span class="tag is-success ml-2">
+                        {% include "common/icon.html" with icon_name="book" %}
+                        Published
+                    </span>
                 {% endif %}
             </td>
         </tr>
