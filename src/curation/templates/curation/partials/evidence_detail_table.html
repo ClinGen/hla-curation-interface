@@ -1,23 +1,25 @@
 <div class="box mt-6 mb-6">
     <h1 class="title">Evidence</h1>
-    <div class="buttons">
-        {% if object.evidence.all %}
-            <a href="{% url 'curation-edit-evidence' object.slug %}"
+    {% if not object.publication %}
+        <div class="buttons">
+            {% if object.evidence.all %}
+                <a href="{% url 'curation-edit-evidence' object.slug %}"
+                   class="button"
+                   id="edit-evidence-button"
+                >
+                    {% include "common/icon.html" with icon_name="pencil" %}
+                    Edit
+                </a>
+            {% endif %}
+            <a href="{% url 'evidence-create' object.slug %}"
                class="button"
-               id="edit-evidence-button"
+               id="add-evidence-button"
             >
-                {% include "common/icon.html" with icon_name="pencil" %}
-                Edit
+                {% include "common/icon.html" with icon_name="plus-circle" %}
+                Add Evidence
             </a>
-        {% endif %}
-        <a href="{% url 'evidence-create' object.slug %}"
-           class="button"
-           id="add-evidence-button"
-        >
-            {% include "common/icon.html" with icon_name="plus-circle" %}
-            Add Evidence
-        </a>
-    </div>
+        </div>
+    {% endif %}
     {% if object.evidence.all %}
         <div class="block table-container mt-4">
             <table class="table is-fullwidth is-hoverable" id="evidence-table">

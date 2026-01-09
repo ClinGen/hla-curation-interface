@@ -76,6 +76,9 @@
                                             {% elif value == "DNE" %}
                                                 {% include "common/tags/done.html" %}
                                             {% endif %}
+                                            {% if object.publication %}
+                                                {% include "common/tags/published.html" %}
+                                            {% endif %}
                                         </td>
                                     {% elif field.param_name == "added_at" %}
                                         <td>

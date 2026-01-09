@@ -1,0 +1,112 @@
+{% extends "layouts/base.html" %}
+{% block title %}{{ curation.slug }} - Published Curation{% endblock %}
+{% block description %}View published curation {{ curation.slug }}.{% endblock %}
+{% block main %}
+    <div class="box mt-6 mb-6">
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li>
+                    <a href="{% url 'home' %}">Home</a>
+                </li>
+                <li>
+                    <a href="{% url 'repo-search' %}">Repository</a>
+                </li>
+                <li class="is-active">
+                    <a href="" aria-current="page">{{ curation.slug }}</a>
+                </li>
+            </ul>
+        </nav>
+
+        <h1 class="title">Published Curation Details</h1>
+
+        <div class="block table-container mt-4">
+            <table class="table is-hoverable">
+                <tbody>
+                {% if curation.curation_type == "ALL" %}
+                    <tr>
+                        <td>Allele</td>
+                        <td id="allele">{{ curation.allele }}</td>
+                    </tr>
+                {% elif curation.curation_type == "HAP" %}
+                    <tr>
+                        <td>Haplotype</td>
+                        <td id="haplotype">{{ curation.haplotype }}</td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <td>Disease</td>
+                    <td id="disease">{{ curation.disease }}</td>
+                </tr>
+                <tr>
+                    <td>Status</td>
+                    <td id="status">
+                        {% if curation.status == "INP" %}
+                            {% include "common/tags/in_progress.html" %}
+                        {% elif curation.status == "DNE" %}
+                            {% include "common/tags/done.html" %}
+                        {% endif %}
+                        {% include "common/tags/published.html" %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Classification</td>
+                    <td id="classification">
+                        {% if curation.classification == "DEF" %}
+                            <span class="tag">Definitive</span>
+                        {% elif curation.classification == "STR" %}
+                            <span class="tag">Strong</span>
+                        {% elif curation.classification == "MOD" %}
+                            <span class="tag">Moderate</span>
+                        {% elif curation.classification == "LIM" %}
+                            <span class="tag">Limited</span>
+                        {% elif curation.classification == "NOK" %}
+                            <span class="tag">No Known Association</span>
+                        {% elif curation.classification == "DIS" %}
+                            <span class="tag">Disputed</span>
+                        {% elif curation.classification == "REF" %}
+                            <span class="tag">Refuted</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Score</td>
+                    <td id="score">{{ curation.score }}</td>
+                </tr>
+                <tr>
+                    <td>HCI Curation ID</td>
+                    <td id="curation-id">{{ curation.slug }}</td>
+                </tr>
+                <tr>
+                    <td>Curation Added</td>
+                    <td id="added-at">{{ curation.added_at|date:"Y-m-d" }}</td>
+                </tr>
+                <tr>
+                    <td>Published</td>
+                    <td id="added-at">{{ curation.publication.published_at|date:"Y-m-d" }}</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="buttons">
+                <a href="{% url 'repo-search' %}" class="button" id="search-button">
+                    {% include "common/icon.html" with icon_name="search" %}
+                    Search Repository
+                </a>
+                <a href="{% url 'curation-detail' curation.slug %}"
+                   class="button"
+                   id="view-curation-button">
+                    {% include "common/icon.html" with icon_name="eye" %}
+                    View Original Curation
+                </a>
+                <a href="{% url 'repo-download-single' curation.slug %}"
+                   class="button"
+                   id="download-button">
+                    {% include "common/icon.html" with icon_name="download" %}
+                    Download as JSON
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% include "curation/partials/evidence_detail_table.html" with object=curation %}
+{% endblock %}
