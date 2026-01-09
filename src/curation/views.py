@@ -256,7 +256,6 @@ def curation_publish(request: HttpRequest, curation_slug: str) -> HttpResponse:
 
     curation = get_object_or_404(Curation, slug=curation_slug)
 
-    # Validation: Only DNE curations can be published
     if curation.status != Status.DONE:
         messages.error(
             request,
@@ -264,7 +263,6 @@ def curation_publish(request: HttpRequest, curation_slug: str) -> HttpResponse:
         )
         return redirect("curation-detail", curation_slug=curation.slug)
 
-    # Check if already published
     if hasattr(curation, "publication"):
         messages.info(
             request,
@@ -272,7 +270,6 @@ def curation_publish(request: HttpRequest, curation_slug: str) -> HttpResponse:
         )
         return redirect("curation-detail", curation_slug=curation.slug)
 
-    # Create publication
     PublishedCuration.objects.create(
         curation=curation,
         published_by=cast(User, request.user),
