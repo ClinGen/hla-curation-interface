@@ -47,10 +47,12 @@
         <div class="column">
             <div class="box">
                 <h1 class="title" id="data">Data</h1>
-                <a href="{% url 'evidence-edit' object.curation.slug object.slug %}" class="button" id="edit-button">
-                    {% include "common/icon.html" with icon_name="pencil" %}
-                    Edit
-                </a>
+                {% if not object.curation.publication %}
+                    <a href="{% url 'evidence-edit' object.curation.slug object.slug %}" class="button" id="edit-button">
+                        {% include "common/icon.html" with icon_name="pencil" %}
+                        Edit
+                    </a>
+                {% endif %}
                 {% include "evidence/partials/data.html" %}
             </div>
             <div class="box">

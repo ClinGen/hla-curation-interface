@@ -19,38 +19,6 @@
 
         <h1 class="title">Published Curation Details</h1>
 
-        <div class="notification is-success is-light">
-            <p>
-                <strong>This curation has been published to the repository.</strong>
-            </p>
-            <p class="mt-2">
-                Published on {{ object.published_at|date:"Y-m-d H:i" }}
-                {% if object.published_by %}
-                    by {{ object.published_by.username }}
-                {% endif %}
-            </p>
-        </div>
-
-        <div class="buttons">
-            <a href="{% url 'repo-search' %}" class="button" id="search-button">
-                {% include "common/icon.html" with icon_name="search" %}
-                Search Repository
-            </a>
-            <a href="{% url 'repo-download-single' curation.slug %}"
-               class="button is-primary"
-               id="download-button">
-                {% include "common/icon.html" with icon_name="download" %}
-                Download as JSON
-            </a>
-            <a href="{% url 'curation-detail' curation.slug %}"
-               class="button"
-               id="view-curation-button">
-                {% include "common/icon.html" with icon_name="eye" %}
-                View Original Curation
-            </a>
-        </div>
-
-        <h1 class="title mt-5">Curation Details</h1>
         <div class="block table-container mt-4">
             <table class="table is-hoverable">
                 <tbody>
@@ -77,6 +45,7 @@
                         {% elif curation.status == "DNE" %}
                             {% include "common/tags/done.html" %}
                         {% endif %}
+                        {% include "common/tags/published.html" %}
                     </td>
                 </tr>
                 <tr>
@@ -108,11 +77,34 @@
                     <td id="curation-id">{{ curation.slug }}</td>
                 </tr>
                 <tr>
-                    <td>Added</td>
+                    <td>Curation Added</td>
                     <td id="added-at">{{ curation.added_at|date:"Y-m-d" }}</td>
+                </tr>
+                <tr>
+                    <td>Published</td>
+                    <td id="added-at">{{ curation.publication.published_at|date:"Y-m-d" }}</td>
                 </tr>
                 </tbody>
             </table>
+
+            <div class="buttons">
+                <a href="{% url 'repo-search' %}" class="button" id="search-button">
+                    {% include "common/icon.html" with icon_name="search" %}
+                    Search Repository
+                </a>
+                <a href="{% url 'curation-detail' curation.slug %}"
+                   class="button"
+                   id="view-curation-button">
+                    {% include "common/icon.html" with icon_name="eye" %}
+                    View Original Curation
+                </a>
+                <a href="{% url 'repo-download-single' curation.slug %}"
+                   class="button"
+                   id="download-button">
+                    {% include "common/icon.html" with icon_name="download" %}
+                    Download as JSON
+                </a>
+            </div>
         </div>
     </div>
 

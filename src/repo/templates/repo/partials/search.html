@@ -1,6 +1,6 @@
 {% load custom_filters %}
 <div id="datatable-content">
-    <div class="box mt-6 mb-6">
+    <div class="box mt-6 mb-6 bulma">
         <nav class="breadcrumb" aria-label="breadcrumbs">
             <ul>
                 <li>
@@ -16,7 +16,7 @@
 
         <div class="buttons">
             <a href="{% url 'repo-download-all' %}"
-               class="button is-primary"
+               class="button"
                id="download-all-button">
                 {% include "common/icon.html" with icon_name="download" %}
                 Download All as JSON
@@ -84,7 +84,7 @@
                             {% endfor %}
                             <td>
                                 <a href="{% url 'repo-download-single' object.curation.slug %}"
-                                   class="button is-small is-primary">
+                                   class="button is-small">
                                     {% include "common/icon.html" with icon_name="download" %}
                                     JSON
                                 </a>

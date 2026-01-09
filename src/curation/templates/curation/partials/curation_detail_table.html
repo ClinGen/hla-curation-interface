@@ -41,10 +41,7 @@
                     {% include "common/tags/done.html" %}
                 {% endif %}
                 {% if object.publication %}
-                    <span class="tag is-success ml-2">
-                        {% include "common/icon.html" with icon_name="book" %}
-                        Published
-                    </span>
+                    {% include "common/tags/published.html" %}
                 {% endif %}
             </td>
         </tr>

@@ -3,6 +3,10 @@
         {% include "common/icon.html" with icon_name="search" %}
         Search Curations
     </a>
+    <a href="{% url 'curation-create' %}" class="button" id="add-button">
+        {% include "common/icon.html" with icon_name="plus-circle" %}
+        Add Another Curation
+    </a>
     {% if object.status == "DNE" and not object.publication %}
         <a href="{% url 'curation-publish' object.slug %}"
            class="button is-success"
@@ -11,16 +15,5 @@
             {% include "common/icon.html" with icon_name="upload" %}
             Publish to Repository
         </a>
-    {% elif object.publication %}
-        <a href="{% url 'repo-detail' object.slug %}"
-           class="button is-link"
-           id="view-published-button">
-            {% include "common/icon.html" with icon_name="book" %}
-            View in Repository
-        </a>
     {% endif %}
-    <a href="{% url 'curation-create' %}" class="button" id="add-button">
-        {% include "common/icon.html" with icon_name="plus-circle" %}
-        Add Another Curation
-    </a>
 </div>
