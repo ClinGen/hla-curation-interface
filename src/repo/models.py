@@ -33,6 +33,8 @@ class PublishedCuration(models.Model):
     )
 
     class Meta:
+        """Provides Django model metadata for PublishedCuration."""
+
         db_table = "published_curation"
         verbose_name = "Published Curation"
         verbose_name_plural = "Published Curations"

@@ -1,5 +1,8 @@
 """Provides views for the repo app."""
 
+from typing import Any
+
+from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -29,31 +32,47 @@ class PublishedCurationDetail(DetailView):
     model = PublishedCuration
     template_name = "repo/detail.html"
 
-    def get_object(self):
-        """Get PublishedCuration by the curation's slug."""
+    def get_object(self, _queryset: QuerySet[Any] | None = None) -> PublishedCuration:
+        """Get PublishedCuration by the curation's slug.
+
+        Returns:
+            PublishedCuration instance matching the slug from URL kwargs.
+        """
         curation_slug = self.kwargs.get("curation_slug")
         return get_object_or_404(
             PublishedCuration,
             curation__slug=curation_slug,
         )
 
-    def get_context_data(self, **kwargs):
-        """Add curation to context for template convenience."""
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        """Add curation to context for template convenience.
+
+        Returns:
+            Context dictionary with curation added for template use.
+        """
         context = super().get_context_data(**kwargs)
         context["curation"] = self.object.curation
         return context
 
 
 def download_all_json(request: HttpRequest) -> HttpResponse:
-    """Downloads all published curations as JSON."""
-    published_curations = PublishedCuration.objects.all().select_related(
-        "curation__allele",
-        "curation__haplotype",
-        "curation__disease",
-        "published_by",
-    ).prefetch_related(
-        "curation__evidence__publication",
-        "curation__evidence__demographics",
+    """Downloads all published curations as JSON.
+
+    Returns:
+        JSON response with all published curations and metadata.
+    """
+    published_curations = (
+        PublishedCuration.objects.all()
+        .select_related(
+            "curation__allele",
+            "curation__haplotype",
+            "curation__disease",
+            "published_by",
+        )
+        .prefetch_related(
+            "curation__evidence__publication",
+            "curation__evidence__demographics",
+        )
     )
 
     data = {
@@ -72,7 +91,11 @@ def download_all_json(request: HttpRequest) -> HttpResponse:
 
 
 def download_single_json(request: HttpRequest, curation_slug: str) -> HttpResponse:
-    """Downloads a single published curation as JSON."""
+    """Downloads a single published curation as JSON.
+
+    Returns:
+        JSON response with the specified published curation.
+    """
     published = get_object_or_404(
         PublishedCuration.objects.select_related(
             "curation__allele",

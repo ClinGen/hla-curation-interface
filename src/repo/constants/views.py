@@ -1,8 +1,10 @@
 """Defines constants for the repo app's views."""
 
+from typing import Any
+
 from datatable.constants.views import FieldTypes, SortDirections
 
-PUBLISHED_CURATION_SEARCH_FIELDS = [
+PUBLISHED_CURATION_SEARCH_FIELDS: list[dict[str, Any]] = [
     {
         "text": "Curation ID",
         "param_name": "curation__slug",

@@ -1,12 +1,20 @@
 """Provides views for the curation app."""
 
+from typing import cast
+
 from django.contrib import messages
-from django.http import HttpRequest, HttpResponse
+from django.contrib.auth.models import User
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+    HttpResponseBase,
+)
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, UpdateView
 from django.views.generic.edit import CreateView
 
 from core.permissions import CreateAccessMixin, has_create_access
+from curation.constants.models.common import Status
 from curation.constants.views import CURATION_SEARCH_FIELDS, FRAMEWORK
 from curation.forms import (
     CurationCreateForm,
@@ -15,7 +23,6 @@ from curation.forms import (
     EvidenceEditForm,
     EvidenceTopLevelEditFormSet,
 )
-from curation.constants.models.common import Status
 from curation.models import (
     Curation,
     Evidence,
@@ -70,8 +77,12 @@ class CurationEdit(CreateAccessMixin, UpdateView):  # type: ignore
     slug_field = "slug"
     slug_url_kwarg = "curation_slug"
 
-    def dispatch(self, request, *args, **kwargs):
-        """Check if curation is published before allowing edit."""
+    def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponseBase:  # type: ignore[override]
+        """Check if curation is published before allowing edit.
+
+        Returns:
+            HttpResponse redirecting to detail view if published, else normal.
+        """
         self.object = self.get_object()
         if hasattr(self.object, "publication"):
             messages.error(
@@ -80,7 +91,7 @@ class CurationEdit(CreateAccessMixin, UpdateView):  # type: ignore
                 "It is now read-only.",
             )
             return redirect("curation-detail", curation_slug=self.object.slug)
-        return super().dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)  # type: ignore[return-value]
 
 
 @has_create_access
@@ -183,8 +194,12 @@ class EvidenceEdit(CreateAccessMixin, UpdateView):  # type: ignore
     slug_field = "slug"
     slug_url_kwarg = "evidence_slug"
 
-    def dispatch(self, request, *args, **kwargs):
-        """Check if parent curation is published before allowing edit."""
+    def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponseBase:  # type: ignore[override]
+        """Check if parent curation is published before allowing edit.
+
+        Returns:
+            HttpResponse redirecting to detail view if published, else normal.
+        """
         self.object = self.get_object()
         if hasattr(self.object.curation, "publication"):
             messages.error(
@@ -197,7 +212,7 @@ class EvidenceEdit(CreateAccessMixin, UpdateView):  # type: ignore
                 curation_slug=self.object.curation.slug,
                 evidence_slug=self.object.slug,
             )
-        return super().dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)  # type: ignore[return-value]
 
     def form_invalid(self, form: EvidenceEditForm) -> HttpResponse:
         """Returns the form with errors and flashes a message about the errors."""
@@ -260,7 +275,7 @@ def curation_publish(request: HttpRequest, curation_slug: str) -> HttpResponse:
     # Create publication
     PublishedCuration.objects.create(
         curation=curation,
-        published_by=request.user,
+        published_by=cast(User, request.user),
     )
 
     messages.success(

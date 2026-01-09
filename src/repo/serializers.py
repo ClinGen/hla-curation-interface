@@ -1,6 +1,10 @@
 """Serializers for the repo app."""
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from curation.models import Evidence
+    from repo.models import PublishedCuration
 
 
 def serialize_published_curation(published: "PublishedCuration") -> dict[str, Any]:
@@ -14,7 +18,7 @@ def serialize_published_curation(published: "PublishedCuration") -> dict[str, An
     """
     curation = published.curation
 
-    # Determine entity (allele or haplotype)
+    # Determine entity (allele or haplotype).
     entity_data = {}
     if curation.curation_type == "ALL" and curation.allele:
         entity_data = {
@@ -50,11 +54,15 @@ def serialize_published_curation(published: "PublishedCuration") -> dict[str, An
             "classification": curation.classification,
             "score": float(curation.score),
             **entity_data,
-            "disease": {
-                "name": curation.disease.name,
-                "mondo_id": curation.disease.mondo_id,
-                "slug": curation.disease.slug,
-            },
+            "disease": (
+                {
+                    "name": curation.disease.name,
+                    "mondo_id": curation.disease.mondo_id,
+                    "slug": curation.disease.slug,
+                }
+                if curation.disease
+                else None
+            ),
             "added_at": curation.added_at.isoformat(),
         },
         "evidence": [
