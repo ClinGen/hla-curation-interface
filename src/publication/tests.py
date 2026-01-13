@@ -305,7 +305,9 @@ class PublicationSearchTest(TestCase):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         year_label = (
-            soup.find("label", {"for": "sort-publication-year-button"}).get_text().strip()
+            soup.find("label", {"for": "sort-publication-year-button"})
+            .get_text()
+            .strip()
         )
         self.assertEqual(year_label, "Year")
         year_button = soup.find(id="sort-publication-year-button")
@@ -314,11 +316,11 @@ class PublicationSearchTest(TestCase):
     def test_shows_title_in_tbody(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        title = soup.find("tbody").find("tr").find_all("td")[4].get_text().strip()
+        title = soup.find("tbody").find("tr").find_all("td")[3].get_text().strip()
         self.assertEqual(title, "Diseases in grass type Pokémon in the Kanto region")
 
     def test_shows_added_in_tbody(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        added_at = soup.find("tbody").find("tr").find_all("td")[5].get_text().strip()
+        added_at = soup.find("tbody").find("tr").find_all("td")[7].get_text().strip()
         self.assertIn("1990-01-01", added_at)
