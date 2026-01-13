@@ -8,6 +8,8 @@
       ansible.builtin.include_tasks: ../tasks/admin/apt_upgrade.yml
     - name: Admin | Git pull
       ansible.builtin.include_tasks: ../tasks/admin/git_pull.yml
+    - name: Admin | Git SHA
+      ansible.builtin.include_tasks: ../tasks/admin/git_sha.yml
     - name: Admin | uv sync
       ansible.builtin.include_tasks: ../tasks/admin/uv_sync.yml
     - name: Admin | Bun install
