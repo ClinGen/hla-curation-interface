@@ -3,6 +3,7 @@
 coverage.xml
 firebase-account-key*
 inventory.ini
+version.txt
 
 .ansible/
 .mypy_cache/

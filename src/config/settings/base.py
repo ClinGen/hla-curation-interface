@@ -15,6 +15,13 @@ sentry_sdk.init(
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+try:
+    version_file_path = Path(BASE_DIR / "version.txt")
+    with version_file_path.open(encoding="utf-8") as f:
+        GIT_SHA = f.read().strip()
+except Exception:
+    GIT_SHA = "dev"
+
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 INSTALLED_APPS = [
@@ -63,6 +70,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "common.context_processors.git_sha",
             ],
         },
     },
