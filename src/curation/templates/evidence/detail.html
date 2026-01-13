@@ -34,7 +34,7 @@
         Back to Curation
     </a>
     <hr>
-    <div class="tabs" hx-boost="true">
+    <div id="evidence-detail-tabs" class="tabs" hx-boost="true">
         <ul>
             <li {% if request.GET.tab == "data" or not request.GET.tab %}class="is-active"{% endif %}>
                 <a href="{% url 'evidence-detail' object.curation.slug object.slug %}?tab=data">Data</a>

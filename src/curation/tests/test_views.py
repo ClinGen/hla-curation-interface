@@ -878,32 +878,32 @@ class EvidenceDetailTest(TestCase):
             kwargs={"curation_slug": "C000001", "evidence_slug": "E000001"},
         )
 
-    def test_shows_menu(self):
+    def test_shows_tabs(self):
         response = self.client.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
-        menu = soup.find(id="menu")
-        self.assertIsNotNone(menu)
+        tabs = soup.find(id="evidence-detail-tabs")
+        self.assertIsNotNone(tabs)
 
     def test_shows_evidence_data_table(self):
-        response = self.client.get(self.url)
+        response = self.client.get(f"{self.url}?tab=data")
         soup = BeautifulSoup(response.content, "html.parser")
         table = soup.find(id="evidence-data-table")
         self.assertIsNotNone(table)
 
     def test_shows_evidence_score_table(self):
-        response = self.client.get(self.url)
+        response = self.client.get(f"{self.url}?tab=score")
         soup = BeautifulSoup(response.content, "html.parser")
         table = soup.find(id="evidence-score-table")
         self.assertIsNotNone(table)
 
     def test_shows_total_score_before_multipliers(self):
-        response = self.client.get(self.url)
+        response = self.client.get(f"{self.url}?tab=score")
         soup = BeautifulSoup(response.content, "html.parser")
         total_score = soup.find(id="total-score-before-multipliers")
         self.assertIsNotNone(total_score)
 
     def test_shows_total_score(self):
-        response = self.client.get(self.url)
+        response = self.client.get(f"{self.url}?tab=score")
         soup = BeautifulSoup(response.content, "html.parser")
         total_score = soup.find(id="total-score")
         self.assertIsNotNone(total_score)
