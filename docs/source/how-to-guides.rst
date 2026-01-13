@@ -58,6 +58,13 @@ How to Set Up a Server for the First Time
 
     just server-prod-init
 
+* If a task fails during initialization, it's usually easier to SSH in and fix it
+  manually than to futz with Ansible tasks.
+
+* Make sure the demographics fixtures are loaded.
+
+* Make sure to add the Ansible SSH key to the ``authorized_keys`` file.
+
 ------------------------------
 How to Manually Deploy the HCI
 ------------------------------
