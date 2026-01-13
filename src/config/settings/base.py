@@ -19,7 +19,7 @@ try:
     version_file_path = Path(BASE_DIR / "version.txt")
     with version_file_path.open(encoding="utf-8") as f:
         GIT_SHA = f.read().strip()
-except Exception:
+except FileNotFoundError:
     GIT_SHA = "dev"
 
 SECRET_KEY = os.getenv("SECRET_KEY")
