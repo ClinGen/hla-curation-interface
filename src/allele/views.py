@@ -1,17 +1,15 @@
 """Provides views for the allele app."""
 
 from django.contrib import messages
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
 from allele.clients import fetch_allele_data, get_car_id
-from allele.constants.views import ALLELE_SEARCH_FIELDS
 from allele.forms import AlleleForm
 from allele.models import Allele
 from core.permissions import CreateAccessMixin
-from datatable.views import datatable
 
 
 class AlleleCreate(CreateAccessMixin, CreateView):  # type: ignore
@@ -48,18 +46,6 @@ class AlleleDetail(DetailView):
 
     model = Allele
     template_name = "allele/detail.html"
-
-
-def allele_search(request: HttpRequest) -> HttpResponse:
-    """Returns an interactive datatable for searching alleles."""
-    return datatable(
-        request=request,
-        model=Allele,
-        order_by="pk",
-        fields=ALLELE_SEARCH_FIELDS,
-        data_title="Alleles",
-        partial="allele/partials/search.html",
-    )
 
 
 class AlleleList(ListView):
