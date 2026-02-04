@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 {% block title %}{{ object.slug }} Details{% endblock %}
-{% block description %}View information about {{ object.slug }}.{% endblock %}
+{% block description %}Edit {{ object.slug }}.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
 
@@ -18,33 +18,28 @@
                         Curation Search
                     </a>
                 </li>
+                <li>
+                    <a href="{% url 'curation-detail' object.slug %}">
+                        {% include "common/icon.html" with icon_name="journal-text" %}
+                        {{ object.slug|default_if_none:"------" }} Details
+                    </a>
+                </li>
                 <li class="is-active">
                     <b>
                         <a href="" aria-current="page">
-                            {% include "common/icon.html" with icon_name="journal-text" %}
-                            {{ object.slug|default_if_none:"------" }} Details
+                            {% include "common/icon.html" with icon_name="pencil" %}
+                            {{ object.slug|default_if_none:"------" }} Edit Evidence
                         </a>
                     </b>
                 </li>
             </ul>
         </nav>
 
-        {% if object.publication %}
-            <div class="notification is-info is-light">
-                <p>
-                    <strong>This curation has been published and is read-only.</strong>
-                </p>
-                <p class="mt-2">
-                    <a href="{% url 'repo-detail' object.slug %}">View in HLArepo</a>
-                </p>
-            </div>
-        {% endif %}
-
         {% include "curation/partials/curation/detail_table.html" %}
 
         {% include "curation/partials/buttons.html" %}
 
-        {% include "curation/partials/evidence/detail_table.html" %}
-    </div>
+        {% include "curation/forms/evidence.html" %}
 
+    </div>
 {% endblock %}

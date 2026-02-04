@@ -3,26 +3,26 @@
 {% block description %}Add a curation to the HLA Curation Interface.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
+
         <nav class="breadcrumb" aria-label="breadcrumbs">
             <ul>
                 <li>
                     <a href="{% url 'home' %}">
+                        {% include "common/icon.html" with icon_name="house" %}
                         Home
                     </a>
                 </li>
-                <li>
-                    <a href="{% url 'curation-search' %}">
-                        Curations
-                    </a>
-                </li>
                 <li class="is-active">
-                    <a href="" aria-current="page">
-                        Add Curation
-                    </a>
+                    <b>
+                        <a href="" aria-current="page">
+                            {% include "common/icon.html" with icon_name="plus-circle" %}
+                            Add Curation
+                        </a>
+                    </b>
                 </li>
             </ul>
         </nav>
-        <h1 class="title">Add Curation</h1>
+
         <form method="post">{% csrf_token %}
             {{ form.non_field_errors }}
             {% with field=form.curation_type %}
@@ -45,7 +45,9 @@
                 Submit
             </button>
         </form>
+
     </div>
+
     <script>
         document.addEventListener("htmx:load", () => {
             const alleleDiv = document.getElementById("allele-div");

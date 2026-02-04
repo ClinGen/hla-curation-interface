@@ -3,7 +3,8 @@
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
-from django.views.generic import CreateView, DetailView
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DetailView, ListView
 
 from core.permissions import CreateAccessMixin
 from datatable.views import datatable
@@ -19,6 +20,7 @@ class DiseaseCreate(CreateAccessMixin, CreateView):  # type: ignore
     model = Disease
     form_class = DiseaseForm
     template_name = "disease/create.html"
+    success_url = reverse_lazy("disease-list")
 
     def form_valid(self, form: DiseaseForm) -> HttpResponse:
         """Fetches and adds data from the Ontology Lookup Service and records user.
@@ -32,6 +34,7 @@ class DiseaseCreate(CreateAccessMixin, CreateView):  # type: ignore
             form.instance.name = get_name(disease_data)
             form.instance.iri = get_iri(disease_data)
             form.instance.added_by = self.request.user
+            messages.success(self.request, "Disease added.")
             return super().form_valid(form)
         message = (
             "Oops, something went wrong trying to fetch data from the "
@@ -58,3 +61,8 @@ def disease_search(request: HttpRequest) -> HttpResponse:
         data_title="Diseases",
         partial="disease/partials/search.html",
     )
+
+
+class DiseaseList(ListView):
+    model = Disease
+    template_name = "disease/list.html"

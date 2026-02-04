@@ -3,7 +3,8 @@
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
-from django.views.generic import CreateView, DetailView
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DetailView, ListView
 
 from allele.clients import fetch_allele_data, get_car_id
 from allele.constants.views import ALLELE_SEARCH_FIELDS
@@ -19,6 +20,7 @@ class AlleleCreate(CreateAccessMixin, CreateView):  # type: ignore
     model = Allele
     form_class = AlleleForm
     template_name = "allele/create.html"
+    success_url = reverse_lazy("allele-list")
 
     def form_valid(self, form: AlleleForm) -> HttpResponse:
         """Fetches and adds data from the ClinGen Allele Registry and records user.
@@ -31,6 +33,7 @@ class AlleleCreate(CreateAccessMixin, CreateView):  # type: ignore
         if allele_data:
             form.instance.car_id = get_car_id(allele_data)
             form.instance.added_by = self.request.user
+            messages.success(self.request, "Added allele.")
             return super().form_valid(form)
         message = (
             "Oops, something went wrong trying to fetch data from the "
@@ -57,3 +60,8 @@ def allele_search(request: HttpRequest) -> HttpResponse:
         data_title="Alleles",
         partial="allele/partials/search.html",
     )
+
+
+class AlleleList(ListView):
+    model = Allele
+    template_name = "allele/list.html"

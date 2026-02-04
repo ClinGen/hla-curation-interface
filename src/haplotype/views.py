@@ -1,7 +1,9 @@
 """Provides views for the haplotype app."""
 
+from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
-from django.views.generic import DetailView
+from django.urls import reverse_lazy
+from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView
 
 from core.permissions import CreateAccessMixin
@@ -18,6 +20,7 @@ class HaplotypeCreate(CreateAccessMixin, CreateView):  # type: ignore
     model = Haplotype
     form_class = HaplotypeForm
     template_name = "haplotype/create.html"
+    success_url = reverse_lazy("haplotype-list")
 
     def form_valid(self, form: HaplotypeForm) -> HttpResponse:
         """Sets the haplotype name and records user.
@@ -35,6 +38,7 @@ class HaplotypeCreate(CreateAccessMixin, CreateView):  # type: ignore
         name = [item["allele"] for item in sorted_alleles]
         form.instance.name = "~".join(name)
         form.instance.added_by = self.request.user
+        messages.success(self.request, "Added haplotype.")
         return super().form_valid(form)
 
 
@@ -55,3 +59,8 @@ def haplotype_search(request: HttpRequest) -> HttpResponse:
         data_title="Haplotypes",
         partial="haplotype/partials/search.html",
     )
+
+
+class HaplotypeList(ListView):
+    model = Haplotype
+    template_name = "haplotype/list.html"

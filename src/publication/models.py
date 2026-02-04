@@ -95,10 +95,7 @@ class Publication(models.Model):
     def __str__(self) -> str:
         """Returns a string representation of the publication."""
         title = self.title[:-1] if self.title.endswith(".") else self.title
-        year_str = f" ({self.publication_year})" if self.publication_year else ""
-        if self.publication_type == PublicationTypes.PUBMED:
-            return f"{self.author}. {title}{year_str}. {self.pubmed_id}."
-        return f"{self.author}. {title}{year_str}. {self.doi}."
+        return f"{title}."
 
     def save(self, *args, **kwargs) -> None:
         """Adds a human-readable ID."""

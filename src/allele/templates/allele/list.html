@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
-{% block title %}Add Haplotype{% endblock %}
-{% block description %}Add a haplotype to the HLA Curation Interface.{% endblock %}
+{% block title %}Allele Search{% endblock %}
+{% block description %}View a list of alleles in the HLA Curation Interface.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
 
@@ -15,23 +15,19 @@
                 <li class="is-active">
                     <b>
                         <a href="" aria-current="page">
-                            {% include "common/icon.html" with icon_name="plus-circle" %}
-                            Add Haplotype
+                            {% include "common/icon.html" with icon_name="search" %}
+                            Allele Search
                         </a>
                     </b>
                 </li>
             </ul>
         </nav>
 
-        <form method="post">{% csrf_token %}
-            {{ form.non_field_errors }}
-            {% with field=form.alleles %}
-                {% include "common/form/select_search.html" %}
-            {% endwith %}
-            <button type="submit" class="button is-link">
-                Submit
-            </button>
-        </form>
+        {% include "allele/partials/table.html" with alleles=object_list %}
 
+        <a href="{% url 'allele-create' %}" class="button is-link" id="plus-circle-button">
+            {% include "common/icon.html" with icon_name="plus-circle" %}
+            Add Allele
+        </a>
     </div>
 {% endblock %}

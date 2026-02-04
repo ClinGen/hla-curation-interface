@@ -10,7 +10,8 @@ from django.http import (
     HttpResponseBase,
 )
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import DetailView, UpdateView
+from django.urls import reverse_lazy
+from django.views.generic import DetailView, ListView, UpdateView
 from django.views.generic.edit import CreateView
 
 from core.permissions import CreateAccessMixin, has_create_access
@@ -47,6 +48,7 @@ class CurationCreate(CreateAccessMixin, CreateView):  # type: ignore
     template_name = "curation/create.html"
     slug_field = "slug"
     slug_url_kwarg = "curation_slug"
+    success_url = reverse_lazy("curation-list")
 
     def form_valid(self, form: CurationCreateForm) -> HttpResponse:
         """Makes sure the user who added the curation is recorded.
@@ -56,6 +58,7 @@ class CurationCreate(CreateAccessMixin, CreateView):  # type: ignore
              errors if the form isn't valid.
         """
         form.instance.added_by = self.request.user
+        messages.success(self.request, "Curation added.")
         return super().form_valid(form)
 
 
@@ -73,7 +76,7 @@ class CurationEdit(CreateAccessMixin, UpdateView):  # type: ignore
 
     model = Curation
     form_class = CurationEditForm
-    template_name = "curation/edit_curation.html"
+    template_name = "curation/edit/curation.html"
     slug_field = "slug"
     slug_url_kwarg = "curation_slug"
 
@@ -124,22 +127,10 @@ def curation_edit_evidence(request: HttpRequest, curation_slug: str) -> HttpResp
         evidence_formset = EvidenceTopLevelEditFormSet(queryset=evidence)
 
     context = {
-        "curation": curation,
+        "object": curation,
         "evidence_formset": evidence_formset,
     }
-    return render(request, "curation/edit_evidence.html", context)
-
-
-def curation_search(request: HttpRequest) -> HttpResponse:
-    """Returns an interactive datatable for searching curations."""
-    return datatable(
-        request=request,
-        model=Curation,
-        order_by="pk",
-        fields=CURATION_SEARCH_FIELDS,  # type: ignore
-        data_title="Curations",
-        partial="curation/partials/search.html",
-    )
+    return render(request, "curation/edit/evidence.html", context)
 
 
 class EvidenceCreate(CreateAccessMixin, CreateView):  # type: ignore
@@ -280,3 +271,8 @@ def curation_publish(request: HttpRequest, curation_slug: str) -> HttpResponse:
         f"Curation {curation.slug} has been published to the repository.",
     )
     return redirect("repo-detail", curation_slug=curation.slug)
+
+
+class CurationList(ListView):
+    model = Curation
+    template_name = "curation/list.html"

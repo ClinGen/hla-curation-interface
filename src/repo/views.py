@@ -6,7 +6,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.views.generic import DetailView
+from django.views.generic import DetailView, ListView
 
 from datatable.views import datatable
 from repo.constants.views import PUBLISHED_CURATION_SEARCH_FIELDS
@@ -24,6 +24,11 @@ def repo_search(request: HttpRequest) -> HttpResponse:
         data_title="Published Curations",
         partial="repo/partials/search.html",
     )
+
+
+class PublishedCurationList(ListView):
+    model = PublishedCuration
+    template_name = "repo/list.html"
 
 
 class PublishedCurationDetail(DetailView):

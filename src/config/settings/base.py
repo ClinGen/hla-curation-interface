@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "allele",
     "auth_",
     "core",
+    "common",
     "curation",
     "datatable",
     "disease",

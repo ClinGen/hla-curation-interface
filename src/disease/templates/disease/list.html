@@ -1,0 +1,64 @@
+{% extends "layouts/base.html" %}
+{% block title %}Disease Search{% endblock %}
+{% block description %}View a list of diseases in the HLA Curation Interface.{% endblock %}
+{% block main %}
+    <div class="box mt-6 mb-6">
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li>
+                    <a href="{% url 'home' %}">
+                        {% include "common/icon.html" with icon_name="house" %}
+                        Home
+                    </a>
+                </li>
+                <li class="is-active">
+                    <b>
+                        <a href="" aria-current="page">
+                            {% include "common/icon.html" with icon_name="search" %}
+                            Disease Search
+                        </a>
+                    </b>
+                </li>
+            </ul>
+        </nav>
+        <table id="disease-list-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Mondo ID</th>
+                    <th>Added</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for disease in object_list %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'disease-detail' disease.slug %}">
+                                {{ disease.slug|default_if_none:"------" }}
+                            </a>
+                        </td>
+                        <td>{{ disease.name|default_if_none:"------" }}</td>
+                        <td>
+                            {% if disease.iri and disease.mondo_id %}
+                                {% with url=disease.iri text=disease.mondo_id %}
+                                    {% include "common/external_link.html" %}
+                                {% endwith %}
+                            {% else %}
+                                ------
+                            {% endif %}
+                        </td>
+                        <td>{{ disease.added_at|default_if_none:"------"|date:"Y-m-d" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{% url 'disease-create' %}" class="button is-link" id="plus-circle-button">
+            {% include "common/icon.html" with icon_name="plus-circle" %}
+            Add Disease
+        </a>
+    </div>
+    <script>
+        let table = new DataTable("#disease-list-table", {"order": []});
+    </script>
+{% endblock %}

@@ -3,7 +3,8 @@
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
-from django.views.generic import DetailView
+from django.urls import reverse_lazy
+from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView
 
 from core.permissions import CreateAccessMixin
@@ -29,6 +30,7 @@ class PublicationCreate(CreateAccessMixin, CreateView):  # type: ignore
     model = Publication
     form_class = PublicationForm
     template_name = "publication/create.html"
+    success_url = reverse_lazy("publication-list")
 
     def form_valid(self, form: PublicationForm) -> HttpResponse:
         """Makes sure the user who added the publication is recorded.
@@ -44,6 +46,7 @@ class PublicationCreate(CreateAccessMixin, CreateView):  # type: ignore
                 form.instance.title = get_pubmed_title(pubmed_data)
                 form.instance.publication_year = get_pubmed_year(pubmed_data)
                 form.instance.added_by = self.request.user
+                messages.success(self.request, "Publication created.")
                 return super().form_valid(form)
         elif (
             form.instance.publication_type == PublicationTypes.BIORXIV
@@ -83,3 +86,8 @@ def publication_search(request: HttpRequest) -> HttpResponse:
         data_title="Publications",
         partial="publication/partials/search.html",
     )
+
+
+class PublicationList(ListView):
+    model = Publication
+    template_name = "publication/list.html"

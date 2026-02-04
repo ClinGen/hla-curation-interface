@@ -8,23 +8,21 @@
             <ul>
                 <li>
                     <a href="{% url 'home' %}">
+                        {% include "common/icon.html" with icon_name="house" %}
                         Home
                     </a>
                 </li>
-                <li>
-                    <a href="{% url 'allele-search' %}">
-                        Alleles
-                    </a>
-                </li>
                 <li class="is-active">
-                    <a href="" aria-current="page">
-                        Add Allele
-                    </a>
+                    <b>
+                        <a href="" aria-current="page">
+                            {% include "common/icon.html" with icon_name="plus-circle" %}
+                            Add Allele
+                        </a>
+                    </b>
                 </li>
             </ul>
         </nav>
 
-        <h1 class="title">Add Allele</h1>
         <form method="post">{% csrf_token %}
             {{ form.non_field_errors }}
             {% with field=form.name %}

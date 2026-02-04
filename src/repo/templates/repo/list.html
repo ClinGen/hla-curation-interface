@@ -1,0 +1,75 @@
+{% extends "layouts/base.html" %}
+{% block title %}Published Curation Search{% endblock %}
+{% block description %}View a list of published curations in the HLArepo.{% endblock %}
+{% block main %}
+    <div class="box mt-6 mb-6">
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li>
+                    <a href="{% url 'home' %}">
+                        {% include "common/icon.html" with icon_name="house" %}
+                        Home
+                    </a>
+                </li>
+                <li class="is-active">
+                    <b>
+                        <a href="" aria-current="page">
+                            {% include "common/icon.html" with icon_name="database" %}
+                            HLArepo
+                        </a>
+                    </b>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="mt-2 mb-6">
+            <a href="{% url 'repo-download-all' %}"
+               class="button"
+               id="download-button">
+                {% include "common/icon.html" with icon_name="download" %}
+                Download All as JSON
+            </a>
+        </div>
+
+        <table id="published-curation-list-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Type</th>
+                    <th>Allele</th>
+                    <th>Haplotype</th>
+                    <th>Disease</th>
+                    <th>Classification</th>
+                    <th>Added</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for published in object_list %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'repo-detail' published.curation.slug %}">
+                                {{ published.curation.slug|default_if_none:"------" }}
+                            </a>
+                        </td>
+                        <td>{{ published.curation.get_curation_type_display|default_if_none:"------" }}</td>
+                        <td>{{ published.curation.allele|default_if_none:"------" }}</td>
+                        <td>{{ published.curation.haplotype|default_if_none:"------" }}</td>
+                        <td>{{ published.curation.disease|default_if_none:"------" }}</td>
+                        <td>{{ published.curation.get_classification_display|default_if_none:"------" }}</td>
+                        <td>{{ published.curation.added_at|default_if_none:"------"|date:"Y-m-d" }}</td>
+                        <td>
+                            <a href="{% url 'repo-download-single' published.curation.slug %}" class="button is-small">
+                                {% include "common/icon.html" with icon_name="download" %}
+                                JSON
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        let table = new DataTable("#published-curation-list-table", {"order": []});
+    </script>
+{% endblock %}

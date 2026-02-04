@@ -1,22 +1,10 @@
-<h1 class="title">Curation Details</h1>
-{% if object.publication %}
-    <div class="notification is-info is-light">
-        <p>
-            <strong>This curation has been published and is read-only.</strong>
-        </p>
-        <p class="mt-2">
-            <a href="{% url 'repo-detail' object.slug %}">View in Repository</a>
-        </p>
-    </div>
-{% else %}
-    <a href="{% url 'curation-edit' object.slug %}" class="button" id="edit-curation-button">
-        {% include "common/icon.html" with icon_name="pencil" %}
-        Edit
-    </a>
-{% endif %}
 <div class="block table-container mt-4">
-    <table class="table is-hoverable">
+    <table class="table">
         <tbody>
+        <tr>
+            <td>HCI Curation ID</td>
+            <td id="curation-id">{{ object.slug }}</td>
+        </tr>
         {% if object.curation_type == "ALL" %}
             <tr>
                 <td>Allele</td>
@@ -68,10 +56,6 @@
         <tr>
             <td>Score</td>
             <td id="score">{{ object.score }}</td>
-        </tr>
-        <tr>
-            <td>HCI Curation ID</td>
-            <td id="curation-id">{{ object.slug }}</td>
         </tr>
         <tr>
             <td>Added</td>

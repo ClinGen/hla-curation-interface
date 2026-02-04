@@ -1,26 +1,12 @@
-<h1 class="title">Curation Details</h1>
 <div class="block table-container">
     <form method="post">{% csrf_token %}
-        <div class="field is-grouped">
-            <div class="control">
-                <button type="submit"
-                        class="button is-link"
-                        id="curation-edit-save-button"
-                >
-                    Save
-                </button>
-            </div>
-            <div class="control">
-                <a href="{% url 'curation-detail' object.slug %}"
-                   class="button is-link is-light"
-                   id="curation-edit-cancel-button"
-                >
-                    Cancel
-                </a>
-            </div>
-        </div>
-        <table class="table is-hoverable">
+
+        <table class="table">
             <tbody>
+            <tr>
+                <td>HCI Curation ID</td>
+                <td id="allele">{{ object.slug }}</td>
+            </tr>
             {% if object.curation_type == "ALL" %}
                 <tr>
                     <td>Allele</td>
@@ -53,14 +39,30 @@
                 <td id="score">{{ object.score }}</td>
             </tr>
             <tr>
-                <td>HCI Curation ID</td>
-                <td id="curation-id">{{ object.slug }}</td>
-            </tr>
-            <tr>
                 <td>Added</td>
                 <td id="added-at">{{ object.added_at|date:"Y-m-d" }}</td>
             </tr>
             </tbody>
         </table>
+
+        <div class="field is-grouped">
+            <div class="control">
+                <button type="submit"
+                        class="button is-link"
+                        id="curation-edit-save-button"
+                >
+                    Save
+                </button>
+            </div>
+            <div class="control">
+                <a href="{% url 'curation-detail' object.slug %}"
+                   class="button is-link is-light"
+                   id="curation-edit-cancel-button"
+                >
+                    Cancel
+                </a>
+            </div>
+        </div>
+
     </form>
 </div>

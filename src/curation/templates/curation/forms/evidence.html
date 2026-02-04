@@ -1,0 +1,79 @@
+<details class="mt-6" open>
+    <summary><b>Evidence</b></summary>
+
+    <form method="post">{% csrf_token %}
+        {{ evidence_formset.management_form }}
+        <div class="block table-container mt-4">
+            <table class="table is-fullwidth is-hoverable" id="evidence-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Publication</th>
+                    <th>Needs Review</th>
+                    <th>Status</th>
+                    <th>Conflicting</th>
+                    <th>Included</th>
+                    <th>Score</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for form in evidence_formset %}
+                    {% for hidden in form.hidden_fields %}
+                        {{ hidden }}
+                    {% endfor %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'evidence-detail' curation_slug=object.slug evidence_slug=form.instance.slug %}"
+                            >
+                                {{ form.instance.slug }}
+                            </a>
+                        </td>
+                        <td>
+                            <i>{{ form.instance.publication }}</i>
+                        </td>
+                        <td>
+                            {% if form.instance.needs_review %}
+                                {% include "common/tags/needs_review.html" with text=form.instance.needs_review %}
+                            {% else %}
+                                {{ form.instance.needs_review }}
+                            {% endif %}
+                        </td>
+                        {% for field in form.visible_fields %}
+                            <td>
+                                {% if field.errors %}
+                                    <div class="has-text-danger">{{ field.errors }}</div>
+                                {% endif %}
+                                <div class="field">
+                                    <div class="control">
+                                        {% if field.widget_type == "select" %}
+                                            <div class="select is-small">
+                                                {{ field }}
+                                            </div>
+                                        {% else %}
+                                            {{ field }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                        {% endfor %}
+                        <td>
+                            {{ form.instance.score }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="buttons">
+            <button type="submit" class="button is-link" id="save-edit-button">
+                Save
+            </button>
+            <a href="{% url 'curation-detail' object.slug %}" class="button is-link is-light" id="cancel-edit-button">
+                Cancel
+            </a>
+        </div>
+
+    </form>
+
+</details>

@@ -6,7 +6,7 @@ from django.shortcuts import render
 
 def home(request: HttpRequest) -> HttpResponse:
     """Returns the home page."""
-    return render(request, "core/home.html")
+    return render(request, "core/home_new.html")
 
 
 def about(request: HttpRequest) -> HttpResponse:
