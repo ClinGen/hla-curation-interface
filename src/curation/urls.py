@@ -6,13 +6,21 @@ from curation import views
 from curation.views import CurationList
 
 urlpatterns = [
-    path("create", views.CurationCreate.as_view(), name="curation-create"),
+    path(
+        "create",
+        views.CurationCreate.as_view(),
+        name="curation-create",
+    ),
     path(
         "<slug:curation_slug>/detail",
         views.CurationDetail.as_view(),
         name="curation-detail",
     ),
-    path("list", CurationList.as_view(), name="curation-list"),
+    path(
+        "list",
+        CurationList.as_view(),
+        name="curation-list",
+    ),
     path(
         "<slug:curation_slug>/edit-curation",
         views.CurationEdit.as_view(),

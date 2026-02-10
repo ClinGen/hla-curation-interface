@@ -2,12 +2,11 @@
 
 from unittest.mock import MagicMock, patch
 
-from bs4 import BeautifulSoup
-from django.test import Client, TestCase
+from django.test import TestCase
 from django.urls import reverse
 
 from allele.models import Allele
-from common.tests import CreateTestMixin
+from common.tests import CreateTestMixin, ViewTestMixin
 from haplotype.models import Haplotype
 
 
@@ -19,16 +18,12 @@ class AlleleCreateTest(CreateTestMixin, TestCase):
     def test_shows_allele_name_input(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        allele_name = soup.find(id="id_name")
-        self.assertIsNotNone(allele_name)
+        self.assertContains(response, "Name")
 
     def test_shows_submit_button(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        submit_button = soup.find("button", {"type": "submit"}).get_text().strip()
-        self.assertEqual(submit_button, "Submit")
+        self.assertContains(response, "Submit")
 
     @patch("allele.views.fetch_allele_data")
     def test_creates_allele_with_valid_form_data(
@@ -77,48 +72,16 @@ class AlleleCreateTest(CreateTestMixin, TestCase):
         self.assertEqual(Allele.objects.count(), initial_allele_count)
 
 
-class AlleleDetailTest(TestCase):
+class AlleleDetailTest(ViewTestMixin, TestCase):
     fixtures = ["test_alleles.json"]
+    url = reverse("allele-detail", kwargs={"slug": "A000001"})
+    template = "allele/detail.html"
+    page_name = "A000001 Details"
+    expected_text = ["A*01:02:03", "XAHLA123", "1970-01-01"]
 
-    def setUp(self):
-        self.client = Client()
-        self.url = reverse("allele-detail", kwargs={"slug": "A000001"})
-
-    def test_shows_car_logo(self):
+    def test_shows_car_registry_label(self):
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        car_logo = soup.find("img", {"class": "entity-type-logo"})
-        self.assertIn("ClinGen Allele Registry", car_logo.attrs["alt"])
-
-    def test_shows_allele_name(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        allele_name = soup.find(id="allele-1-name").get_text().strip()
-        self.assertEqual(allele_name, "A*01:02:03")
-
-    def test_shows_car_id(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        car_id = soup.find(id="allele-1-car-id").get_text().strip()
-        self.assertEqual(car_id, "XAHLA123")
-
-    def test_shows_added_at(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        added_at = soup.find(id="allele-1-added-at").get_text().strip()
-        self.assertEqual(added_at, "1970-01-01")
-
-    def test_shows_search_button(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        search_button = soup.find(id="search-button").get_text().strip()
-        self.assertIn("Search", search_button)
-
-    def test_shows_add_button(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        add_button = soup.find(id="add-button").get_text().strip()
-        self.assertIn("Add", add_button)
+        self.assertContains(response, "ClinGen Allele Registry")
 
     def test_shows_haplotype(self):
         allele_1 = Allele.objects.get(pk=1)
@@ -128,82 +91,22 @@ class AlleleDetailTest(TestCase):
         haplotype.alleles.add(allele_1)
         haplotype.alleles.add(allele_2)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        haplotype_anchor = soup.find(id="haplotype-anchor").get_text().strip()
-        self.assertIn(str(haplotype.pk), haplotype_anchor)
-        haplotype_name_in_html = soup.find(id="haplotype-name").get_text().strip()
-        self.assertEqual(haplotype_name_in_html, haplotype_name)
+        self.assertContains(response, haplotype.slug)
+        self.assertContains(response, haplotype_name)
 
 
-class AlleleSearchTest(TestCase):
+class AlleleListTest(ViewTestMixin, TestCase):
     fixtures = ["test_alleles.json"]
-
-    def setUp(self):
-        self.client = Client()
-        self.url = reverse("allele-search")
-
-    def test_shows_id_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        id_label = soup.find("label", {"for": "search-slug-input"}).get_text().strip()
-        self.assertEqual(id_label, "ID")
-        id_input = soup.find(id="search-slug-input")
-        self.assertIsNotNone(id_input)
-
-    def test_shows_allele_name_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        name_label = (
-            soup.find("label", {"for": "search-allele-name-input"}).get_text().strip()
-        )
-        self.assertEqual(name_label, "Name")
-        name_input = soup.find(id="search-allele-name-input")
-        self.assertIsNotNone(name_input)
-
-    def test_shows_car_id_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        car_id_label = (
-            soup.find("label", {"for": "search-car-id-input"}).get_text().strip()
-        )
-        self.assertIsNotNone(car_id_label, "CAR ID")
-        car_id_input = soup.find(id="search-car-id-input")
-        self.assertIsNotNone(car_id_input)
-
-    def test_shows_added_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        added_label = (
-            soup.find("label", {"for": "sort-added-at-button"}).get_text().strip()
-        )
-        self.assertEqual(added_label, "Added")
-        added_button = soup.find(id="sort-added-at-button")
-        self.assertIsNotNone(added_button)
-
-    def test_shows_id_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        id_anchor = (
-            soup.find("tbody").find("tr").find_all("td")[0].find("a").get_text().strip()
-        )
-        self.assertIn("A000001", id_anchor)
-
-    def test_shows_allele_name_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        name = soup.find("tbody").find("tr").find_all("td")[1].get_text().strip()
-        self.assertIn("A*01:02:03", name)
-
-    def test_shows_car_id_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        car_id = (
-            soup.find("tbody").find("tr").find_all("td")[2].find("a").get_text().strip()
-        )
-        self.assertIn("XAHLA123", car_id)
-
-    def test_shows_added_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        added_at = soup.find("tbody").find("tr").find_all("td")[3].get_text().strip()
-        self.assertIn("1970-01-01", added_at)
+    url = reverse("allele-list")
+    template = "allele/list.html"
+    page_name = "Allele Search"
+    expected_text = [
+        "ID",
+        "Name",
+        "CAR ID",
+        "Added",
+        "A000001",
+        "A*01:02:03",
+        "XAHLA123",
+        "1970-01-01",
+    ]

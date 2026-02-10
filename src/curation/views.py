@@ -16,7 +16,7 @@ from django.views.generic.edit import CreateView
 
 from core.permissions import CreateAccessMixin, has_create_access
 from curation.constants.models.common import Status
-from curation.constants.views import CURATION_SEARCH_FIELDS, FRAMEWORK
+from curation.constants.views import FRAMEWORK
 from curation.forms import (
     CurationCreateForm,
     CurationEditForm,
@@ -37,7 +37,6 @@ from curation.validators.views import (
     validate_p_value,
     validate_relative_risk,
 )
-from datatable.views import datatable
 
 
 class CurationCreate(CreateAccessMixin, CreateView):  # type: ignore
