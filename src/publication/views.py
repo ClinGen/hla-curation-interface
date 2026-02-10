@@ -1,14 +1,13 @@
 """Provides views for the publication app."""
 
 from django.contrib import messages
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView
 
-from core.permissions import CreateAccessMixin
-from datatable.views import datatable
+from auth_.permissions import CreateAccessMixin
 from publication.clients import (
     fetch_pubmed_data,
     fetch_rxiv_data,
@@ -19,7 +18,7 @@ from publication.clients import (
     get_rxiv_title,
     get_rxiv_year,
 )
-from publication.constants.views import PUBLICATION_SEARCH_FIELDS, PublicationTypes
+from publication.constants.models import PublicationTypes
 from publication.forms import PublicationForm
 from publication.models import Publication
 
@@ -74,18 +73,6 @@ class PublicationDetail(DetailView):
 
     model = Publication
     template_name = "publication/detail.html"
-
-
-def publication_search(request: HttpRequest) -> HttpResponse:
-    """Returns an interactive datatable for searching publications."""
-    return datatable(
-        request=request,
-        model=Publication,
-        order_by="pk",
-        fields=PUBLICATION_SEARCH_FIELDS,  # type: ignore
-        data_title="Publications",
-        partial="publication/partials/search.html",
-    )
 
 
 class PublicationList(ListView):

@@ -14,7 +14,7 @@ from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, UpdateView
 from django.views.generic.edit import CreateView
 
-from core.permissions import CreateAccessMixin, has_create_access
+from auth_.permissions import CreateAccessMixin, has_create_access
 from curation.constants.models.common import Status
 from curation.constants.views import FRAMEWORK
 from curation.forms import (

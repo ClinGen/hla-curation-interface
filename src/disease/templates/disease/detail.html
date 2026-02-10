@@ -41,7 +41,7 @@
                             <td>
                                 {% if object.mondo_id and object.iri %}
                                     {% with url=object.iri text=object.mondo_id %}
-                                        {% include "common/external_link.html" %}
+                                        {% include "common/linkout.html" %}
                                     {% endwith %}
                                 {% endif %}
                             </td>

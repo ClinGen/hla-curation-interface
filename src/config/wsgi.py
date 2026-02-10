@@ -1,5 +1,3 @@
-"""Configures the WSGI server for the project."""
-
 from django.core.wsgi import get_wsgi_application
 from dotenv import load_dotenv
 

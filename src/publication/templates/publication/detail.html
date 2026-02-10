@@ -54,7 +54,7 @@
                         <td>
                             {% if object.pubmed_id %}
                                 {% with url="https://pubmed.ncbi.nlm.nih.gov/"|add:object.pubmed_id text=object.pubmed_id %}
-                                    {% include "common/external_link.html" %}
+                                    {% include "common/linkout.html" %}
                                 {% endwith %}
                             {% else %}
                                 ------
@@ -66,7 +66,7 @@
                         <td>
                             {% if object.doi %}
                                 {% with url="https://doi.org/"|add:object.doi text=object.doi %}
-                                    {% include "common/external_link.html" %}
+                                    {% include "common/linkout.html" %}
                                 {% endwith %}
                             {% else %}
                                 ------

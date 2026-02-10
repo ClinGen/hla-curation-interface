@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render
 from workos import WorkOSClient
 
 from auth_.forms import PHIForm
-from core.models import UserProfile
+from auth_.models import UserProfile
 
 logger = logging.getLogger(__name__)
 

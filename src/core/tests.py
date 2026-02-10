@@ -1,16 +1,14 @@
-"""Houses tests for the core app."""
-
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 
+from auth_.models import UserProfile
 from common.tests import ViewTestMixin
-from core.models import UserProfile
 
 
 class HomeViewTest(ViewTestMixin, TestCase):
     url = reverse("home")
-    template = "core/home_new.html"
+    template = "core/home.html"
     page_name = "Home"
     expected_text = ["HLA Curation Interface"]
 

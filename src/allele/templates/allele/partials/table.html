@@ -21,7 +21,7 @@
                 <td>
                     {% if allele.car_id %}
                         {% with url="https://reg.clinicalgenome.org/car/ui/id/xahla/detail/"|add:allele.car_id text=allele.car_id %}
-                            {% include "common/external_link.html" %}
+                            {% include "common/linkout.html" %}
                         {% endwith %}
                     {% else %}
                         ------

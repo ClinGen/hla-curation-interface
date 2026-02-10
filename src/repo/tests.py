@@ -8,7 +8,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from allele.models import Allele
-from core.models import UserProfile
+from auth_.models import UserProfile
 from curation.constants.models.common import Status
 from curation.constants.models.curation import CurationTypes
 from curation.models import Curation

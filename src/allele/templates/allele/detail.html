@@ -46,7 +46,7 @@
                         <td>
                             {% if object.car_id %}
                                 {% with url="https://reg.clinicalgenome.org/car/ui/id/xahla/detail/"|add:object.car_id text=object.car_id %}
-                                    {% include "common/external_link.html" %}
+                                    {% include "common/linkout.html" %}
                                 {% endwith %}
                             {% else %}
                                 ------

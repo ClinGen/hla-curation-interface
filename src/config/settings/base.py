@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     "core",
     "common",
     "curation",
-    "datatable",
     "disease",
     "haplotype",
     "publication",

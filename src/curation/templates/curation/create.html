@@ -26,20 +26,20 @@
         <form method="post">{% csrf_token %}
             {{ form.non_field_errors }}
             {% with field=form.curation_type %}
-                {% include "common/form/input_radio.html" %}
+                {% include "common/form/input/radio.html" %}
             {% endwith %}
             <div id="allele-div">
                 {% with field=form.allele %}
-                    {% include "common/form/select_search.html" %}
+                    {% include "common/form/select/search.html" %}
                 {% endwith %}
             </div>
             <div id="haplotype-div">
                 {% with field=form.haplotype %}
-                    {% include "common/form/select_search.html" %}
+                    {% include "common/form/select/search.html" %}
                 {% endwith %}
             </div>
             {% with field=form.disease %}
-                {% include "common/form/select_search.html" %}
+                {% include "common/form/select/search.html" %}
             {% endwith %}
             <button type="submit" class="button is-link">
                 Submit

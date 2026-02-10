@@ -1,15 +1,13 @@
 """Provides views for the disease app."""
 
 from django.contrib import messages
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
-from core.permissions import CreateAccessMixin
-from datatable.views import datatable
+from auth_.permissions import CreateAccessMixin
 from disease.clients import fetch_disease_data, get_iri, get_name
-from disease.constants.views import DISEASE_SEARCH_FIELDS
 from disease.forms import DiseaseForm
 from disease.models import Disease
 
@@ -49,18 +47,6 @@ class DiseaseDetail(DetailView):
 
     model = Disease
     template_name = "disease/detail.html"
-
-
-def disease_search(request: HttpRequest) -> HttpResponse:
-    """Returns an interactive datatable for searching diseases."""
-    return datatable(
-        request=request,
-        model=Disease,
-        order_by="pk",
-        fields=DISEASE_SEARCH_FIELDS,
-        data_title="Diseases",
-        partial="disease/partials/search.html",
-    )
 
 
 class DiseaseList(ListView):

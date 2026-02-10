@@ -7,7 +7,7 @@ from django.views.generic import CreateView, DetailView, ListView
 from allele.clients import fetch_allele_data, get_car_id
 from allele.forms import AlleleForm
 from allele.models import Allele
-from core.permissions import CreateAccessMixin
+from auth_.permissions import CreateAccessMixin
 
 
 class AlleleCreate(CreateAccessMixin, CreateView):  # type: ignore

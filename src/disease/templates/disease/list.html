@@ -42,7 +42,7 @@
                         <td>
                             {% if disease.iri and disease.mondo_id %}
                                 {% with url=disease.iri text=disease.mondo_id %}
-                                    {% include "common/external_link.html" %}
+                                    {% include "common/linkout.html" %}
                                 {% endwith %}
                             {% else %}
                                 ------

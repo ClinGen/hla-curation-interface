@@ -26,17 +26,17 @@
         <form method="post">{% csrf_token %}
             {{ form.non_field_errors }}
             {% with field=form.publication_type %}
-                {% include "common/form/input_radio.html" %}
+                {% include "common/form/input/radio.html" %}
             {% endwith %}
             <div id="pubmed-div">
                 {% with field=form.pubmed_id %}
-                    {% include "common/form/input_text.html" with show_help=True %}
+                    {% include "common/form/input/text.html" with show_help=True %}
                 {% endwith %}
             </div>
             <div id="doi-div">
                 {% with field=form.doi %}
                     {% include "publication/partials/rxiv_warning.html" %}
-                    {% include "common/form/input_text.html" with show_help=True %}
+                    {% include "common/form/input/text.html" with show_help=True %}
                 {% endwith %}
             </div>
             <button type="submit" class="button is-link mt-3">

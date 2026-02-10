@@ -8,22 +8,8 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views.generic import DetailView, ListView
 
-from datatable.views import datatable
-from repo.constants.views import PUBLISHED_CURATION_SEARCH_FIELDS
 from repo.models import PublishedCuration
 from repo.serializers import serialize_published_curation
-
-
-def repo_search(request: HttpRequest) -> HttpResponse:
-    """Returns an interactive datatable for searching published curations."""
-    return datatable(
-        request=request,
-        model=PublishedCuration,
-        order_by="-published_at",
-        fields=PUBLISHED_CURATION_SEARCH_FIELDS,
-        data_title="Published Curations",
-        partial="repo/partials/search.html",
-    )
 
 
 class PublishedCurationList(ListView):

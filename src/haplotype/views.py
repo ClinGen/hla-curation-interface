@@ -6,10 +6,8 @@ from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView
 
-from core.permissions import CreateAccessMixin
-from datatable.views import datatable
+from auth_.permissions import CreateAccessMixin
 from haplotype.constants.models import GENE_LIST
-from haplotype.constants.views import HAPLOTYPE_SEARCH_FIELDS
 from haplotype.forms import HaplotypeForm
 from haplotype.models import Haplotype
 
