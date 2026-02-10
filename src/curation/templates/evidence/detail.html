@@ -39,7 +39,7 @@
 
     <hr>
 
-    <div id="evidence-detail-tabs" class="tabs" hx-boost="true">
+    <div class="tabs" hx-boost="true">
         <ul>
             <li {% if request.GET.tab == "data" or not request.GET.tab %}class="is-active"{% endif %}>
                 <a href="{% url 'evidence-detail' object.curation.slug object.slug %}?tab=data">Data</a>
@@ -54,7 +54,7 @@
     {% if request.GET.tab == "data" or not request.GET.tab %}
 
         {% if not object.curation.publication %}
-            <a href="{% url 'evidence-edit' object.curation.slug object.slug %}" class="button" id="edit-button">
+            <a href="{% url 'evidence-edit' object.curation.slug object.slug %}" class="button">
                 {% include "common/icon.html" with icon_name="pencil" %}
                 Edit Data
             </a>

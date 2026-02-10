@@ -3,26 +3,26 @@
         <tbody>
         <tr>
             <td>HCI Curation ID</td>
-            <td id="curation-id">{{ object.slug }}</td>
+            <td>{{ object.slug }}</td>
         </tr>
         {% if object.curation_type == "ALL" %}
             <tr>
                 <td>Allele</td>
-                <td id="allele">{{ object.allele }}</td>
+                <td>{{ object.allele }}</td>
             </tr>
         {% elif object.curation_type == "HAP" %}
             <tr>
                 <td>Haplotype</td>
-                <td id="haplotype">{{ object.haplotype }}</td>
+                <td>{{ object.haplotype }}</td>
             </tr>
         {% endif %}
         <tr>
             <td>Disease</td>
-            <td id="disease">{{ object.disease }}</td>
+            <td>{{ object.disease }}</td>
         </tr>
         <tr>
             <td>Status</td>
-            <td id="status">
+            <td>
                 {% if object.status == "INP" %}
                     {% include "common/tags/in_progress.html" %}
                 {% elif object.status == "DNE" %}
@@ -35,7 +35,7 @@
         </tr>
         <tr>
             <td>Classification</td>
-            <td id="classification">
+            <td>
                 {% if object.classification == "DEF" %}
                     <span class="tag">Definitive</span>
                 {% elif object.classification == "STR" %}
@@ -55,11 +55,11 @@
         </tr>
         <tr>
             <td>Score</td>
-            <td id="score">{{ object.score }}</td>
+            <td>{{ object.score }}</td>
         </tr>
         <tr>
             <td>Added</td>
-            <td id="added-at">{{ object.added_at|date:"Y-m-d" }}</td>
+            <td>{{ object.added_at|date:"Y-m-d" }}</td>
         </tr>
         </tbody>
     </table>

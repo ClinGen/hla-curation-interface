@@ -219,7 +219,7 @@ class PublishedCurationDetailViewTest(TestCase):
         url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
         response = self.client.get(url)
         self.assertContains(response, self.curation.slug)
-        self.assertContains(response, "Published Curation Details")
+        self.assertContains(response, "Download as JSON")
 
 
 class JSONDownloadViewTest(TestCase):

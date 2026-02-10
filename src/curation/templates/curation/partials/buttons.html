@@ -1,6 +1,6 @@
 {% if not object.publication %}
     <div class="buttons">
-            <a href="{% url 'curation-edit' object.slug %}" class="button" id="edit-curation-button">
+            <a href="{% url 'curation-edit' object.slug %}" class="button">
                 {% include "common/icon.html" with icon_name="pencil" %}
                 Edit Curation
             </a>

@@ -37,21 +37,21 @@
         {% if object.status == "INP" %}
             <tr>
                 <td>Status</td>
-                <td id="status">
+                <td>
                     {% include "common/tags/in_progress.html" %}
                 </td>
             </tr>
         {% elif object.status == "DNE" %}
             <tr>
                 <td>Status</td>
-                <td id="status">
+                <td>
                     {% include "common/tags/done.html" %}
                 </td>
             </tr>
         {% endif %}
             <tr>
                 <td>Added</td>
-                <td id="added-at">{{ object.added_at|date:"Y-m-d" }}</td>
+                <td>{{ object.added_at|date:"Y-m-d" }}</td>
             </tr>
         </tbody>
     </table>

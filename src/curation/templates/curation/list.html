@@ -25,7 +25,7 @@
 
         {% include "curation/partials/table.html" with curations=object_list %}
 
-        <a href="{% url 'curation-create' %}" class="button is-link" id="plus-circle-button">
+        <a href="{% url 'curation-create' %}" class="button is-link">
             {% include "common/icon.html" with icon_name="plus-circle" %}
             Add Curation
         </a>

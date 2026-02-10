@@ -32,8 +32,7 @@
         {% include "curation/partials/curation/detail_table.html" with object=curation %}
 
         <a href="{% url 'repo-download-single' curation.slug %}"
-           class="button"
-           id="download-button">
+           class="button">
             {% include "common/icon.html" with icon_name="download" %}
             Download as JSON
         </a>

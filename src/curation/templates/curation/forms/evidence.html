@@ -4,7 +4,7 @@
     <form method="post">{% csrf_token %}
         {{ evidence_formset.management_form }}
         <div class="block table-container mt-4">
-            <table class="table is-fullwidth is-hoverable" id="evidence-table">
+            <table class="table is-fullwidth is-hoverable">
                 <thead>
                 <tr>
                     <th>ID</th>
@@ -66,10 +66,10 @@
         </div>
 
         <div class="buttons">
-            <button type="submit" class="button is-link" id="save-edit-button">
+            <button type="submit" class="button is-link">
                 Save
             </button>
-            <a href="{% url 'curation-detail' object.slug %}" class="button is-link is-light" id="cancel-edit-button">
+            <a href="{% url 'curation-detail' object.slug %}" class="button is-link is-light">
                 Cancel
             </a>
         </div>

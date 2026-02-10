@@ -63,7 +63,7 @@
                     </tr>
                     <tr>
                         <td>Digital Object Identifier</td>
-                        <td id="doi">
+                        <td>
                             {% if object.doi %}
                                 {% with url="https://doi.org/"|add:object.doi text=object.doi %}
                                     {% include "common/external_link.html" %}
@@ -75,7 +75,7 @@
                     </tr>
                     <tr>
                         <td>Added</td>
-                        <td id="added-at">{{ object.added_at|default_if_none:"------"|date:"Y-m-d" }}</td>
+                        <td>{{ object.added_at|default_if_none:"------"|date:"Y-m-d" }}</td>
                     </tr>
                 </tbody>
             </table>
