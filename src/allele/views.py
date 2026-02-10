@@ -1,5 +1,3 @@
-"""Provides views for the allele app."""
-
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -13,8 +11,6 @@ from core.permissions import CreateAccessMixin
 
 
 class AlleleCreate(CreateAccessMixin, CreateView):  # type: ignore
-    """Allows the user to create (add) an allele."""
-
     model = Allele
     form_class = AlleleForm
     template_name = "allele/create.html"
@@ -24,7 +20,7 @@ class AlleleCreate(CreateAccessMixin, CreateView):  # type: ignore
         """Fetches and adds data from the ClinGen Allele Registry and records user.
 
         Returns:
-             The details page for the allele if the form is valid, or the form with
+             The success page for the allele if the form is valid, or the form with
              errors if the form isn't valid.
         """
         allele_data = fetch_allele_data(form.instance.name)
@@ -42,8 +38,6 @@ class AlleleCreate(CreateAccessMixin, CreateView):  # type: ignore
 
 
 class AlleleDetail(DetailView):
-    """Shows user information about an allele."""
-
     model = Allele
     template_name = "allele/detail.html"
 

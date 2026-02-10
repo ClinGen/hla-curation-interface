@@ -1,5 +1,3 @@
-"""Configures URLs for the allele app."""
-
 from django.urls import path
 
 from allele import views

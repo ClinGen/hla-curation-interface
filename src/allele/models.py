@@ -1,5 +1,3 @@
-"""Houses database models for the allele app."""
-
 from django.contrib.auth.models import User
 from django.db import models
 from django.http import HttpResponseBase
@@ -7,8 +5,6 @@ from django.urls import reverse
 
 
 class Allele(models.Model):
-    """Contains information about an allele that has been added to the HCI."""
-
     slug = models.SlugField(
         default="",
         max_length=7,
@@ -50,14 +46,11 @@ class Allele(models.Model):
     )
 
     class Meta:
-        """Provides metadata."""
-
         db_table = "allele"
         verbose_name = "Allele"
         verbose_name_plural = "Alleles"
 
     def __str__(self) -> str:
-        """Returns a string representation of the allele."""
         return self.name
 
     def save(self, *args, **kwargs) -> None:
@@ -68,5 +61,4 @@ class Allele(models.Model):
             self.save(update_fields=["slug"])
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:
-        """Returns the details page for a specific allele."""
         return reverse("allele-detail", kwargs={"slug": self.slug})
