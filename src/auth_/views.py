@@ -1,5 +1,3 @@
-"""Provides views for the auth_ app."""
-
 import logging
 import os
 
@@ -82,7 +80,7 @@ def logout_(request: HttpRequest) -> HttpResponseRedirect:
 
 
 def profile(request: HttpRequest) -> HttpResponse:
-    """Returns the view profile page for the user."""
+    """Returns the profile page for the user."""
     if request.user.is_authenticated:
         p, _ = UserProfile.objects.get_or_create(user=request.user)
         context = {"user_profile": p}
