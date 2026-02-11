@@ -5,7 +5,7 @@ import sys
 from dotenv import load_dotenv
 
 
-def main() -> None:
+def main() -> None:  # noqa: D103
     # Load environment variables from the .env file.
     load_dotenv()
     try:
