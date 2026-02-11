@@ -1,5 +1,3 @@
-"""Houses tests for the disease app."""
-
 from unittest.mock import MagicMock, patch
 
 from django.test import TestCase

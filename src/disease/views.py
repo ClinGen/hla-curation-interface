@@ -1,5 +1,3 @@
-"""Provides views for the disease app."""
-
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -13,20 +11,12 @@ from disease.models import Disease
 
 
 class DiseaseCreate(CreateAccessMixin, CreateView):  # type: ignore
-    """Allows the user to create (add) a disease."""
-
     model = Disease
     form_class = DiseaseForm
     template_name = "disease/create.html"
     success_url = reverse_lazy("disease-list")
 
     def form_valid(self, form: DiseaseForm) -> HttpResponse:
-        """Fetches and adds data from the Ontology Lookup Service and records user.
-
-        Returns:
-             The details page for the allele if the form is valid, or the form with
-             errors if the form isn't valid.
-        """
         disease_data = fetch_disease_data(form.instance.mondo_id)
         if disease_data:
             form.instance.name = get_name(disease_data)
@@ -43,8 +33,6 @@ class DiseaseCreate(CreateAccessMixin, CreateView):  # type: ignore
 
 
 class DiseaseDetail(DetailView):
-    """Shows user information about a disease."""
-
     model = Disease
     template_name = "disease/detail.html"
 
