@@ -1,4 +1,5 @@
 import json
+from typing import override
 
 from django.contrib.auth.models import User
 from django.db import IntegrityError
@@ -95,8 +96,9 @@ class CurationPublishViewTest(CreateTestMixin, TestCase):
             "curation-publish", kwargs={"curation_slug": self.curation.slug}
         )
 
+    @override
     def test_permission_granted_if_yes_phi_yes_perms(self):
-        # Override: publish always redirects (302) rather than returning 200.
+        # Publish always redirects (302) rather than returning 200, so we override.
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
