@@ -57,8 +57,6 @@ from publication.models import Publication
 
 
 class Curation(models.Model):
-    """Contains top-level information about a curation."""
-
     slug = models.SlugField(
         default="",
         max_length=7,
@@ -134,14 +132,11 @@ class Curation(models.Model):
     )
 
     class Meta:
-        """Provides metadata."""
-
         db_table = "curation"
         verbose_name = "Curation"
         verbose_name_plural = "Curations"
 
     def __str__(self) -> str:
-        """Returns a string representation of the curation."""
         return f"Curation #{self.pk} ({self.curation_type})"
 
     def save(self, *args, **kwargs) -> None:
@@ -152,11 +147,9 @@ class Curation(models.Model):
             self.save(update_fields=["slug"])
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:
-        """Returns the details page for a specific publication."""
         return reverse("curation-detail", kwargs={"curation_slug": self.slug})
 
     def clean(self) -> None:
-        """Makes sure the curation is saved in a valid state."""
         super().clean()
         validate_status(self)
         validate_curation_type(self)
@@ -190,20 +183,15 @@ class Demographic(models.Model):
     )
 
     class Meta:
-        """Provides metadata."""
-
         db_table = "demographic"
         verbose_name = "Demographic"
         verbose_name_plural = "Demographics"
 
     def __str__(self) -> str:
-        """Returns a string representation of the demographic."""
         return self.group
 
 
 class Evidence(models.Model):
-    """Contains evidence derived from a publication."""
-
     slug = models.SlugField(
         default="",
         max_length=7,
@@ -495,25 +483,20 @@ class Evidence(models.Model):
     )
 
     class Meta:
-        """Provides metadata."""
-
         db_table = "evidence"
         verbose_name = "evidence"
         verbose_name_plural = "Evidence"
 
     def __str__(self) -> str:
-        """Returns a string representation of the curation."""
         return f"Evidence #{self.pk}"
 
     def save(self, *args, **kwargs) -> None:
-        """Adds a human-readable ID."""
         super().save(*args, **kwargs)
         if not self.slug:
             self.slug = f"E{self.id:06d}"
             self.save(update_fields=["slug"])
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:
-        """Returns the details page for an evidence item."""
         curation_pk = self.curation.slug if self.curation else None
         return reverse(
             "evidence-detail",
@@ -524,7 +507,6 @@ class Evidence(models.Model):
         )
 
     def clean(self) -> None:
-        """Makes sure the data being submitted is valid."""
         validate_publication(self)
         validate_p_value_string(self)
         validate_effect_size_statistic(self)
@@ -566,7 +548,6 @@ class Evidence(models.Model):
 
     @property
     def score(self) -> float:
-        """Returns the score for the evidence."""
         return self.score_before_multipliers * self.score_step_6a * self.score_step_6b
 
     @property
@@ -588,65 +569,52 @@ class Evidence(models.Model):
 
     @property
     def score_step_1a(self) -> float | None:
-        """Returns the score for step 1A."""
         return get_step_1a_points(self)
 
     @property
     def score_step_1b(self) -> float | None:
-        """Returns the score for step 1B."""
         return get_step_1b_points(self)
 
     @property
     def score_step_1c(self) -> float | None:
-        """Returns the score for step 1C."""
         return get_step_1c_points(self)
 
     @property
     def score_step_1d(self) -> float | None:
-        """Returns the score for step 1D."""
         return get_step_1d_points(self)
 
     @property
     def score_step_2(self) -> float | None:
-        """Returns the score for step 2."""
         return get_step_2_points(self)
 
     @property
     def score_step_3a(self) -> float | None:
-        """Returns the score for step 3A."""
         return get_step_3a_points(self)
 
     @property
     def score_step_3b(self) -> float | None:
-        """Returns the score for step 3B."""
         return get_step_3b_points(self)
 
     @property
     def score_step_3c1(self) -> float | None:
-        """Returns the first score for step 3C."""
         return get_step_3c1_points(self)
 
     @property
     def score_step_3c2(self) -> float | None:
-        """Returns the second score for step 3C."""
         return get_step_3c2_points(self)
 
     @property
     def score_step_4(self) -> float | None:
-        """Returns the score for step 4."""
         return get_step_4_points(self)
 
     @property
     def score_step_5(self) -> float | None:
-        """Returns the score for step 5."""
         return get_step_5_points(self)
 
     @property
     def score_step_6a(self) -> float:
-        """Returns the score for step 6A."""
         return get_step_6a_multiplier(self)
 
     @property
     def score_step_6b(self) -> float:
-        """Returns the score for step 6B."""
         return get_step_6b_multiplier(self)

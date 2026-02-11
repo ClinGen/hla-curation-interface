@@ -1,5 +1,3 @@
-"""Provides forms for the curation app."""
-
 from django import forms
 from django.forms import ModelForm, modelformset_factory
 
@@ -7,42 +5,26 @@ from curation.models import Curation, Evidence
 
 
 class CurationCreateForm(ModelForm):
-    """Allows the user to add a curation."""
-
     class Meta:
-        """Provides metadata."""
-
         model = Curation
         fields = ["curation_type", "allele", "haplotype", "disease"]
         widgets = {"curation_type": forms.RadioSelect}
 
 
 class CurationEditForm(ModelForm):
-    """Allows the user to edit a curation."""
-
     class Meta:
-        """Provides metadata."""
-
         model = Curation
         fields = ["status", "classification"]
 
 
 class EvidenceCreateForm(ModelForm):
-    """Allows the user to add evidence."""
-
     class Meta:
-        """Provides metadata."""
-
         model = Evidence
         fields = ["publication"]
 
 
 class EvidenceTopLevelEditForm(ModelForm):
-    """Allows the user to edit the top-level evidence fields."""
-
     class Meta:
-        """Provides metadata."""
-
         model = Evidence
         fields = ["status", "is_conflicting", "is_included"]
         widgets = {
@@ -63,11 +45,7 @@ YN_BOOL_CHOICES = [(True, "Yes"), (False, "No")]
 
 
 class EvidenceEditForm(ModelForm):
-    """Allows the user to edit all evidence fields other than the top-level fields."""
-
     class Meta:
-        """Provides metadata."""
-
         model = Evidence
         fields = [
             "is_gwas",
@@ -128,12 +106,6 @@ class EvidenceEditForm(ModelForm):
         }
 
     def clean(self) -> dict | None:
-        """Returns cleaned data.
-
-        Raises:
-            ValidationError: If demographics are not provided when imputation is typing
-                             method.
-        """
         cleaned_data = super().clean()
         typing_method = cleaned_data.get("typing_method")  # type: ignore
         demographics = cleaned_data.get("demographics")  # type: ignore

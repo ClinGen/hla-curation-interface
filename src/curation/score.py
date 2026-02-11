@@ -15,7 +15,6 @@ from curation.interval import Interval
 
 
 def get_step_1a_points(evidence) -> float | None:
-    """Returns the points for step 1A."""
     points = None
     if (
         evidence.curation
@@ -33,7 +32,6 @@ def get_step_1a_points(evidence) -> float | None:
 
 
 def get_step_1b_points(evidence) -> float | None:
-    """Returns the points for step 1B."""
     fields_points = {
         1: Points.S1B_1_FIELD,
         2: Points.S1B_2_FIELD,
@@ -44,7 +42,6 @@ def get_step_1b_points(evidence) -> float | None:
 
 
 def get_step_1c_points(evidence) -> float | None:
-    """Returns the points for step 1C."""
     points = None
     if evidence.zygosity == Zygosity.MONOALLELIC:
         points = Points.S1C_MONOALLELIC
@@ -54,7 +51,6 @@ def get_step_1c_points(evidence) -> float | None:
 
 
 def get_step_1d_points(evidence) -> float | None:
-    """Returns the points for step 1D."""
     points = None
     if evidence.phase_confirmed:
         points = Points.S1D_PHASE_CONFIRMED
@@ -64,7 +60,6 @@ def get_step_1d_points(evidence) -> float | None:
 
 
 def get_step_2_points(evidence) -> float | None:
-    """Returns the points for step 2."""
     typing_method_points = {
         TypingMethod.TAG_SNPS: Points.S2_TAG_SNPS,
         TypingMethod.MICROARRAYS: Points.S2_MICROARRAYS,
@@ -84,7 +79,6 @@ def get_step_2_points(evidence) -> float | None:
 
 
 def get_step_3a_points(evidence) -> float | None:
-    """Returns the points for step 3A."""
     if evidence.p_value is None:
         return None
 
@@ -113,7 +107,6 @@ def get_step_3a_points(evidence) -> float | None:
 
 
 def get_step_3b_points(evidence) -> float | None:
-    """Returns the points for step 3B."""
     points = None
     if evidence.multiple_testing_correction == MultipleTestingCorrection.OVERALL:
         points = Points.S3B_OVERALL
@@ -123,7 +116,6 @@ def get_step_3b_points(evidence) -> float | None:
 
 
 def get_step_3c1_points(evidence) -> float | None:
-    """Returns the first score for step 3C."""
     points = None
 
     is_odds_ratio = (
@@ -163,7 +155,6 @@ def get_step_3c1_points(evidence) -> float | None:
 
 
 def get_step_3c2_points(evidence) -> float | None:
-    """Returns the second score for step 3C."""
     has_confidence_interval = evidence.ci_start and evidence.ci_end
     if not has_confidence_interval:
         return None
@@ -208,7 +199,6 @@ def get_step_3c2_points(evidence) -> float | None:
 
 
 def get_step_4_points(evidence) -> float | None:
-    """Returns the points for step 4."""
     if evidence.cohort_size is None:
         return None
 
@@ -237,7 +227,6 @@ def get_step_4_points(evidence) -> float | None:
 
 
 def get_step_5_points(evidence) -> float | None:
-    """Returns the points for step 5."""
     points = None
 
     specific_phenotype = (
@@ -259,14 +248,12 @@ def get_step_5_points(evidence) -> float | None:
 
 
 def get_step_6a_multiplier(evidence) -> float:
-    """Returns the multiplier for step 6a."""
     if evidence.has_association:
         return Points.S6A_ASSOCIATION
     return Points.S6A_NO_ASSOCIATION
 
 
 def get_step_6b_multiplier(evidence) -> float:
-    """Returns the multiplier for step 6b."""
     if evidence.num_fields == 1:
         return Points.S6B_1_FIELD
     return Points.S6B_MORE_THAN_1_FIELD
