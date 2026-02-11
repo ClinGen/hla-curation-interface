@@ -1,5 +1,3 @@
-"""Provides views for the publication app."""
-
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -24,20 +22,12 @@ from publication.models import Publication
 
 
 class PublicationCreate(CreateAccessMixin, CreateView):  # type: ignore
-    """Allows the user to create (add) a publication."""
-
     model = Publication
     form_class = PublicationForm
     template_name = "publication/create.html"
     success_url = reverse_lazy("publication-list")
 
     def form_valid(self, form: PublicationForm) -> HttpResponse:
-        """Makes sure the user who added the publication is recorded.
-
-        Returns:
-             The details page for the publication if the form is valid, or the form with
-             errors if the form isn't valid.
-        """
         if form.instance.publication_type == PublicationTypes.PUBMED:
             pubmed_data = fetch_pubmed_data(form.instance.pubmed_id)
             if pubmed_data:
@@ -69,8 +59,6 @@ class PublicationCreate(CreateAccessMixin, CreateView):  # type: ignore
 
 
 class PublicationDetail(DetailView):
-    """Shows the user information about a publication."""
-
     model = Publication
     template_name = "publication/detail.html"
 

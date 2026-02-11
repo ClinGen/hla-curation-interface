@@ -1,5 +1,3 @@
-"""Configures URLs for the publication app."""
-
 from django.urls import path
 
 from publication import views

@@ -1,5 +1,3 @@
-"""Houses database models for the publication app."""
-
 from django.contrib.auth.models import User
 from django.db import models
 from django.http import HttpResponseBase
@@ -14,8 +12,6 @@ from publication.validators.models import (
 
 
 class Publication(models.Model):
-    """Contains information about a publication that has been added to the HCI."""
-
     slug = models.SlugField(
         default="",
         max_length=7,
@@ -86,30 +82,24 @@ class Publication(models.Model):
     )
 
     class Meta:
-        """Provides metadata."""
-
         db_table = "publication"
         verbose_name = "Publication"
         verbose_name_plural = "Publications"
 
     def __str__(self) -> str:
-        """Returns a string representation of the publication."""
         title = self.title[:-1] if self.title.endswith(".") else self.title
         return f"{title}."
 
     def save(self, *args, **kwargs) -> None:
-        """Adds a human-readable ID."""
         super().save(*args, **kwargs)
         if not self.slug:
             self.slug = f"P{self.id:06d}"
             self.save(update_fields=["slug"])
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:
-        """Returns the details page for a specific publication."""
         return reverse("publication-detail", kwargs={"slug": self.slug})
 
     def clean(self) -> None:
-        """Makes sure the publication is valid."""
         super().clean()
         validate_publication_type_pubmed(self)
         validate_publication_type_biorxiv(self)

@@ -1,5 +1,3 @@
-"""Houses tests for the publication app."""
-
 from unittest.mock import MagicMock, patch
 
 from bs4 import BeautifulSoup
