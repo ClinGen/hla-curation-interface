@@ -3,34 +3,35 @@
 {% block description %}Add a haplotype to the HLA Curation Interface.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
+
         <nav class="breadcrumb" aria-label="breadcrumbs">
             <ul>
                 <li>
                     <a href="{% url 'home' %}">
+                        {% include "common/icon.html" with icon_name="house" %}
                         Home
                     </a>
                 </li>
-                <li>
-                    <a href="{% url 'haplotype-search' %}">
-                        Haplotypes
-                    </a>
-                </li>
                 <li class="is-active">
-                    <a href="" aria-current="page">
-                        Add Haplotype
-                    </a>
+                    <b>
+                        <a href="" aria-current="page">
+                            {% include "common/icon.html" with icon_name="plus-circle" %}
+                            Add Haplotype
+                        </a>
+                    </b>
                 </li>
             </ul>
         </nav>
-        <h1 class="title">Add Haplotype</h1>
+
         <form method="post">{% csrf_token %}
             {{ form.non_field_errors }}
             {% with field=form.alleles %}
-                {% include "common/form/select_search.html" %}
+                {% include "common/form/select/search.html" %}
             {% endwith %}
             <button type="submit" class="button is-link">
                 Submit
             </button>
         </form>
+
     </div>
 {% endblock %}

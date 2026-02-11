@@ -1,6 +1,5 @@
-"""Houses tests for the repo app."""
-
 import json
+from typing import override
 
 from django.contrib.auth.models import User
 from django.db import IntegrityError
@@ -8,7 +7,8 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from allele.models import Allele
-from core.models import UserProfile
+from auth_.models import UserProfile
+from common.tests import CreateTestMixin
 from curation.constants.models.common import Status
 from curation.constants.models.curation import CurationTypes
 from curation.models import Curation
@@ -78,34 +78,37 @@ class PublishedCurationModelTest(TestCase):
         self.assertEqual(published.get_absolute_url(), expected_url)
 
 
-class CurationPublishViewTest(TestCase):
+class CurationPublishViewTest(CreateTestMixin, TestCase):
     fixtures = ["test_alleles.json", "test_diseases.json"]
 
     def setUp(self):
-        self.client = Client()
+        super().setUp()
         self.allele = Allele.objects.get(pk=1)
         self.disease = Disease.objects.get(pk=1)
-        self.user = User.objects.create_user(username="testuser", password="testpass")  # noqa: S106
-        UserProfile.objects.create(
-            user=self.user,
-            has_signed_phi_agreement=True,
-            has_curation_permissions=True,
-        )
-        self.client.force_login(self.user)
-
-    def test_publish_done_curation(self):
-        curation = Curation.objects.create(
+        self.curation = Curation.objects.create(
             curation_type=CurationTypes.ALLELE,
             allele=self.allele,
             disease=self.disease,
             status=Status.DONE,
         )
-        curation.save()  # Ensure slug is generated.
-        url = reverse("curation-publish", kwargs={"curation_slug": curation.slug})
-        response = self.client.get(url)
+        self.curation.save()  # Ensure slug is generated.
+        self.url = reverse(
+            "curation-publish", kwargs={"curation_slug": self.curation.slug}
+        )
+
+    @override
+    def test_permission_granted_if_yes_phi_yes_perms(self):
+        # Publish always redirects (302) rather than returning 200, so we override.
+        self.client.force_login(self.user4_yes_phi_yes_perms)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_publish_done_curation(self):
+        self.client.force_login(self.user4_yes_phi_yes_perms)
+        response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(hasattr(curation, "publication"))
+        self.assertTrue(hasattr(self.curation, "publication"))
         self.assertEqual(PublishedCuration.objects.count(), 1)
 
     def test_cannot_publish_in_progress_curation(self):
@@ -117,44 +120,22 @@ class CurationPublishViewTest(TestCase):
         )
         curation.save()  # Ensure slug is generated.
         url = reverse("curation-publish", kwargs={"curation_slug": curation.slug})
+        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(PublishedCuration.objects.count(), 0)
 
     def test_cannot_publish_already_published_curation(self):
-        curation = Curation.objects.create(
-            curation_type=CurationTypes.ALLELE,
-            allele=self.allele,
-            disease=self.disease,
-            status=Status.DONE,
-        )
-        curation.save()  # Ensure slug is generated.
         PublishedCuration.objects.create(
-            curation=curation,
-            published_by=self.user,
+            curation=self.curation,
+            published_by=self.user4_yes_phi_yes_perms,
         )
-
-        url = reverse("curation-publish", kwargs={"curation_slug": curation.slug})
-        response = self.client.get(url)
+        self.client.force_login(self.user4_yes_phi_yes_perms)
+        response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(PublishedCuration.objects.count(), 1)
-
-    def test_requires_authentication(self):
-        self.client.logout()
-        curation = Curation.objects.create(
-            curation_type=CurationTypes.ALLELE,
-            allele=self.allele,
-            disease=self.disease,
-            status=Status.DONE,
-        )
-        curation.save()
-        url = reverse("curation-publish", kwargs={"curation_slug": curation.slug})
-        response = self.client.get(url)
-
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(PublishedCuration.objects.count(), 0)
 
 
 class RepoSearchViewTest(TestCase):
@@ -219,7 +200,7 @@ class PublishedCurationDetailViewTest(TestCase):
         url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
         response = self.client.get(url)
         self.assertContains(response, self.curation.slug)
-        self.assertContains(response, "Published Curation Details")
+        self.assertContains(response, "Download as JSON")
 
 
 class JSONDownloadViewTest(TestCase):
@@ -254,7 +235,7 @@ class JSONDownloadViewTest(TestCase):
         self.assertIn("attachment", response["Content-Disposition"])
 
         data = json.loads(response.content)
-        self.assertEqual(data["curation_id"], self.curation.slug)
+        self.assertEqual(data["curation"]["curation_id"], self.curation.slug)
 
     def test_download_all_json(self):
         url = reverse("repo-download-all")

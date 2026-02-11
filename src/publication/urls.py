@@ -1,8 +1,7 @@
-"""Configures URLs for the publication app."""
-
 from django.urls import path
 
 from publication import views
+from publication.views import PublicationList
 
 urlpatterns = [
     path("create", views.PublicationCreate.as_view(), name="publication-create"),
@@ -11,5 +10,5 @@ urlpatterns = [
         views.PublicationDetail.as_view(),
         name="publication-detail",
     ),
-    path("search", views.publication_search, name="publication-search"),
+    path("list", PublicationList.as_view(), name="publication-list"),
 ]

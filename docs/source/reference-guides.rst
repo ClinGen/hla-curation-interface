@@ -123,13 +123,6 @@ Curation App
 The haplotype app handles the basic CRUD operations for curations. It also handles
 the basic CRUD operations for evidence, and code related to the scoring framework.
 
-Datatable App
-=============
-
-The datatable app provides a reusable ``datatable`` view that provides an interactive
-searchable, sortable, and filterable table. It uses HTMX for interactivity. The
-searching, sorting, and filtering are done on the backend.
-
 Publication App
 ===============
 

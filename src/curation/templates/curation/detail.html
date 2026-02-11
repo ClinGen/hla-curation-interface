@@ -3,27 +3,48 @@
 {% block description %}View information about {{ object.slug }}.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
+
         <nav class="breadcrumb" aria-label="breadcrumbs">
             <ul>
                 <li>
                     <a href="{% url 'home' %}">
+                        {% include "common/icon.html" with icon_name="house" %}
                         Home
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'curation-search' %}">
-                        Curations
+                    <a href="{% url 'curation-list' %}">
+                        {% include "common/icon.html" with icon_name="search" %}
+                        Curation Search
                     </a>
                 </li>
                 <li class="is-active">
-                    <a href="" aria-current="page">
-                        {{ object.slug }}
-                    </a>
+                    <b>
+                        <a href="" aria-current="page">
+                            {% include "common/icon.html" with icon_name="journal-text" %}
+                            {{ object.slug|default_if_none:"------" }} Details
+                        </a>
+                    </b>
                 </li>
             </ul>
         </nav>
-        {% include "curation/partials/curation_detail_table.html" %}
+
+        {% if object.publication %}
+            <div class="notification is-info is-light">
+                <p>
+                    <strong>This curation has been published and is read-only.</strong>
+                </p>
+                <p class="mt-2">
+                    <a href="{% url 'repo-detail' object.slug %}">View in HLArepo</a>
+                </p>
+            </div>
+        {% endif %}
+
+        {% include "curation/partials/curation/detail_table.html" %}
+
         {% include "curation/partials/buttons.html" %}
+
+        {% include "curation/partials/evidence/detail_table.html" %}
     </div>
-    {% include "curation/partials/evidence_detail_table.html" %}
+
 {% endblock %}

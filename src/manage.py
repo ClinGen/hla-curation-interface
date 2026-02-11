@@ -1,17 +1,11 @@
 #!/usr/bin/env python
-"""Provides a command-line utility for administrative tasks."""
 
 import sys
 
 from dotenv import load_dotenv
 
 
-def main() -> None:
-    """Runs administrative tasks.
-
-    Raises:
-        ImportError: When Django can't be imported.
-    """
+def main() -> None:  # noqa: D103
     # Load environment variables from the .env file.
     load_dotenv()
     try:

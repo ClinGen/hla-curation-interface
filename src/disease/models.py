@@ -1,5 +1,3 @@
-"""Houses database models for the disease app."""
-
 from django.contrib.auth.models import User
 from django.db import models
 from django.http import HttpResponseBase
@@ -10,8 +8,6 @@ from disease.validators.models import validate_disease_type_mondo, validate_mond
 
 
 class Disease(models.Model):
-    """Contains information about a disease that has been added to the HCI."""
-
     slug = models.SlugField(
         default="",
         max_length=7,

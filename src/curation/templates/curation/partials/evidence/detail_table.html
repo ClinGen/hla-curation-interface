@@ -1,0 +1,75 @@
+{% if object.evidence.all %}
+    <details class="mt-6" open>
+        <summary><b>Evidence</b></summary>
+
+        <div class="block table-container mt-4">
+            <table class="table is-fullwidth">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Publication</th>
+                    <th>Needs Review</th>
+                    <th>Status</th>
+                    <th>Conflicting</th>
+                    <th>Included</th>
+                    <th>Score</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for evidence in object.evidence.all %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'evidence-detail' curation_slug=object.slug evidence_slug=evidence.slug %}">
+                                {{ evidence.slug|default_if_none:"------" }}
+                            </a>
+                        </td>
+                        <td>
+                            <i>{{ evidence.publication|default_if_none:"------" }}</i>
+                        </td>
+                        <td>
+                            {% if evidence.needs_review %}
+                                {% include "common/tags/needs_review.html" with text=evidence.needs_review %}
+                            {% else %}
+                                {{ evidence.needs_review }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if evidence.status == "INP" %}
+                                {% include "common/tags/in_progress.html" %}
+                            {% elif evidence.status == "DNE" %}
+                                {% include "common/tags/done.html" %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <label class="checkbox" disabled>
+                                {% if evidence.is_conflicting %}
+                                    <input type="checkbox" disabled checked/>
+                                {% else %}
+                                    <input type="checkbox" disabled />
+                                {% endif %}
+                            </label>
+                        </td>
+                        <td>
+                            <label class="checkbox" disabled>
+                                {% if evidence.is_included %}
+                                    <input type="checkbox" disabled checked/>
+                                {% else %}
+                                    <input type="checkbox" disabled />
+                                {% endif %}
+                            </label>
+                        </td>
+                        <td>{{ evidence.score|default_if_none:"------" }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if not object.publication %}
+            <a href="{% url 'curation-edit-evidence' object.slug %}" class="button">
+                {% include "common/icon.html" with icon_name="pencil" %}
+                Edit Evidence
+            </a>
+        {% endif %}
+    </details>
+{% endif %}

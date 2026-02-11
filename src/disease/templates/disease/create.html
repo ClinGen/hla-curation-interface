@@ -3,6 +3,7 @@
 {% block description %}Add a disease to the HLA Curation Interface.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
+
         <nav class="breadcrumb" aria-label="breadcrumbs">
             <ul>
                 <li>
@@ -10,27 +11,26 @@
                         Home
                     </a>
                 </li>
-                <li>
-                    <a href="{% url 'disease-search' %}">
-                        Diseases
-                    </a>
-                </li>
                 <li class="is-active">
-                    <a href="" aria-current="page">
-                        Add Disease
-                    </a>
+                    <b>
+                        <a href="" aria-current="page">
+                            {% include "common/icon.html" with icon_name="plus-circle" %}
+                            Add Disease
+                        </a>
+                    </b>
                 </li>
             </ul>
         </nav>
-        <h1 class="title">Add Disease</h1>
+
         <form method="post">{% csrf_token %}
             {{ form.non_field_errors }}
             {% with field=form.mondo_id %}
-                {% include "common/form/input_text.html" with show_help=True %}
+                {% include "common/form/input/text.html" with show_help=True %}
             {% endwith %}
             <button type="submit" class="button is-link">
                 Submit
             </button>
         </form>
+
     </div>
 {% endblock %}

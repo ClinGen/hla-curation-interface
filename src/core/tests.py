@@ -1,123 +1,66 @@
-"""Houses tests for the core app."""
-
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from core.models import UserProfile
+from auth_.models import UserProfile
+from common.tests import ViewTestMixin
 
 
-class HomeViewTest(TestCase):
-    def setUp(self):
-        self.client = Client()
-        self.url = reverse("home")
-
-    def test_response_code(self):
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_content(self):
-        response = self.client.get(self.url)
-        self.assertContains(response, "HLA Curation Interface")
+class HomeViewTest(ViewTestMixin, TestCase):
+    url = reverse("home")
+    template = "core/home.html"
+    page_name = "Home"
+    expected_text = ["HLA Curation Interface"]
 
 
-class AboutViewTest(TestCase):
-    def setUp(self):
-        self.client = Client()
-        self.url = reverse("about")
-
-    def test_response_code(self):
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_content(self):
-        response = self.client.get(self.url)
-        self.assertContains(response, "About")
-        self.assertContains(response, "HLA Curation Interface (HCI)")
-        self.assertContains(response, "alleles")
-        self.assertContains(response, "haplotypes")
-        self.assertContains(response, "Stanford University")
+class AboutViewTest(ViewTestMixin, TestCase):
+    url = reverse("about")
+    template = "core/about.html"
+    page_name = "About"
+    expected_text = [
+        "HLA Curation Interface (HCI)",
+        "alleles",
+        "haplotypes",
+        "Stanford University",
+    ]
 
 
-class ContactViewTest(TestCase):
-    def setUp(self):
-        self.client = Client()
-        self.url = reverse("contact")
-
-    def test_response_code(self):
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_content(self):
-        response = self.client.get(self.url)
-        self.assertContains(response, "Contact")
-        self.assertContains(response, "email")
-        self.assertContains(response, "hci@clinicalgenome.org")
+class ContactViewTest(ViewTestMixin, TestCase):
+    url = reverse("contact")
+    template = "core/contact.html"
+    page_name = "Contact"
+    expected_text = ["email", "hci@clinicalgenome.org"]
 
 
-class HelpViewTests(TestCase):
-    def setUp(self):
-        self.client = Client()
-        self.url = reverse("help")
-
-    def test_response_code(self):
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_content(self):
-        response = self.client.get(self.url)
-        self.assertContains(response, "Help")
-        self.assertContains(response, "standard operating procedure")
-        self.assertContains(response, "email")
-        self.assertContains(response, "hci@clinicalgenome.org")
+class HelpViewTest(ViewTestMixin, TestCase):
+    url = reverse("help")
+    template = "core/help.html"
+    page_name = "Help"
+    expected_text = ["standard operating procedure", "email", "hci@clinicalgenome.org"]
 
 
-class CitingViewTest(TestCase):
-    def setUp(self):
-        self.client = Client()
-        self.url = reverse("citing")
-
-    def test_response_code(self):
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_content(self):
-        response = self.client.get(self.url)
-        self.assertContains(response, "Citing")
-        self.assertContains(response, "format")
-        self.assertContains(response, "dataset")
+class CitingViewTest(ViewTestMixin, TestCase):
+    url = reverse("citing")
+    template = "core/citing.html"
+    page_name = "Citing"
+    expected_text = ["format", "dataset"]
 
 
-class AcknowledgementsViewTest(TestCase):
-    def setUp(self):
-        self.client = Client()
-        self.url = reverse("acknowledgements")
-
-    def test_response_code(self):
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_content(self):
-        response = self.client.get(self.url)
-        self.assertContains(response, "Acknowledgements")
-        self.assertContains(response, "NIH/NHGRI")
-        self.assertContains(response, "Steven Mack")
+class AcknowledgementsViewTest(ViewTestMixin, TestCase):
+    url = reverse("acknowledgements")
+    template = "core/acknowledgements.html"
+    page_name = "Acknowledgements"
+    expected_text = ["NIH/NHGRI", "Steven Mack"]
 
 
-class CollaboratorsViewTest(TestCase):
-    def setUp(self):
-        self.client = Client()
-        self.url = reverse("collaborators")
-
-    def test_response_code(self):
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_content(self):
-        response = self.client.get(self.url)
-        self.assertContains(response, "Collaborators")
-        self.assertContains(response, "The Baylor College of Medicine ClinGen Team")
-        self.assertContains(response, "ClinPGx")
+class CollaboratorsViewTest(ViewTestMixin, TestCase):
+    url = reverse("collaborators")
+    template = "core/collaborators.html"
+    page_name = "Collaborators"
+    expected_text = [
+        "The Baylor College of Medicine ClinGen Team",
+        "ClinPGx",
+    ]
 
 
 class AccountActivationMessageTest(TestCase):

@@ -1,0 +1,45 @@
+{% extends "layouts/base.html" %}
+{% block title %}{{ object.slug }} Details{% endblock %}
+{% block description %}Edit {{ object.slug }}.{% endblock %}
+{% block main %}
+    <div class="box mt-6 mb-6">
+
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li>
+                    <a href="{% url 'home' %}">
+                        {% include "common/icon.html" with icon_name="house" %}
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'curation-list' %}">
+                        {% include "common/icon.html" with icon_name="search" %}
+                        Curation Search
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'curation-detail' object.slug %}">
+                        {% include "common/icon.html" with icon_name="journal-text" %}
+                        {{ object.slug|default_if_none:"------" }} Details
+                    </a>
+                </li>
+                <li class="is-active">
+                    <b>
+                        <a href="" aria-current="page">
+                            {% include "common/icon.html" with icon_name="pencil" %}
+                            {{ object.slug|default_if_none:"------" }} Edit Evidence
+                        </a>
+                    </b>
+                </li>
+            </ul>
+        </nav>
+
+        {% include "curation/partials/curation/detail_table.html" %}
+
+        {% include "curation/partials/buttons.html" %}
+
+        {% include "curation/forms/evidence.html" %}
+
+    </div>
+{% endblock %}

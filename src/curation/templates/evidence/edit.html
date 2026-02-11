@@ -3,45 +3,51 @@
 {% block description %}Edit {{ object.slug }}.{% endblock %}
 {% block main %}
 <div class="box mt-6 mb-6">
+
     <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
             <li>
                 <a href="{% url 'home' %}">
+                    {% include "common/icon.html" with icon_name="house" %}
                     Home
                 </a>
             </li>
             <li>
-                <a href="{% url 'curation-search' %}">
-                    Curations
+                <a href="{% url 'curation-list' %}">
+                    {% include "common/icon.html" with icon_name="search" %}
+                    Curation Search
                 </a>
             </li>
             <li>
                 <a href="{% url 'curation-detail' object.curation.slug %}">
-                    {{ object.curation.slug }}
+                    {% include "common/icon.html" with icon_name="journal-text" %}
+                    {{ object.curation.slug|default_if_none:"------" }} Details
                 </a>
             </li>
             <li>
                 <a href="{% url 'evidence-detail' object.curation.slug object.slug %}">
-                    {{ object.slug }}
+                    {% include "common/icon.html" with icon_name="journal-text" %}
+                    {{ object.slug|default_if_none:"------" }} Details
                 </a>
             </li>
             <li class="is-active">
-                <a href="" aria-current="page">
-                    Edit Evidence Data
-                </a>
+                <b>
+                    <a href="" aria-current="page">
+                        {% include "common/icon.html" with icon_name="journal-text" %}
+                        {{ object.slug|default_if_none:"------" }} Edit Data
+                    </a>
+                </b>
             </li>
         </ul>
     </nav>
-    <h1 class="title">Edit Evidence Data</h1>
+
     {% include "evidence/partials/detail_table.html" %}
-    <a href="{% url 'evidence-detail' object.curation.slug object.slug %}" class="button" id="back-button">
-        {% include "common/icon.html" with icon_name="arrow-left" %}
-        Back to Evidence Details
-    </a>
+
     <hr>
+
     <div class="columns">
         <div class="column is-one-fifth">
-            <aside class="menu" id="menu">
+            <aside class="menu">
                 <p class="menu-label">Menu</p>
                 <ul class="menu-list">
                     <li><a href="#gwas">GWAS</a></li>
@@ -64,82 +70,82 @@
             <form method="post">{% csrf_token %}
                 <div class="box">
                     <h2 id="gwas" class="title is-4">GWAS</h2>
-                    {% include "common/form/input_radio.html" with field=form.is_gwas hide_label=True show_help=True %}
+                    {% include "common/form/input/radio.html" with field=form.is_gwas hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.is_gwas_notes %}
                 </div>
                 <div class="box">
                     <h2 id="zygosity" class="title is-4">Zygosity</h2>
-                    {% include "common/form/input_radio.html" with field=form.zygosity hide_label=True %}
+                    {% include "common/form/input/radio.html" with field=form.zygosity hide_label=True %}
                     {% include "common/form/textarea.html" with field=form.zygosity_notes %}
                 </div>
                 <div class="box">
                     <h2 id="phase" class="title is-4">Phase</h2>
-                    {% include "common/form/input_radio.html" with field=form.phase_confirmed hide_label=True show_help=True %}
+                    {% include "common/form/input/radio.html" with field=form.phase_confirmed hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.phase_confirmed_notes %}
                 </div>
                 <div class="box">
                     <h2 id="typing-method" class="title is-4">Typing Method</h2>
-                    {% include "common/form/select.html" with field=form.typing_method hide_label=True show_help=True %}
+                    {% include "common/form/select/default.html" with field=form.typing_method hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.typing_method_notes %}
                 </div>
                 <div class="box">
                     <h2 id="demographics" class="title is-4">Demographics</h2>
-                    {% include "common/form/select_search.html" with field=form.demographics hide_label=True %}
+                    {% include "common/form/select/search.html" with field=form.demographics hide_label=True %}
                     {% include "common/form/textarea.html" with field=form.demographics_notes %}
                 </div>
                 <div class="box">
                     <h2 id="p-value" class="title is-4">p-value</h2>
-                    {% include "common/form/input_text.html" with field=form.p_value_string hide_label=True show_help=True %}
+                    {% include "common/form/input/text.html" with field=form.p_value_string hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.p_value_notes %}
                 </div>
                 <div class="box">
                     <h2 id="multiple-testing-correction" class="title is-4">Multiple Testing Correction</h2>
-                    {% include "common/form/select.html" with field=form.multiple_testing_correction hide_label=True %}
+                    {% include "common/form/select/default.html" with field=form.multiple_testing_correction hide_label=True %}
                     {% include "common/form/textarea.html" with field=form.multiple_testing_correction_notes %}
                 </div>
                 <div class="box">
                     <h2 id="effect-size" class="title is-4">Effect Size</h2>
-                    {% include "common/form/select.html" with field=form.effect_size_statistic %}
+                    {% include "common/form/select/default.html" with field=form.effect_size_statistic %}
                     <div id="odds-ratio-div" class="mb-2">
-                        {% include "common/form/input_text.html" with field=form.odds_ratio_string show_help=True %}
+                        {% include "common/form/input/text.html" with field=form.odds_ratio_string show_help=True %}
                     </div>
                     <div id="relative-risk-div" class="mb-2">
-                        {% include "common/form/input_text.html" with field=form.relative_risk_string show_help=True %}
+                        {% include "common/form/input/text.html" with field=form.relative_risk_string show_help=True %}
                     </div>
                     <div id="beta-div" class="mb-2">
-                        {% include "common/form/input_text.html" with field=form.beta_string show_help=True %}
+                        {% include "common/form/input/text.html" with field=form.beta_string show_help=True %}
                     </div>
                     {% include "common/form/textarea.html" with field=form.effect_size_statistic_notes show_help=False %}
                 </div>
                 <div class="box">
                     <h2 id="confidence-interval" class="title is-4">Confidence Interval</h2>
-                    {% include "common/form/input_text.html" with field=form.ci_start_string show_help=True %}
-                    {% include "common/form/input_text.html" with field=form.ci_end_string show_help=True %}
+                    {% include "common/form/input/text.html" with field=form.ci_start_string show_help=True %}
+                    {% include "common/form/input/text.html" with field=form.ci_end_string show_help=True %}
                     {% include "common/form/textarea.html" with field=form.ci_notes %}
                 </div>
                 <div class="box">
                     <h2 id="cohort-size" class="title is-4">Cohort Size</h2>
-                    {% include "common/form/input_text.html" with field=form.cohort_size hide_label=True show_help=True %}
+                    {% include "common/form/input/text.html" with field=form.cohort_size hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.cohort_size_notes %}
                 </div>
                 <div class="box">
                     <h2 id="additional-phenotypes" class="title is-4">Additional Phenotypes</h2>
-                    {% include "common/form/select.html" with field=form.additional_phenotypes hide_label=True show_help=False %}
+                    {% include "common/form/select/default.html" with field=form.additional_phenotypes hide_label=True show_help=False %}
                     {% include "common/form/textarea.html" with field=form.additional_phenotypes_notes %}
                 </div>
                 <div class="box">
                     <h2 id="significant-association" class="title is-4">Significant Association</h2>
-                    {% include "common/form/input_radio.html" with field=form.has_association hide_label=True show_help=True %}
+                    {% include "common/form/input/radio.html" with field=form.has_association hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.has_association_notes %}
                 </div>
                 <div class="box">
                     <h2 id="protective" class="title is-4">Protective</h2>
-                    {% include "common/form/input_radio.html" with field=form.is_protective hide_label=True show_help=True %}
+                    {% include "common/form/input/radio.html" with field=form.is_protective hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.is_protective_notes %}
                 </div>
                 <div class="box">
                     <h2 id="needs-review" class="title is-4">Needs Review</h2>
-                    {% include "common/form/input_radio.html" with field=form.needs_review hide_label=True show_help=True %}
+                    {% include "common/form/input/radio.html" with field=form.needs_review hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.needs_review_notes %}
                 </div>
                 <div class="box">

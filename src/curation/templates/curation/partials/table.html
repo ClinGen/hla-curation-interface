@@ -1,0 +1,41 @@
+<table id="curation-list-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Allele</th>
+            <th>Haplotype</th>
+            <th>Disease</th>
+            <th>Status</th>
+            <th>Classification</th>
+            <th>Added</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for curation in curations %}
+            <tr>
+                <td>
+                    <a href="{% url 'curation-detail' curation.slug %}">
+                        {{ curation.slug|default_if_none:"------" }}
+                    </a>
+                </td>
+                <td>{{ curation.get_curation_type_display|default_if_none:"------" }}</td>
+                <td>{{ curation.allele|default_if_none:"------" }}</td>
+                <td>{{ curation.haplotype|default_if_none:"------" }}</td>
+                <td>{{ curation.disease|default_if_none:"------" }}</td>
+                <td>
+                    {% if curation.publication %}
+                        {{ curation.get_status_display|default_if_none:"------" }}/Published
+                    {% else %}
+                        {{ curation.get_status_display|default_if_none:"------" }}
+                    {% endif %}
+                </td>
+                <td>{{ curation.get_classification_display|default_if_none:"------" }}</td>
+                <td>{{ curation.added_at|default_if_none:"------"|date:"Y-m-d" }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script>
+    let curationListTable = new DataTable("#curation-list-table", {"order": []});
+</script>

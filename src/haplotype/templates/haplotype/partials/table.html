@@ -1,0 +1,25 @@
+<table id="haplotype-list-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Added</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for haplotype in haplotypes %}
+            <tr>
+                <td>
+                    <a href="{% url 'haplotype-detail' haplotype.slug %}">
+                        {{ haplotype.slug|default_if_none:"------" }}
+                    </a>
+                </td>
+                <td>{{ haplotype.name|default_if_none:"------" }}</td>
+                <td>{{ haplotype.added_at|default_if_none:"------"|date:"Y-m-d" }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script>
+    let haplotypeListTable = new DataTable("#haplotype-list-table", {"order": []});
+</script>

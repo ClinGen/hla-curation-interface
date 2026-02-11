@@ -9,78 +9,58 @@
             <ul>
                 <li>
                     <a href="{% url 'home' %}">
+                        {% include "common/icon.html" with icon_name="house" %}
                         Home
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'haplotype-search' %}">
-                        Haplotypes
+                    <a href="{% url 'haplotype-list' %}">
+                        {% include "common/icon.html" with icon_name="search" %}
+                        Haplotype Search
                     </a>
                 </li>
                 <li class="is-active">
-                    <a href="" aria-current="page">
-                        {{ object.slug }}
-                    </a>
+                    <b>
+                        <a href="" aria-current="page">
+                            {% include "common/icon.html" with icon_name="journal-text" %}
+                            {{ object.slug|default_if_none:"------" }} Details
+                        </a>
+                    </b>
                 </li>
             </ul>
         </nav>
 
-        <div class="level">
-            <div class="level-left">
-                <h1 class="title">Haplotype Details</h1>
-            </div>
-        </div>
-
-        <h2 class="subtitle"><i id="haplotype-{{ object.pk }}-name">{{ object.name }}</i></h2>
-
         <div class="block table-container">
-            <table class="table is-hoverable">
+            <table class="table">
                 <tbody>
-                <tr>
-                    <td>HCI Haplotype ID</td>
-                    <td>{{ object.slug }}</td>
-                </tr>
-                <tr>
-                    <td>Added</td>
-                    <td id="haplotype-{{ object.pk }}-added-at">{{ object.added_at|date:"Y-m-d" }}</td>
-                </tr>
+                    <tr>
+                        <td>HCI Haplotype ID</td>
+                        <td>{{ object.slug|default_if_none:"------" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td>{{ object.name|default_if_none:"------" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Added</td>
+                        <td>{{ object.added_at|default_if_none:"------"|date:"Y-m-d" }}</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
 
-        <div class="buttons">
-            <a href="{% url 'haplotype-search' %}" class="button" id="search-button">
-                {% include "common/icon.html" with icon_name="search" %}
-                Search Haplotypes
-            </a>
-            <a href="{% url 'haplotype-create' %}" class="button" id="add-button">
-                {% include "common/icon.html" with icon_name="plus-circle" %}
-                Add Another Haplotype
-            </a>
-        </div>
+        {% if object.curations.all %}
+            <details class="mt-2">
+                <summary><b>Curations</b></summary>
+                {% include "curation/partials/table.html" with curations=object.curations.all %}
+            </details>
+        {% endif %}
 
         {% if object.alleles.all %}
-            <div class="mt-6">
-                <h1 class="title is-4">Alleles</h1>
-                <table class="table is-hoverable">
-                    {% for allele in object.alleles.all %}
-                        <tr>
-                            <td>
-                                <a id="allele-{{ allele.pk }}-anchor"
-                                   href="{% url 'allele-detail' allele.slug %}"
-                                   class="button is-small"
-                                >
-                                    {% include "common/icon.html" with icon_name="eye" %}
-                                    {{ allele.slug }}
-                                </a>
-                            </td>
-                            <td id="allele-{{ allele.pk }}-name">
-                                {{ allele.name }}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            </div>
+            <details class="mt-2">
+                <summary><b>Alleles</b></summary>
+                {% include "allele/partials/table.html" with alleles=object.alleles.all %}
+            </details>
         {% endif %}
     </div>
 {% endblock %}

@@ -1,37 +1,28 @@
-"""Provides views for the disease app."""
-
 from django.contrib import messages
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import redirect
-from django.views.generic import CreateView, DetailView
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DetailView, ListView
 
-from core.permissions import CreateAccessMixin
-from datatable.views import datatable
+from auth_.permissions import CreateAccessMixin
 from disease.clients import fetch_disease_data, get_iri, get_name
-from disease.constants.views import DISEASE_SEARCH_FIELDS
 from disease.forms import DiseaseForm
 from disease.models import Disease
 
 
 class DiseaseCreate(CreateAccessMixin, CreateView):  # type: ignore
-    """Allows the user to create (add) a disease."""
-
     model = Disease
     form_class = DiseaseForm
     template_name = "disease/create.html"
+    success_url = reverse_lazy("disease-list")
 
     def form_valid(self, form: DiseaseForm) -> HttpResponse:
-        """Fetches and adds data from the Ontology Lookup Service and records user.
-
-        Returns:
-             The details page for the allele if the form is valid, or the form with
-             errors if the form isn't valid.
-        """
         disease_data = fetch_disease_data(form.instance.mondo_id)
         if disease_data:
             form.instance.name = get_name(disease_data)
             form.instance.iri = get_iri(disease_data)
             form.instance.added_by = self.request.user
+            messages.success(self.request, "Disease added.")
             return super().form_valid(form)
         message = (
             "Oops, something went wrong trying to fetch data from the "
@@ -42,19 +33,10 @@ class DiseaseCreate(CreateAccessMixin, CreateView):  # type: ignore
 
 
 class DiseaseDetail(DetailView):
-    """Shows user information about a disease."""
-
     model = Disease
     template_name = "disease/detail.html"
 
 
-def disease_search(request: HttpRequest) -> HttpResponse:
-    """Returns an interactive datatable for searching diseases."""
-    return datatable(
-        request=request,
-        model=Disease,
-        order_by="pk",
-        fields=DISEASE_SEARCH_FIELDS,
-        data_title="Diseases",
-        partial="disease/partials/search.html",
-    )
+class DiseaseList(ListView):
+    model = Disease
+    template_name = "disease/list.html"

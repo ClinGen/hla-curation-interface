@@ -3,7 +3,7 @@
 from django.contrib.auth.models import User
 from django.test import Client
 
-from core.models import UserProfile
+from auth_.models import UserProfile
 
 
 class ViewTestMixin:

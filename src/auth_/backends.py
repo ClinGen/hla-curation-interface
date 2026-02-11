@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.http import HttpRequest
 from workos import WorkOSClient
 
-from core.models import UserProfile
+from auth_.models import UserProfile
 
 logger = logging.getLogger(__name__)
 

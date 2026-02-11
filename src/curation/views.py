@@ -1,5 +1,3 @@
-"""Provides views for the curation app."""
-
 from typing import cast
 
 from django.contrib import messages
@@ -10,12 +8,13 @@ from django.http import (
     HttpResponseBase,
 )
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import DetailView, UpdateView
+from django.urls import reverse_lazy
+from django.views.generic import DetailView, ListView, UpdateView
 from django.views.generic.edit import CreateView
 
-from core.permissions import CreateAccessMixin, has_create_access
+from auth_.permissions import CreateAccessMixin, has_create_access
 from curation.constants.models.common import Status
-from curation.constants.views import CURATION_SEARCH_FIELDS, FRAMEWORK
+from curation.constants.views import FRAMEWORK
 from curation.forms import (
     CurationCreateForm,
     CurationEditForm,
@@ -36,32 +35,23 @@ from curation.validators.views import (
     validate_p_value,
     validate_relative_risk,
 )
-from datatable.views import datatable
 
 
 class CurationCreate(CreateAccessMixin, CreateView):  # type: ignore
-    """Allows the user to create (add) a curation."""
-
     model = Curation
     form_class = CurationCreateForm
     template_name = "curation/create.html"
     slug_field = "slug"
     slug_url_kwarg = "curation_slug"
+    success_url = reverse_lazy("curation-list")
 
     def form_valid(self, form: CurationCreateForm) -> HttpResponse:
-        """Makes sure the user who added the curation is recorded.
-
-        Returns:
-             The details page for the curation if the form is valid, or the form with
-             errors if the form isn't valid.
-        """
         form.instance.added_by = self.request.user
+        messages.success(self.request, "Curation added.")
         return super().form_valid(form)
 
 
 class CurationDetail(DetailView):
-    """Shows the user information about a curation."""
-
     model = Curation
     template_name = "curation/detail.html"
     slug_field = "slug"
@@ -69,11 +59,9 @@ class CurationDetail(DetailView):
 
 
 class CurationEdit(CreateAccessMixin, UpdateView):  # type: ignore
-    """Shows the user information about a curation."""
-
     model = Curation
     form_class = CurationEditForm
-    template_name = "curation/edit_curation.html"
+    template_name = "curation/edit/curation.html"
     slug_field = "slug"
     slug_url_kwarg = "curation_slug"
 
@@ -124,27 +112,13 @@ def curation_edit_evidence(request: HttpRequest, curation_slug: str) -> HttpResp
         evidence_formset = EvidenceTopLevelEditFormSet(queryset=evidence)
 
     context = {
-        "curation": curation,
+        "object": curation,
         "evidence_formset": evidence_formset,
     }
-    return render(request, "curation/edit_evidence.html", context)
-
-
-def curation_search(request: HttpRequest) -> HttpResponse:
-    """Returns an interactive datatable for searching curations."""
-    return datatable(
-        request=request,
-        model=Curation,
-        order_by="pk",
-        fields=CURATION_SEARCH_FIELDS,  # type: ignore
-        data_title="Curations",
-        partial="curation/partials/search.html",
-    )
+    return render(request, "curation/edit/evidence.html", context)
 
 
 class EvidenceCreate(CreateAccessMixin, CreateView):  # type: ignore
-    """Allows the user to create (add) evidence."""
-
     model = Evidence
     form_class = EvidenceCreateForm
     template_name = "evidence/create.html"
@@ -152,12 +126,6 @@ class EvidenceCreate(CreateAccessMixin, CreateView):  # type: ignore
     slug_url_kwarg = "evidence_slug"
 
     def form_valid(self, form: EvidenceCreateForm) -> HttpResponse:
-        """Makes sure the user who added the evidence is recorded.
-
-        Returns:
-             The details page for the evidence if the form is valid, or the form with
-             errors otherwise.
-        """
         curation = Curation.objects.get(slug=self.kwargs["curation_slug"])
         form.instance.curation = curation
         form.instance.added_by = self.request.user
@@ -171,8 +139,6 @@ class EvidenceCreate(CreateAccessMixin, CreateView):  # type: ignore
 
 
 class EvidenceDetail(DetailView):
-    """Shows the user information about evidence."""
-
     model = Evidence
     template_name = "evidence/detail.html"
     slug_field = "slug"
@@ -186,8 +152,6 @@ class EvidenceDetail(DetailView):
 
 
 class EvidenceEdit(CreateAccessMixin, UpdateView):  # type: ignore
-    """Allows the user to edit evidence."""
-
     model = Evidence
     form_class = EvidenceEditForm
     template_name = "evidence/edit.html"
@@ -215,7 +179,6 @@ class EvidenceEdit(CreateAccessMixin, UpdateView):  # type: ignore
         return super().dispatch(request, *args, **kwargs)  # type: ignore[return-value]
 
     def form_invalid(self, form: EvidenceEditForm) -> HttpResponse:
-        """Returns the form with errors and flashes a message about the errors."""
         message = (
             "There was an issue with your submission. Please check the form fields."
         )
@@ -223,13 +186,6 @@ class EvidenceEdit(CreateAccessMixin, UpdateView):  # type: ignore
         return super().form_invalid(form)
 
     def form_valid(self, form: EvidenceEditForm) -> HttpResponse:
-        """Sets the value for several fields that don't appear in the form.
-
-        Also makes sure there is only one effect size statistic.
-
-        Returns:
-             The details page for the evidence.
-        """
         validate_effect_size_statistic(form)
         validate_p_value(form)
         validate_odds_ratio(form)
@@ -280,3 +236,8 @@ def curation_publish(request: HttpRequest, curation_slug: str) -> HttpResponse:
         f"Curation {curation.slug} has been published to the repository.",
     )
     return redirect("repo-detail", curation_slug=curation.slug)
+
+
+class CurationList(ListView):
+    model = Curation
+    template_name = "curation/list.html"

@@ -1,0 +1,66 @@
+<div class="block table-container mt-4">
+    <table class="table">
+        <tbody>
+        <tr>
+            <td>HCI Curation ID</td>
+            <td>{{ object.slug }}</td>
+        </tr>
+        {% if object.curation_type == "ALL" %}
+            <tr>
+                <td>Allele</td>
+                <td>{{ object.allele }}</td>
+            </tr>
+        {% elif object.curation_type == "HAP" %}
+            <tr>
+                <td>Haplotype</td>
+                <td>{{ object.haplotype }}</td>
+            </tr>
+        {% endif %}
+        <tr>
+            <td>Disease</td>
+            <td>{{ object.disease }}</td>
+        </tr>
+        <tr>
+            <td>Status</td>
+            <td>
+                {% if object.status == "INP" %}
+                    {% include "common/tags/in_progress.html" %}
+                {% elif object.status == "DNE" %}
+                    {% include "common/tags/done.html" %}
+                {% endif %}
+                {% if object.publication %}
+                    {% include "common/tags/published.html" %}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>Classification</td>
+            <td>
+                {% if object.classification == "DEF" %}
+                    <span class="tag">Definitive</span>
+                {% elif object.classification == "STR" %}
+                    <span class="tag">Strong</span>
+                {% elif object.classification == "MOD" %}
+                    <span class="tag">Moderate</span>
+                {% elif object.classification == "LIM" %}
+                    <span class="tag">Limited</span>
+                {% elif object.classification == "NOK" %}
+                    <span class="tag">No Known Association</span>
+                {% elif object.classification == "DIS" %}
+                    <span class="tag">Disputed</span>
+                {% elif object.classification == "REF" %}
+                    <span class="tag">Refuted</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>Score</td>
+            <td>{{ object.score }}</td>
+        </tr>
+        <tr>
+            <td>Added</td>
+            <td>{{ object.added_at|date:"Y-m-d" }}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

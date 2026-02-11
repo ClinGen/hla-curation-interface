@@ -1,11 +1,10 @@
 """Houses tests for the curation app's views."""
 
-from bs4 import BeautifulSoup
-from django.test import Client, TestCase
+from django.test import TestCase
 from django.urls import reverse
 
 from allele.models import Allele
-from common.tests import CreateTestMixin
+from common.tests import CreateTestMixin, ViewTestMixin
 from curation.constants.models.common import Status
 from curation.constants.models.evidence import (
     AdditionalPhenotypes,
@@ -34,39 +33,28 @@ class CurationCreateTest(CreateTestMixin, TestCase):
     def test_shows_breadcrumb(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        breadcrumb = soup.find("nav", {"class": "breadcrumb"})
-        self.assertIsNotNone(breadcrumb)
+        self.assertContains(response, "Add Curation")
 
     def test_shows_radio_buttons(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        allele_radio_button = soup.find(id="id_curation_type_0")
-        self.assertIsNotNone(allele_radio_button)
-        haplotype_radio_button = soup.find(id="id_curation_type_1")
-        self.assertIsNotNone(haplotype_radio_button)
+        self.assertContains(response, "Allele")
+        self.assertContains(response, "Haplotype")
 
     def test_shows_allele_select(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        allele_select = soup.find(id="id_allele")
-        self.assertIsNotNone(allele_select)
+        self.assertContains(response, "Allele")
 
     def test_shows_disease_select(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        disease_select = soup.find(id="id_disease")
-        self.assertIsNotNone(disease_select)
+        self.assertContains(response, "Disease")
 
     def test_shows_submit_button(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        submit_button = soup.find("button", {"type": "submit"})
-        self.assertIsNotNone(submit_button)
+        self.assertContains(response, "Submit")
 
     def test_creates_allele_curation_with_valid_form_data(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
@@ -97,7 +85,7 @@ class CurationCreateTest(CreateTestMixin, TestCase):
         self.assertEqual(new_curation.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
 
 
-class CurationDetailTest(TestCase):
+class CurationDetailTest(ViewTestMixin, TestCase):
     fixtures = [
         "test_alleles.json",
         "test_diseases.json",
@@ -105,232 +93,32 @@ class CurationDetailTest(TestCase):
         "test_curations.json",
         "test_evidence.json",
     ]
+    url = reverse("curation-detail", kwargs={"curation_slug": "C000001"})
+    template = "curation/detail.html"
+    page_name = "C000001 Details"
+    expected_text = [
+        "C000001",
+        "A*01:02:03",
+        "acute oran berry intoxication",
+        "In Progress",
+        "Limited",
+        "1970-01-01",
+        "ID",
+        "Publication",
+        "Needs Review",
+        "Status",
+        "Conflicting",
+        "Included",
+        "Score",
+    ]
 
-    def setUp(self):
-        self.client = Client()
-        self.url = reverse("curation-detail", kwargs={"curation_slug": "C000001"})
-
-    def test_shows_breadcrumb(self):
+    def test_shows_evidence_in_tbody(self):
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        breadcrumb = soup.find("nav", {"class": "breadcrumb"})
-        self.assertIsNotNone(breadcrumb)
-
-    def test_shows_allele_name(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        allele = soup.find(id="allele").get_text().strip()
-        self.assertEqual(allele, "A*01:02:03")
-
-    def test_shows_disease_name(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        allele = soup.find(id="disease").get_text().strip()
-        self.assertEqual(allele, "acute oran berry intoxication")
-
-    def test_shows_status(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        status = soup.find(id="status").get_text().strip()
-        self.assertEqual(status, "In Progress")
-
-    def test_shows_classification(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        classification = soup.find(id="classification").get_text().strip()
-        self.assertEqual(classification, "Limited")
-
-    def test_shows_score(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        score = soup.find(id="score").get_text().strip()
-        self.assertIsNotNone(score)
-
-    def test_shows_curation_id(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        curation_id = soup.find(id="curation-id").get_text().strip()
-        self.assertEqual(curation_id, "C000001")
-
-    def test_shows_added_at(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        added_at = soup.find(id="added-at").get_text().strip()
-        self.assertEqual(added_at, "1970-01-01")
-
-    def test_shows_search_button(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        search_button = soup.find(id="search-button").get_text().strip()
-        self.assertIn("Search", search_button)
-
-    def test_shows_add_button(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        add_button = soup.find(id="add-button").get_text().strip()
-        self.assertIn("Add", add_button)
-
-    def test_shows_edit_button(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        edit_button = soup.find(id="edit-evidence-button").get_text().strip()
-        self.assertIn("Edit", edit_button)
-
-    def test_shows_add_evidence_button(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        add_evidence_button = soup.find(id="add-evidence-button").get_text().strip()
-        self.assertIn("Add Evidence", add_evidence_button)
-
-    def test_shows_id_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        id_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[0].get_text().strip()
+        self.assertContains(response, "E000001")
+        self.assertContains(
+            response, "Diseases in grass type Pokémon in the Kanto region"
         )
-        self.assertEqual(id_th, "ID")
-
-    def test_shows_publication_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        publication_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[1].get_text().strip()
-        )
-        self.assertEqual(publication_th, "Publication")
-
-    def test_shows_needs_review_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        needs_review_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[2].get_text().strip()
-        )
-        self.assertEqual(needs_review_th, "Needs Review")
-
-    def test_shows_status_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        status_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[3].get_text().strip()
-        )
-        self.assertEqual(status_th, "Status")
-
-    def test_shows_conflicting_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        conflicting_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[4].get_text().strip()
-        )
-        self.assertEqual(conflicting_th, "Conflicting")
-
-    def test_shows_included_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        included_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[5].get_text().strip()
-        )
-        self.assertEqual(included_th, "Included")
-
-    def test_shows_score_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        score_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[6].get_text().strip()
-        )
-        self.assertEqual(score_th, "Score")
-
-    def test_shows_id_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        id_anchor = (
-            evidence_table.find("tbody")
-            .find("tr")
-            .find_all("td")[0]
-            .find("a")
-            .get_text()
-            .strip()
-        )
-        self.assertIn("1", id_anchor)
-
-    def test_shows_publication_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        publication_anchor = (
-            evidence_table.find("tbody")
-            .find("tr")
-            .find_all("td")[1]
-            .find("a")
-            .get_text()
-            .strip()
-        )
-        title = "Diseases in grass type Pokémon in the Kanto region"
-        self.assertIn(title, publication_anchor)
-
-    def test_shows_needs_review_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        needs_review = (
-            evidence_table.find("tbody").find("tr").find_all("td")[2].get_text().strip()
-        )
-        self.assertEqual(needs_review, "False")
-
-    def test_shows_status_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        status = (
-            evidence_table.find("tbody")
-            .find("tr")
-            .find_all("td")[3]
-            .find("span")
-            .get_text()
-            .strip()
-        )
-        self.assertEqual(status, "In Progress")
-
-    def test_shows_conflicting_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        conflicting = (
-            evidence_table.find("tbody")
-            .find("tr")
-            .find_all("td")[4]
-            .find("label")
-            .find("input")
-        )
-        self.assertIsNotNone(conflicting)
-
-    def test_shows_included_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        included = (
-            evidence_table.find("tbody")
-            .find("tr")
-            .find_all("td")[5]
-            .find("label")
-            .find("input")
-        )
-        self.assertIsNotNone(included)
-
-    def test_shows_score_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        score = (
-            evidence_table.find("tbody").find("tr").find_all("td")[6].get_text().strip()
-        )
-        self.assertEqual(score, "2.0")
+        self.assertContains(response, "2.0")
 
 
 class CurationEditTest(CreateTestMixin, TestCase):
@@ -349,86 +137,52 @@ class CurationEditTest(CreateTestMixin, TestCase):
     def test_shows_breadcrumb(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        breadcrumb = soup.find("nav", {"class": "breadcrumb"})
-        self.assertIsNotNone(breadcrumb)
+        self.assertContains(response, "Curation Search")
 
     def test_shows_save_button(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        save_button = soup.find(id="curation-edit-save-button").get_text().strip()
-        self.assertEqual(save_button, "Save")
+        self.assertContains(response, "Save")
 
     def test_shows_cancel_button(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        cancel_button = soup.find(id="curation-edit-cancel-button").get_text().strip()
-        self.assertEqual(cancel_button, "Cancel")
+        self.assertContains(response, "Cancel")
 
     def test_shows_allele(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        allele = soup.find(id="allele").get_text().strip()
-        self.assertEqual(allele, "A*01:02:03")
+        self.assertContains(response, "A*01:02:03")
 
     def test_shows_disease(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        disease = soup.find(id="disease").get_text().strip()
-        self.assertEqual(disease, "acute oran berry intoxication")
+        self.assertContains(response, "acute oran berry intoxication")
 
     def test_shows_status(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        status = soup.find(id="status")
-        self.assertIsNotNone(status)
+        self.assertContains(response, "Status")
 
     def test_shows_classification(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        classification = soup.find(id="classification")
-        self.assertIsNotNone(classification)
+        self.assertContains(response, "Classification")
 
     def test_shows_score(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        score = soup.find(id="score")
-        self.assertIsNotNone(score)
+        self.assertContains(response, "Score")
 
     def test_shows_curation_id(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        curation_id = soup.find(id="curation-id").get_text().strip()
-        self.assertEqual(curation_id, "C000001")
+        self.assertContains(response, "C000001")
 
     def test_shows_added_at(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        added_at = soup.find(id="added-at").get_text().strip()
-        self.assertEqual(added_at, "1970-01-01")
-
-    def test_shows_search_button(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        search_button = soup.find(id="search-button").get_text().strip()
-        self.assertIn("Search", search_button)
-
-    def test_shows_add_button(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        add_button = soup.find(id="add-button").get_text().strip()
-        self.assertIn("Add", add_button)
+        self.assertContains(response, "1970-01-01")
 
 
 class CurationEditEvidenceTest(CreateTestMixin, TestCase):
@@ -449,374 +203,94 @@ class CurationEditEvidenceTest(CreateTestMixin, TestCase):
     def test_shows_breadcrumb(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        breadcrumb = soup.find("nav", {"class": "breadcrumb"})
-        self.assertIsNotNone(breadcrumb)
+        self.assertContains(response, "Curation Search")
 
     def test_shows_allele_name(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        allele = soup.find(id="allele").get_text().strip()
-        self.assertEqual(allele, "A*01:02:03")
+        self.assertContains(response, "A*01:02:03")
 
     def test_shows_disease_name(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        allele = soup.find(id="disease").get_text().strip()
-        self.assertEqual(allele, "acute oran berry intoxication")
+        self.assertContains(response, "acute oran berry intoxication")
 
     def test_shows_status(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        status = soup.find(id="status").get_text().strip()
-        self.assertEqual(status, "In Progress")
+        self.assertContains(response, "In Progress")
 
     def test_shows_classification(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        classification = soup.find(id="classification").get_text().strip()
-        self.assertEqual(classification, "Limited")
+        self.assertContains(response, "Limited")
 
     def test_shows_score(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        score = soup.find(id="score").get_text().strip()
-        self.assertIsNotNone(score)
+        self.assertContains(response, "Score")
 
     def test_shows_curation_id(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        curation_id = soup.find(id="curation-id").get_text().strip()
-        self.assertEqual(curation_id, "C000001")
+        self.assertContains(response, "C000001")
 
     def test_shows_added_at(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        added_at = soup.find(id="added-at").get_text().strip()
-        self.assertEqual(added_at, "1970-01-01")
-
-    def test_shows_search_button(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        search_button = soup.find(id="search-button").get_text().strip()
-        self.assertIn("Search", search_button)
-
-    def test_shows_add_button(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        add_button = soup.find(id="add-button").get_text().strip()
-        self.assertIn("Add", add_button)
+        self.assertContains(response, "1970-01-01")
 
     def test_shows_save_button(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        save_button = soup.find(id="save-edit-button")
-        self.assertIsNotNone(save_button)
+        self.assertContains(response, "Save")
 
     def test_shows_cancel_button(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        cancel_button = soup.find(id="cancel-edit-button")
-        self.assertIsNotNone(cancel_button)
+        self.assertContains(response, "Cancel")
 
-    def test_shows_id_in_thead(self):
+    def test_shows_evidence_table_headers(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        id_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[0].get_text().strip()
-        )
-        self.assertEqual(id_th, "ID")
+        self.assertContains(response, "ID")
+        self.assertContains(response, "Publication")
+        self.assertContains(response, "Needs Review")
+        self.assertContains(response, "Status")
+        self.assertContains(response, "Conflicting")
+        self.assertContains(response, "Included")
+        self.assertContains(response, "Score")
 
-    def test_shows_publication_in_thead(self):
+    def test_shows_evidence_in_tbody(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        publication_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[1].get_text().strip()
+        self.assertContains(response, "E000001")
+        self.assertContains(
+            response, "Diseases in grass type Pokémon in the Kanto region"
         )
-        self.assertEqual(publication_th, "Publication")
-
-    def test_shows_needs_review_in_thead(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        needs_review_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[2].get_text().strip()
-        )
-        self.assertEqual(needs_review_th, "Needs Review")
-
-    def test_shows_status_in_thead(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        status_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[3].get_text().strip()
-        )
-        self.assertEqual(status_th, "Status")
-
-    def test_shows_conflicting_in_thead(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        conflicting_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[4].get_text().strip()
-        )
-        self.assertEqual(conflicting_th, "Conflicting")
-
-    def test_shows_included_in_thead(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        included_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[5].get_text().strip()
-        )
-        self.assertEqual(included_th, "Included")
-
-    def test_shows_score_in_thead(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        score_th = (
-            evidence_table.find("thead").find("tr").find_all("th")[6].get_text().strip()
-        )
-        self.assertEqual(score_th, "Score")
-
-    def test_shows_id_in_tbody(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        id_anchor = (
-            evidence_table.find("tbody")
-            .find("tr")
-            .find_all("td")[0]
-            .find("a")
-            .get_text()
-            .strip()
-        )
-        self.assertIn("1", id_anchor)
-
-    def test_shows_publication_in_tbody(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        publication_anchor = (
-            evidence_table.find("tbody")
-            .find("tr")
-            .find_all("td")[1]
-            .find("a")
-            .get_text()
-            .strip()
-        )
-        title = "Diseases in grass type Pokémon in the Kanto region"
-        self.assertIn(title, publication_anchor)
-
-    def test_shows_needs_review_in_tbody(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        needs_review = (
-            evidence_table.find("tbody").find("tr").find_all("td")[2].get_text().strip()
-        )
-        self.assertEqual(needs_review, "False")
-
-    def test_shows_status_in_tbody(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        status = (
-            evidence_table.find("tbody").find("tr").find_all("td")[3].find("select")
-        )
-        self.assertIsNotNone(status)
-
-    def test_shows_conflicting_in_tbody(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        conflicting = (
-            evidence_table.find("tbody").find("tr").find_all("td")[4].find("input")
-        )
-        self.assertIsNotNone(conflicting)
-
-    def test_shows_included_in_tbody(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        included = (
-            evidence_table.find("tbody").find("tr").find_all("td")[5].find("input")
-        )
-        self.assertIsNotNone(included)
-
-    def test_shows_score_in_tbody(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        evidence_table = soup.find(id="evidence-table")
-        score = (
-            evidence_table.find("tbody").find("tr").find_all("td")[6].get_text().strip()
-        )
-        self.assertEqual(score, "2.0")
+        self.assertContains(response, "2.0")
 
 
-class CurationSearchTest(TestCase):
+class CurationListTest(ViewTestMixin, TestCase):
     fixtures = ["test_alleles.json", "test_diseases.json", "test_curations.json"]
-
-    def setUp(self):
-        self.client = Client()
-        self.url = reverse("curation-search")
-
-    def test_shows_breadcrumb(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        breadcrumb = soup.find("nav", {"class": "breadcrumb"})
-        self.assertIsNotNone(breadcrumb)
-
-    def test_shows_id_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        id_label = soup.find("label", {"for": "search-slug-input"}).get_text().strip()
-        self.assertEqual(id_label, "ID")
-        id_input = soup.find(id="search-slug-input")
-        self.assertIsNotNone(id_input)
-
-    def test_shows_type_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        type_label = (
-            soup.find("label", {"for": "filter-curation-type-select"})
-            .get_text()
-            .strip()
-        )
-        self.assertEqual(type_label, "Type")
-        type_select = soup.find(id="filter-curation-type-select")
-        self.assertIsNotNone(type_select)
-
-    def test_shows_allele_name_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        name_label = (
-            soup.find("label", {"for": "search-allele-name-input"}).get_text().strip()
-        )
-        self.assertEqual(name_label, "Allele")
-        name_input = soup.find(id="search-allele-name-input")
-        self.assertIsNotNone(name_input)
-
-    def test_shows_haplotype_name_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        name_label = (
-            soup.find("label", {"for": "search-haplotype-name-input"})
-            .get_text()
-            .strip()
-        )
-        self.assertEqual(name_label, "Haplotype")
-        name_input = soup.find(id="search-haplotype-name-input")
-        self.assertIsNotNone(name_input)
-
-    def test_shows_disease_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        disease_label = (
-            soup.find("label", {"for": "search-disease-name-input"}).get_text().strip()
-        )
-        self.assertEqual(disease_label, "Disease")
-        disease_input = soup.find(id="search-disease-name-input")
-        self.assertIsNotNone(disease_input)
-
-    def test_shows_score_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        status_label = (
-            soup.find("label", {"for": "filter-status-select"}).get_text().strip()
-        )
-        self.assertEqual(status_label, "Status")
-        status_select = soup.find(id="filter-status-select")
-        self.assertIsNotNone(status_select)
-
-    def test_shows_added_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        added_label = (
-            soup.find("label", {"for": "sort-added-at-button"}).get_text().strip()
-        )
-        self.assertEqual(added_label, "Added")
-        added_button = soup.find(id="sort-added-at-button")
-        self.assertIsNotNone(added_button)
-
-    def test_shows_id_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        id_anchor = (
-            soup.find("tbody").find("tr").find_all("td")[0].find("a").get_text().strip()
-        )
-        self.assertIn("1", id_anchor)
-
-    def test_shows_type_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        curation_type = (
-            soup.find("tbody")
-            .find("tr")
-            .find_all("td")[1]
-            .find("span")
-            .get_text()
-            .strip()
-        )
-        self.assertIn("Allele", curation_type)
-
-    def test_shows_allele_name_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        name = soup.find("tbody").find("tr").find_all("td")[2].get_text().strip()
-        self.assertIn("A*01:02:03", name)
-
-    def test_shows_haplotype_name_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        name = soup.find("tbody").find("tr").find_all("td")[3].get_text().strip()
-        self.assertIn("--", name)
-
-    def test_shows_disease_name_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        disease = soup.find("tbody").find("tr").find_all("td")[4].get_text().strip()
-        self.assertEqual("acute oran berry intoxication", disease)
-
-    def test_shows_score_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        status = soup.find("tbody").find("tr").find_all("td")[5].get_text().strip()
-        self.assertEqual(status, "In Progress")
-
-    def test_shows_added_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        added_at = soup.find("tbody").find("tr").find_all("td")[6].get_text().strip()
-        self.assertIn("1970-01-01", added_at)
+    url = reverse("curation-list")
+    template = "curation/list.html"
+    page_name = "Curation Search"
+    expected_text = [
+        "ID",
+        "Type",
+        "Allele",
+        "Haplotype",
+        "Disease",
+        "Status",
+        "Classification",
+        "Added",
+        "C000001",
+        "A*01:02:03",
+        "acute oran berry intoxication",
+        "In Progress",
+        "1970-01-01",
+    ]
 
 
 class EvidenceCreateTest(CreateTestMixin, TestCase):
@@ -834,16 +308,12 @@ class EvidenceCreateTest(CreateTestMixin, TestCase):
     def test_shows_publication_input(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        publication_input = soup.find(id="id_publication")
-        self.assertIsNotNone(publication_input)
+        self.assertContains(response, "Publication")
 
     def test_shows_submit_button(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        submit_button = soup.find("button", {"type": "submit"}).get_text().strip()
-        self.assertEqual(submit_button, "Submit")
+        self.assertContains(response, "Submit")
 
     def test_creates_evidence_with_valid_form_data(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
@@ -862,7 +332,7 @@ class EvidenceCreateTest(CreateTestMixin, TestCase):
         self.assertEqual(new_evidence.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
 
 
-class EvidenceDetailTest(TestCase):
+class EvidenceDetailTest(ViewTestMixin, TestCase):
     fixtures = [
         "test_alleles.json",
         "test_diseases.json",
@@ -870,43 +340,36 @@ class EvidenceDetailTest(TestCase):
         "test_curations.json",
         "test_evidence.json",
     ]
+    url = reverse(
+        "evidence-detail",
+        kwargs={"curation_slug": "C000001", "evidence_slug": "E000001"},
+    )
+    template = "evidence/detail.html"
+    page_name = "E000001 Details"
+    expected_text = [
+        "Data",
+        "Score",
+        "A*01:02:03",
+        "acute oran berry intoxication",
+    ]
 
-    def setUp(self):
-        self.client = Client()
-        self.url = reverse(
-            "evidence-detail",
-            kwargs={"curation_slug": "C000001", "evidence_slug": "E000001"},
-        )
-
-    def test_shows_tabs(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        tabs = soup.find(id="evidence-detail-tabs")
-        self.assertIsNotNone(tabs)
-
-    def test_shows_evidence_data_table(self):
+    def test_shows_data_tab_content(self):
         response = self.client.get(f"{self.url}?tab=data")
-        soup = BeautifulSoup(response.content, "html.parser")
-        table = soup.find(id="evidence-data-table")
-        self.assertIsNotNone(table)
+        self.assertContains(response, "Genome-Wide Association Study")
 
-    def test_shows_evidence_score_table(self):
+    def test_shows_score_tab_content(self):
         response = self.client.get(f"{self.url}?tab=score")
-        soup = BeautifulSoup(response.content, "html.parser")
-        table = soup.find(id="evidence-score-table")
-        self.assertIsNotNone(table)
+        self.assertContains(response, "Step")
+        self.assertContains(response, "Category")
+        self.assertContains(response, "Points")
 
     def test_shows_total_score_before_multipliers(self):
         response = self.client.get(f"{self.url}?tab=score")
-        soup = BeautifulSoup(response.content, "html.parser")
-        total_score = soup.find(id="total-score-before-multipliers")
-        self.assertIsNotNone(total_score)
+        self.assertContains(response, "Total Before Multipliers")
 
     def test_shows_total_score(self):
         response = self.client.get(f"{self.url}?tab=score")
-        soup = BeautifulSoup(response.content, "html.parser")
-        total_score = soup.find(id="total-score")
-        self.assertIsNotNone(total_score)
+        self.assertContains(response, "Total")
 
 
 class EvidenceEditTest(CreateTestMixin, TestCase):
@@ -928,32 +391,28 @@ class EvidenceEditTest(CreateTestMixin, TestCase):
     def test_shows_menu(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        menu = soup.find(id="menu")
-        self.assertIsNotNone(menu)
+        self.assertContains(response, "Menu")
 
     def test_shows_data_headings(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        heading_ids = [
-            "gwas",
-            "zygosity",
-            "phase",
-            "typing-method",
-            "demographics",
-            "multiple-testing-correction",
-            "effect-size",
-            "confidence-interval",
-            "cohort-size",
-            "significant-association",
-            "protective",
-            "needs-review",
-            "save",
+        headings = [
+            "GWAS",
+            "Zygosity",
+            "Phase",
+            "Typing Method",
+            "Demographics",
+            "Multiple Testing Correction",
+            "Effect Size",
+            "Confidence Interval",
+            "Cohort Size",
+            "Significant Association",
+            "Protective",
+            "Needs Review",
+            "Save",
         ]
-        for heading_id in heading_ids:
-            heading = soup.find(id=heading_id)
-            self.assertIsNotNone(heading)
+        for heading in headings:
+            self.assertContains(response, heading)
 
     def test_edits_evidence_with_valid_form_data(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)

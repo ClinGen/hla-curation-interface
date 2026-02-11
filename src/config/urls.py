@@ -9,7 +9,6 @@ urlpatterns = [
     path("allele/", include("allele.urls")),
     path("auth/", include("auth_.urls")),
     path("curation/", include("curation.urls")),
-    path("datatable/", include("datatable.urls")),
     path("disease/", include("disease.urls")),
     path("haplotype/", include("haplotype.urls")),
     path("publication/", include("publication.urls")),

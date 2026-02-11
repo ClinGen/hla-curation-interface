@@ -1,0 +1,39 @@
+<table id="allele-list-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>CAR ID</th>
+            <th>Added</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for allele in alleles %}
+            <tr>
+                <td>
+                    <a href="{% url 'allele-detail' allele.slug %}">
+                        {{ allele.slug|default_if_none:"------" }}
+                    </a>
+                </td>
+                <td>
+                    {{ allele.name|default_if_none:"------" }}
+                </td>
+                <td>
+                    {% if allele.car_id %}
+                        {% with url="https://reg.clinicalgenome.org/car/ui/id/xahla/detail/"|add:allele.car_id text=allele.car_id %}
+                            {% include "common/linkout.html" %}
+                        {% endwith %}
+                    {% else %}
+                        ------
+                    {% endif %}
+                </td>
+                <td>
+                    {{ allele.added_at|default_if_none:"------"|date:"Y-m-d" }}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script>
+    let alleleListTable = new DataTable("#allele-list-table", {"order": []});
+</script>

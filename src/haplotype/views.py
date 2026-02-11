@@ -1,30 +1,26 @@
-"""Provides views for the haplotype app."""
-
-from django.http import HttpRequest, HttpResponse
-from django.views.generic import DetailView
+from django.contrib import messages
+from django.http import HttpResponse
+from django.urls import reverse_lazy
+from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView
 
-from core.permissions import CreateAccessMixin
-from datatable.views import datatable
+from auth_.permissions import CreateAccessMixin
 from haplotype.constants.models import GENE_LIST
-from haplotype.constants.views import HAPLOTYPE_SEARCH_FIELDS
 from haplotype.forms import HaplotypeForm
 from haplotype.models import Haplotype
 
 
 class HaplotypeCreate(CreateAccessMixin, CreateView):  # type: ignore
-    """Allows the user to create (add) a haplotype."""
-
     model = Haplotype
     form_class = HaplotypeForm
     template_name = "haplotype/create.html"
+    success_url = reverse_lazy("haplotype-list")
 
     def form_valid(self, form: HaplotypeForm) -> HttpResponse:
-        """Sets the haplotype name and records user.
+        """Sets the haplotype name by sorting the constituent alleles.
 
         Returns:
-             The details page for the haplotype if the form is valid, or the form with
-             errors if the form isn't valid.
+             The success page if valid or the form with errors if not.
         """
         unsorted_alleles = []
         for allele in form.cleaned_data["alleles"]:
@@ -35,23 +31,15 @@ class HaplotypeCreate(CreateAccessMixin, CreateView):  # type: ignore
         name = [item["allele"] for item in sorted_alleles]
         form.instance.name = "~".join(name)
         form.instance.added_by = self.request.user
+        messages.success(self.request, "Added haplotype.")
         return super().form_valid(form)
 
 
 class HaplotypeDetail(DetailView):
-    """Shows the user information about a haplotype."""
-
     model = Haplotype
     template_name = "haplotype/detail.html"
 
 
-def haplotype_search(request: HttpRequest) -> HttpResponse:
-    """Returns an interactive datatable for searching haplotypes."""
-    return datatable(
-        request=request,
-        model=Haplotype,
-        order_by="pk",
-        fields=HAPLOTYPE_SEARCH_FIELDS,  # type: ignore
-        data_title="Haplotypes",
-        partial="haplotype/partials/search.html",
-    )
+class HaplotypeList(ListView):
+    model = Haplotype
+    template_name = "haplotype/list.html"

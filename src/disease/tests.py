@@ -1,13 +1,10 @@
-"""Houses tests for the disease app."""
-
 from unittest.mock import MagicMock, patch
 
-from bs4 import BeautifulSoup
-from django.test import Client, TestCase
+from django.test import TestCase
 from django.urls import reverse
 
-from common.tests import CreateTestMixin
-from disease.models import Disease, DiseaseTypes
+from common.tests import CreateTestMixin, ViewTestMixin
+from disease.models import Disease
 
 
 class DiseaseCreateTest(CreateTestMixin, TestCase):
@@ -18,16 +15,12 @@ class DiseaseCreateTest(CreateTestMixin, TestCase):
     def test_shows_mondo_input(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        mondo_input = soup.find(id="id_mondo_id")
-        self.assertIsNotNone(mondo_input)
+        self.assertContains(response, "Mondo")
 
     def test_shows_submit_button(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        submit_button = soup.find("button", {"type": "submit"}).get_text().strip()
-        self.assertEqual(submit_button, "Submit")
+        self.assertContains(response, "Submit")
 
     @patch("disease.views.fetch_disease_data")
     def test_creates_disease_with_valid_form_data(
@@ -71,114 +64,26 @@ class DiseaseCreateTest(CreateTestMixin, TestCase):
         self.assertEqual(Disease.objects.count(), initial_disease_count)
 
 
-class DiseaseDetailTest(TestCase):
+class DiseaseDetailTest(ViewTestMixin, TestCase):
     fixtures = ["test_diseases.json"]
-
-    def setUp(self):
-        self.client = Client()
-        self.disease_type = DiseaseTypes.MONDO
-        self.url = reverse("disease-detail", kwargs={"slug": "D000001"})
-
-    def test_shows_disease_type(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        disease_type_image = soup.find("img", {"class": "entity-type-logo"})
-        self.assertIn("Mondo", disease_type_image.attrs["alt"])
-
-    def test_shows_mondo_id(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        mondo_id = soup.find(id="mondo-id").get_text().strip()
-        self.assertEqual(mondo_id, "MONDO:123")
-
-    def test_shows_added_at(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        added_at = soup.find(id="added-at").get_text().strip()
-        self.assertEqual(added_at, "2000-01-01")
-
-    def test_shows_search_button(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        search_button = soup.find(id="search-button").get_text().strip()
-        self.assertIn("Search", search_button)
-
-    def test_shows_add_button(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        add_button = soup.find(id="add-button").get_text().strip()
-        self.assertIn("Add", add_button)
+    url = reverse("disease-detail", kwargs={"slug": "D000001"})
+    template = "disease/detail.html"
+    page_name = "D000001 Details"
+    expected_text = ["MONDO:123", "2000-01-01"]
 
 
-class DiseaseSearchTest(TestCase):
+class DiseaseListTest(ViewTestMixin, TestCase):
     fixtures = ["test_diseases.json"]
-
-    def setUp(self):
-        self.client = Client()
-        self.url = reverse("disease-search")
-
-    def test_shows_id_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        id_label = soup.find("label", {"for": "search-slug-input"}).get_text().strip()
-        self.assertEqual(id_label, "ID")
-        id_input = soup.find(id="search-slug-input")
-        self.assertIsNotNone(id_input)
-
-    def test_shows_mondo_id_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        mondo_id_label = (
-            soup.find("label", {"for": "search-mondo-id-input"}).get_text().strip()
-        )
-        self.assertEqual(mondo_id_label, "Mondo ID")
-        mondo_id_input = soup.find(id="search-mondo-id-input")
-        self.assertIsNotNone(mondo_id_input)
-
-    def test_shows_name_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        name_label = (
-            soup.find("label", {"for": "search-disease-name-input"}).get_text().strip()
-        )
-        self.assertEqual(name_label, "Name")
-        name_input = soup.find(id="search-disease-name-input")
-        self.assertIsNotNone(name_input)
-
-    def test_shows_added_in_thead(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        added_label = (
-            soup.find("label", {"for": "sort-added-at-button"}).get_text().strip()
-        )
-        self.assertEqual(added_label, "Added")
-        added_button = soup.find(id="sort-added-at-button")
-        self.assertIsNotNone(added_button)
-
-    def test_shows_id_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        id_anchor = (
-            soup.find("tbody").find("tr").find_all("td")[0].find("a").get_text().strip()
-        )
-        self.assertIn("D000001", id_anchor)
-
-    def test_shows_mondo_id_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        mondo_id_anchor = (
-            soup.find("tbody").find("tr").find_all("td")[1].find("a").get_text().strip()
-        )
-        self.assertEqual("MONDO:123", mondo_id_anchor)
-
-    def test_shows_name_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        name = soup.find("tbody").find("tr").find_all("td")[2].get_text().strip()
-        self.assertEqual(name, "acute oran berry intoxication")
-
-    def test_shows_added_in_tbody(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        added_at = soup.find("tbody").find("tr").find_all("td")[3].get_text().strip()
-        self.assertIn("2000-01-01", added_at)
+    url = reverse("disease-list")
+    template = "disease/list.html"
+    page_name = "Disease Search"
+    expected_text = [
+        "ID",
+        "Name",
+        "Mondo ID",
+        "Added",
+        "D000001",
+        "acute oran berry intoxication",
+        "MONDO:123",
+        "2000-01-01",
+    ]

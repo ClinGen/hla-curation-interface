@@ -1,19 +1,21 @@
-<div class="buttons">
-    <a href="{% url 'curation-search' %}" class="button" id="search-button">
-        {% include "common/icon.html" with icon_name="search" %}
-        Search Curations
-    </a>
-    <a href="{% url 'curation-create' %}" class="button" id="add-button">
-        {% include "common/icon.html" with icon_name="plus-circle" %}
-        Add Another Curation
-    </a>
-    {% if object.status == "DNE" and not object.publication %}
-        <a href="{% url 'curation-publish' object.slug %}"
-           class="button is-success"
-           id="publish-button"
-           onclick="return confirm('Are you sure you want to publish this curation to the repository? This will make it read-only.');">
-            {% include "common/icon.html" with icon_name="upload" %}
-            Publish to Repository
-        </a>
-    {% endif %}
-</div>
+{% if not object.publication %}
+    <div class="buttons">
+            <a href="{% url 'curation-edit' object.slug %}" class="button">
+                {% include "common/icon.html" with icon_name="pencil" %}
+                Edit Curation
+            </a>
+            <a href="{% url 'evidence-create' object.slug %}" class="button is-link">
+                {% include "common/icon.html" with icon_name="plus-circle" %}
+                Add Evidence
+            </a>
+
+        {% if object.status == "DNE" %}
+            <a href="{% url 'curation-publish' object.slug %}"
+               class="button is-success"
+               onclick="return confirm('Are you sure you want to publish this curation to the repository? This will make it read-only.');">
+                {% include "common/icon.html" with icon_name="upload" %}
+                Publish to Repository
+            </a>
+        {% endif %}
+    </div>
+{% endif %}

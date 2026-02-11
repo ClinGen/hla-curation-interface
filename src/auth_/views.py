@@ -1,5 +1,3 @@
-"""Provides views for the auth_ app."""
-
 import logging
 import os
 
@@ -10,7 +8,7 @@ from django.shortcuts import redirect, render
 from workos import WorkOSClient
 
 from auth_.forms import PHIForm
-from core.models import UserProfile
+from auth_.models import UserProfile
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +80,7 @@ def logout_(request: HttpRequest) -> HttpResponseRedirect:
 
 
 def profile(request: HttpRequest) -> HttpResponse:
-    """Returns the view profile page for the user."""
+    """Returns the profile page for the user."""
     if request.user.is_authenticated:
         p, _ = UserProfile.objects.get_or_create(user=request.user)
         context = {"user_profile": p}
