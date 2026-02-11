@@ -8,6 +8,5 @@ urlpatterns = [
     path(
         "<slug:slug>/detail", views.HaplotypeDetail.as_view(), name="haplotype-detail"
     ),
-    path("search", views.haplotype_search, name="haplotype-search"),
     path("list", HaplotypeList.as_view(), name="haplotype-list"),
 ]

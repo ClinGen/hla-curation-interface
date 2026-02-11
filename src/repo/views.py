@@ -1,5 +1,3 @@
-"""Provides views for the repo app."""
-
 from typing import Any
 
 from django.db.models import QuerySet
@@ -18,8 +16,6 @@ class PublishedCurationList(ListView):
 
 
 class PublishedCurationDetail(DetailView):
-    """Shows the user information about a published curation."""
-
     model = PublishedCuration
     template_name = "repo/detail.html"
 
@@ -52,31 +48,18 @@ def download_all_json(request: HttpRequest) -> HttpResponse:
     Returns:
         JSON response with all published curations and metadata.
     """
-    published_curations = (
-        PublishedCuration.objects.all()
-        .select_related(
-            "curation__allele",
-            "curation__haplotype",
-            "curation__disease",
-            "published_by",
-        )
-        .prefetch_related(
-            "curation__evidence__publication",
-            "curation__evidence__demographics",
-        )
-    )
-
+    published_curations = PublishedCuration.objects.all()
+    timestamp = timezone.now().strftime("%Y-%m-%d")
     data = {
         "published_curations": [
-            serialize_published_curation(pc) for pc in published_curations
+            serialize_published_curation(pc) for pc in PublishedCuration.objects.all()
         ],
-        "export_date": timezone.now().isoformat(),
         "total_count": published_curations.count(),
+        "export_date": timestamp,
     }
-
     response = JsonResponse(data)
     response["Content-Disposition"] = (
-        f'attachment; filename="hla_curations_{timezone.now().strftime("%Y%m%d")}.json"'
+        f'attachment; filename="hla_curations_all_{timestamp}.json"'
     )
     return response
 
@@ -87,23 +70,14 @@ def download_single_json(request: HttpRequest, curation_slug: str) -> HttpRespon
     Returns:
         JSON response with the specified published curation.
     """
-    published = get_object_or_404(
-        PublishedCuration.objects.select_related(
-            "curation__allele",
-            "curation__haplotype",
-            "curation__disease",
-            "published_by",
-        ).prefetch_related(
-            "curation__evidence__publication",
-            "curation__evidence__demographics",
-        ),
-        curation__slug=curation_slug,
-    )
-
-    data = serialize_published_curation(published)
-
+    published = get_object_or_404(PublishedCuration, curation__slug=curation_slug)
+    timestamp = timezone.now().strftime("%Y-%m-%d")
+    data = {
+        "curation": serialize_published_curation(published),
+        "export_date": timestamp,
+    }
     response = JsonResponse(data)
     response["Content-Disposition"] = (
-        f'attachment; filename="curation_{curation_slug}.json"'
+        f'attachment; filename="hla_curation_{curation_slug}.json"'
     )
     return response
