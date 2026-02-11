@@ -1,5 +1,3 @@
-"""Provides views for the haplotype app."""
-
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.urls import reverse_lazy
@@ -13,19 +11,16 @@ from haplotype.models import Haplotype
 
 
 class HaplotypeCreate(CreateAccessMixin, CreateView):  # type: ignore
-    """Allows the user to create (add) a haplotype."""
-
     model = Haplotype
     form_class = HaplotypeForm
     template_name = "haplotype/create.html"
     success_url = reverse_lazy("haplotype-list")
 
     def form_valid(self, form: HaplotypeForm) -> HttpResponse:
-        """Sets the haplotype name and records user.
+        """Sets the haplotype name by sorting the constituent alleles.
 
         Returns:
-             The details page for the haplotype if the form is valid, or the form with
-             errors if the form isn't valid.
+             The success page if valid or the form with errors if not.
         """
         unsorted_alleles = []
         for allele in form.cleaned_data["alleles"]:
@@ -41,22 +36,8 @@ class HaplotypeCreate(CreateAccessMixin, CreateView):  # type: ignore
 
 
 class HaplotypeDetail(DetailView):
-    """Shows the user information about a haplotype."""
-
     model = Haplotype
     template_name = "haplotype/detail.html"
-
-
-def haplotype_search(request: HttpRequest) -> HttpResponse:
-    """Returns an interactive datatable for searching haplotypes."""
-    return datatable(
-        request=request,
-        model=Haplotype,
-        order_by="pk",
-        fields=HAPLOTYPE_SEARCH_FIELDS,  # type: ignore
-        data_title="Haplotypes",
-        partial="haplotype/partials/search.html",
-    )
 
 
 class HaplotypeList(ListView):

@@ -1,6 +1,7 @@
 """Houses constants used in the models module of the haplotype app."""
 
 # Genes on chromosome 6 ordered by location in ascending order.
+# See https://hla.alleles.org/pages/genes/genes_map/.
 GENE_LIST = [
     "HFE",
     "F",

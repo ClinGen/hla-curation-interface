@@ -1,5 +1,3 @@
-"""Configures URLs for the haplotype app."""
-
 from django.urls import path
 
 from haplotype import views

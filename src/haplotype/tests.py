@@ -1,5 +1,3 @@
-"""Houses tests for the haplotype app."""
-
 from django.test import TestCase
 from django.urls import reverse
 

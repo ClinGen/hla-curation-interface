@@ -1,5 +1,3 @@
-"""Houses database models for the haplotype app."""
-
 from django.contrib.auth.models import User
 from django.db import models
 from django.http import HttpResponseBase
@@ -9,8 +7,6 @@ from allele.models import Allele
 
 
 class Haplotype(models.Model):
-    """Contains information about a haplotype that has been added to the HCI."""
-
     slug = models.SlugField(
         default="",
         max_length=7,
@@ -51,23 +47,18 @@ class Haplotype(models.Model):
     )
 
     class Meta:
-        """Provides metadata."""
-
         db_table = "haplotype"
         verbose_name = "Haplotype"
         verbose_name_plural = "Haplotypes"
 
     def __str__(self) -> str:
-        """Returns a string representation of a specific haplotype."""
         return self.name
 
     def save(self, *args, **kwargs) -> None:
-        """Adds a human-readable ID."""
         super().save(*args, **kwargs)
         if not self.slug:
             self.slug = f"H{self.id:06d}"
             self.save(update_fields=["slug"])
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:
-        """Returns the details page for a specific haplotype."""
         return reverse("haplotype-detail", kwargs={"slug": self.slug})
