@@ -9,9 +9,9 @@ from lxml import etree
 
 from publication.models import PublicationTypes
 
-BIORXIV_URL = "https://api.biorxiv.org/details/biorxiv/"
-MEDRXIV_URL = "https://api.biorxiv.org/details/medrxiv/"
-PUBMED_URL = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?api_key={os.getenv('PUBMED_API_KEY')}&db=PubMed&retmode=xml&id="
+BIORXIV_URL = "https://api.biorxiv.org/details/biorxiv"
+MEDRXIV_URL = "https://api.biorxiv.org/details/medrxiv"
+PUBMED_URL = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?api_key={os.getenv('PUBMED_API_KEY')}&db=PubMed&retmode=xml"
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ def fetch_pubmed_data(pubmed_id: str, timeout: int = 5) -> BeautifulSoup | None:
         The API endpoint's XML or None if there was an error.
     """
     try:
-        response = requests.get(f"{PUBMED_URL}/{pubmed_id}", timeout=timeout)
+        response = requests.get(f"{PUBMED_URL}&id={pubmed_id}", timeout=timeout)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "xml")
     except (
@@ -88,17 +88,19 @@ def get_pubmed_year(soup: BeautifulSoup) -> int | None:
     Returns:
         The year of publication if it can be found as an integer, or None otherwise.
     """
-    year = soup.find("Year")
-    if isinstance(year, PageElement):
-        year_text = year.get_text(strip=True)
-        try:
-            return int(year_text)
-        except (ValueError, TypeError):
-            logger.warning(
-                f"Unable to convert year '{year_text}' to integer; returning None"
-            )
-            return None
-    logger.warning("Unable to get year from PubMed data; returning None")
+    pub_date = soup.find("PubDate")
+    if pub_date:
+        year = pub_date.find("Year")  # type: ignore
+        if isinstance(year, PageElement):
+            year_text = year.get_text(strip=True)
+            try:
+                return int(year_text)
+            except (ValueError, TypeError):
+                logger.warning(
+                    f"Unable to convert year '{year_text}' to integer; returning None"
+                )
+                return None
+        logger.warning("Unable to get year from PubMed data; returning None")
     return None
 
 
@@ -126,7 +128,7 @@ def fetch_rxiv_data(rxiv_type: str, doi: str, timeout: int = 5) -> dict | None:
         etree.XMLSyntaxError,
         Exception,
     ):
-        message = "Unable to get data from PubMed"
+        message = "Unable to get data from Rxiv"
         logger.exception(message)
         return None
     else:

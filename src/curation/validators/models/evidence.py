@@ -5,6 +5,7 @@ from decimal import Decimal, InvalidOperation
 from django.core.exceptions import ValidationError
 
 from curation.constants.models.evidence import EffectSizeStatistic
+from publication.constants.models import PublicationTypes
 
 
 def validate_publication(evidence) -> None:
@@ -15,6 +16,26 @@ def validate_publication(evidence) -> None:
     """
     if evidence.publication is None:
         raise ValidationError({"publication": "Please select a publication."})
+
+
+def validate_preprint_not_included(evidence) -> None:
+    """Makes sure preprint publications cannot be included in curations.
+
+    Raises:
+        ValidationError: If publication is included and is a preprint.
+    """
+    if evidence.publication is None:
+        return
+    preprint_types = (PublicationTypes.BIORXIV, PublicationTypes.MEDRXIV)
+    if evidence.is_included and evidence.publication.publication_type in preprint_types:
+        raise ValidationError(
+            {
+                "is_included": (
+                    "Preprint publications (bioRxiv and medRxiv) cannot be included "
+                    "in curations. Please use a PubMed publication instead."
+                )
+            }
+        )
 
 
 def to_decimal(string_value: str, field: str, message: str) -> None:

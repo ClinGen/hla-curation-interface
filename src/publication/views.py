@@ -51,11 +51,10 @@ class PublicationCreate(CreateAccessMixin, CreateView):  # type: ignore
                 form.instance.added_by = self.request.user
                 return super().form_valid(form)
         message = (
-            "Oops, something went wrong trying to fetch data from PubMed. "
-            "Please try again later."
+            "Oops, something went wrong trying to fetch data. Please try again later."
         )
         messages.warning(self.request, message)
-        return redirect("disease-create")
+        return redirect("publication-create")
 
 
 class PublicationDetail(DetailView):

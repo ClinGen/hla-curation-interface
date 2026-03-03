@@ -67,6 +67,7 @@ jobs:
     runs-on: "ubuntu-latest"
     env:
       DJANGO_SETTINGS_MODULE: "config.settings.prod"
+      RUN_CONTRACT_TESTS: false
       SECRET_KEY: "dummy"
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
       SENTRY_ENV: "ci"

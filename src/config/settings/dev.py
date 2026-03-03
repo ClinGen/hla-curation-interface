@@ -31,3 +31,5 @@ LOGGING = {
         "level": "DEBUG",
     },
 }
+
+USE_TZ = False

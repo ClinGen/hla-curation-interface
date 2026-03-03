@@ -57,3 +57,5 @@ LOGGING = {
         "level": "INFO",
     },
 }
+
+USE_TZ = True

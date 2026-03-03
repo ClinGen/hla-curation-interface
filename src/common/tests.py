@@ -1,5 +1,8 @@
 """Houses code used commonly in tests."""
 
+import logging
+from contextlib import contextmanager
+
 from django.contrib.auth.models import User
 from django.test import Client
 
@@ -66,30 +69,40 @@ class CreateTestMixin:
             has_curation_permissions=True,
         )
 
+    @contextmanager
+    def suppress_request_logging(self):
+        """Temporarily suppress django.request logging to hide expected 403s."""
+        logger = logging.getLogger("django.request")
+        previous_level = logger.level
+        logger.setLevel(logging.CRITICAL)
+        try:
+            yield
+        finally:
+            logger.setLevel(previous_level)
+
     def test_redirects_anonymous_user_to_login(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
 
     def test_permission_denied_if_no_phi_no_perms(self):
         self.client.force_login(self.user1_no_phi_no_perms)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
+        with self.suppress_request_logging():
+            response = self.client.get(self.url)
         self.assertEqual(response.status_code, 403)
 
     def test_permission_denied_if_yes_phi_no_perms(self):
         self.client.force_login(self.user2_yes_phi_no_perms)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
+        with self.suppress_request_logging():
+            response = self.client.get(self.url)
         self.assertEqual(response.status_code, 403)
 
     def test_permission_denied_if_no_phi_yes_perms(self):
         self.client.force_login(self.user3_no_phi_yes_perms)
-        # If DEBUG is true, this will print a warning and a stack trace.
-        response = self.client.get(self.url)
+        with self.suppress_request_logging():
+            response = self.client.get(self.url)
         self.assertEqual(response.status_code, 403)
 
     def test_permission_granted_if_yes_phi_yes_perms(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
-        # If DEBUG is true, this will print a warning and a stack trace.
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)

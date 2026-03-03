@@ -369,3 +369,37 @@ class TestEvidence(TestCase):
         self.evidence.needs_review = True
         self.evidence.save()
         self.assertTrue(self.evidence.needs_review)
+
+    def test_can_include_pubmed_publication(self):
+        pubmed_publication = Publication.objects.get(pk=1)
+        self.evidence.publication = pubmed_publication
+        self.evidence.is_included = True
+        self.evidence.clean()  # Should not raise
+
+    def test_cannot_include_biorxiv_publication(self):
+        biorxiv_publication = Publication.objects.get(pk=2)
+        self.evidence.publication = biorxiv_publication
+        self.evidence.is_included = True
+        with self.assertRaises(ValidationError) as context:
+            self.evidence.clean()
+        self.assertIn("is_included", context.exception.message_dict)
+
+    def test_cannot_include_medrxiv_publication(self):
+        medrxiv_publication = Publication.objects.get(pk=3)
+        self.evidence.publication = medrxiv_publication
+        self.evidence.is_included = True
+        with self.assertRaises(ValidationError) as context:
+            self.evidence.clean()
+        self.assertIn("is_included", context.exception.message_dict)
+
+    def test_can_add_biorxiv_publication_without_including(self):
+        biorxiv_publication = Publication.objects.get(pk=2)
+        self.evidence.publication = biorxiv_publication
+        self.evidence.is_included = False
+        self.evidence.clean()  # Should not raise
+
+    def test_can_add_medrxiv_publication_without_including(self):
+        medrxiv_publication = Publication.objects.get(pk=3)
+        self.evidence.publication = medrxiv_publication
+        self.evidence.is_included = False
+        self.evidence.clean()  # Should not raise
