@@ -27,7 +27,7 @@ from publication.clients import (
 )
 from publication.constants.models import PublicationTypes
 
-SKIP_CONTRACT_TESTS = not os.getenv("RUN_CONTRACT_TESTS")
+SKIP_CONTRACT_TESTS = os.getenv("RUN_CONTRACT_TESTS") != "1"
 SKIP_REASON = "Contract tests are skipped by default. Set RUN_CONTRACT_TESTS=1 to run."
 
 PUBMED_TEST_CASES = [
