@@ -44,8 +44,8 @@
             <li {% if request.GET.tab == "data" or not request.GET.tab %}class="is-active"{% endif %}>
                 <a href="{% url 'evidence-detail' object.curation.slug object.slug %}?tab=data">Data</a>
             </li>
-            <li {% if request.GET.tab == "score" %}class="is-active"{% endif %}>
-                <a href="{% url 'evidence-detail' object.curation.slug object.slug %}?tab=score">Score</a>
+            <li {% if request.GET.tab == "matrix" %}class="is-active"{% endif %}>
+                <a href="{% url 'evidence-detail' object.curation.slug object.slug %}?tab=matrix">Scoring Matrix</a>
             </li>
         </ul>
     </div>
@@ -63,7 +63,7 @@
         {% include "evidence/partials/data.html" %}
     {% endif %}
 
-    {% if request.GET.tab == "score" %}
+    {% if request.GET.tab == "matrix" %}
         {% include "evidence/partials/score.html" %}
     {% endif %}
 

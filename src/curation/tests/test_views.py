@@ -348,7 +348,7 @@ class EvidenceDetailTest(ViewTestMixin, TestCase):
     page_name = "E000001 Details"
     expected_text = [
         "Data",
-        "Score",
+        "Scoring Matrix",
         "A*01:02:03",
         "acute oran berry intoxication",
     ]
@@ -358,17 +358,17 @@ class EvidenceDetailTest(ViewTestMixin, TestCase):
         self.assertContains(response, "Genome-Wide Association Study")
 
     def test_shows_score_tab_content(self):
-        response = self.client.get(f"{self.url}?tab=score")
+        response = self.client.get(f"{self.url}?tab=matrix")
         self.assertContains(response, "Step")
         self.assertContains(response, "Category")
         self.assertContains(response, "Points")
 
     def test_shows_total_score_before_multipliers(self):
-        response = self.client.get(f"{self.url}?tab=score")
+        response = self.client.get(f"{self.url}?tab=matrix")
         self.assertContains(response, "Total Before Multipliers")
 
     def test_shows_total_score(self):
-        response = self.client.get(f"{self.url}?tab=score")
+        response = self.client.get(f"{self.url}?tab=matrix")
         self.assertContains(response, "Total")
 
 
