@@ -13,8 +13,8 @@ from config.settings.base import LOGIN_URL
 PERMISSION_DENIED_MESSAGE = "You don't have permission to access this page."
 
 
-class CreateAccessMixin(AccessMixin):
-    """Ensures the user has the correct permissions creating.
+class ProtectedViewMixin(AccessMixin):
+    """Ensures the user has the correct permissions to access protected views.
 
     This AccessMixin should be used in class-based views that aren't public.
     """
@@ -41,8 +41,8 @@ class CreateAccessMixin(AccessMixin):
         raise PermissionDenied(PERMISSION_DENIED_MESSAGE)
 
 
-def has_create_access(view_function: Callable) -> Callable:
-    """Ensures the user has the correct permissions for creating.
+def protected_view(view_function: Callable) -> Callable:
+    """Ensures the user has the correct permissions to access protected views.
 
     This decorator should be used in function-based views that aren't public.
 

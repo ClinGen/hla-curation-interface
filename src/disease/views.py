@@ -4,13 +4,13 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
-from auth_.permissions import CreateAccessMixin
+from auth_.permissions import ProtectedViewMixin
 from disease.clients import fetch_disease_data, get_iri, get_name
 from disease.forms import DiseaseForm
 from disease.models import Disease
 
 
-class DiseaseCreate(CreateAccessMixin, CreateView):  # type: ignore
+class DiseaseCreate(ProtectedViewMixin, CreateView):  # type: ignore
     model = Disease
     form_class = DiseaseForm
     template_name = "disease/create.html"
@@ -32,11 +32,11 @@ class DiseaseCreate(CreateAccessMixin, CreateView):  # type: ignore
         return redirect("disease-create")
 
 
-class DiseaseDetail(DetailView):
+class DiseaseDetail(ProtectedViewMixin, DetailView):  # type: ignore
     model = Disease
     template_name = "disease/detail.html"
 
 
-class DiseaseList(ListView):
+class DiseaseList(ProtectedViewMixin, ListView):  # type: ignore
     model = Disease
     template_name = "disease/list.html"

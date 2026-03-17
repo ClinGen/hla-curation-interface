@@ -4,22 +4,25 @@ from django.test import TestCase
 from django.urls import reverse
 
 from allele.models import Allele
-from common.tests import CreateTestMixin, ViewTestMixin
+from common.tests import ProtectedViewTestMixin
 from haplotype.models import Haplotype
 
 
-class AlleleCreateTest(CreateTestMixin, TestCase):
+class AlleleCreateTest(ProtectedViewTestMixin, TestCase):
+    url = reverse("allele-create")
+    template = "allele/create.html"
+    page_name = "Add Allele"
+    expected_text = ["Add Allele", "Name", "HLA allele"]
+
     def setUp(self):
-        self.url = reverse("allele-create")
         super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)
 
     def test_shows_allele_name_input(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         self.assertContains(response, "Name")
 
     def test_shows_submit_button(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         self.assertContains(response, "Submit")
 
@@ -27,7 +30,6 @@ class AlleleCreateTest(CreateTestMixin, TestCase):
     def test_creates_allele_with_valid_form_data(
         self, mock_fetch_allele_data: MagicMock
     ):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_allele_count = Allele.objects.count()
         data = {"name": "ASH*01:02:03"}
         mock_fetch_allele_data.return_value = [  # Mock the CAR API response.
@@ -56,7 +58,6 @@ class AlleleCreateTest(CreateTestMixin, TestCase):
         self.assertEqual(new_allele.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
 
     def test_does_not_create_allele_with_invalid_form_data(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_allele_count = Allele.objects.count()
         data = {"name": ""}  # The name field is required.
         response = self.client.post(self.url, data)
@@ -70,12 +71,16 @@ class AlleleCreateTest(CreateTestMixin, TestCase):
         self.assertEqual(Allele.objects.count(), initial_allele_count)
 
 
-class AlleleDetailTest(ViewTestMixin, TestCase):
+class AlleleDetailTest(ProtectedViewTestMixin, TestCase):
     fixtures = ["test_alleles.json"]
     url = reverse("allele-detail", kwargs={"slug": "A000001"})
     template = "allele/detail.html"
     page_name = "A000001 Details"
     expected_text = ["A*01:02:03", "XAHLA123", "1970-01-01"]
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)
 
     def test_shows_car_registry_label(self):
         response = self.client.get(self.url)
@@ -93,7 +98,7 @@ class AlleleDetailTest(ViewTestMixin, TestCase):
         self.assertContains(response, haplotype_name)
 
 
-class AlleleListTest(ViewTestMixin, TestCase):
+class AlleleListTest(ProtectedViewTestMixin, TestCase):
     fixtures = ["test_alleles.json"]
     url = reverse("allele-list")
     template = "allele/list.html"
@@ -108,3 +113,7 @@ class AlleleListTest(ViewTestMixin, TestCase):
         "XAHLA123",
         "1970-01-01",
     ]
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)

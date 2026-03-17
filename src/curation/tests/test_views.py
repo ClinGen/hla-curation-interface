@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from allele.models import Allele
-from common.tests import CreateTestMixin, ViewTestMixin
+from common.tests import ProtectedViewTestMixin
 from curation.constants.models.common import Status
 from curation.constants.models.evidence import (
     AdditionalPhenotypes,
@@ -23,41 +23,25 @@ from haplotype.models import Haplotype
 from publication.models import Publication
 
 
-class CurationCreateTest(CreateTestMixin, TestCase):
+class CurationCreateTest(ProtectedViewTestMixin, TestCase):
     fixtures = ["test_alleles.json", "test_haplotypes.json", "test_diseases.json"]
+    url = reverse("curation-create")
+    template = "curation/create.html"
+    page_name = "Add Curation"
+    expected_text = [
+        "Add Curation",
+        "Curation Type",
+        "Allele",
+        "Haplotype",
+        "Disease",
+        "Submit",
+    ]
 
     def setUp(self):
-        self.url = reverse("curation-create")
         super().setUp()
-
-    def test_shows_breadcrumb(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Add Curation")
-
-    def test_shows_radio_buttons(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Allele")
-        self.assertContains(response, "Haplotype")
-
-    def test_shows_allele_select(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Allele")
-
-    def test_shows_disease_select(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Disease")
-
-    def test_shows_submit_button(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Submit")
 
     def test_creates_allele_curation_with_valid_form_data(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_curation_count = Curation.objects.count()
         data = {"curation_type": "ALL", "allele": "1", "disease": "1"}
         response = self.client.post(self.url, data)
@@ -71,7 +55,6 @@ class CurationCreateTest(CreateTestMixin, TestCase):
         self.assertEqual(new_curation.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
 
     def test_creates_haplotype_curation_with_valid_form_data(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_curation_count = Curation.objects.count()
         data = {"curation_type": "HAP", "haplotype": "1", "disease": "1"}
         response = self.client.post(self.url, data)
@@ -85,7 +68,7 @@ class CurationCreateTest(CreateTestMixin, TestCase):
         self.assertEqual(new_curation.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
 
 
-class CurationDetailTest(ViewTestMixin, TestCase):
+class CurationDetailTest(ProtectedViewTestMixin, TestCase):
     fixtures = [
         "test_alleles.json",
         "test_diseases.json",
@@ -112,6 +95,10 @@ class CurationDetailTest(ViewTestMixin, TestCase):
         "Score",
     ]
 
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)
+
     def test_shows_evidence_in_tbody(self):
         response = self.client.get(self.url)
         self.assertContains(response, "E000001")
@@ -121,7 +108,7 @@ class CurationDetailTest(ViewTestMixin, TestCase):
         self.assertContains(response, "2.0")
 
 
-class CurationEditTest(CreateTestMixin, TestCase):
+class CurationEditTest(ProtectedViewTestMixin, TestCase):
     fixtures = [
         "test_alleles.json",
         "test_diseases.json",
@@ -129,63 +116,23 @@ class CurationEditTest(CreateTestMixin, TestCase):
         "test_curations.json",
         "test_evidence.json",
     ]
+    url = reverse("curation-edit", kwargs={"curation_slug": "C000001"})
+    template = "curation/edit/curation.html"
+    page_name = "Edit Curation"
+    expected_text = [
+        "Edit Curation",
+        "Status",
+        "Classification",
+        "Save",
+        "Cancel",
+    ]
 
     def setUp(self):
-        self.url = reverse("curation-edit", kwargs={"curation_slug": "C000001"})
         super().setUp()
-
-    def test_shows_breadcrumb(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Curation Search")
-
-    def test_shows_save_button(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Save")
-
-    def test_shows_cancel_button(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Cancel")
-
-    def test_shows_allele(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "A*01:02:03")
-
-    def test_shows_disease(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "acute oran berry intoxication")
-
-    def test_shows_status(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Status")
-
-    def test_shows_classification(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Classification")
-
-    def test_shows_score(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Score")
-
-    def test_shows_curation_id(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "C000001")
-
-    def test_shows_added_at(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "1970-01-01")
 
 
-class CurationEditEvidenceTest(CreateTestMixin, TestCase):
+class CurationEditEvidenceTest(ProtectedViewTestMixin, TestCase):
     fixtures = [
         "test_alleles.json",
         "test_diseases.json",
@@ -193,85 +140,24 @@ class CurationEditEvidenceTest(CreateTestMixin, TestCase):
         "test_curations.json",
         "test_evidence.json",
     ]
+    url = reverse("curation-edit-evidence", kwargs={"curation_slug": "C000001"})
+    template = "curation/edit/evidence.html"
+    page_name = "Edit Evidence"
+    expected_text = [
+        "Edit Evidence",
+        "Status",
+        "Conflicting",
+        "Included",
+        "Save",
+        "Cancel",
+    ]
 
     def setUp(self):
-        self.url = reverse(
-            "curation-edit-evidence", kwargs={"curation_slug": "C000001"}
-        )
         super().setUp()
-
-    def test_shows_breadcrumb(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Curation Search")
-
-    def test_shows_allele_name(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "A*01:02:03")
-
-    def test_shows_disease_name(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "acute oran berry intoxication")
-
-    def test_shows_status(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "In Progress")
-
-    def test_shows_classification(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Limited")
-
-    def test_shows_score(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Score")
-
-    def test_shows_curation_id(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "C000001")
-
-    def test_shows_added_at(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "1970-01-01")
-
-    def test_shows_save_button(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Save")
-
-    def test_shows_cancel_button(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Cancel")
-
-    def test_shows_evidence_table_headers(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "ID")
-        self.assertContains(response, "Publication")
-        self.assertContains(response, "Needs Review")
-        self.assertContains(response, "Status")
-        self.assertContains(response, "Conflicting")
-        self.assertContains(response, "Included")
-        self.assertContains(response, "Score")
-
-    def test_shows_evidence_in_tbody(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "E000001")
-        self.assertContains(
-            response, "Diseases in grass type Pokémon in the Kanto region"
-        )
-        self.assertContains(response, "2.0")
 
 
-class CurationListTest(ViewTestMixin, TestCase):
+class CurationListTest(ProtectedViewTestMixin, TestCase):
     fixtures = ["test_alleles.json", "test_diseases.json", "test_curations.json"]
     url = reverse("curation-list")
     template = "curation/list.html"
@@ -292,31 +178,28 @@ class CurationListTest(ViewTestMixin, TestCase):
         "1970-01-01",
     ]
 
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)
 
-class EvidenceCreateTest(CreateTestMixin, TestCase):
+
+class EvidenceCreateTest(ProtectedViewTestMixin, TestCase):
     fixtures = [
         "test_alleles.json",
         "test_diseases.json",
         "test_publications.json",
         "test_curations.json",
     ]
+    url = reverse("evidence-create", kwargs={"curation_slug": "C000001"})
+    template = "evidence/create.html"
+    page_name = "Add Evidence"
+    expected_text = ["Add Evidence", "Publication", "Submit"]
 
     def setUp(self):
-        self.url = reverse("evidence-create", kwargs={"curation_slug": "C000001"})
         super().setUp()
-
-    def test_shows_publication_input(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Publication")
-
-    def test_shows_submit_button(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Submit")
 
     def test_creates_evidence_with_valid_form_data(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_evidence_count = Evidence.objects.count()
         data = {"publication": "1"}
         response = self.client.post(self.url, data)
@@ -332,7 +215,7 @@ class EvidenceCreateTest(CreateTestMixin, TestCase):
         self.assertEqual(new_evidence.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
 
 
-class EvidenceDetailTest(ViewTestMixin, TestCase):
+class EvidenceDetailTest(ProtectedViewTestMixin, TestCase):
     fixtures = [
         "test_alleles.json",
         "test_diseases.json",
@@ -353,6 +236,10 @@ class EvidenceDetailTest(ViewTestMixin, TestCase):
         "acute oran berry intoxication",
     ]
 
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)
+
     def test_shows_data_tab_content(self):
         response = self.client.get(f"{self.url}?tab=data")
         self.assertContains(response, "Genome-Wide Association Study")
@@ -372,7 +259,7 @@ class EvidenceDetailTest(ViewTestMixin, TestCase):
         self.assertContains(response, "Total")
 
 
-class EvidenceEditTest(CreateTestMixin, TestCase):
+class EvidenceEditTest(ProtectedViewTestMixin, TestCase):
     fixtures = [
         "test_alleles.json",
         "test_diseases.json",
@@ -380,21 +267,27 @@ class EvidenceEditTest(CreateTestMixin, TestCase):
         "test_curations.json",
         "test_evidence.json",
     ]
+    url = reverse(
+        "evidence-edit",
+        kwargs={"curation_slug": "C000001", "evidence_slug": "E000001"},
+    )
+    template = "evidence/edit.html"
+    page_name = "Edit Evidence"
+    expected_text: list[str] = []  # We test this later.
 
     def setUp(self):
-        self.url = reverse(
-            "evidence-edit",
-            kwargs={"curation_slug": "C000001", "evidence_slug": "E000001"},
-        )
         super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)
+
+    # We skip this because we test it in other test methods.
+    def test_expected_text_in_response(self):
+        pass
 
     def test_shows_menu(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         self.assertContains(response, "Menu")
 
     def test_shows_data_headings(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         headings = [
             "GWAS",
@@ -415,7 +308,6 @@ class EvidenceEditTest(CreateTestMixin, TestCase):
             self.assertContains(response, heading)
 
     def test_edits_evidence_with_valid_form_data(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
         data = {
             "is_gwas": True,
             "is_gwas_notes": "",

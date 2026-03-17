@@ -7,10 +7,10 @@ from django.views.generic import CreateView, DetailView, ListView
 from allele.clients import fetch_allele_data, get_car_id
 from allele.forms import AlleleForm
 from allele.models import Allele
-from auth_.permissions import CreateAccessMixin
+from auth_.permissions import ProtectedViewMixin
 
 
-class AlleleCreate(CreateAccessMixin, CreateView):  # type: ignore
+class AlleleCreate(ProtectedViewMixin, CreateView):  # type: ignore
     model = Allele
     form_class = AlleleForm
     template_name = "allele/create.html"
@@ -37,11 +37,11 @@ class AlleleCreate(CreateAccessMixin, CreateView):  # type: ignore
         return redirect("allele-create")
 
 
-class AlleleDetail(DetailView):
+class AlleleDetail(ProtectedViewMixin, DetailView):  # type: ignore
     model = Allele
     template_name = "allele/detail.html"
 
 
-class AlleleList(ListView):
+class AlleleList(ProtectedViewMixin, ListView):  # type: ignore
     model = Allele
     template_name = "allele/list.html"

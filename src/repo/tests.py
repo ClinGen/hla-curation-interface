@@ -8,7 +8,7 @@ from django.urls import reverse
 
 from allele.models import Allele
 from auth_.models import UserProfile
-from common.tests import CreateTestMixin
+from common.tests import ProtectedViewTestMixin
 from curation.constants.models.common import Status
 from curation.constants.models.curation import CurationTypes
 from curation.models import Curation
@@ -78,10 +78,15 @@ class PublishedCurationModelTest(TestCase):
         self.assertEqual(published.get_absolute_url(), expected_url)
 
 
-class CurationPublishViewTest(CreateTestMixin, TestCase):
+class CurationPublishViewTest(ProtectedViewTestMixin, TestCase):
     fixtures = ["test_alleles.json", "test_diseases.json"]
+    # Publish is a redirect action, not a page view, so these don't apply.
+    template = ""
+    page_name = ""
+    expected_text: list[str] = []
 
     def setUp(self):
+        self.url = ""  # Set a placeholder; will be updated after super().setUp()
         super().setUp()
         self.allele = Allele.objects.get(pk=1)
         self.disease = Disease.objects.get(pk=1)
@@ -95,6 +100,16 @@ class CurationPublishViewTest(CreateTestMixin, TestCase):
         self.url = reverse(
             "curation-publish", kwargs={"curation_slug": self.curation.slug}
         )
+
+    # Publish is a redirect action, not a page view, so skip inherited page tests.
+    def test_template(self):
+        pass
+
+    def test_page_name_in_response(self):
+        pass
+
+    def test_expected_text_in_response(self):
+        pass
 
     @override
     def test_permission_granted_if_yes_phi_yes_perms(self):

@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView
 
-from auth_.permissions import CreateAccessMixin
+from auth_.permissions import ProtectedViewMixin
 from publication.clients import (
     fetch_pubmed_data,
     fetch_rxiv_data,
@@ -21,7 +21,7 @@ from publication.forms import PublicationForm
 from publication.models import Publication
 
 
-class PublicationCreate(CreateAccessMixin, CreateView):  # type: ignore
+class PublicationCreate(ProtectedViewMixin, CreateView):  # type: ignore
     model = Publication
     form_class = PublicationForm
     template_name = "publication/create.html"
@@ -57,11 +57,11 @@ class PublicationCreate(CreateAccessMixin, CreateView):  # type: ignore
         return redirect("publication-create")
 
 
-class PublicationDetail(DetailView):
+class PublicationDetail(ProtectedViewMixin, DetailView):  # type: ignore
     model = Publication
     template_name = "publication/detail.html"
 
 
-class PublicationList(ListView):
+class PublicationList(ProtectedViewMixin, ListView):  # type: ignore
     model = Publication
     template_name = "publication/list.html"

@@ -4,38 +4,33 @@ from bs4 import BeautifulSoup
 from django.test import TestCase
 from django.urls import reverse
 
-from common.tests import CreateTestMixin, ViewTestMixin
+from common.tests import ProtectedViewTestMixin
 from publication.models import Publication
 
 
-class PublicationCreateTest(CreateTestMixin, TestCase):
+class PublicationCreateTest(ProtectedViewTestMixin, TestCase):
+    url = reverse("publication-create")
+    template = "publication/create.html"
+    page_name = "Add Publication"
+    expected_text = [
+        "Add Publication",
+        "Publication Type",
+        "PubMed Article",
+        "bioRxiv Paper",
+        "medRxiv Paper",
+        "PubMed ID",
+        "DOI",
+        "Submit",
+    ]
+
     def setUp(self):
-        self.url = reverse("publication-create")
         super().setUp()
-
-    def test_shows_radio_buttons(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "PubMed")
-        self.assertContains(response, "bioRxiv")
-        self.assertContains(response, "medRxiv")
-
-    def test_shows_inputs(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "PubMed ID")
-        self.assertContains(response, "DOI")
-
-    def test_shows_submit_button(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
-        self.assertContains(response, "Submit")
 
     @patch("publication.views.fetch_pubmed_data")
     def test_creates_pubmed_publication_with_valid_form_data(
         self, mock_fetch_pubmed_data: MagicMock
     ):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_publication_count = Publication.objects.count()
         data = {"publication_type": "PUB", "pubmed_id": "123"}
         mock_pubmed_response = """
@@ -77,7 +72,6 @@ class PublicationCreateTest(CreateTestMixin, TestCase):
     def test_creates_biorxiv_publication_with_valid_form_data(
         self, mock_fetch_rxiv_data: MagicMock
     ):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_publication_count = Publication.objects.count()
         data = {"publication_type": "BIO", "doi": "10.1101/123"}
         mock_fetch_rxiv_data.return_value = {
@@ -105,7 +99,6 @@ class PublicationCreateTest(CreateTestMixin, TestCase):
     def test_creates_medrxiv_publication_with_valid_form_data(
         self, mock_fetch_rxiv_data: MagicMock
     ):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_publication_count = Publication.objects.count()
         data = {"publication_type": "MED", "doi": "10.1101/456"}
         mock_fetch_rxiv_data.return_value = {
@@ -130,7 +123,6 @@ class PublicationCreateTest(CreateTestMixin, TestCase):
         self.assertEqual(new_publication.publication_year, 2021)  # type: ignore[union-attr]
 
     def test_does_not_create_publication_with_invalid_form_data(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_publication_count = Publication.objects.count()
         data = {"publication_type": ""}  # The publication_type field is required.
         response = self.client.post(self.url, data)
@@ -144,7 +136,7 @@ class PublicationCreateTest(CreateTestMixin, TestCase):
         self.assertEqual(Publication.objects.count(), initial_publication_count)
 
 
-class PublicationDetailTest(ViewTestMixin, TestCase):
+class PublicationDetailTest(ProtectedViewTestMixin, TestCase):
     fixtures = ["test_publications.json"]
     url = reverse("publication-detail", kwargs={"slug": "P000001"})
     template = "publication/detail.html"
@@ -157,8 +149,12 @@ class PublicationDetailTest(ViewTestMixin, TestCase):
         "1990-01-01",
     ]
 
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)
 
-class PublicationListTest(ViewTestMixin, TestCase):
+
+class PublicationListTest(ProtectedViewTestMixin, TestCase):
     fixtures = ["test_publications.json"]
     url = reverse("publication-list")
     template = "publication/list.html"
@@ -178,3 +174,7 @@ class PublicationListTest(ViewTestMixin, TestCase):
         "10.1000/123",
         "1990-01-01",
     ]
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)

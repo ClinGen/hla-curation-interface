@@ -9,10 +9,8 @@ from django.test import Client
 from auth_.models import UserProfile
 
 
-class ViewTestMixin:
-    def test_get_successful(self):
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
+class BaseViewTestMixin:
+    """Base mixin with common view tests."""
 
     def test_template(self):
         response = self.client.get(self.url)
@@ -28,7 +26,25 @@ class ViewTestMixin:
             self.assertContains(response, text)
 
 
-class CreateTestMixin:
+class OpenViewTestMixin(BaseViewTestMixin):
+    """Mixin for views that are open to the public.
+
+    Adds test that anonymous users get 200 status code.
+    """
+
+    def test_get_successful(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+
+class ProtectedViewTestMixin(BaseViewTestMixin):
+    """Mixin for views that require authentication and curation permissions.
+
+    Sets up 4 test users with different permission combinations and tests
+    that only users with both PHI agreement and curation permissions can
+    access the view.
+    """
+
     def setUp(self):
         super().setUp()
         self.client = Client()
@@ -81,6 +97,7 @@ class CreateTestMixin:
             logger.setLevel(previous_level)
 
     def test_redirects_anonymous_user_to_login(self):
+        self.client.logout()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
 

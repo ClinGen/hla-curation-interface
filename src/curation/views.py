@@ -12,7 +12,7 @@ from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, UpdateView
 from django.views.generic.edit import CreateView
 
-from auth_.permissions import CreateAccessMixin, has_create_access
+from auth_.permissions import ProtectedViewMixin, protected_view
 from curation.constants.models.common import Status
 from curation.constants.views import FRAMEWORK
 from curation.forms import (
@@ -37,7 +37,7 @@ from curation.validators.views import (
 )
 
 
-class CurationCreate(CreateAccessMixin, CreateView):  # type: ignore
+class CurationCreate(ProtectedViewMixin, CreateView):  # type: ignore
     model = Curation
     form_class = CurationCreateForm
     template_name = "curation/create.html"
@@ -51,14 +51,14 @@ class CurationCreate(CreateAccessMixin, CreateView):  # type: ignore
         return super().form_valid(form)
 
 
-class CurationDetail(DetailView):
+class CurationDetail(ProtectedViewMixin, DetailView):  # type: ignore
     model = Curation
     template_name = "curation/detail.html"
     slug_field = "slug"
     slug_url_kwarg = "curation_slug"
 
 
-class CurationEdit(CreateAccessMixin, UpdateView):  # type: ignore
+class CurationEdit(ProtectedViewMixin, UpdateView):  # type: ignore
     model = Curation
     form_class = CurationEditForm
     template_name = "curation/edit/curation.html"
@@ -82,7 +82,7 @@ class CurationEdit(CreateAccessMixin, UpdateView):  # type: ignore
         return super().dispatch(request, *args, **kwargs)  # type: ignore[return-value]
 
 
-@has_create_access
+@protected_view
 def curation_edit_evidence(request: HttpRequest, curation_slug: str) -> HttpResponse:
     """Returns the editable curation details page with editable top-level evidence.
 
@@ -118,7 +118,7 @@ def curation_edit_evidence(request: HttpRequest, curation_slug: str) -> HttpResp
     return render(request, "curation/edit/evidence.html", context)
 
 
-class EvidenceCreate(CreateAccessMixin, CreateView):  # type: ignore
+class EvidenceCreate(ProtectedViewMixin, CreateView):  # type: ignore
     model = Evidence
     form_class = EvidenceCreateForm
     template_name = "evidence/create.html"
@@ -138,7 +138,7 @@ class EvidenceCreate(CreateAccessMixin, CreateView):  # type: ignore
         return context
 
 
-class EvidenceDetail(DetailView):
+class EvidenceDetail(ProtectedViewMixin, DetailView):  # type: ignore
     model = Evidence
     template_name = "evidence/detail.html"
     slug_field = "slug"
@@ -151,7 +151,7 @@ class EvidenceDetail(DetailView):
         return context
 
 
-class EvidenceEdit(CreateAccessMixin, UpdateView):  # type: ignore
+class EvidenceEdit(ProtectedViewMixin, UpdateView):  # type: ignore
     model = Evidence
     form_class = EvidenceEditForm
     template_name = "evidence/edit.html"
@@ -196,7 +196,7 @@ class EvidenceEdit(CreateAccessMixin, UpdateView):  # type: ignore
         return super().form_valid(form)
 
 
-@has_create_access
+@protected_view
 def curation_publish(request: HttpRequest, curation_slug: str) -> HttpResponse:
     """Publishes a curation to the repository.
 
@@ -238,6 +238,6 @@ def curation_publish(request: HttpRequest, curation_slug: str) -> HttpResponse:
     return redirect("repo-detail", curation_slug=curation.slug)
 
 
-class CurationList(ListView):
+class CurationList(ProtectedViewMixin, ListView):  # type: ignore
     model = Curation
     template_name = "curation/list.html"

@@ -3,22 +3,25 @@ from unittest.mock import MagicMock, patch
 from django.test import TestCase
 from django.urls import reverse
 
-from common.tests import CreateTestMixin, ViewTestMixin
+from common.tests import ProtectedViewTestMixin
 from disease.models import Disease
 
 
-class DiseaseCreateTest(CreateTestMixin, TestCase):
+class DiseaseCreateTest(ProtectedViewTestMixin, TestCase):
+    url = reverse("disease-create")
+    template = "disease/create.html"
+    page_name = "Add Disease"
+    expected_text = ["Add Disease", "Mondo", "Submit"]
+
     def setUp(self):
-        self.url = reverse("disease-create")
         super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)
 
     def test_shows_mondo_input(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         self.assertContains(response, "Mondo")
 
     def test_shows_submit_button(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         self.assertContains(response, "Submit")
 
@@ -26,7 +29,6 @@ class DiseaseCreateTest(CreateTestMixin, TestCase):
     def test_creates_disease_with_valid_form_data(
         self, mock_fetch_disease_data: MagicMock
     ):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_disease_count = Disease.objects.count()
         data = {"mondo_id": "MONDO:123"}
         mock_fetch_disease_data.return_value = {  # Mock the OLS API response.
@@ -50,7 +52,6 @@ class DiseaseCreateTest(CreateTestMixin, TestCase):
         self.assertEqual(new_disease.iri, "http://purl.obolibrary.org/obo/MONDO_123")  # type: ignore[union-attr]
 
     def test_does_not_create_disease_with_invalid_form_data(self):
-        self.client.force_login(self.user4_yes_phi_yes_perms)
         initial_disease_count = Disease.objects.count()
         data = {"mondo_id": ""}  # The mondo_id field is required.
         response = self.client.post(self.url, data)
@@ -64,15 +65,19 @@ class DiseaseCreateTest(CreateTestMixin, TestCase):
         self.assertEqual(Disease.objects.count(), initial_disease_count)
 
 
-class DiseaseDetailTest(ViewTestMixin, TestCase):
+class DiseaseDetailTest(ProtectedViewTestMixin, TestCase):
     fixtures = ["test_diseases.json"]
     url = reverse("disease-detail", kwargs={"slug": "D000001"})
     template = "disease/detail.html"
     page_name = "D000001 Details"
     expected_text = ["MONDO:123", "2000-01-01"]
 
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)
 
-class DiseaseListTest(ViewTestMixin, TestCase):
+
+class DiseaseListTest(ProtectedViewTestMixin, TestCase):
     fixtures = ["test_diseases.json"]
     url = reverse("disease-list")
     template = "disease/list.html"
@@ -87,3 +92,7 @@ class DiseaseListTest(ViewTestMixin, TestCase):
         "MONDO:123",
         "2000-01-01",
     ]
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)

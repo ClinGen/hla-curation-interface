@@ -3,17 +3,17 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from auth_.models import UserProfile
-from common.tests import ViewTestMixin
+from common.tests import OpenViewTestMixin
 
 
-class HomeViewTest(ViewTestMixin, TestCase):
+class HomeViewTest(OpenViewTestMixin, TestCase):
     url = reverse("home")
     template = "core/home.html"
     page_name = "Home"
     expected_text = ["HLA Curation Interface"]
 
 
-class AboutViewTest(ViewTestMixin, TestCase):
+class AboutViewTest(OpenViewTestMixin, TestCase):
     url = reverse("about")
     template = "core/about.html"
     page_name = "About"
@@ -25,35 +25,35 @@ class AboutViewTest(ViewTestMixin, TestCase):
     ]
 
 
-class ContactViewTest(ViewTestMixin, TestCase):
+class ContactViewTest(OpenViewTestMixin, TestCase):
     url = reverse("contact")
     template = "core/contact.html"
     page_name = "Contact"
     expected_text = ["email", "hci@clinicalgenome.org"]
 
 
-class HelpViewTest(ViewTestMixin, TestCase):
+class HelpViewTest(OpenViewTestMixin, TestCase):
     url = reverse("help")
     template = "core/help.html"
     page_name = "Help"
     expected_text = ["standard operating procedure", "email", "hci@clinicalgenome.org"]
 
 
-class CitingViewTest(ViewTestMixin, TestCase):
+class CitingViewTest(OpenViewTestMixin, TestCase):
     url = reverse("citing")
     template = "core/citing.html"
     page_name = "Citing"
     expected_text = ["format", "dataset"]
 
 
-class AcknowledgementsViewTest(ViewTestMixin, TestCase):
+class AcknowledgementsViewTest(OpenViewTestMixin, TestCase):
     url = reverse("acknowledgements")
     template = "core/acknowledgements.html"
     page_name = "Acknowledgements"
     expected_text = ["NIH/NHGRI", "Steven Mack"]
 
 
-class CollaboratorsViewTest(ViewTestMixin, TestCase):
+class CollaboratorsViewTest(OpenViewTestMixin, TestCase):
     url = reverse("collaborators")
     template = "core/collaborators.html"
     page_name = "Collaborators"

@@ -4,13 +4,13 @@ from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView
 
-from auth_.permissions import CreateAccessMixin
+from auth_.permissions import ProtectedViewMixin
 from haplotype.constants.models import GENE_LIST
 from haplotype.forms import HaplotypeForm
 from haplotype.models import Haplotype
 
 
-class HaplotypeCreate(CreateAccessMixin, CreateView):  # type: ignore
+class HaplotypeCreate(ProtectedViewMixin, CreateView):  # type: ignore
     model = Haplotype
     form_class = HaplotypeForm
     template_name = "haplotype/create.html"
@@ -35,11 +35,11 @@ class HaplotypeCreate(CreateAccessMixin, CreateView):  # type: ignore
         return super().form_valid(form)
 
 
-class HaplotypeDetail(DetailView):
+class HaplotypeDetail(ProtectedViewMixin, DetailView):  # type: ignore
     model = Haplotype
     template_name = "haplotype/detail.html"
 
 
-class HaplotypeList(ListView):
+class HaplotypeList(ProtectedViewMixin, ListView):  # type: ignore
     model = Haplotype
     template_name = "haplotype/list.html"
