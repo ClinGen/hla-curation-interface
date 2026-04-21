@@ -439,7 +439,7 @@ class Evidence(models.Model):
         verbose_name="Notes",
     )
     has_association = models.BooleanField(
-        default=True,
+        default=False,
         verbose_name="Weighing Association",
         help_text="Is there a significant association with the disease?",
     )

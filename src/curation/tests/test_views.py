@@ -105,7 +105,7 @@ class CurationDetailTest(ProtectedViewTestMixin, TestCase):
         self.assertContains(
             response, "Diseases in grass type Pokémon in the Kanto region"
         )
-        self.assertContains(response, "2.0")
+        self.assertContains(response, "0.0")  # Should default to a score of 0.0.
 
 
 class CurationEditTest(ProtectedViewTestMixin, TestCase):

@@ -101,33 +101,40 @@ class TestEvidence(TestCase):
         self.assertEqual(self.evidence.zygosity, Zygosity.MONOALLELIC)
 
     def test_score_increases_when_biallelic_selected(self):
-        initial_points = self.evidence.score
+        initial_points = self.evidence.score_before_multipliers
         self.evidence.zygosity = Zygosity.BIALLELIC
         self.evidence.save()
-        self.assertGreater(self.evidence.score, initial_points)
-        self.assertEqual(self.evidence.score, initial_points + Points.S1C_BIALLELIC)
+        self.assertGreater(self.evidence.score_before_multipliers, initial_points)
+        self.assertEqual(
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S1C_BIALLELIC,
+        )
 
     def test_phase_confirmed_is_false_when_created(self):
         self.assertFalse(self.evidence.phase_confirmed)
 
     def test_score_increases_when_phase_confirmed(self):
-        initial_points = self.evidence.score
+        initial_points = self.evidence.score_before_multipliers
         self.evidence.phase_confirmed = True
         self.evidence.save()
-        self.assertGreater(self.evidence.score, initial_points)
+        self.assertGreater(self.evidence.score_before_multipliers, initial_points)
         self.assertEqual(
-            self.evidence.score, initial_points + Points.S1D_PHASE_CONFIRMED
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S1D_PHASE_CONFIRMED,
         )
 
     def test_typing_method_is_empty_when_created(self):
         self.assertEqual(self.evidence.typing_method, "")
 
     def test_score_increases_when_typing_method_selected(self):
-        initial_points = self.evidence.score
+        initial_points = self.evidence.score_before_multipliers
         self.evidence.typing_method = TypingMethod.LONG_READ_SEQ
         self.evidence.save()
-        self.assertGreater(self.evidence.score, initial_points)
-        self.assertEqual(self.evidence.score, initial_points + Points.S2_LONG_READ_SEQ)
+        self.assertGreater(self.evidence.score_before_multipliers, initial_points)
+        self.assertEqual(
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S2_LONG_READ_SEQ,
+        )
 
     def test_demographics_is_empty_when_created(self):
         self.assertEqual(len(self.evidence.demographics.all()), 0)
@@ -157,29 +164,38 @@ class TestEvidence(TestCase):
         self.assertIsNotNone(self.evidence.p_value)
 
     def test_score_increases_when_p_value_provided(self):
-        initial_points = self.evidence.score
+        initial_points = self.evidence.score_before_multipliers
         p_value_string = "0.0004"
         self.evidence.p_value = Decimal(p_value_string)
         self.evidence.save()
-        self.assertGreater(self.evidence.score, initial_points)
-        self.assertEqual(self.evidence.score, initial_points + Points.S3A_INTERVAL_4)
+        self.assertGreater(self.evidence.score_before_multipliers, initial_points)
+        self.assertEqual(
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S3A_INTERVAL_4,
+        )
 
     def test_multiple_testing_correction_is_empty_when_created(self):
         self.assertEqual(self.evidence.multiple_testing_correction, "")
 
     def test_score_increases_when_multiple_testing_correction_overall_selected(self):
-        initial_points = self.evidence.score
+        initial_points = self.evidence.score_before_multipliers
         self.evidence.multiple_testing_correction = MultipleTestingCorrection.OVERALL
         self.evidence.save()
-        self.assertGreater(self.evidence.score, initial_points)
-        self.assertEqual(self.evidence.score, initial_points + Points.S3B_OVERALL)
+        self.assertGreater(self.evidence.score_before_multipliers, initial_points)
+        self.assertEqual(
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S3B_OVERALL,
+        )
 
     def test_score_increases_when_multiple_testing_correction_two_step_selected(self):
-        initial_points = self.evidence.score
+        initial_points = self.evidence.score_before_multipliers
         self.evidence.multiple_testing_correction = MultipleTestingCorrection.TWO_STEP
         self.evidence.save()
-        self.assertGreater(self.evidence.score, initial_points)
-        self.assertEqual(self.evidence.score, initial_points + Points.S3B_TWO_STEP)
+        self.assertGreater(self.evidence.score_before_multipliers, initial_points)
+        self.assertEqual(
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S3B_TWO_STEP,
+        )
 
     def test_effect_size_statistic_is_empty_when_created(self):
         self.assertEqual(self.evidence.effect_size_statistic, "")
@@ -194,20 +210,26 @@ class TestEvidence(TestCase):
         self.assertEqual(self.evidence.odds_ratio, odds_ratio_value)
 
     def test_score_increases_when_odds_ratio_provided_high(self):
-        initial_points = self.evidence.score
+        initial_points = self.evidence.score_before_multipliers
         self.evidence.effect_size_statistic = EffectSizeStatistic.ODDS_RATIO
         self.evidence.odds_ratio = Decimal("2.5")
         self.evidence.save()
-        self.assertGreater(self.evidence.score, initial_points)
-        self.assertEqual(self.evidence.score, initial_points + Points.S3C_OR_RR_BETA)
+        self.assertGreater(self.evidence.score_before_multipliers, initial_points)
+        self.assertEqual(
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S3C_OR_RR_BETA,
+        )
 
     def test_score_increases_when_odds_ratio_provided_low(self):
-        initial_points = self.evidence.score
+        initial_points = self.evidence.score_before_multipliers
         self.evidence.effect_size_statistic = EffectSizeStatistic.ODDS_RATIO
         self.evidence.odds_ratio = Decimal("0.4")
         self.evidence.save()
-        self.assertGreater(self.evidence.score, initial_points)
-        self.assertEqual(self.evidence.score, initial_points + Points.S3C_OR_RR_BETA)
+        self.assertGreater(self.evidence.score_before_multipliers, initial_points)
+        self.assertEqual(
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S3C_OR_RR_BETA,
+        )
 
     def test_relative_risk_is_none_when_created(self):
         self.assertIsNone(self.evidence.relative_risk)
@@ -219,20 +241,26 @@ class TestEvidence(TestCase):
         self.assertEqual(self.evidence.relative_risk, relative_risk_value)
 
     def test_score_increases_when_relative_risk_provided_high(self):
-        initial_points = self.evidence.score
+        initial_points = self.evidence.score_before_multipliers
         self.evidence.effect_size_statistic = EffectSizeStatistic.RELATIVE_RISK
         self.evidence.relative_risk = Decimal("2.1")
         self.evidence.save()
-        self.assertGreater(self.evidence.score, initial_points)
-        self.assertEqual(self.evidence.score, initial_points + Points.S3C_OR_RR_BETA)
+        self.assertGreater(self.evidence.score_before_multipliers, initial_points)
+        self.assertEqual(
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S3C_OR_RR_BETA,
+        )
 
     def test_score_increases_when_relative_risk_provided_low(self):
-        initial_points = self.evidence.score
+        initial_points = self.evidence.score_before_multipliers
         self.evidence.effect_size_statistic = EffectSizeStatistic.RELATIVE_RISK
         self.evidence.relative_risk = Decimal("0.3")
         self.evidence.save()
-        self.assertGreater(self.evidence.score, initial_points)
-        self.assertEqual(self.evidence.score, initial_points + Points.S3C_OR_RR_BETA)
+        self.assertGreater(self.evidence.score_before_multipliers, initial_points)
+        self.assertEqual(
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S3C_OR_RR_BETA,
+        )
 
     def test_beta_is_none_when_created(self):
         self.assertIsNone(self.evidence.beta)
@@ -244,20 +272,26 @@ class TestEvidence(TestCase):
         self.assertEqual(self.evidence.beta, beta_value)
 
     def test_score_increases_when_beta_provided_high(self):
-        initial_points = self.evidence.score
+        initial_points = self.evidence.score_before_multipliers
         self.evidence.effect_size_statistic = EffectSizeStatistic.BETA
         self.evidence.beta = Decimal("0.6")
         self.evidence.save()
-        self.assertGreater(self.evidence.score, initial_points)
-        self.assertEqual(self.evidence.score, initial_points + Points.S3C_OR_RR_BETA)
+        self.assertGreater(self.evidence.score_before_multipliers, initial_points)
+        self.assertEqual(
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S3C_OR_RR_BETA,
+        )
 
     def test_score_increases_when_beta_provided_low(self):
-        initial_points = self.evidence.score
+        initial_points = self.evidence.score_before_multipliers
         self.evidence.effect_size_statistic = EffectSizeStatistic.BETA
         self.evidence.beta = Decimal("-0.7")
         self.evidence.save()
-        self.assertGreater(self.evidence.score, initial_points)
-        self.assertEqual(self.evidence.score, initial_points + Points.S3C_OR_RR_BETA)
+        self.assertGreater(self.evidence.score_before_multipliers, initial_points)
+        self.assertEqual(
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S3C_OR_RR_BETA,
+        )
 
     def test_ci_start_is_none_when_created(self):
         self.assertIsNone(self.evidence.ci_start)
@@ -278,26 +312,28 @@ class TestEvidence(TestCase):
         self.evidence.odds_ratio = Decimal("2.5")
         self.evidence.effect_size_statistic = EffectSizeStatistic.ODDS_RATIO
         self.evidence.save()
-        initial_points = self.evidence.score
+        initial_points = self.evidence.score_before_multipliers
         self.evidence.ci_start = Decimal("1.2")
         self.evidence.ci_end = Decimal("3.8")
         self.evidence.save()
-        self.assertGreater(self.evidence.score, initial_points)
+        self.assertGreater(self.evidence.score_before_multipliers, initial_points)
         self.assertEqual(
-            self.evidence.score, initial_points + Points.S3C_CI_DOES_NOT_CROSS
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S3C_CI_DOES_NOT_CROSS,
         )
 
     def test_score_increases_when_ci_does_not_cross_zero_for_beta(self):
         self.evidence.beta = Decimal("0.5")
         self.evidence.effect_size_statistic = EffectSizeStatistic.BETA
         self.evidence.save()
-        initial_points = self.evidence.score
+        initial_points = self.evidence.score_before_multipliers
         self.evidence.ci_start = Decimal("0.2")
         self.evidence.ci_end = Decimal("0.8")
         self.evidence.save()
-        self.assertGreater(self.evidence.score, initial_points)
+        self.assertGreater(self.evidence.score_before_multipliers, initial_points)
         self.assertEqual(
-            self.evidence.score, initial_points + Points.S3C_CI_DOES_NOT_CROSS
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S3C_CI_DOES_NOT_CROSS,
         )
 
     def test_cohort_size_is_none_when_created(self):
@@ -310,44 +346,52 @@ class TestEvidence(TestCase):
         self.assertEqual(self.evidence.cohort_size, cohort_size_value)
 
     def test_score_increases_when_cohort_size_provided_non_gwas(self):
-        initial_points = self.evidence.score
+        initial_points = self.evidence.score_before_multipliers
         self.evidence.cohort_size = 150
         self.evidence.save()
-        self.assertGreater(self.evidence.score, initial_points)
-        self.assertEqual(self.evidence.score, initial_points + Points.S4_INTERVAL_3)
+        self.assertGreater(self.evidence.score_before_multipliers, initial_points)
+        self.assertEqual(
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S4_INTERVAL_3,
+        )
 
     def test_score_increases_when_cohort_size_provided_gwas(self):
-        initial_points = self.evidence.score
+        initial_points = self.evidence.score_before_multipliers
         self.evidence.is_gwas = True
         self.evidence.cohort_size = 3000
         self.evidence.save()
-        self.assertGreater(self.evidence.score, initial_points)
-        self.assertEqual(self.evidence.score, initial_points + Points.S4_INTERVAL_3)
+        self.assertGreater(self.evidence.score_before_multipliers, initial_points)
+        self.assertEqual(
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S4_INTERVAL_3,
+        )
 
     def test_additional_phenotypes_is_empty_when_created(self):
         self.assertEqual(self.evidence.additional_phenotypes, "")
 
     def test_score_increases_when_specific_disease_related_phenotype_selected(self):
-        initial_points = self.evidence.score
+        initial_points = self.evidence.score_before_multipliers
         self.evidence.additional_phenotypes = (
             AdditionalPhenotypes.SPECIFIC_DISEASE_RELATED
         )
         self.evidence.save()
-        self.assertGreater(self.evidence.score, initial_points)
+        self.assertGreater(self.evidence.score_before_multipliers, initial_points)
         self.assertEqual(
-            self.evidence.score, initial_points + Points.S5_SPECIFIC_PHENOTYPE
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S5_SPECIFIC_PHENOTYPE,
         )
 
     def test_score_does_not_increase_when_only_disease_tested_selected(self):
-        initial_points = self.evidence.score
+        initial_points = self.evidence.score_before_multipliers
         self.evidence.additional_phenotypes = AdditionalPhenotypes.ONLY_DISEASE_TESTED
         self.evidence.save()
         self.assertEqual(
-            self.evidence.score, initial_points + Points.S5_ONLY_DISEASE_TESTED
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S5_ONLY_DISEASE_TESTED,
         )
 
-    def test_has_association_is_true_when_created(self):
-        self.assertTrue(self.evidence.has_association)
+    def test_has_association_is_false_when_created(self):
+        self.assertFalse(self.evidence.has_association)
 
     def test_score_multiplied_by_zero_when_no_association(self):
         self.evidence.has_association = False
