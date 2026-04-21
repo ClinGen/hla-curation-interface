@@ -90,3 +90,18 @@ ADDITIONAL_PHENOTYPES_CHOICES = {
     AdditionalPhenotypes.SPECIFIC_DISEASE_RELATED: "Has specific disease-related phenotype",  # noqa: E501
     AdditionalPhenotypes.ONLY_DISEASE_TESTED: "Only disease tested",
 }
+
+
+class PValueComparator:
+    """Defines comparator codes for p-values."""
+
+    EXACT = "EX"
+    LESS_THAN = "LT"
+    LESS_THAN_OR_EQUAL = "LE"
+
+
+P_VALUE_COMPARATOR_CHOICES = {
+    PValueComparator.EXACT: "Exact",
+    PValueComparator.LESS_THAN: "<",
+    PValueComparator.LESS_THAN_OR_EQUAL: "<=",
+}

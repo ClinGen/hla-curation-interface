@@ -17,6 +17,7 @@ from curation.constants.models.evidence import (
     ADDITIONAL_PHENOTYPES_CHOICES,
     EFFECT_SIZE_STATISTIC_CHOICES,
     MULTIPLE_TESTING_CORRECTION_CHOICES,
+    P_VALUE_COMPARATOR_CHOICES,
     TYPING_METHOD_CHOICES,
     ZYGOSITY_CHOICES,
     Zygosity,
@@ -297,9 +298,17 @@ class Evidence(models.Model):
         max_length=40,
         verbose_name="p-value",
         help_text=(
-            "The reported p-value as a decimal (e.g. 0.05) or in scientific "
-            "notation (e.g. 5e-8)."
+            "The reported p-value as a decimal (e.g. 0.05), in scientific "
+            "notation (e.g. 5e-8), or with a comparator (e.g. < 0.0001)."
         ),
+    )
+    p_value_comparator = models.CharField(
+        blank=True,
+        choices=P_VALUE_COMPARATOR_CHOICES,
+        default="",
+        max_length=2,
+        verbose_name="p-value Comparator",
+        help_text="Comparator for the p-value (e.g., <, <=, exact).",
     )
     p_value = models.DecimalField(
         decimal_places=30,

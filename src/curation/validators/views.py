@@ -4,6 +4,7 @@ from decimal import Decimal, InvalidOperation
 
 from curation.constants.models.evidence import EffectSizeStatistic
 from curation.forms import EvidenceEditForm
+from curation.validators.models.evidence import parse_p_value_string
 
 
 def validate_effect_size_statistic(form: EvidenceEditForm) -> None:
@@ -40,9 +41,11 @@ def maybe_to_decimal(value: str) -> Decimal | None:
 
 
 def validate_p_value(form: EvidenceEditForm) -> None:
-    """Sets the p-value."""
+    """Parses and sets the p-value and comparator."""
     p_value_string = form.cleaned_data["p_value_string"]
-    form.instance.p_value = maybe_to_decimal(p_value_string)
+    comparator, numeric_string = parse_p_value_string(p_value_string)
+    form.instance.p_value_comparator = comparator
+    form.instance.p_value = maybe_to_decimal(numeric_string)
 
 
 def validate_odds_ratio(form: EvidenceEditForm) -> None:

@@ -4,7 +4,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.core.exceptions import ValidationError
 
-from curation.constants.models.evidence import EffectSizeStatistic
+from curation.constants.models.evidence import EffectSizeStatistic, PValueComparator
 from publication.constants.models import PublicationTypes
 
 
@@ -51,14 +51,57 @@ def to_decimal(string_value: str, field: str, message: str) -> None:
             raise ValidationError({field: message}) from exc
 
 
+def parse_p_value_string(p_value_string: str) -> tuple[str, str]:
+    """Parses a p-value string into (comparator_code, numeric_string).
+
+    Args:
+        p_value_string: The raw p-value string from user input.
+
+    Returns:
+        A tuple of (comparator_code, numeric_string).
+
+    Examples:
+        "0.05" -> ("", "0.05")
+        "< 0.0001" -> ("LT", "0.0001")
+        "<=5e-8" -> ("LE", "5e-8")
+        "<= 1e-10" -> ("LE", "1e-10")
+
+    Raises:
+        ValidationError: If the comparator is unsupported (> or >=).
+    """
+    string = p_value_string.strip()
+    if not string:
+        return "", ""
+
+    # Check for <= first (before <).
+    if string.startswith("<="):
+        return PValueComparator.LESS_THAN_OR_EQUAL, string[2:].strip()
+    if string.startswith("<"):
+        return PValueComparator.LESS_THAN, string[1:].strip()
+
+    # Reject unsupported comparators.
+    if string.startswith((">", ">=")):
+        raise ValidationError(
+            {
+                "p_value_string": (
+                    "The > and >= comparators are not supported. "
+                    "Please enter an exact value or use < or <=."
+                )
+            }
+        )
+
+    return "", string
+
+
 def validate_p_value_string(evidence) -> None:
     """Makes sure the p-value string is valid."""
     message = (
         "Unable to save p-value as written. "
-        "Make sure it is written as a decimal (e.g. 0.05) "
-        "or in scientific notation (e.g. 5e-8)."
+        "Make sure it is written as a decimal (e.g. 0.05), "
+        "in scientific notation (e.g. 5e-8), or with a comparator (e.g. < 0.0001)."
     )
-    to_decimal(evidence.p_value_string, "p_value_string", message)
+    _, numeric_part = parse_p_value_string(evidence.p_value_string)
+    to_decimal(numeric_part, "p_value_string", message)
 
 
 def validate_effect_size_statistic(evidence) -> None:
