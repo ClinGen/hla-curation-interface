@@ -5,6 +5,7 @@ from decimal import Decimal, InvalidOperation
 from django.core.exceptions import ValidationError
 
 from curation.constants.models.evidence import EffectSizeStatistic, PValueComparator
+from curation.validators.common import has_association_and_p_value_err_msg
 from publication.constants.models import PublicationTypes
 
 
@@ -94,14 +95,25 @@ def parse_p_value_string(p_value_string: str) -> tuple[str, str]:
 
 
 def validate_p_value_string(evidence) -> None:
-    """Makes sure the p-value string is valid."""
+    """Validates the p-value string and parses it onto the instance.
+
+    Raises:
+        ValidationError: If the p-value string cannot be parsed into a Decimal.
+    """
     message = (
         "Unable to save p-value as written. "
         "Make sure it is written as a decimal (e.g. 0.05), "
         "in scientific notation (e.g. 5e-8), or with a comparator (e.g. < 0.0001)."
     )
-    _, numeric_part = parse_p_value_string(evidence.p_value_string)
-    to_decimal(numeric_part, "p_value_string", message)
+    comparator, numeric_part = parse_p_value_string(evidence.p_value_string)
+    evidence.p_value_comparator = comparator
+    if numeric_part == "":
+        evidence.p_value = None
+        return
+    try:
+        evidence.p_value = Decimal(numeric_part)
+    except InvalidOperation as exc:
+        raise ValidationError({"p_value_string": message}) from exc
 
 
 def validate_effect_size_statistic(evidence) -> None:
@@ -166,3 +178,21 @@ def validate_ci_end_string(evidence) -> None:
         "Make sure it is written as a decimal."
     )
     to_decimal(evidence.ci_end_string, "ci_end_string", message)
+
+
+def validate_has_association_and_p_value(evidence) -> None:
+    """Validates that has_association is False if p-value is insignificant.
+
+    Args:
+        evidence: The model instance.
+
+    Raises:
+        ValidationError: If has_association is True but p-value is insignificant.
+    """
+    err_msg = has_association_and_p_value_err_msg(
+        evidence.p_value,
+        is_gwas=evidence.is_gwas,
+        has_association=evidence.has_association,
+    )
+    if err_msg:
+        raise ValidationError({"has_association": err_msg})

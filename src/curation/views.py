@@ -31,8 +31,8 @@ from curation.validators.views import (
     validate_ci_end,
     validate_ci_start,
     validate_effect_size_statistic,
+    validate_has_association_and_p_value,
     validate_odds_ratio,
-    validate_p_value,
     validate_relative_risk,
 )
 
@@ -187,12 +187,16 @@ class EvidenceEdit(ProtectedViewMixin, UpdateView):  # type: ignore
 
     def form_valid(self, form: EvidenceEditForm) -> HttpResponse:
         validate_effect_size_statistic(form)
-        validate_p_value(form)
+        validate_has_association_and_p_value(form)
         validate_odds_ratio(form)
         validate_relative_risk(form)
         validate_beta(form)
         validate_ci_start(form)
         validate_ci_end(form)
+
+        if form.errors:
+            return self.form_invalid(form)
+
         return super().form_valid(form)
 
 

@@ -18,7 +18,7 @@ from curation.constants.models.evidence import (
     TypingMethod,
     Zygosity,
 )
-from curation.constants.score import Points
+from curation.constants.score import Intervals, Points
 from curation.models import (
     Curation,
     Demographic,
@@ -447,3 +447,75 @@ class TestEvidence(TestCase):
         self.evidence.publication = medrxiv_publication
         self.evidence.is_included = False
         self.evidence.clean()  # Should not raise
+
+    def test_gwas_p_value_at_threshold_is_not_significant(self):
+        self.evidence.is_gwas = True
+        self.evidence.p_value_string = str(Intervals.S3A.GWAS_1.start)
+        self.evidence.has_association = True
+        with self.assertRaises(ValidationError) as context:
+            self.evidence.clean()
+        self.assertIn("has_association", context.exception.message_dict)
+
+    def test_gwas_p_value_above_threshold_is_not_significant(self):
+        self.evidence.is_gwas = True
+        self.evidence.p_value_string = str(Intervals.S3A.GWAS_1.start + Decimal("0.01"))
+        self.evidence.has_association = True
+        with self.assertRaises(ValidationError) as context:
+            self.evidence.clean()
+        self.assertIn("has_association", context.exception.message_dict)
+
+    def test_gwas_p_value_below_threshold_is_significant(self):
+        self.evidence.is_gwas = True
+        self.evidence.p_value_string = str(Intervals.S3A.GWAS_1.start - Decimal("0.01"))
+        self.evidence.has_association = True
+        self.evidence.clean()  # Should not raise
+
+    def test_non_gwas_p_value_at_threshold_is_not_significant(self):
+        self.evidence.is_gwas = False
+        self.evidence.p_value_string = str(Intervals.S3A.NON_GWAS_1.start)
+        self.evidence.has_association = True
+        with self.assertRaises(ValidationError) as context:
+            self.evidence.clean()
+        self.assertIn("has_association", context.exception.message_dict)
+
+    def test_non_gwas_p_value_above_threshold_is_not_significant(self):
+        self.evidence.is_gwas = False
+        self.evidence.p_value_string = str(
+            Intervals.S3A.NON_GWAS_1.start + Decimal("0.05")
+        )
+        self.evidence.has_association = True
+        with self.assertRaises(ValidationError) as context:
+            self.evidence.clean()
+        self.assertIn("has_association", context.exception.message_dict)
+
+    def test_non_gwas_p_value_below_threshold_is_significant(self):
+        self.evidence.is_gwas = False
+        self.evidence.p_value_string = str(
+            Intervals.S3A.NON_GWAS_1.start - Decimal("0.01")
+        )
+        self.evidence.has_association = True
+        self.evidence.clean()  # Should not raise
+
+    def test_not_significant_allowed_with_any_p_value(self):
+        """has_association=False should always be allowed regardless of p-value."""
+        # Large p-value, non-GWAS
+        self.evidence.is_gwas = False
+        self.evidence.p_value_string = str(Intervals.S3A.GWAS_1.start + Decimal("0.5"))
+        self.evidence.has_association = False
+        self.evidence.clean()  # Should not raise
+
+        # Large p-value, GWAS
+        self.evidence.is_gwas = True
+        self.evidence.p_value_string = str(
+            Intervals.S3A.NON_GWAS_1.start + Decimal("0.5")
+        )
+        self.evidence.has_association = False
+        self.evidence.clean()  # Should not raise
+
+    def test_significant_not_allowed_when_p_value_is_none(self):
+        """has_association=True should not be allowed when p_value is None."""
+        self.evidence.p_value_string = ""
+        self.evidence.has_association = True
+        with self.assertRaises(ValidationError) as context:
+            self.evidence.clean()
+        self.assertIn("has_association", context.exception.message_dict)

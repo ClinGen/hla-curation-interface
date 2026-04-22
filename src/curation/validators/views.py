@@ -4,7 +4,7 @@ from decimal import Decimal, InvalidOperation
 
 from curation.constants.models.evidence import EffectSizeStatistic
 from curation.forms import EvidenceEditForm
-from curation.validators.models.evidence import parse_p_value_string
+from curation.validators.common import has_association_and_p_value_err_msg
 
 
 def validate_effect_size_statistic(form: EvidenceEditForm) -> None:
@@ -40,12 +40,23 @@ def maybe_to_decimal(value: str) -> Decimal | None:
     return decimal_value
 
 
-def validate_p_value(form: EvidenceEditForm) -> None:
-    """Parses and sets the p-value and comparator."""
-    p_value_string = form.cleaned_data["p_value_string"]
-    comparator, numeric_string = parse_p_value_string(p_value_string)
-    form.instance.p_value_comparator = comparator
-    form.instance.p_value = maybe_to_decimal(numeric_string)
+def validate_has_association_and_p_value(form: EvidenceEditForm) -> None:
+    """Validates that has_association is False if p-value is insignificant.
+
+    By the time this runs, the model's clean() has already parsed
+    p_value_string onto form.instance.p_value. If validation fails, an
+    error is added to the form.
+
+    Args:
+        form: The form instance.
+    """
+    err_msg = has_association_and_p_value_err_msg(
+        form.instance.p_value,
+        is_gwas=form.cleaned_data.get("is_gwas", False),
+        has_association=form.cleaned_data.get("has_association", False),
+    )
+    if err_msg:
+        form.add_error("has_association", err_msg)
 
 
 def validate_odds_ratio(form: EvidenceEditForm) -> None:

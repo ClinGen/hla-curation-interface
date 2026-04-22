@@ -47,6 +47,7 @@ from curation.validators.models.evidence import (
     validate_ci_end_string,
     validate_ci_start_string,
     validate_effect_size_statistic,
+    validate_has_association_and_p_value,
     validate_odds_ratio_string,
     validate_p_value_string,
     validate_preprint_not_included,
@@ -520,6 +521,7 @@ class Evidence(models.Model):
         validate_publication(self)
         validate_preprint_not_included(self)
         validate_p_value_string(self)
+        validate_has_association_and_p_value(self)
         validate_effect_size_statistic(self)
         validate_odds_ratio_string(self)
         validate_relative_risk_string(self)

@@ -295,6 +295,7 @@ class EvidenceEditTest(ProtectedViewTestMixin, TestCase):
             "Phase",
             "Typing Method",
             "Demographics",
+            "p-value",
             "Multiple Testing Correction",
             "Effect Size",
             "Confidence Interval",
