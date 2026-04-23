@@ -102,8 +102,15 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTHENTICATION_BACKENDS = [
     "auth_.backends.WorkOSBackend",
+    "auth_.clerk_backend.ClerkBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
+
+# Selects the identity provider used for the login/logout URLs in templates and the
+# default ``LOGIN_URL`` redirect. Both backends remain in ``AUTHENTICATION_BACKENDS``
+# during the Clerk transition; flipping this flag in a per-environment settings file
+# controls which flow users go through.
+AUTH_PROVIDER = os.getenv("AUTH_PROVIDER", "workos")
 
 LANGUAGE_CODE = "en-us"
 

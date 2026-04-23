@@ -1,5 +1,6 @@
 import logging
 import os
+from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -7,6 +8,7 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from workos import WorkOSClient
 
+from auth_.clerk_backend import SESSION_COOKIE_NAME as CLERK_SESSION_COOKIE
 from auth_.forms import PHIForm
 from auth_.models import UserProfile
 
@@ -75,6 +77,60 @@ def logout_(request: HttpRequest) -> HttpResponseRedirect:
     """Returns the user to the home page after deleting their cookie."""
     response = redirect("home")
     response.delete_cookie("wos_session")
+    logout(request)
+    return response
+
+
+def clerk_login(request: HttpRequest) -> HttpResponseRedirect:
+    """Logs the user in via Clerk's hosted Account Portal.
+
+    Returns:
+        A redirect response that sends the user to the Clerk sign-in page, with the
+        callback URL encoded as the ``redirect_url`` query parameter.
+    """
+    if request.user.is_authenticated:
+        messages.info(request, "Already logged in.")
+        return redirect("home")
+    sign_in_url = os.getenv("CLERK_SIGN_IN_URL")
+    redirect_url = os.getenv("CLERK_REDIRECT_URI")
+    if not sign_in_url or not redirect_url:
+        logger.error("Clerk sign-in URLs are not configured")
+        messages.error(request, "Login is not configured. Please contact an admin.")
+        return redirect("home")
+    query = urlencode({"redirect_url": redirect_url})
+    return redirect(f"{sign_in_url}?{query}")
+
+
+def clerk_callback(request: HttpRequest) -> HttpResponseRedirect:
+    """Authenticates the user and redirects them to the home page.
+
+    Clerk's Account Portal sets the ``__session`` cookie on the application's domain
+    before redirecting here, so we just need to verify it and log the user in.
+
+    Returns:
+        A redirect response that sends the authenticated user to the home page.
+    """
+    try:
+        session_token = request.COOKIES.get(CLERK_SESSION_COOKIE)
+        user = authenticate(request, session_token=session_token)
+        if user is not None:
+            login(request, user)
+        else:
+            messages.error(request, "Oops, we couldn't log you in. Please try again.")
+    except Exception:
+        logger.exception("Error authenticating with Clerk session")
+        messages.error(
+            request,
+            "Oops, an error occurred while trying to log you in."
+            " Please try again later.",
+        )
+    return redirect("home")
+
+
+def clerk_logout(request: HttpRequest) -> HttpResponseRedirect:
+    """Returns the user to the home page after deleting their Clerk session cookie."""
+    response = redirect("home")
+    response.delete_cookie(CLERK_SESSION_COOKIE)
     logout(request)
     return response
 
