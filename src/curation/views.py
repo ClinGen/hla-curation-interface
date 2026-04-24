@@ -13,7 +13,7 @@ from django.views.generic import DetailView, ListView, UpdateView
 from django.views.generic.edit import CreateView
 
 from auth_.permissions import ProtectedViewMixin, protected_view
-from curation.constants.models.common import Status
+from curation.constants.models.common import CurationStatus
 from curation.constants.views import FRAMEWORK
 from curation.forms import (
     CurationCreateForm,
@@ -216,10 +216,10 @@ def curation_publish(request: HttpRequest, curation_slug: str) -> HttpResponse:
 
     curation = get_object_or_404(Curation, slug=curation_slug)
 
-    if curation.status != Status.DONE:
+    if curation.status != CurationStatus.APPROVED:
         messages.error(
             request,
-            "Only curations with status 'Done' can be published.",
+            "Only curations with status 'Approved' can be published.",
         )
         return redirect("curation-detail", curation_slug=curation.slug)
 

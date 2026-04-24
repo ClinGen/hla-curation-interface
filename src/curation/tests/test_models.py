@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from allele.models import Allele
-from curation.constants.models.common import Status
+from curation.constants.models.common import CurationStatus, EvidenceStatus
 from curation.constants.models.curation import (
     Classification,
     CurationTypes,
@@ -41,7 +41,7 @@ class TestCuration(TestCase):
         )
 
     def test_status_is_in_progress_when_created(self):
-        self.assertEqual(self.curation.status, Status.IN_PROGRESS)
+        self.assertEqual(self.curation.status, CurationStatus.IN_PROGRESS)
 
     def test_classification_is_no_known_when_created(self):
         self.assertEqual(self.curation.classification, Classification.NO_KNOWN)
@@ -86,7 +86,7 @@ class TestEvidence(TestCase):
         self.evidence.save()
 
     def test_status_is_in_progress_when_created(self):
-        self.assertEqual(self.evidence.status, Status.IN_PROGRESS)
+        self.assertEqual(self.evidence.status, EvidenceStatus.IN_PROGRESS)
 
     def test_conflicting_is_false_when_created(self):
         self.assertFalse(self.evidence.is_conflicting)

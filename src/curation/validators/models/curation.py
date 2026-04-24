@@ -2,20 +2,20 @@
 
 from django.core.exceptions import ValidationError
 
-from curation.constants.models.common import Status
+from curation.constants.models.common import CurationStatus, EvidenceStatus
 from curation.constants.models.curation import Classification, CurationTypes
 
 
 def validate_status(curation) -> None:
-    """Makes sure a curation isn't marked done if evidence marked in progress.
+    """Makes sure a curation isn't submitted for review with in-progress evidence.
 
     Raises:
-        ValidationError: If curation is marked as done but has included evidence
-                        that is still in progress.
+        ValidationError: If the curation has left the in-progress state but has
+                         included evidence that is still in progress.
     """
-    if curation.status == Status.DONE:
+    if curation.status != CurationStatus.IN_PROGRESS:
         for evidence in curation.evidence.all():
-            if evidence.status == Status.IN_PROGRESS and evidence.is_included:
+            if evidence.status == EvidenceStatus.IN_PROGRESS and evidence.is_included:
                 raise ValidationError(
                     {"status": "All included evidence must be marked as done."}
                 )

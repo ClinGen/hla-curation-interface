@@ -6,7 +6,12 @@ from django.http import HttpResponseBase
 from django.urls import reverse
 
 from allele.models import Allele
-from curation.constants.models.common import STATUS_CHOICES, Status
+from curation.constants.models.common import (
+    EVIDENCE_STATUS_CHOICES,
+    STATUS_CHOICES,
+    CurationStatus,
+    EvidenceStatus,
+)
 from curation.constants.models.curation import (
     CLASSIFICATION_CHOICES,
     CURATION_TYPE_CHOICES,
@@ -69,11 +74,14 @@ class Curation(models.Model):
     status = models.CharField(
         blank=False,
         choices=STATUS_CHOICES,
-        default=Status.IN_PROGRESS,
+        default=CurationStatus.IN_PROGRESS,
         max_length=3,
         verbose_name="Status",
         help_text=(
-            f"Either '{Status.IN_PROGRESS}' (in progress) or '{Status.DONE}' (done)."
+            f"One of '{CurationStatus.IN_PROGRESS}' (in progress), "
+            f"'{CurationStatus.PROVISIONAL}' (provisional), "
+            f"'{CurationStatus.APPROVED}' (approved), or "
+            f"'{CurationStatus.PUBLISHED}' (published)."
         ),
     )
     curation_type = models.CharField(
@@ -203,12 +211,13 @@ class Evidence(models.Model):
     )
     status = models.CharField(
         blank=False,
-        choices=STATUS_CHOICES,
-        default=Status.IN_PROGRESS,
+        choices=EVIDENCE_STATUS_CHOICES,
+        default=EvidenceStatus.IN_PROGRESS,
         max_length=3,
         verbose_name="Status",
         help_text=(
-            f"Either '{Status.IN_PROGRESS}' (in progress) or '{Status.DONE}' (done)."
+            f"Either '{EvidenceStatus.IN_PROGRESS}' (in progress) or "
+            f"'{EvidenceStatus.DONE}' (done)."
         ),
     )
     curation = models.ForeignKey(

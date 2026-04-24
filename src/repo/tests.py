@@ -9,7 +9,7 @@ from django.urls import reverse
 from allele.models import Allele
 from auth_.models import UserProfile
 from common.tests import ProtectedViewTestMixin
-from curation.constants.models.common import Status
+from curation.constants.models.common import CurationStatus
 from curation.constants.models.curation import CurationTypes
 from curation.models import Curation
 from disease.models import Disease
@@ -27,7 +27,7 @@ class PublishedCurationModelTest(TestCase):
             curation_type=CurationTypes.ALLELE,
             allele=self.allele,
             disease=self.disease,
-            status=Status.DONE,
+            status=CurationStatus.APPROVED,
         )
 
     def test_create_published_curation(self):
@@ -94,7 +94,7 @@ class CurationPublishViewTest(ProtectedViewTestMixin, TestCase):
             curation_type=CurationTypes.ALLELE,
             allele=self.allele,
             disease=self.disease,
-            status=Status.DONE,
+            status=CurationStatus.APPROVED,
         )
         self.curation.save()  # Ensure slug is generated.
         self.url = reverse(
@@ -131,7 +131,7 @@ class CurationPublishViewTest(ProtectedViewTestMixin, TestCase):
             curation_type=CurationTypes.ALLELE,
             allele=self.allele,
             disease=self.disease,
-            status=Status.IN_PROGRESS,
+            status=CurationStatus.IN_PROGRESS,
         )
         curation.save()  # Ensure slug is generated.
         url = reverse("curation-publish", kwargs={"curation_slug": curation.slug})
@@ -173,7 +173,7 @@ class RepoSearchViewTest(TestCase):
             curation_type=CurationTypes.ALLELE,
             allele=allele,
             disease=disease,
-            status=Status.DONE,
+            status=CurationStatus.APPROVED,
         )
         curation.save()
         PublishedCuration.objects.create(
@@ -198,7 +198,7 @@ class PublishedCurationDetailViewTest(TestCase):
             curation_type=CurationTypes.ALLELE,
             allele=allele,
             disease=disease,
-            status=Status.DONE,
+            status=CurationStatus.APPROVED,
         )
         self.curation.save()
         self.published = PublishedCuration.objects.create(
@@ -231,7 +231,7 @@ class JSONDownloadViewTest(TestCase):
             curation_type=CurationTypes.ALLELE,
             allele=allele,
             disease=disease,
-            status=Status.DONE,
+            status=CurationStatus.APPROVED,
         )
         self.curation.save()
         self.published = PublishedCuration.objects.create(
@@ -287,7 +287,7 @@ class ReadOnlyEnforcementTest(TestCase):
             curation_type=CurationTypes.ALLELE,
             allele=allele,
             disease=disease,
-            status=Status.DONE,
+            status=CurationStatus.APPROVED,
         )
         self.curation.save()
         self.published = PublishedCuration.objects.create(

@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from allele.models import Allele
 from common.tests import ProtectedViewTestMixin
-from curation.constants.models.common import Status
+from curation.constants.models.common import EvidenceStatus
 from curation.constants.models.evidence import (
     AdditionalPhenotypes,
     EffectSizeStatistic,
@@ -211,7 +211,7 @@ class EvidenceCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(new_evidence.curation.disease, Disease.objects.get(pk=1))  # type: ignore[union-attr]
         self.assertEqual(new_evidence.publication, Publication.objects.get(pk=1))  # type: ignore[union-attr]
         self.assertFalse(new_evidence.needs_review)  # type: ignore[union-attr]
-        self.assertEqual(new_evidence.status, Status.IN_PROGRESS)  # type: ignore[union-attr]
+        self.assertEqual(new_evidence.status, EvidenceStatus.IN_PROGRESS)  # type: ignore[union-attr]
         self.assertEqual(new_evidence.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
 
 
