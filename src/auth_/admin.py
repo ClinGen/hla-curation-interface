@@ -9,4 +9,9 @@ admin.site.unregister(Group)
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ["user", "has_curation_permissions", "has_signed_phi_agreement"]
+    list_display = [
+        "user",
+        "has_curation_permissions",
+        "has_signed_phi_agreement",
+        "has_approval_permissions",
+    ]

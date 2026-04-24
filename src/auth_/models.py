@@ -19,6 +19,14 @@ class UserProfile(models.Model):
         verbose_name="PHI Agreement",
         help_text="Whether the user has signed the PHI agreement.",
     )
+    has_approval_permissions = models.BooleanField(
+        default=False,
+        verbose_name="Approval Permissions",
+        help_text=(
+            "Whether the user should be able to approve curations as an expert "
+            "panel member."
+        ),
+    )
 
     class Meta:
         """Provides metadata."""
@@ -38,4 +46,14 @@ class UserProfile(models.Model):
             self.user.is_authenticated
             and self.has_curation_permissions
             and self.has_signed_phi_agreement
+        )
+
+    @property
+    def can_approve(self) -> bool:
+        """Returns whether the user is allowed to approve curations."""
+        return (
+            self.user.is_authenticated
+            and self.has_signed_phi_agreement
+            and self.has_curation_permissions
+            and self.has_approval_permissions
         )
