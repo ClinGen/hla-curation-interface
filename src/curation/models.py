@@ -141,6 +141,33 @@ class Curation(models.Model):
         verbose_name="Added At",
         help_text="When the curation was added.",
     )
+    expert_panel_review_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Expert Panel Review Notes",
+        help_text="Notes recorded by the expert panel during review.",
+    )
+    expert_panel_approved_by = models.ForeignKey(
+        User,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="curations_approved",
+        verbose_name="Expert Panel Approved By",
+        help_text="The expert panel member who approved the curation.",
+    )
+    expert_panel_approved_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name="Expert Panel Approved At",
+        help_text="When the expert panel approved the curation.",
+    )
+    classification_override_reason = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Classification Override Reason",
+        help_text="The reason the expert panel overrode the computed classification.",
+    )
 
     class Meta:
         db_table = "curation"
