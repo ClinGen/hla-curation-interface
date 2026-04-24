@@ -205,6 +205,59 @@ class Curation(models.Model):
         return total
 
 
+class CurationStatusEvent(models.Model):
+    curation = models.ForeignKey(
+        Curation,
+        on_delete=models.CASCADE,
+        related_name="status_events",
+        verbose_name="Curation",
+        help_text="The curation whose status changed.",
+    )
+    from_status = models.CharField(
+        blank=False,
+        choices=STATUS_CHOICES,
+        max_length=3,
+        verbose_name="From Status",
+        help_text="The status the curation transitioned from.",
+    )
+    to_status = models.CharField(
+        blank=False,
+        choices=STATUS_CHOICES,
+        max_length=3,
+        verbose_name="To Status",
+        help_text="The status the curation transitioned to.",
+    )
+    actor = models.ForeignKey(
+        User,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="curation_status_events",
+        verbose_name="Actor",
+        help_text="The user who initiated the status change.",
+    )
+    note = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Note",
+        help_text="An optional note recorded with the status change.",
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Created At",
+        help_text="When the status change was recorded.",
+    )
+
+    class Meta:
+        db_table = "curation_status_event"
+        ordering = ["-created_at"]
+        verbose_name = "Curation Status Event"
+        verbose_name_plural = "Curation Status Events"
+
+    def __str__(self) -> str:
+        return f"CurationStatusEvent #{self.pk} ({self.from_status} → {self.to_status})"
+
+
 class Demographic(models.Model):
     """Contains the biogeographic groups in Huddart et al. 2019.
 
