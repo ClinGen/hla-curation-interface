@@ -2,16 +2,37 @@
 
 from django.core.exceptions import ValidationError
 
-from curation.constants.models.common import CurationStatus, EvidenceStatus
+from curation.constants.models.common import (
+    STATUS_CHOICES,
+    CurationStatus,
+    EvidenceStatus,
+)
 from curation.constants.models.curation import Classification, CurationTypes
+
+ALLOWED_STATUS_TRANSITIONS = frozenset(
+    {
+        (CurationStatus.IN_PROGRESS, CurationStatus.PROVISIONAL),
+        (CurationStatus.PROVISIONAL, CurationStatus.IN_PROGRESS),
+        (CurationStatus.PROVISIONAL, CurationStatus.APPROVED),
+        (CurationStatus.APPROVED, CurationStatus.IN_PROGRESS),
+        (CurationStatus.APPROVED, CurationStatus.PUBLISHED),
+        (CurationStatus.PUBLISHED, CurationStatus.IN_PROGRESS),
+    }
+)
 
 
 def validate_status(curation) -> None:
-    """Makes sure a curation isn't submitted for review with in-progress evidence.
+    """Validates the curation's status and any attempted status transition.
+
+    When a curation leaves the in-progress state, every included evidence row
+    must be marked as done. When an existing curation's status changes, the
+    (from, to) pair must be one of the allowed edges of the workflow state
+    machine defined in `ALLOWED_STATUS_TRANSITIONS`.
 
     Raises:
         ValidationError: If the curation has left the in-progress state but has
-                         included evidence that is still in progress.
+                         included evidence that is still in progress, or if the
+                         attempted status change is not an allowed transition.
     """
     if curation.status != CurationStatus.IN_PROGRESS:
         for evidence in curation.evidence.all():
@@ -19,6 +40,25 @@ def validate_status(curation) -> None:
                 raise ValidationError(
                     {"status": "All included evidence must be marked as done."}
                 )
+
+    if not curation.pk:
+        return
+
+    previous_status = (
+        type(curation)
+        .objects.filter(pk=curation.pk)
+        .values_list("status", flat=True)
+        .first()
+    )
+    if previous_status is None or previous_status == curation.status:
+        return
+
+    if (previous_status, curation.status) not in ALLOWED_STATUS_TRANSITIONS:
+        previous_label = STATUS_CHOICES.get(previous_status, previous_status)
+        new_label = STATUS_CHOICES.get(curation.status, curation.status)
+        raise ValidationError(
+            {"status": f"Cannot transition from '{previous_label}' to '{new_label}'."}
+        )
 
 
 def validate_curation_type(curation) -> None:
