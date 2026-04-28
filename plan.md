@@ -25,6 +25,13 @@ curation. Here are the proposed states:
 Part 1 must land before Part 2 (the history feature registers the new models
 and events from Part 1).
 
+Each numbered step below is meant to be a single checkpoint commit on the
+way to the finished PR: self-contained, builds, migrates, and passes
+`just test-all` at HEAD. Tests for new behavior land in the same commit
+as the behavior, not in a trailing test-only step. The pre-PR quality
+gate (lint/format/type-check/tests across the whole branch) is called
+out at the end of each part as a gate, not a commit.
+
 ---
 
 ## Decisions locked in
@@ -61,7 +68,11 @@ and events from Part 1).
 
 ## Part 1 — Workflow states and Curation model changes
 
-### Step 1 — Add approval permission to `UserProfile`
+Steps 1–5 are already committed (see git log: `af9deda` through
+`72d7ad5`). Their descriptions are preserved below for the PR
+description; the remaining work is in Steps 6–9.
+
+### Step 1 — Add approval permission to `UserProfile` *(committed: af9deda)*
 
 **File:** `src/auth_/models.py`
 
@@ -84,7 +95,7 @@ and events from Part 1).
 - Update the admin (`src/auth_/admin.py` if present) so staff can toggle
   the new field.
 
-### Step 2 — Extend the workflow status enum
+### Step 2 — Extend the workflow status enum *(committed: 66bac6b)*
 
 **File:** `src/curation/constants/models/common.py`
 
@@ -96,8 +107,11 @@ and events from Part 1).
 - Remove the `DONE` value.
 - Update `Curation.status.help_text` in `src/curation/models.py` to reflect
   the four states.
+- Update every call site that referenced the old enum (views, validators,
+  tests) so the codebase still builds and the existing test suite still
+  passes at this commit.
 
-### Step 3 — Add new fields to `Curation`
+### Step 3 — Add new fields to `Curation` *(committed: 41ab55a)*
 
 **File:** `src/curation/models.py` (`Curation` model, around lines 62-170)
 
@@ -110,7 +124,7 @@ Add:
 
 Create migration.
 
-### Step 4 — Add the `CurationStatusEvent` model
+### Step 4 — Add the `CurationStatusEvent` model *(committed: 302bb79)*
 
 **File:** `src/curation/models.py`
 
@@ -127,12 +141,12 @@ Fields:
 
 Create migration.
 
-### Step 5 — Status-transition validators
+### Step 5 — Status-transition validators *(committed: 72d7ad5)*
 
 **File:** `src/curation/validators/models/curation.py`
 
-Update (or replace) `validate_status` so that, when loading an existing
-row, the following transitions are the only allowed ones:
+Update `validate_status` so that, when loading an existing row, the
+following transitions are the only allowed ones:
 
 - `IN_PROGRESS` → `PROVISIONAL`
 - `PROVISIONAL` → `IN_PROGRESS` (send back)
@@ -152,9 +166,60 @@ Validation of "the actor has permission for this transition" lives in the
 views (Step 7), not in the model-level validator, because permission
 depends on `request.user`.
 
-### Step 6 — Restructure `PublishedCuration`
+### Step 6 — Edit-guard helper
 
-**File:** `src/repo/models.py`
+**Files:** `src/curation/views.py`, `src/curation/tests/test_views.py`
+
+Replace every `hasattr(object, "publication")` check in
+`CurationEdit.dispatch` (~line 75), `curation_edit_evidence` (~line 96),
+`EvidenceEdit.dispatch` (~line 168), and `curation_publish` (~line 226)
+with a helper `can_edit(user, curation)`:
+
+- Nobody can edit a curation when `status == PUBLISHED`. To edit, the
+  approver must first click "Start New Revision," which transitions the
+  curation to `IN_PROGRESS`.
+- Curators can edit when `status == IN_PROGRESS`.
+- Approvers can edit when `status in {IN_PROGRESS, PROVISIONAL, APPROVED}`
+  (the panel can always edit in non-published states — that enables
+  classification override during review).
+- The frozen public record for any prior publish lives in
+  `PublishedCuration.snapshot` (added in Step 7) and is never touched
+  by edits to the live curation.
+
+Tests in this commit:
+
+- Edit endpoints are blocked for all users when `status == PUBLISHED`.
+- Curators can edit `IN_PROGRESS`; approvers can edit
+  `IN_PROGRESS` / `PROVISIONAL` / `APPROVED`.
+
+This step lands before Step 7 because Step 7 changes the `publication`
+reverse descriptor's semantics (`OneToOneField` → `ForeignKey`), which
+would silently turn `hasattr(curation, "publication")` into an
+always-true check if the call sites still used it.
+
+### Step 7 — Publish-workflow cutover
+
+This is the largest commit in Part 1. The pieces are interlocking and
+cannot land separately without leaving the publish flow broken in
+between:
+
+- Adding required `snapshot = JSONField()` to `PublishedCuration`
+  invalidates the existing `curation_publish` view's
+  `PublishedCuration.objects.create(...)` call.
+- Replacing `curation_publish` with separate transition views requires
+  the new `can_approve` decorator and the new model fields.
+- Reading the public record from `snapshot` instead of the live curation
+  must happen at the same time `snapshot` becomes required.
+
+So all of it lands in one commit, with tests.
+
+**Files:** `src/repo/models.py`, `src/repo/views.py`,
+`src/repo/serializers.py`, `src/curation/views.py`,
+`src/curation/urls.py`, `src/auth_/permissions.py`,
+`src/curation/tests/test_views.py`, `src/curation/tests/test_models.py`,
+`src/repo/tests.py`
+
+Model changes (`src/repo/models.py`):
 
 - Change `curation` from `OneToOneField(unique=True)` to `ForeignKey`.
 - Add `snapshot = JSONField()` — populated at publish time via
@@ -163,22 +228,12 @@ depends on `request.user`.
   `PublishedCuration.objects.filter(curation=curation).count() + 1`.
 - Update `Meta` to include `unique_together = [("curation", "version")]`.
 
-**File:** `src/repo/views.py`
+Permission infrastructure (`src/auth_/permissions.py`):
 
-- Update `PublishedCurationDetail` to resolve the latest version by
-  default and read display data from `snapshot`, not from the live
-  `curation`/`curation.evidence`.
-- Update `download_single_json` and `download_all_json` similarly.
-- Update `serialize_published_curation` to accept a snapshot dict (so
-  downloads render the snapshot, not the live state). We will likely
-  store the same serialized shape we already produce today — verify no
-  refactor is needed beyond reading from `published.snapshot`.
+- Add a `can_approve` permission decorator and a `CanApproveViewMixin`,
+  mirroring `protected_view` and `ProtectedViewMixin`.
 
-Create migration.
-
-### Step 7 — Refactor `curation_publish` into discrete transition views
-
-**Files:** `src/curation/views.py`, `src/curation/urls.py`
+View refactor (`src/curation/views.py`, `src/curation/urls.py`):
 
 Replace the single `curation_publish` view with five view functions,
 each creating a `CurationStatusEvent`:
@@ -211,7 +266,7 @@ each creating a `CurationStatusEvent`:
   - The existing `PublishedCuration` row is **not** touched — the public
     record remains stable.
 
-Add matching URL entries in `src/curation/urls.py`:
+URL entries in `src/curation/urls.py`:
 
 - `<slug:curation_slug>/submit-for-review` → `curation-submit-for-review`
 - `<slug:curation_slug>/approve` → `curation-approve`
@@ -221,46 +276,77 @@ Add matching URL entries in `src/curation/urls.py`:
 - `<slug:curation_slug>/start-new-revision` →
   `curation-start-new-revision`
 
-Add a `can_approve` permission decorator and a
-`CanApproveViewMixin` in `src/auth_/permissions.py`, mirroring
-`protected_view` and `ProtectedViewMixin`.
+Repo views (`src/repo/views.py`, `src/repo/serializers.py`):
 
-### Step 8 — Rework the read-only guards
+- Update `PublishedCurationDetail` to resolve the latest version by
+  default and read display data from `snapshot`, not from the live
+  `curation` / `curation.evidence`.
+- Update `download_single_json` and `download_all_json` similarly.
+- Update `serialize_published_curation` to accept a snapshot dict (so
+  downloads render the snapshot, not the live state). Verify no
+  refactor is needed beyond reading from `published.snapshot`.
 
-**File:** `src/curation/views.py`
+Migration:
 
-Replace every `hasattr(object, "publication")` check in
-`CurationEdit.dispatch` (~line 68), `curation_edit_evidence` (~line 95),
-and `EvidenceEdit.dispatch` (~line 161) with a helper
-`can_edit(user, curation)`:
+- Generate the schema migration for `PublishedCuration` (FK swap,
+  `snapshot` field, `unique_together`).
+- If any `PublishedCuration` rows exist in production, include a data
+  migration that backfills `snapshot` for those rows by serializing
+  the live curation (best-effort frozen state).
 
-- Nobody can edit a curation when `status == PUBLISHED`. To edit, the
-  approver must first click "Start New Revision," which transitions the
-  curation to `IN_PROGRESS`.
-- Curators can edit when `status == IN_PROGRESS`.
-- Approvers can edit when `status in {IN_PROGRESS, PROVISIONAL, APPROVED}`
-  (the panel can always edit in non-published states — that enables
-  classification override during review).
-- The frozen public record for any prior publish lives in
-  `PublishedCuration.snapshot` and is never touched by edits to the
-  live curation.
+Tests in this commit:
 
-### Step 9 — Split the curation edit forms
+- Each valid transition (curator submit, approver approve, approver
+  send-back from `PROVISIONAL` → `IN_PROGRESS`, approver send-back from
+  `APPROVED` → `IN_PROGRESS`, approver publish, approver
+  start-new-revision).
+- Send-back from `APPROVED` clears `expert_panel_approved_by`,
+  `expert_panel_approved_at`, and `classification_override_reason`.
+- Each invalid transition raises `ValidationError` at the model level
+  (e.g. `IN_PROGRESS` → `APPROVED`, `PROVISIONAL` → `PUBLISHED`,
+  `APPROVED` → `PROVISIONAL`, `PUBLISHED` → anything other than
+  `IN_PROGRESS`).
+- Permission gating: a curator cannot approve / publish /
+  start-new-revision; an approver without `has_signed_phi_agreement`
+  cannot approve.
+- `CurationStatusEvent` is written on every transition with the correct
+  `actor`, `from_status`, `to_status`, and note.
+- Send-back with an empty note fails and re-renders.
+- Publishing sets `status = PUBLISHED`, creates a `PublishedCuration`
+  with `version=1`, and both occur atomically (a simulated failure in
+  one rolls back the other).
+- Re-publishing (start-new-revision → edit → submit → approve → publish)
+  creates `version=2` with a refreshed snapshot; the `version=1` row is
+  unchanged.
+- Start-new-revision transitions `PUBLISHED` → `IN_PROGRESS` and clears
+  the three approval fields; it does **not** touch any
+  `PublishedCuration` rows.
+- `PublishedCuration.snapshot` is populated from the serializer and the
+  repo detail view reads from it (not the live curation).
+- Editing the live curation after a publish (via start-new-revision)
+  does not change the previously-published snapshot.
 
-**File:** `src/curation/forms.py`
+### Step 8 — Split the curation edit forms
+
+**Files:** `src/curation/forms.py`, `src/curation/views.py`,
+`src/curation/tests/test_views.py`
 
 - Keep `CurationEditForm` (curators): fields `= ["status"]` (curators
   initiate the submit-for-review transition; they do not edit
   classification directly).
 - Add `CurationPanelReviewForm` (approvers): fields
   `= ["classification", "classification_override_reason", "expert_panel_review_notes"]`.
-
-**File:** `src/curation/views.py`
-
 - Route `CurationEdit.get_form_class()` based on
   `request.user.profile.can_approve`.
 
-### Step 10 — Update the detail template
+Tests in this commit:
+
+- Classification can be edited by an approver and cannot be edited by a
+  curator (the curator form omits the field).
+- An approver hitting the edit page receives the panel-review form;
+  a curator receives the curator form.
+
+### Step 9 — Update the detail template
 
 **File:** `src/curation/templates/curation/detail.html` (and any included
 partials)
@@ -279,49 +365,12 @@ partials)
 - When one or more `PublishedCuration` rows exist, link to the latest
   published version in the repo.
 
-### Step 11 — Tests
+UI-only change. Verify by manual smoke test: walk a curation through the
+full lifecycle in the browser.
 
-**Files:** `src/curation/tests/test_views.py`,
-`src/curation/tests/test_models.py`, `src/repo/tests.py`
+### Pre-PR quality gate for Part 1
 
-Cover:
-
-- Each valid transition (curator submit, approver approve, approver
-  send-back from `PROVISIONAL` → `IN_PROGRESS`, approver send-back from
-  `APPROVED` → `IN_PROGRESS`, approver publish, approver
-  start-new-revision).
-- Send-back from `APPROVED` clears `expert_panel_approved_by`,
-  `expert_panel_approved_at`, and `classification_override_reason`.
-- Each invalid transition raises `ValidationError` at the model level
-  (e.g. `IN_PROGRESS` → `APPROVED`, `PROVISIONAL` → `PUBLISHED`,
-  `APPROVED` → `PROVISIONAL`, `PUBLISHED` → anything other than
-  `IN_PROGRESS`).
-- Permission gating: a curator cannot approve/publish/start-new-revision;
-  an approver without `has_signed_phi_agreement` cannot approve.
-- `CurationStatusEvent` is written on every transition with the
-  correct `actor`, `from_status`, `to_status`, and note.
-- Send-back with an empty note fails and re-renders.
-- Publishing sets `status = PUBLISHED`, creates a `PublishedCuration`
-  with `version=1`, and both occur atomically (a simulated failure in
-  one rolls back the other).
-- Re-publishing (start-new-revision → edit → submit → approve → publish)
-  creates `version=2` with a refreshed snapshot; the `version=1` row is
-  unchanged.
-- Start-new-revision transitions `PUBLISHED` → `IN_PROGRESS` and clears
-  `expert_panel_approved_by`, `expert_panel_approved_at`, and
-  `classification_override_reason`; it does **not** touch any
-  `PublishedCuration` rows.
-- Edit endpoints are blocked for all users when `status == PUBLISHED`.
-- The `PublishedCuration.snapshot` field is populated from the serializer
-  and the repo detail view reads from it (not the live curation).
-- Editing the live curation after a publish (via start-new-revision)
-  does not change the previously-published snapshot.
-- Classification can be edited by an approver and cannot be edited by a
-  curator (the curator form omits the field).
-
-### Step 12 — Lint, format, type-check, run tests
-
-Run:
+Not a commit — a checklist before opening (or merging) the PR:
 
 ```
 just py-format
@@ -336,51 +385,63 @@ Fix any issues before considering Part 1 complete.
 
 ## Part 2 — History feature (`django-simple-history`)
 
-### Step 13 — Add the dependency
+### Step 10 — Add the dependency and wire into Django settings
 
-**File:** `pyproject.toml`
+**Files:** `pyproject.toml`, `src/config/settings/base.py`
 
-- Add `django-simple-history>=3.7` to `[project].dependencies`.
-- Sync with whichever package manager this repo uses (`uv`, `pip`, etc.).
-
-### Step 14 — Wire into Django settings
-
-**File:** `src/config/settings/base.py`
-
+- Add `django-simple-history>=3.7` to `[project].dependencies` and sync
+  the lockfile with whichever package manager this repo uses (`uv`,
+  `pip`, etc.).
 - Add `"simple_history"` to `INSTALLED_APPS`.
 - Add `"simple_history.middleware.HistoryRequestMiddleware"` to
   `MIDDLEWARE`, after the authentication middleware. This captures
   `request.user` as the history actor automatically.
 
-### Step 15 — Register domain models
+This commit is behaviorally a no-op until Step 11 registers models.
 
-Add `history = HistoricalRecords()` to each of:
+### Step 11 — Register history on domain models
 
-- `Curation` (`src/curation/models.py`)
-- `Evidence` (`src/curation/models.py`)
-- `PublishedCuration` (`src/repo/models.py`)
-- `CurationStatusEvent` (`src/curation/models.py`) — optional but
-  cheap; captures any manual corrections.
+**Files:** `src/curation/models.py`, `src/repo/models.py`,
+`src/curation/admin.py`, `src/repo/admin.py` (if it exists),
+`src/curation/tests/test_history.py` (new)
 
-Do **not** register lookup models (e.g. `Demographic`).
+- Add `history = HistoricalRecords()` to:
+  - `Curation` (`src/curation/models.py`)
+  - `Evidence` (`src/curation/models.py`)
+  - `PublishedCuration` (`src/repo/models.py`)
+  - `CurationStatusEvent` (`src/curation/models.py`) — optional but
+    cheap; captures any manual corrections.
+  - Do **not** register lookup models (e.g. `Demographic`).
+- Run `just py-manage makemigrations` and review the generated
+  migrations for `HistoricalCuration`, `HistoricalEvidence`,
+  `HistoricalPublishedCuration`, and `HistoricalCurationStatusEvent`.
+  Confirm the tracked field set matches expectations (all concrete
+  fields except FKs to managers, etc. — the default is usually fine).
+- Swap `admin.ModelAdmin` → `simple_history.admin.SimpleHistoryAdmin`
+  for each tracked model, giving staff an admin-side history viewer
+  for free, useful for debugging.
 
-### Step 16 — Generate and review migrations
+Tests in this commit:
 
-Run `just py-manage makemigrations` (or the repo's equivalent).
-`django-simple-history` will generate migrations for
-`HistoricalCuration`, `HistoricalEvidence`, `HistoricalPublishedCuration`,
-and `HistoricalCurationStatusEvent`. Review them to confirm the
-tracked field set matches expectations (all concrete fields except FKs
-to managers, etc. — the default is usually fine).
+- An edit produces a `HistoricalCuration` row with the expected
+  `history_user`, `history_type`, and tracked fields.
+- Deleting an Evidence row leaves its history queryable by
+  `HistoricalEvidence.objects.filter(curation_id=...)`.
 
-### Step 17 — Build the history view
+### Step 12 — Build the history view, template, and detail link
 
-**Files:** `src/curation/views.py`, `src/curation/urls.py`
+**Files:** `src/curation/views.py`, `src/curation/urls.py`,
+`src/curation/templates/curation/history.html`,
+`src/curation/templates/curation/detail.html`,
+`src/curation/tests/test_history.py`
 
-- Add `CurationHistory` view (class- or function-based — likely function
-  so the multi-stream merge is readable).
+View (`src/curation/views.py`, `src/curation/urls.py`):
+
+- Add `CurationHistory` view (likely function-based so the multi-stream
+  merge is readable).
 - URL: `<slug:curation_slug>/history` → name `curation-history`.
-- The view assembles a timeline from three streams, merged by timestamp:
+- The view assembles a timeline from three streams, merged by
+  timestamp:
   1. `curation.history.all()` — Curation-level edits.
   2. `HistoricalEvidence.objects.filter(curation_id=curation.id)` — all
      Evidence edits for this curation's children.
@@ -389,56 +450,35 @@ to managers, etc. — the default is usually fine).
      first-class events have the review note as a real field).
 - Paginate with Django's `Paginator` (page size 25).
 
-### Step 18 — History template
-
-**File:** `src/curation/templates/curation/history.html`
+Template (`src/curation/templates/curation/history.html`):
 
 - Timeline layout grouped by day.
-- For each entry: actor, timestamp, action type (create/update/delete/
-  status change), and — for updates — a diff rendered via
+- For each entry: actor, timestamp, action type (create / update /
+  delete / status change), and — for updates — a diff rendered via
   `new_record.diff_against(old_record)`.
-- Write a small template filter or helper that resolves FK fields on a
-  historical record to a human label (accessing `record.disease.name`
-  works because simple-history stores the FK ID and the live lookup
-  still resolves). Handle deleted FK targets defensively.
+- A small template filter or helper resolves FK fields on a historical
+  record to a human label (accessing `record.disease.name` works
+  because simple-history stores the FK ID and the live lookup still
+  resolves). Handle deleted FK targets defensively.
 - Link each entry back to the record it describes (curation detail,
   evidence detail, etc.).
 
-### Step 19 — Expose the history in the curation detail page
+Detail page (`src/curation/templates/curation/detail.html`):
 
-**File:** `src/curation/templates/curation/detail.html`
-
-- Add a "History" link near the existing action buttons. Visible to
+- Add a "History" link near the existing action buttons, visible to
   anyone who can view the curation.
 
-### Step 20 — Admin integration
+Tests in this commit:
 
-**File:** `src/curation/admin.py` (and `src/repo/admin.py` if it exists)
-
-- Swap `admin.ModelAdmin` → `simple_history.admin.SimpleHistoryAdmin`
-  for each tracked model. This gives staff an admin-side history
-  viewer for free, useful for debugging.
-
-### Step 21 — Tests
-
-**Files:** `src/curation/tests/test_history.py` (new) and existing test
-modules as needed.
-
-Cover:
-
-- An edit produces a `HistoricalCuration` row with the expected
-  `history_user`, `history_type`, and fields.
 - `new.diff_against(old)` returns the expected delta for a specific
   edit.
-- The merged timeline orders Curation/Evidence/StatusEvent entries
+- The merged timeline orders Curation / Evidence / StatusEvent entries
   correctly by timestamp.
 - Pagination works.
-- Deleting an Evidence row leaves its history queryable by
-  `HistoricalEvidence.objects.filter(curation_id=...)`.
 
-### Step 22 — Lint, format, type-check, run tests
+### Pre-PR quality gate for Part 2
 
-Same suite as Step 12.
+Same checklist as Part 1.
 
 ---
 
