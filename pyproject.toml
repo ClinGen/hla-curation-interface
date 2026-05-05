@@ -129,6 +129,12 @@ convention = "google"
 "views.py" = [
     "ARG001", # Sometimes you need a default parameter that goes unused.
 ]
+"checkreadmes.py" = [
+    "T201", # CLI tool: print is the intended output mechanism.
+    "S404", # Invoking git is the whole point of this tool.
+    "S603", # Invoking git is the whole point of this tool.
+    "S607", # Resolving git via PATH is fine for a dev-time CLI script.
+]
 
 [tool.coverage.run]
 data_file = "coverage.db"

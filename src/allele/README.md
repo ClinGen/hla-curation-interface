@@ -37,5 +37,6 @@ who added it and when.
 - `fixtures/` — Test fixtures (e.g., `test_alleles.json`) loaded by the test
   cases.
 - `migrations/` — Django database migrations for the `Allele` model.
-- `templates/allele/` — HTML templates for the create, detail, and list pages,
-  plus a `partials/` directory for reusable template fragments.
+- `templates/allele/` — HTML templates for the app: `create.html`,
+  `detail.html`, and `list.html`, plus `partials/table.html`, a reusable
+  allele table fragment used by the list view.

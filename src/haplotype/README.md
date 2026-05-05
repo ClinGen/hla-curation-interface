@@ -42,6 +42,6 @@ when.
 - `fixtures/` — Test fixtures: `test_haplotypes.json` provides the haplotype
   data loaded by `HaplotypeDetailTest` and `HaplotypeListTest`.
 - `migrations/` — Django database migrations for the `Haplotype` model.
-- `templates/haplotype/` — HTML templates for the create, detail, and list
-  pages, plus a `partials/` directory containing `table.html`, the reusable
+- `templates/haplotype/` — HTML templates for the app: `create.html`,
+  `detail.html`, and `list.html`, plus `partials/table.html`, the reusable
   haplotype table fragment used by the list view.
