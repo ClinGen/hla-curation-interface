@@ -1,0 +1,21 @@
+{
+  "directories": [
+    "src/allele",
+    "src/auth_",
+    "src/common",
+    "src/config",
+    "src/core",
+    "src/curation",
+    "src/config",
+    "src/core",
+    "src/curation",
+    "src/disease",
+    "src/haplotype",
+    "src/publication",
+    "src/repo",
+    "src/static",
+    "src/templates",
+    ""
+  ],
+  "ignore": ["migrations", "__pycache__", "*.bak"]
+}
