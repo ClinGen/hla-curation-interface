@@ -14,8 +14,15 @@
     "src/publication",
     "src/repo",
     "src/static",
-    "src/templates",
-    ""
+    "src/templates"
   ],
-  "ignore": ["migrations", "__pycache__", "*.bak"]
+  "ignore": [
+    "*.bak",
+    ".mypy_cache",
+    ".venv",
+    "__pycache__",
+    "migrations",
+    "node_modules",
+    "public"
+  ]
 }
