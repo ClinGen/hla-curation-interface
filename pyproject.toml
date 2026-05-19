@@ -129,6 +129,9 @@ convention = "google"
 "views.py" = [
     "ARG001", # Sometimes you need a default parameter that goes unused.
 ]
+"docs.py" = [
+    "T201", # CLI tool: print is the intended output mechanism.
+]
 
 [tool.coverage.run]
 data_file = "coverage.db"
