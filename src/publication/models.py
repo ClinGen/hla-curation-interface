@@ -88,7 +88,8 @@ class Publication(models.Model):
 
     def __str__(self) -> str:
         title = self.title[:-1] if self.title.endswith(".") else self.title
-        return f"{title}."
+        identifier = f"PMID:{self.pubmed_id}" if self.pubmed_id else self.doi
+        return f"{title} ({identifier})."
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
