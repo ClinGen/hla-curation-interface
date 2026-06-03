@@ -51,3 +51,19 @@ await copyFile(
   `${choicesCssPath}/choices.css.map`,
   `${CSS_STATIC_DIR}/choices.css.map`,
 );
+
+// Copy jQuery into our Django static directory.
+const jqueryPath = "./node_modules/jquery/dist/jquery.min.js";
+await copyFile(jqueryPath, `${JS_STATIC_DIR}/jquery.min.js`);
+
+// Copy DataTables core JS into our Django static directory.
+const dataTablesJsPath = "./node_modules/datatables.net/js/dataTables.min.js";
+await copyFile(dataTablesJsPath, `${JS_STATIC_DIR}/dataTables.min.js`);
+
+// Copy DataTables CSS into our Django static directory.
+const dataTablesDtCssPath =
+  "./node_modules/datatables.net-dt/css/dataTables.dataTables.min.css";
+await copyFile(
+  dataTablesDtCssPath,
+  `${CSS_STATIC_DIR}/dataTables.dataTables.min.css`,
+);

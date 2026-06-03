@@ -4,8 +4,11 @@
   "dependencies": {
     "bootstrap-icons": "^1.13.1",
     "bulma": "^1.0.4",
-    "choices.js": "^11.1.0",
-    "htmx.org": "^2.0.5"
+    "choices.js": "^11.2.3",
+    "datatables.net": "^2.3.8",
+    "datatables.net-dt": "^2.3.8",
+    "htmx.org": "^2.0.10",
+    "jquery": "^4.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4"
