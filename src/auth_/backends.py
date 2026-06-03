@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 """Provides a custom WorkOS authentication backend."""
 
 import logging

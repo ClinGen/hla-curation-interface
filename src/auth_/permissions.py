@@ -27,12 +27,12 @@ class ProtectedViewMixin(AccessMixin):
     ) -> HttpResponse | HttpResponseRedirect | None:
         """Defines permission logic.
 
-        Raises:
-            PermissionDenied: When the user doesn't have correct permissions.
-
         Returns:
             If the user has the correct permissions, the requested view is returned.
             Otherwise, the user is redirected to the login view.
+
+        Raises:
+            PermissionDenied: When the user doesn't have correct permissions.
         """
         if not request.user.is_authenticated:
             return self.handle_no_permission()
@@ -58,12 +58,12 @@ def protected_view(view_function: Callable) -> Callable:
     ) -> HttpResponse | HttpResponseRedirect | None:
         """Defines permission logic.
 
-        Raises:
-            PermissionDenied: When the user doesn't have correct permissions.
-
         Returns:
             If the user has the correct permissions, the requested view is returned.
             Otherwise, the user is redirected to the login view.
+
+        Raises:
+            PermissionDenied: When the user doesn't have correct permissions.
         """
         if not request.user.is_authenticated:
             return redirect(f"{LOGIN_URL}?next={request.path}")

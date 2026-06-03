@@ -38,7 +38,7 @@ def get_step_1b_points(evidence) -> float | None:
         3: Points.S1B_3_FIELD,
         4: Points.S1B_4_FIELD,
     }
-    return fields_points.get(evidence.num_fields, None)
+    return fields_points.get(evidence.num_fields)
 
 
 def get_step_1c_points(evidence) -> float | None:
@@ -75,7 +75,7 @@ def get_step_2_points(evidence) -> float | None:
         TypingMethod.NEXT_GENERATION_SEQ: Points.S2_NEXT_GENERATION_SEQ,
         TypingMethod.LONG_READ_SEQ: Points.S2_LONG_READ_SEQ,
     }
-    return typing_method_points.get(evidence.typing_method, None)
+    return typing_method_points.get(evidence.typing_method)
 
 
 def get_step_3a_points(evidence) -> float | None:
