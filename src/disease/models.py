@@ -30,7 +30,7 @@ class Disease(models.Model):
         max_length=26,  # A Mondo ID is of the form MONDO:1234567. 13 characters.
         unique=True,
         verbose_name="Mondo ID",
-        help_text="The Mondo Disease Ontology ID, e.g., MONDO:1234567.",
+        help_text="The Mondo Disease Ontology ID, e.g., MONDO:0005052.",
     )
     iri = models.CharField(
         blank=True,
