@@ -20,7 +20,7 @@
                 </td>
                 <td>
                     {% if allele.car_id %}
-                        {% with url="https://reg.clinicalgenome.org/car/ui/id/xahla/detail/"|add:allele.car_id text=allele.car_id %}
+                        {% with url="https://reg.clinicalgenome.org/allele/ui/hla/id/"|add:allele.car_id text=allele.car_id %}
                             {% include "common/linkout.html" %}
                         {% endwith %}
                     {% else %}
