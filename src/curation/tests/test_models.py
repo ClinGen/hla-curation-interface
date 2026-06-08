@@ -406,8 +406,8 @@ class TestEvidence(TestCase):
         self.evidence.save()
         self.assertTrue(self.evidence.is_protective)
 
-    def test_needs_review_is_false_when_created(self):
-        self.assertFalse(self.evidence.needs_review)
+    def test_needs_review_is_true_when_created(self):
+        self.assertTrue(self.evidence.needs_review)
 
     def test_can_set_needs_review(self):
         self.evidence.needs_review = True

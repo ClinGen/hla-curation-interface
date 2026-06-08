@@ -469,7 +469,7 @@ class Evidence(models.Model):
         verbose_name="Notes",
     )
     needs_review = models.BooleanField(
-        default=False,
+        default=True,
         verbose_name="Needs Manual Review",
         help_text="Does this evidence need to be reviewed manually?",
     )

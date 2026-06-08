@@ -210,7 +210,7 @@ class EvidenceCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(new_evidence.curation.allele, Allele.objects.get(pk=1))  # type: ignore[union-attr]
         self.assertEqual(new_evidence.curation.disease, Disease.objects.get(pk=1))  # type: ignore[union-attr]
         self.assertEqual(new_evidence.publication, Publication.objects.get(pk=1))  # type: ignore[union-attr]
-        self.assertFalse(new_evidence.needs_review)  # type: ignore[union-attr]
+        self.assertTrue(new_evidence.needs_review)  # type: ignore[union-attr]
         self.assertEqual(new_evidence.status, Status.IN_PROGRESS)  # type: ignore[union-attr]
         self.assertEqual(new_evidence.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
 
