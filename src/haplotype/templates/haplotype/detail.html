@@ -45,6 +45,10 @@
                         <td>Added</td>
                         <td>{{ object.added_at|default_if_none:"------"|date:"Y-m-d" }}</td>
                     </tr>
+                    <tr>
+                        <td>Updated</td>
+                        <td>{{ object.updated_at|default_if_none:"------"|date:"Y-m-d" }}</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
