@@ -11,7 +11,8 @@
       "author": "Oak",
       "publication_year": 1990,
       "added_by": null,
-      "added_at": "1990-01-01"
+      "added_at": "1990-01-01",
+      "updated_at": "1990-01-01T00:00:00"
     }
   },
   {
@@ -26,7 +27,8 @@
       "author": "Elm",
       "publication_year": 1970,
       "added_by": null,
-      "added_at": "1970-01-01"
+      "added_at": "1970-01-01",
+      "updated_at": "1970-01-01T00:00:00"
     }
   },
   {
@@ -41,7 +43,8 @@
       "author": "Birch",
       "publication_year": 1980,
       "added_by": null,
-      "added_at": "1980-01-01"
+      "added_at": "1980-01-01",
+      "updated_at": "1980-01-01T00:00:00"
     }
   }
 ]

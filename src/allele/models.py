@@ -44,6 +44,11 @@ class Allele(models.Model):
         verbose_name="Added At",
         help_text="When the allele was added.",
     )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Updated At",
+        help_text="When the allele was last updated.",
+    )
 
     class Meta:
         db_table = "allele"

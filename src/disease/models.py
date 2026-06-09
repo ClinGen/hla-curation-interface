@@ -59,6 +59,11 @@ class Disease(models.Model):
         verbose_name="Added At",
         help_text="When the disease was added.",
     )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Updated At",
+        help_text="When the disease was last updated.",
+    )
 
     class Meta:
         """Provides metadata."""

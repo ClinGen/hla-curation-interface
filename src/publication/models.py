@@ -80,6 +80,11 @@ class Publication(models.Model):
         verbose_name="Added At",
         help_text="When the publication was added.",
     )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Updated At",
+        help_text="When the publication was last updated.",
+    )
 
     class Meta:
         db_table = "publication"

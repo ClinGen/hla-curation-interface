@@ -27,6 +27,11 @@ class PublishedCuration(models.Model):
         default=1,
         help_text="Version number for this publication.",
     )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Updated At",
+        help_text="When the published curation was last updated.",
+    )
 
     class Meta:
         db_table = "published_curation"

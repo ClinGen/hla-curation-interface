@@ -19,6 +19,11 @@ class UserProfile(models.Model):
         verbose_name="PHI Agreement",
         help_text="Whether the user has signed the PHI agreement.",
     )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Updated At",
+        help_text="When the user profile was last updated.",
+    )
 
     class Meta:
         """Provides metadata."""

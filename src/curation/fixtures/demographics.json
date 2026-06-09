@@ -3,49 +3,56 @@
     "model": "curation.demographic",
     "pk": 1,
     "fields": {
-      "group": "American"
+      "group": "American",
+      "updated_at": "1970-01-01T00:00:00"
     }
   },
   {
     "model": "curation.demographic",
     "pk": 2,
     "fields": {
-      "group": "East Asian"
+      "group": "East Asian",
+      "updated_at": "1970-01-01T00:00:00"
     }
   },
   {
     "model": "curation.demographic",
     "pk": 3,
     "fields": {
-      "group": "European"
+      "group": "European",
+      "updated_at": "1970-01-01T00:00:00"
     }
   },
   {
     "model": "curation.demographic",
     "pk": 4,
     "fields": {
-      "group": "Central/South Asian"
+      "group": "Central/South Asian",
+      "updated_at": "1970-01-01T00:00:00"
     }
   },
   {
     "model": "curation.demographic",
     "pk": 5,
     "fields": {
-      "group": "Near Eastern"
+      "group": "Near Eastern",
+      "updated_at": "1970-01-01T00:00:00"
     }
   },
   {
     "model": "curation.demographic",
     "pk": 6,
     "fields": {
-      "group": "Oceanian"
+      "group": "Oceanian",
+      "updated_at": "1970-01-01T00:00:00"
     }
   },
   {
     "model": "curation.demographic",
     "pk": 7,
     "fields": {
-      "group": "Sub-Saharan African"
+      "group": "Sub-Saharan African",
+      "updated_at": "1970-01-01T00:00:00"
     }
   }
 ]

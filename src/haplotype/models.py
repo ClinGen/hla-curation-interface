@@ -45,6 +45,11 @@ class Haplotype(models.Model):
         verbose_name="Added At",
         help_text="When the haplotype was added.",
     )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Updated At",
+        help_text="When the haplotype was last updated.",
+    )
 
     class Meta:
         db_table = "haplotype"

@@ -9,7 +9,8 @@
       "iri": "http://purl.obolibrary.org/obo/MONDO_123",
       "name": "acute oran berry intoxication",
       "added_by": null,
-      "added_at": "2000-01-01"
+      "added_at": "2000-01-01",
+      "updated_at": "2000-01-01T00:00:00"
     }
   },
   {
@@ -22,7 +23,8 @@
       "iri": "http://purl.obolibrary.org/obo/MONDO_456",
       "name": "acute cheri berry intoxication",
       "added_by": null,
-      "added_at": "2010-01-01"
+      "added_at": "2010-01-01",
+      "updated_at": "2010-01-01T00:00:00"
     }
   },
   {
@@ -35,7 +37,8 @@
       "iri": "http://purl.obolibrary.org/obo/MONDO_789",
       "name": "acute chesto berry intoxication",
       "added_by": null,
-      "added_at": "1980-01-01"
+      "added_at": "1980-01-01",
+      "updated_at": "1980-01-01T00:00:00"
     }
   }
 ]

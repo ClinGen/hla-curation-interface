@@ -133,6 +133,11 @@ class Curation(models.Model):
         verbose_name="Added At",
         help_text="When the curation was added.",
     )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Updated At",
+        help_text="When the curation was last updated.",
+    )
 
     class Meta:
         db_table = "curation"
@@ -183,6 +188,11 @@ class Demographic(models.Model):
         unique=True,
         verbose_name="Group",
         help_text="The bio-geographical group for a population.",
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Updated At",
+        help_text="When the demographic was last updated.",
     )
 
     class Meta:
@@ -491,6 +501,11 @@ class Evidence(models.Model):
         auto_now_add=True,
         verbose_name="Added At",
         help_text="When the evidence was added.",
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Updated At",
+        help_text="When the evidence was last updated.",
     )
 
     class Meta:
