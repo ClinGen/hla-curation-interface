@@ -43,3 +43,4 @@ class HaplotypeDetail(ProtectedViewMixin, DetailView):  # type: ignore
 class HaplotypeList(ProtectedViewMixin, ListView):  # type: ignore
     model = Haplotype
     template_name = "haplotype/list.html"
+    ordering = ["-updated_at"]

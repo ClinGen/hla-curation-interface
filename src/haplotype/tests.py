@@ -69,7 +69,7 @@ class HaplotypeListTest(ProtectedViewTestMixin, TestCase):
     expected_text = [
         "ID",
         "Name",
-        "Added",
+        "Updated",
         "H000001",
         "A*01:02:03~B*04:05:06",
         "1970-01-01",

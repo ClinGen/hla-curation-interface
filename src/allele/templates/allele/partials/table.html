@@ -4,7 +4,7 @@
             <th>ID</th>
             <th>Name</th>
             <th>CAR ID</th>
-            <th>Added</th>
+            <th>Updated</th>
         </tr>
     </thead>
     <tbody>
@@ -28,7 +28,7 @@
                     {% endif %}
                 </td>
                 <td>
-                    {{ allele.added_at|default_if_none:"------"|date:"Y-m-d" }}
+                    {{ allele.updated_at|default_if_none:"------"|date:"Y-m-d" }}
                 </td>
             </tr>
         {% endfor %}

@@ -65,3 +65,4 @@ class PublicationDetail(ProtectedViewMixin, DetailView):  # type: ignore
 class PublicationList(ProtectedViewMixin, ListView):  # type: ignore
     model = Publication
     template_name = "publication/list.html"
+    ordering = ["-updated_at"]

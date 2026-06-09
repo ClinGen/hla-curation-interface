@@ -41,7 +41,7 @@
                     <th>Haplotype</th>
                     <th>Disease</th>
                     <th>Classification</th>
-                    <th>Added</th>
+                    <th>Updated</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -58,7 +58,7 @@
                         <td>{{ published.curation.haplotype|default_if_none:"------" }}</td>
                         <td>{{ published.curation.disease|default_if_none:"------" }}</td>
                         <td>{{ published.curation.get_classification_display|default_if_none:"------" }}</td>
-                        <td>{{ published.curation.added_at|default_if_none:"------"|date:"Y-m-d" }}</td>
+                        <td>{{ published.curation.updated_at|default_if_none:"------"|date:"Y-m-d" }}</td>
                         <td>
                             <a href="{% url 'repo-download-single' published.curation.slug %}" class="button is-small">
                                 {% include "common/icon.html" with icon_name="download" %}

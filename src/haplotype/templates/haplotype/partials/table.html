@@ -3,7 +3,7 @@
         <tr>
             <th>ID</th>
             <th>Name</th>
-            <th>Added</th>
+            <th>Updated</th>
         </tr>
     </thead>
     <tbody>
@@ -15,7 +15,7 @@
                     </a>
                 </td>
                 <td>{{ haplotype.name|default_if_none:"------" }}</td>
-                <td>{{ haplotype.added_at|default_if_none:"------"|date:"Y-m-d" }}</td>
+                <td>{{ haplotype.updated_at|default_if_none:"------"|date:"Y-m-d" }}</td>
             </tr>
         {% endfor %}
     </tbody>

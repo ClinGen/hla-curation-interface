@@ -45,3 +45,4 @@ class AlleleDetail(ProtectedViewMixin, DetailView):  # type: ignore
 class AlleleList(ProtectedViewMixin, ListView):  # type: ignore
     model = Allele
     template_name = "allele/list.html"
+    ordering = ["-updated_at"]

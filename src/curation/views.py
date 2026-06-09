@@ -245,3 +245,4 @@ def curation_publish(request: HttpRequest, curation_slug: str) -> HttpResponse:
 class CurationList(ProtectedViewMixin, ListView):  # type: ignore
     model = Curation
     template_name = "curation/list.html"
+    ordering = ["-updated_at"]

@@ -107,7 +107,7 @@ class AlleleListTest(ProtectedViewTestMixin, TestCase):
         "ID",
         "Name",
         "CAR ID",
-        "Added",
+        "Updated",
         "A000001",
         "A*01:02:03",
         "XAHLA123",

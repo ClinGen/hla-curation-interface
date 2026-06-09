@@ -40,3 +40,4 @@ class DiseaseDetail(ProtectedViewMixin, DetailView):  # type: ignore
 class DiseaseList(ProtectedViewMixin, ListView):  # type: ignore
     model = Disease
     template_name = "disease/list.html"
+    ordering = ["-updated_at"]

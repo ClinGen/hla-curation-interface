@@ -170,7 +170,7 @@ class CurationListTest(ProtectedViewTestMixin, TestCase):
         "Disease",
         "Status",
         "Classification",
-        "Added",
+        "Updated",
         "C000001",
         "A*01:02:03",
         "acute oran berry intoxication",

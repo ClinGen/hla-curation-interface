@@ -27,7 +27,7 @@
                     <th>ID</th>
                     <th>Name</th>
                     <th>Mondo ID</th>
-                    <th>Added</th>
+                    <th>Updated</th>
                 </tr>
             </thead>
             <tbody>
@@ -48,7 +48,7 @@
                                 ------
                             {% endif %}
                         </td>
-                        <td>{{ disease.added_at|default_if_none:"------"|date:"Y-m-d" }}</td>
+                        <td>{{ disease.updated_at|default_if_none:"------"|date:"Y-m-d" }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

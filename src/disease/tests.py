@@ -86,7 +86,7 @@ class DiseaseListTest(ProtectedViewTestMixin, TestCase):
         "ID",
         "Name",
         "Mondo ID",
-        "Added",
+        "Updated",
         "D000001",
         "acute oran berry intoxication",
         "MONDO:123",

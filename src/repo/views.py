@@ -14,6 +14,9 @@ class PublishedCurationList(ListView):
     model = PublishedCuration
     template_name = "repo/list.html"
 
+    def get_queryset(self) -> QuerySet[PublishedCuration]:
+        return PublishedCuration.objects.order_by("-curation__updated_at")
+
 
 class PublishedCurationDetail(DetailView):
     model = PublishedCuration

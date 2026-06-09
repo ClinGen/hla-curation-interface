@@ -166,7 +166,7 @@ class PublicationListTest(ProtectedViewTestMixin, TestCase):
         "Year",
         "PMID",
         "DOI",
-        "Added",
+        "Updated",
         "P000001",
         "Diseases in grass type Pokémon in the Kanto region",
         "Oak",
