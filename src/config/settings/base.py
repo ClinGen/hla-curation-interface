@@ -24,6 +24,8 @@ except FileNotFoundError:
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
+ENV = os.getenv("ENV", "dev")
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -71,6 +73,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "common.context_processors.git_sha",
+                "common.context_processors.env",
             ],
         },
     },
