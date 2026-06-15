@@ -50,7 +50,7 @@ class WorkOSBackend(BaseBackend):
         try:
             logger.warning("Attempting to load session")
             session = workos.user_management.load_sealed_session(
-                sealed_session=sealed_session,
+                session_data=sealed_session,
                 cookie_password=cookie_password,  # type: ignore
             )
             auth_response = session.authenticate()
@@ -66,11 +66,11 @@ class WorkOSBackend(BaseBackend):
                     return None
             user_info = auth_response.user
             user, created_user = User.objects.get_or_create(
-                username=user_info.email,
+                username=user_info["email"],
                 defaults={
-                    "email": user_info.email,
-                    "first_name": user_info.first_name or "",
-                    "last_name": user_info.last_name or "",
+                    "email": user_info["email"],
+                    "first_name": user_info.get("first_name") or "",
+                    "last_name": user_info.get("last_name") or "",
                 },
             )
             profile, created_profile = UserProfile.objects.get_or_create(user=user)
