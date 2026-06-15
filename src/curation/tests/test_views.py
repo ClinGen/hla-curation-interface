@@ -312,6 +312,8 @@ class EvidenceEditTest(ProtectedViewTestMixin, TestCase):
         data = {
             "is_gwas": True,
             "is_gwas_notes": "",
+            "num_fields": 3,
+            "num_fields_notes": "",
             "zygosity": Zygosity.BIALLELIC,
             "zygosity_notes": "",
             "phase_confirmed": True,

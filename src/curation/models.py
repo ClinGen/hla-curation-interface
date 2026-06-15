@@ -17,6 +17,7 @@ from curation.constants.models.evidence import (
     ADDITIONAL_PHENOTYPES_CHOICES,
     EFFECT_SIZE_STATISTIC_CHOICES,
     MULTIPLE_TESTING_CORRECTION_CHOICES,
+    NUM_FIELDS_CHOICES,
     P_VALUE_COMPARATOR_CHOICES,
     TYPING_METHOD_CHOICES,
     ZYGOSITY_CHOICES,
@@ -48,6 +49,7 @@ from curation.validators.models.evidence import (
     validate_ci_start_string,
     validate_effect_size_statistic,
     validate_has_association_and_p_value,
+    validate_num_fields,
     validate_odds_ratio_string,
     validate_p_value_string,
     validate_preprint_not_included,
@@ -252,6 +254,21 @@ class Evidence(models.Model):
         help_text="Was the study a genome-wide association study?",
     )
     is_gwas_notes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Notes",
+    )
+    num_fields = models.IntegerField(
+        blank=True,
+        null=True,
+        choices=NUM_FIELDS_CHOICES,
+        verbose_name="Number of Fields",
+        help_text=(
+            "The allele resolution (number of fields) for the allele or "
+            "haplotype in the study."
+        ),
+    )
+    num_fields_notes = models.TextField(
         blank=True,
         default="",
         verbose_name="Notes",
@@ -535,6 +552,7 @@ class Evidence(models.Model):
     def clean(self) -> None:
         validate_publication(self)
         validate_preprint_not_included(self)
+        validate_num_fields(self)
         validate_p_value_string(self)
         validate_has_association_and_p_value(self)
         validate_effect_size_statistic(self)
@@ -543,36 +561,6 @@ class Evidence(models.Model):
         validate_beta_string(self)
         validate_ci_start_string(self)
         validate_ci_end_string(self)
-
-    @property
-    def num_fields(self) -> int:
-        """Returns the number of fields.
-
-        If the curation is an allele curation, this returns the number of fields in
-        the allele. If the curation is a haplotype curation, this returns the number
-        of fields in the allele with the lowest number of fields.
-        """
-        num_fields = 1  # Default to the lowest possible number of fields to be safe.
-        if (
-            self.curation
-            and self.curation.curation_type == CurationTypes.ALLELE
-            and self.curation.allele
-        ):
-            num_fields = self.curation.allele.name.count(":") + 1
-        elif (
-            self.curation
-            and self.curation.curation_type == CurationTypes.HAPLOTYPE
-            and self.curation.haplotype
-        ):
-            large_int = 1000
-            min_num_fields = large_int
-            for allele in self.curation.haplotype.alleles.all():
-                allele_num_fields = allele.name.count(":") + 1
-                if allele_num_fields < min_num_fields:
-                    min_num_fields = allele_num_fields
-            if min_num_fields != large_int:
-                num_fields = min_num_fields
-        return num_fields
 
     @property
     def score(self) -> float:

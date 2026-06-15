@@ -50,6 +50,8 @@ class EvidenceEditForm(ModelForm):
         fields = [
             "is_gwas",
             "is_gwas_notes",
+            "num_fields",
+            "num_fields_notes",
             "zygosity",
             "zygosity_notes",
             "phase_confirmed",
@@ -84,6 +86,7 @@ class EvidenceEditForm(ModelForm):
         widgets = {
             "is_gwas": forms.RadioSelect(choices=YN_BOOL_CHOICES),
             "is_gwas_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
+            "num_fields_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
             "zygosity": forms.RadioSelect,
             "zygosity_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
             "phase_confirmed": forms.RadioSelect(choices=YN_BOOL_CHOICES),

@@ -25,6 +25,7 @@ from curation.models import (
     Evidence,
 )
 from disease.models import Disease
+from haplotype.models import Haplotype
 from publication.models import Publication
 
 
@@ -519,3 +520,81 @@ class TestEvidence(TestCase):
         with self.assertRaises(ValidationError) as context:
             self.evidence.clean()
         self.assertIn("has_association", context.exception.message_dict)
+
+
+class TestValidateNumFields(TestCase):
+    # Curation pk=1 is an allele curation for A*01:02:03 (3-field max).
+    # Haplotype pk=1 is A*01:02:03~B*04:05:06 (also 3-field max on both alleles).
+    fixtures = [
+        "test_alleles.json",
+        "test_diseases.json",
+        "test_curations.json",
+        "test_publications.json",
+        "test_haplotypes.json",
+    ]
+
+    def setUp(self):
+        self.publication = Publication.objects.get(pk=1)
+        self.allele_curation = Curation.objects.get(pk=1)
+        self.evidence = Evidence(
+            curation=self.allele_curation,
+            publication=self.publication,
+        )
+        self.evidence.save()
+
+    def test_none_does_not_raise(self):
+        self.evidence.num_fields = None
+        self.evidence.clean()
+
+    def test_less_than_max_does_not_raise(self):
+        self.evidence.num_fields = 1
+        self.evidence.clean()
+
+    def test_equal_to_max_does_not_raise(self):
+        self.evidence.num_fields = 3
+        self.evidence.clean()
+
+    def test_greater_than_max_raises(self):
+        self.evidence.num_fields = 4
+        with self.assertRaises(ValidationError) as context:
+            self.evidence.clean()
+        self.assertIn("num_fields", context.exception.message_dict)
+
+    def test_no_curation_does_not_raise(self):
+        evidence = Evidence(publication=self.publication, num_fields=4)
+        evidence.save()
+        evidence.clean()
+
+    def test_haplotype_equal_to_min_allele_max_does_not_raise(self):
+        haplotype = Haplotype.objects.get(pk=1)
+        disease = Disease.objects.get(pk=1)
+        curation = Curation.objects.create(
+            curation_type=CurationTypes.HAPLOTYPE,
+            haplotype=haplotype,
+            disease=disease,
+        )
+        evidence = Evidence(
+            curation=curation,
+            publication=self.publication,
+            num_fields=3,
+        )
+        evidence.save()
+        evidence.clean()
+
+    def test_haplotype_greater_than_min_allele_max_raises(self):
+        haplotype = Haplotype.objects.get(pk=1)
+        disease = Disease.objects.get(pk=1)
+        curation = Curation.objects.create(
+            curation_type=CurationTypes.HAPLOTYPE,
+            haplotype=haplotype,
+            disease=disease,
+        )
+        evidence = Evidence(
+            curation=curation,
+            publication=self.publication,
+            num_fields=4,
+        )
+        evidence.save()
+        with self.assertRaises(ValidationError) as context:
+            evidence.clean()
+        self.assertIn("num_fields", context.exception.message_dict)

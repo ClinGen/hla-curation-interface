@@ -4,9 +4,45 @@ from decimal import Decimal, InvalidOperation
 
 from django.core.exceptions import ValidationError
 
+from curation.constants.models.curation import CurationTypes
 from curation.constants.models.evidence import EffectSizeStatistic, PValueComparator
 from curation.validators.common import has_association_and_p_value_err_msg
 from publication.constants.models import PublicationTypes
+
+
+def _max_num_fields(evidence) -> int | None:
+    """Returns the maximum allowed num_fields for the evidence's allele or haplotype."""
+    curation = evidence.curation
+    if not curation:
+        return None
+    if curation.curation_type == CurationTypes.ALLELE and curation.allele:
+        return curation.allele.name.count(":") + 1
+    if curation.curation_type == CurationTypes.HAPLOTYPE and curation.haplotype:
+        alleles = curation.haplotype.alleles.all()
+        if alleles:
+            return min(a.name.count(":") + 1 for a in alleles)
+    return None
+
+
+def validate_num_fields(evidence) -> None:
+    """Validates that num_fields does not exceed what the allele or haplotype supports.
+
+    Raises:
+        ValidationError: If num_fields is greater than the maximum allowed.
+    """
+    if evidence.num_fields is None:
+        return
+    max_fields = _max_num_fields(evidence)
+    if max_fields is not None and evidence.num_fields > max_fields:
+        raise ValidationError(
+            {
+                "num_fields": (
+                    f"The selected resolution ({evidence.num_fields}-field) exceeds "
+                    f"the maximum supported by this allele or haplotype "
+                    f"({max_fields}-field)."
+                )
+            }
+        )
 
 
 def validate_publication(evidence) -> None:

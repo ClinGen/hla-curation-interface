@@ -1,6 +1,23 @@
 """Houses constants used by the Evidence model."""
 
 
+class NumFields:
+    """Defines allele resolution (number of fields) codes."""
+
+    ONE = 1
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+
+
+NUM_FIELDS_CHOICES = {
+    NumFields.ONE: "1-Field",
+    NumFields.TWO: "2-Field",
+    NumFields.THREE: "3-Field, G-Group, P-Group",
+    NumFields.FOUR: "4-Field",
+}
+
+
 class Zygosity:
     """Defines zygosity status codes."""
 

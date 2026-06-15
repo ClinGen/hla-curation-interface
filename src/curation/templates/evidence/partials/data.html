@@ -17,6 +17,22 @@
                 <td>{{ object.is_gwas_notes }}</td>
             </tr>
             <tr>
+                <td>Allele Resolution</td>
+                <td>
+                    {% if object.num_fields %}
+                        {% include "common/tags/provided.html" %}
+                    {% else %}
+                        {% include "common/tags/not_provided.html" %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if object.num_fields %}
+                        {{ object.get_num_fields_display }}
+                    {% endif %}
+                </td>
+                <td>{{ object.num_fields_notes }}</td>
+            </tr>
+            <tr>
                 <td>Zygosity</td>
                 <td>{% include "common/tags/provided.html" %}</td>
                 <td>{{ object.get_zygosity_display }}</td>
