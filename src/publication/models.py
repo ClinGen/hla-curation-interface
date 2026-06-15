@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.http import HttpResponseBase
 from django.urls import reverse
+from simple_history.models import HistoricalRecords
 
 from publication.constants.models import PUBLICATION_TYPE_CHOICES, PublicationTypes
 from publication.validators.models import (
@@ -85,6 +86,7 @@ class Publication(models.Model):
         verbose_name="Updated At",
         help_text="When the publication was last updated.",
     )
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "publication"

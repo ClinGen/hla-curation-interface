@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "beautifulsoup4>=4.13.4",
     "django>=5.2.1",
+    "django-simple-history>=3.11.0",
     "firebase-admin>=6.8.0",
     "gunicorn>=23.0.0",
     "lxml>=6.0.0",
@@ -159,4 +160,8 @@ django_settings_module = "config.settings.dev"
 
 [[tool.mypy.overrides]]
 module = ["firebase_admin", "firebase_admin.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["simple_history", "simple_history.*"]
 ignore_missing_imports = true

@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
+from simple_history.models import HistoricalRecords
 
 
 class PublishedCuration(models.Model):
@@ -32,6 +33,7 @@ class PublishedCuration(models.Model):
         verbose_name="Updated At",
         help_text="When the published curation was last updated.",
     )
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "published_curation"

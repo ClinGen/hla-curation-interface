@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.http import HttpResponseBase
 from django.urls import reverse
+from simple_history.models import HistoricalRecords
 
 
 class Allele(models.Model):
@@ -49,6 +50,7 @@ class Allele(models.Model):
         verbose_name="Updated At",
         help_text="When the allele was last updated.",
     )
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "allele"

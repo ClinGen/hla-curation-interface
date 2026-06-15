@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.http import HttpResponseBase
 from django.urls import reverse
+from simple_history.models import HistoricalRecords
 
 from allele.models import Allele
 from curation.constants.models.common import STATUS_CHOICES, Status
@@ -140,6 +141,7 @@ class Curation(models.Model):
         verbose_name="Updated At",
         help_text="When the curation was last updated.",
     )
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "curation"
@@ -196,6 +198,7 @@ class Demographic(models.Model):
         verbose_name="Updated At",
         help_text="When the demographic was last updated.",
     )
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "demographic"
@@ -524,6 +527,7 @@ class Evidence(models.Model):
         verbose_name="Updated At",
         help_text="When the evidence was last updated.",
     )
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "evidence"

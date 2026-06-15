@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.http import HttpResponseBase
 from django.urls import reverse
+from simple_history.models import HistoricalRecords
 
 from disease.constants.models import DISEASE_TYPE_CHOICES, DiseaseTypes
 from disease.validators.models import validate_disease_type_mondo, validate_mondo_id
@@ -64,6 +65,7 @@ class Disease(models.Model):
         verbose_name="Updated At",
         help_text="When the disease was last updated.",
     )
+    history = HistoricalRecords()
 
     class Meta:
         """Provides metadata."""

@@ -2,6 +2,7 @@
 
 from django.contrib.auth.models import User
 from django.db import models
+from simple_history.models import HistoricalRecords
 
 
 class UserProfile(models.Model):
@@ -24,6 +25,7 @@ class UserProfile(models.Model):
         verbose_name="Updated At",
         help_text="When the user profile was last updated.",
     )
+    history = HistoricalRecords()
 
     class Meta:
         """Provides metadata."""

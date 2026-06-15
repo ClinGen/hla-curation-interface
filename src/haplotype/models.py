@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.http import HttpResponseBase
 from django.urls import reverse
+from simple_history.models import HistoricalRecords
 
 from allele.models import Allele
 
@@ -50,6 +51,7 @@ class Haplotype(models.Model):
         verbose_name="Updated At",
         help_text="When the haplotype was last updated.",
     )
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "haplotype"

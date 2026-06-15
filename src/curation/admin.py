@@ -1,10 +1,11 @@
 from django.contrib import admin
+from simple_history.admin import SimpleHistoryAdmin
 
-from curation.models import Curation, Evidence
+from curation.models import Curation, Demographic, Evidence
 
 
 @admin.register(Curation)
-class CurationAdmin(admin.ModelAdmin):
+class CurationAdmin(SimpleHistoryAdmin):
     list_display = [
         "pk",
         "curation_type",
@@ -18,8 +19,14 @@ class CurationAdmin(admin.ModelAdmin):
     readonly_fields = ["added_by", "added_at"]
 
 
+@admin.register(Demographic)
+class DemographicAdmin(SimpleHistoryAdmin):
+    list_display = ["group"]
+    search_fields = ["group"]
+
+
 @admin.register(Evidence)
-class EvidenceAdmin(admin.ModelAdmin):
+class EvidenceAdmin(SimpleHistoryAdmin):
     list_display = [
         "pk",
         "curation",
