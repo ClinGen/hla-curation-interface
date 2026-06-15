@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from workos import WorkOSClient
+from workos.session import seal_session_from_auth_response
 
 from auth_.forms import PHIForm
 from auth_.models import UserProfile
@@ -47,17 +48,22 @@ def callback(request: HttpRequest) -> HttpResponseRedirect:
     try:
         auth_response = workos.user_management.authenticate_with_code(
             code=code,  # type: ignore
-            session={"seal_session": True, "cookie_password": cookie_password},  # type: ignore
+        )
+        sealed_session = seal_session_from_auth_response(
+            access_token=auth_response.access_token,
+            refresh_token=auth_response.refresh_token,
+            user=auth_response.user.to_dict(),
+            cookie_password=cookie_password,  # type: ignore
         )
         response = redirect("home")
         response.set_cookie(
             "wos_session",
-            auth_response.sealed_session,  # type: ignore
+            sealed_session,
             secure=True,
             httponly=True,
             samesite="Lax",
         )
-        user = authenticate(request, sealed_session=auth_response.sealed_session)
+        user = authenticate(request, sealed_session=sealed_session)
         if user is not None:
             login(request, user)
     except Exception:  # noqa (Normally I don't like doing this, but this is how WorkOS does it.)

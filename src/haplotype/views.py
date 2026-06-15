@@ -28,8 +28,11 @@ class HaplotypeCreate(ProtectedViewMixin, CreateView):  # type: ignore
             index = GENE_LIST.index(gene)
             unsorted_alleles.append({"allele": allele.name, "index": index})
         sorted_alleles = sorted(unsorted_alleles, key=lambda item: item["index"])
-        name = [item["allele"] for item in sorted_alleles]
-        form.instance.name = "~".join(name)
+        computed_name = "~".join(item["allele"] for item in sorted_alleles)
+        if Haplotype.objects.filter(name=computed_name).exists():
+            form.add_error("alleles", "A haplotype with these alleles already exists.")
+            return self.form_invalid(form)
+        form.instance.name = computed_name
         form.instance.added_by = self.request.user
         messages.success(self.request, "Added haplotype.")
         return super().form_valid(form)

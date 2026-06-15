@@ -35,6 +35,27 @@ class HaplotypeCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(new_haplotype.name, "A*01:02:03~B*04:05:06")  # type: ignore[union-attr]
         self.assertEqual(new_haplotype.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
 
+    def test_reversed_allele_order_produces_same_sorted_name(self):
+        initial_haplotype_count = Haplotype.objects.count()
+        data = {"alleles": ["2", "1"]}  # B*04:05:06 before A*01:02:03
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Haplotype.objects.count(), initial_haplotype_count + 1)
+        new_haplotype = Haplotype.objects.first()
+        self.assertEqual(new_haplotype.name, "A*01:02:03~B*04:05:06")  # type: ignore[union-attr]
+
+    def test_duplicate_allele_combination_returns_form_error(self):
+        self.client.post(self.url, {"alleles": ["1", "2"]})
+        initial_haplotype_count = Haplotype.objects.count()
+        response = self.client.post(self.url, {"alleles": ["2", "1"]})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "haplotype/create.html")
+        form = response.context["form"]
+        self.assertFalse(form.is_valid())
+        self.assertIn("alleles", form.errors)
+        self.assertIn("already exists", form.errors["alleles"][0])
+        self.assertEqual(Haplotype.objects.count(), initial_haplotype_count)
+
     def test_does_not_create_haplotype_with_invalid_form_data(self):
         initial_haplotype_count = Haplotype.objects.count()
         data = {"alleles": []}  # The alleles field is required.
