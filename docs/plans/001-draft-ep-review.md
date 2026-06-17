@@ -11,7 +11,7 @@ curator marking a curation ready and that curation being published. It also repl
 current curator-chosen classification with a score-derived suggestion, with the EP
 setting the authoritative classification at review time.
 
----
+______________________________________________________________________
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ when a curation is sent back for revision, and the audit trail of previous revie
 lives in the history tables rather than on the model itself. If history is not in place
 first, that audit trail is simply lost.
 
----
+______________________________________________________________________
 
 ## The New Status State Machine
 
@@ -65,30 +65,31 @@ The transitions are:
 - **Provisional → Published**: any curator with `can_curate` publishes the curation to
   the HLA repository, creating a `PublishedCuration` record as today.
 
----
+______________________________________________________________________
 
 ## Locking
 
-The edit views (`CurationEdit`, `curation_edit_evidence`, `EvidenceEdit`) currently block
-edits once a `PublishedCuration` record exists. This logic needs to extend to cover
-`Ready for Review` and `Provisional` as well. A curation in either of those states is
-locked for editing. The lock lifts only if the curation is sent back to `In Progress`.
+The edit views (`CurationEdit`, `curation_edit_evidence`, `EvidenceEdit`) currently
+block edits once a `PublishedCuration` record exists. This logic needs to extend to
+cover `Ready for Review` and `Provisional` as well. A curation in either of those states
+is locked for editing. The lock lifts only if the curation is sent back to
+`In Progress`.
 
----
+______________________________________________________________________
 
 ## Permissions
 
 The existing `UserProfile` model has `has_curation_permissions`. A new flag,
 `has_ep_review_permissions`, is added alongside it. Any user with this flag set can
-access the EP review view and act on behalf of the expert panel. The existing `can_curate`
-property, which currently gates all curation views, is unchanged — EP reviewers are a
-subset of users who also have `can_curate`.
+access the EP review view and act on behalf of the expert panel. The existing
+`can_curate` property, which currently gates all curation views, is unchanged — EP
+reviewers are a subset of users who also have `can_curate`.
 
 The `ProtectedViewMixin` and `protected_view` decorator in `auth_/permissions.py` remain
 as-is. A new mixin or decorator, `EPReviewViewMixin` / `ep_review_view`, is added that
 additionally checks `has_ep_review_permissions`.
 
----
+______________________________________________________________________
 
 ## Classification
 
@@ -129,7 +130,7 @@ This removes any ambiguity about implicit confirmation.
 `ep_classification_notes` is also required. There is no conditional — the proxy user
 must always provide notes explaining the panel's classification decision.
 
----
+______________________________________________________________________
 
 ## New Fields on `Curation`
 
@@ -137,26 +138,23 @@ The following fields are added to the `Curation` model.
 
 **EP review fields** (all nullable, cleared when a curation is sent back):
 
-| Field | Type | Notes |
-|---|---|---|
-| `ep_review_status` | CharField | Choices: `not_started`, `needs_revision`, `approved` |
-| `ep_classification` | CharField | Choices from `Classification` enum; set by EP |
-| `ep_classification_notes` | TextField | Required at EP review time |
-| `ep_notes` | TextField | Optional overall notes from the EP reviewer |
+| Field | Type | Notes | |---|---|---| | `ep_review_status` | CharField | Choices:
+`not_started`, `needs_revision`, `approved` | | `ep_classification` | CharField |
+Choices from `Classification` enum; set by EP | | `ep_classification_notes` | TextField
+| Required at EP review time | | `ep_notes` | TextField | Optional overall notes from
+the EP reviewer |
 
 **Status transition timestamps** (auto-stamped, overwritten on re-entry):
 
-| Field | Type | Set when |
-|---|---|---|
-| `in_progress_at` | DateTimeField | Curation created, or sent back to In Progress |
-| `ready_for_review_at` | DateTimeField | Curator submits for review |
-| `provisional_at` | DateTimeField | EP approves |
-| `published_at` | DateTimeField | Curation is published |
+| Field | Type | Set when | |---|---|---| | `in_progress_at` | DateTimeField | Curation
+created, or sent back to In Progress | | `ready_for_review_at` | DateTimeField | Curator
+submits for review | | `provisional_at` | DateTimeField | EP approves | | `published_at`
+| DateTimeField | Curation is published |
 
 All four timestamps are nullable and set automatically by the view that drives each
 transition — they are never manually entered.
 
----
+______________________________________________________________________
 
 ## New and Modified Views
 
@@ -192,7 +190,7 @@ Currently checks `curation.status == Status.DONE`. This check changes to
 same. When the `PublishedCuration` is created, `published_at` is also stamped on the
 `Curation` instance.
 
----
+______________________________________________________________________
 
 ## New URL Routes
 
@@ -205,7 +203,7 @@ Three new routes are added to `curation/urls.py`:
 
 The existing `curation-publish` URL is unchanged.
 
----
+______________________________________________________________________
 
 ## Forms
 
@@ -228,7 +226,7 @@ the view will clear them anyway.
 The `classification` field is removed. This form no longer exposes any classification
 input to the curator.
 
----
+______________________________________________________________________
 
 ## Templates
 
@@ -254,11 +252,11 @@ with `ep_classification_notes` and `ep_notes` shown in a collapsible section bel
 ### `curation/ep_review.html` (new)
 
 A dedicated page for the EP review action, accessible only to users with
-`has_ep_review_permissions`. Renders the `EPReviewForm` alongside a read-only summary
-of the curation — status, score, and `suggested_classification` — so the reviewer has
-the relevant context when filling in the EP fields.
+`has_ep_review_permissions`. Renders the `EPReviewForm` alongside a read-only summary of
+the curation — status, score, and `suggested_classification` — so the reviewer has the
+relevant context when filling in the EP fields.
 
----
+______________________________________________________________________
 
 ## Validator Changes
 
@@ -270,14 +268,15 @@ longer a thing the curator sets.
 before a curation can be set to `Done`. It is updated to run the same check when the
 status is being set to `Ready for Review` instead.
 
----
+______________________________________________________________________
 
 ## Admin
 
-`UserProfile` gains a `has_ep_review_permissions` checkbox in the Django admin, alongside
-the existing `has_curation_permissions` checkbox. This is how EP reviewers are designated.
+`UserProfile` gains a `has_ep_review_permissions` checkbox in the Django admin,
+alongside the existing `has_curation_permissions` checkbox. This is how EP reviewers are
+designated.
 
----
+______________________________________________________________________
 
 ## Open Questions
 
@@ -285,6 +284,6 @@ the existing `has_curation_permissions` checkbox. This is how EP reviewers are d
   any `can_curate` user publish a `Provisional` curation? The current draft assumes any
   `can_curate` user can publish, since the EP approval is the meaningful gate.
 
-- The `version` field on `PublishedCuration` is not addressed here. If versioning matters
-  for the re-review case (a curation goes through two EP rounds before being published),
-  it should be thought through separately.
+- The `version` field on `PublishedCuration` is not addressed here. If versioning
+  matters for the re-review case (a curation goes through two EP rounds before being
+  published), it should be thought through separately.

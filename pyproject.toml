@@ -30,6 +30,7 @@ dev = [
     "sphinx>=8.2.3",
     "types-requests>=2.32.4.20250611",
     "types-lxml>=2025.3.30",
+    "mdformat>=1.0.0",
 ]
 
 [tool.ruff]

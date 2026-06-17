@@ -283,6 +283,12 @@ docs-clean:
     rm -rf docs/build/
 alias dcl := docs-clean
 
+[group('docs')]
+docs-format:
+    uv run mdformat docs/plans --wrap 88 --number
+    uv run mdformat docs/prompts --wrap 88 --number
+alias dofm := docs-format
+
 #=====================================================================
 # Terraform Recipes
 #=====================================================================
