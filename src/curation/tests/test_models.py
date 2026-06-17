@@ -523,8 +523,8 @@ class TestEvidence(TestCase):
 
 
 class TestValidateNumFields(TestCase):
-    # Curation pk=1 is an allele curation for A*01:02:03 (3-field max).
-    # Haplotype pk=1 is A*01:02:03~B*04:05:06 (also 3-field max on both alleles).
+    # Curation pk=1 is an allele curation for A*01:02:03 (3-field min).
+    # Haplotype pk=1 is A*01:02:03~B*04:05:06 (also 3-field min on both alleles).
     fixtures = [
         "test_alleles.json",
         "test_diseases.json",
@@ -546,26 +546,26 @@ class TestValidateNumFields(TestCase):
         self.evidence.num_fields = None
         self.evidence.clean()
 
-    def test_less_than_max_does_not_raise(self):
+    def test_less_than_min_raises(self):
         self.evidence.num_fields = 1
-        self.evidence.clean()
-
-    def test_equal_to_max_does_not_raise(self):
-        self.evidence.num_fields = 3
-        self.evidence.clean()
-
-    def test_greater_than_max_raises(self):
-        self.evidence.num_fields = 4
         with self.assertRaises(ValidationError) as context:
             self.evidence.clean()
         self.assertIn("num_fields", context.exception.message_dict)
+
+    def test_equal_to_min_does_not_raise(self):
+        self.evidence.num_fields = 3
+        self.evidence.clean()
+
+    def test_greater_than_min_does_not_raise(self):
+        self.evidence.num_fields = 4
+        self.evidence.clean()
 
     def test_no_curation_does_not_raise(self):
         evidence = Evidence(publication=self.publication, num_fields=4)
         evidence.save()
         evidence.clean()
 
-    def test_haplotype_equal_to_min_allele_max_does_not_raise(self):
+    def test_haplotype_equal_to_min_does_not_raise(self):
         haplotype = Haplotype.objects.get(pk=1)
         disease = Disease.objects.get(pk=1)
         curation = Curation.objects.create(
@@ -581,7 +581,7 @@ class TestValidateNumFields(TestCase):
         evidence.save()
         evidence.clean()
 
-    def test_haplotype_greater_than_min_allele_max_raises(self):
+    def test_haplotype_greater_than_min_does_not_raise(self):
         haplotype = Haplotype.objects.get(pk=1)
         disease = Disease.objects.get(pk=1)
         curation = Curation.objects.create(
@@ -593,6 +593,22 @@ class TestValidateNumFields(TestCase):
             curation=curation,
             publication=self.publication,
             num_fields=4,
+        )
+        evidence.save()
+        evidence.clean()
+
+    def test_haplotype_less_than_min_raises(self):
+        haplotype = Haplotype.objects.get(pk=1)
+        disease = Disease.objects.get(pk=1)
+        curation = Curation.objects.create(
+            curation_type=CurationTypes.HAPLOTYPE,
+            haplotype=haplotype,
+            disease=disease,
+        )
+        evidence = Evidence(
+            curation=curation,
+            publication=self.publication,
+            num_fields=1,
         )
         evidence.save()
         with self.assertRaises(ValidationError) as context:

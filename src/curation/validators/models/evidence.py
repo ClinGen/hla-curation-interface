@@ -10,8 +10,8 @@ from curation.validators.common import has_association_and_p_value_err_msg
 from publication.constants.models import PublicationTypes
 
 
-def _max_num_fields(evidence) -> int | None:
-    """Returns the maximum allowed num_fields for the evidence's allele or haplotype."""
+def _min_num_fields(evidence) -> int | None:
+    """Returns the minimum allowed num_fields for the evidence's allele or haplotype."""
     curation = evidence.curation
     if not curation:
         return None
@@ -25,21 +25,21 @@ def _max_num_fields(evidence) -> int | None:
 
 
 def validate_num_fields(evidence) -> None:
-    """Validates that num_fields does not exceed what the allele or haplotype supports.
+    """Validates that num_fields is not less than what the allele or haplotype requires.
 
     Raises:
-        ValidationError: If num_fields is greater than the maximum allowed.
+        ValidationError: If num_fields is less than the minimum allowed.
     """
     if evidence.num_fields is None:
         return
-    max_fields = _max_num_fields(evidence)
-    if max_fields is not None and evidence.num_fields > max_fields:
+    min_fields = _min_num_fields(evidence)
+    if min_fields is not None and evidence.num_fields < min_fields:
         raise ValidationError(
             {
                 "num_fields": (
-                    f"The selected resolution ({evidence.num_fields}-field) exceeds "
-                    f"the maximum supported by this allele or haplotype "
-                    f"({max_fields}-field)."
+                    f"The selected resolution ({evidence.num_fields}-field) is below "
+                    f"the minimum supported by this allele or haplotype "
+                    f"({min_fields}-field)."
                 )
             }
         )
