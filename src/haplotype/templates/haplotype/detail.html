@@ -53,6 +53,13 @@
             </table>
         </div>
 
+        <div class="mb-4">
+            <a href="{% url 'haplotype-history' object.slug %}" class="button">
+                {% include "common/icon.html" with icon_name="clock-history" %}
+                View History
+            </a>
+        </div>
+
         {% if object.curations.all %}
             <details class="mt-2">
                 <summary><b>Curations</b></summary>

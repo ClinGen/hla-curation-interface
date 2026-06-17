@@ -1,0 +1,41 @@
+{% extends "layouts/base.html" %}
+{% block title %}{{ curation.slug }} History{% endblock %}
+{% block description %}View the history of changes to {{ curation.slug }}.{% endblock %}
+{% block main %}
+    <div class="box mt-6 mb-6">
+
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li>
+                    <a href="{% url 'home' %}">
+                        {% include "common/icon.html" with icon_name="house" %}
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'repo-search' %}">
+                        {% include "common/icon.html" with icon_name="search" %}
+                        HLArepo
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'repo-detail' curation.slug %}">
+                        {% include "common/icon.html" with icon_name="journal-text" %}
+                        {{ curation.slug }} Details
+                    </a>
+                </li>
+                <li class="is-active">
+                    <b>
+                        <a href="" aria-current="page">
+                            {% include "common/icon.html" with icon_name="clock-history" %}
+                            {{ curation.slug }} History
+                        </a>
+                    </b>
+                </li>
+            </ul>
+        </nav>
+
+        {% include "common/history/history_body.html" with table_id="repo-history-table" change_url_name="repo-change" change_url_slug1=curation.slug %}
+
+    </div>
+{% endblock %}

@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views.generic import DetailView, ListView
 
+from common.history import resolve_changes
 from repo.models import PublishedCuration
 from repo.serializers import serialize_published_curation
 
@@ -41,6 +42,41 @@ class PublishedCurationDetail(DetailView):
             Context dictionary with curation added for template use.
         """
         context = super().get_context_data(**kwargs)
+        context["curation"] = self.object.curation
+        return context
+
+
+class PublishedCurationHistory(DetailView):
+    model = PublishedCuration
+    template_name = "repo/history.html"
+
+    def get_object(self, _queryset: QuerySet[Any] | None = None) -> PublishedCuration:
+        return get_object_or_404(
+            PublishedCuration, curation__slug=self.kwargs["curation_slug"]
+        )
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["history"] = self.object.history.all()
+        context["curation"] = self.object.curation
+        return context
+
+
+class PublishedCurationChange(DetailView):
+    model = PublishedCuration
+    template_name = "repo/change.html"
+
+    def get_object(self, _queryset: QuerySet[Any] | None = None) -> PublishedCuration:
+        return get_object_or_404(
+            PublishedCuration, curation__slug=self.kwargs["curation_slug"]
+        )
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        record = self.object.history.get(history_id=self.kwargs["history_id"])
+        prev_record = record.prev_record
+        context["record"] = record
+        context["changes"] = resolve_changes(PublishedCuration, record, prev_record)
         context["curation"] = self.object.curation
         return context
 

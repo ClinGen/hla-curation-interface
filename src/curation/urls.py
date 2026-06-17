@@ -49,4 +49,24 @@ urlpatterns = [
         views.EvidenceEdit.as_view(),
         name="evidence-edit",
     ),
+    path(
+        "<slug:curation_slug>/history",
+        views.CurationHistory.as_view(),
+        name="curation-history",
+    ),
+    path(
+        "<slug:curation_slug>/history/<int:history_id>/change",
+        views.CurationChange.as_view(),
+        name="curation-change",
+    ),
+    path(
+        "<slug:curation_slug>/evidence/<slug:evidence_slug>/history",
+        views.EvidenceHistory.as_view(),
+        name="evidence-history",
+    ),
+    path(
+        "<slug:curation_slug>/evidence/<slug:evidence_slug>/history/<int:history_id>/change",
+        views.EvidenceChange.as_view(),
+        name="evidence-change",
+    ),
 ]

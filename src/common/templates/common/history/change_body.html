@@ -1,0 +1,49 @@
+<div class="block table-container">
+    <table class="table">
+        <tbody>
+            <tr>
+                <td>Changed By</td>
+                <td>{{ record.history_user|default_if_none:"------" }}</td>
+            </tr>
+            <tr>
+                <td>Change</td>
+                <td>
+                    {% if record.history_type == "+" %}
+                        Created
+                    {% elif record.history_type == "~" %}
+                        Updated
+                    {% elif record.history_type == "-" %}
+                        Deleted
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>Date</td>
+                <td>{{ record.history_date|date:"Y-m-d H:i" }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+{% if record.history_type == "~" and changes %}
+    <div class="block table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Before</th>
+                    <th>After</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for change in changes %}
+                    <tr>
+                        <td>{{ change.field }}</td>
+                        <td>{{ change.old|default_if_none:"------" }}</td>
+                        <td>{{ change.new|default_if_none:"------" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}

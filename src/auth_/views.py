@@ -5,12 +5,13 @@ import os
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from workos import WorkOSClient
 from workos.session import seal_session_from_auth_response
 
 from auth_.forms import PHIForm
 from auth_.models import UserProfile
+from common.history import resolve_changes
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +95,33 @@ def profile(request: HttpRequest) -> HttpResponse:
         return render(request, "auth_/profile.html", context)
     messages.info(request, "Not logged in.")
     return redirect("login")
+
+
+def profile_history(request: HttpRequest) -> HttpResponse:
+    """Returns the history page for the current user's profile."""
+    if not request.user.is_authenticated:
+        messages.info(request, "Not logged in.")
+        return redirect("login")
+    p = get_object_or_404(UserProfile, user=request.user)
+    return render(
+        request, "auth_/history.html", {"user_profile": p, "history": p.history.all()}
+    )
+
+
+def profile_change(request: HttpRequest, history_id: int) -> HttpResponse:
+    """Returns the change detail page for a single history record."""
+    if not request.user.is_authenticated:
+        messages.info(request, "Not logged in.")
+        return redirect("login")
+    p = get_object_or_404(UserProfile, user=request.user)
+    record = p.history.get(history_id=history_id)
+    prev_record = record.prev_record
+    changes = resolve_changes(UserProfile, record, prev_record)
+    return render(
+        request,
+        "auth_/change.html",
+        {"user_profile": p, "record": record, "changes": changes},
+    )
 
 
 def phi(request: HttpRequest) -> HttpResponse:

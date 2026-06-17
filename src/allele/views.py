@@ -8,6 +8,7 @@ from allele.clients import fetch_allele_data, get_car_id
 from allele.forms import AlleleForm
 from allele.models import Allele
 from auth_.permissions import ProtectedViewMixin
+from common.history import resolve_changes
 
 
 class AlleleCreate(ProtectedViewMixin, CreateView):  # type: ignore
@@ -40,6 +41,29 @@ class AlleleCreate(ProtectedViewMixin, CreateView):  # type: ignore
 class AlleleDetail(ProtectedViewMixin, DetailView):  # type: ignore
     model = Allele
     template_name = "allele/detail.html"
+
+
+class AlleleHistory(ProtectedViewMixin, DetailView):  # type: ignore
+    model = Allele
+    template_name = "allele/history.html"
+
+    def get_context_data(self, **kwargs: object) -> dict:
+        context = super().get_context_data(**kwargs)
+        context["history"] = self.object.history.all()  # type: ignore[union-attr]
+        return context
+
+
+class AlleleChange(ProtectedViewMixin, DetailView):  # type: ignore
+    model = Allele
+    template_name = "allele/change.html"
+
+    def get_context_data(self, **kwargs: object) -> dict:
+        context = super().get_context_data(**kwargs)
+        record = self.object.history.get(history_id=self.kwargs["history_id"])  # type: ignore[union-attr]
+        prev_record = record.prev_record
+        context["record"] = record
+        context["changes"] = resolve_changes(Allele, record, prev_record)
+        return context
 
 
 class AlleleList(ProtectedViewMixin, ListView):  # type: ignore

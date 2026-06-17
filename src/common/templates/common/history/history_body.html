@@ -1,0 +1,46 @@
+{% if history %}
+    <div class="block scroll-container">
+        <table id="{{ table_id }}">
+            <thead>
+                <tr>
+                    <th>Changed By</th>
+                    <th>Change</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in history %}
+                    <tr>
+                        <td>{{ record.history_user|default_if_none:"------" }}</td>
+                        <td>
+                            {% if change_url_slug2 %}
+                                <a href="{% url change_url_name change_url_slug1 change_url_slug2 record.history_id %}">
+                            {% elif change_url_slug1 %}
+                                <a href="{% url change_url_name change_url_slug1 record.history_id %}">
+                            {% else %}
+                                <a href="{% url change_url_name record.history_id %}">
+                            {% endif %}
+                                {% if record.history_type == "+" %}
+                                    {% include "common/icon.html" with icon_name="file-plus" %}
+                                    Created
+                                {% elif record.history_type == "~" %}
+                                    {% include "common/icon.html" with icon_name="pencil-square" %}
+                                    Updated
+                                {% elif record.history_type == "-" %}
+                                    {% include "common/icon.html" with icon_name="file-minus" %}
+                                    Deleted
+                                {% endif %}
+                            </a>
+                        </td>
+                        <td>{{ record.history_date|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        let historyTable = new DataTable("#{{ table_id }}", {"order": []});
+    </script>
+{% else %}
+    <p>No records.</p>
+{% endif %}

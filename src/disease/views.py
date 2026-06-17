@@ -5,6 +5,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
 from auth_.permissions import ProtectedViewMixin
+from common.history import resolve_changes
 from disease.clients import fetch_disease_data, get_iri, get_name
 from disease.forms import DiseaseForm
 from disease.models import Disease
@@ -35,6 +36,29 @@ class DiseaseCreate(ProtectedViewMixin, CreateView):  # type: ignore
 class DiseaseDetail(ProtectedViewMixin, DetailView):  # type: ignore
     model = Disease
     template_name = "disease/detail.html"
+
+
+class DiseaseHistory(ProtectedViewMixin, DetailView):  # type: ignore
+    model = Disease
+    template_name = "disease/history.html"
+
+    def get_context_data(self, **kwargs: object) -> dict:
+        context = super().get_context_data(**kwargs)
+        context["history"] = self.object.history.all()  # type: ignore[union-attr]
+        return context
+
+
+class DiseaseChange(ProtectedViewMixin, DetailView):  # type: ignore
+    model = Disease
+    template_name = "disease/change.html"
+
+    def get_context_data(self, **kwargs: object) -> dict:
+        context = super().get_context_data(**kwargs)
+        record = self.object.history.get(history_id=self.kwargs["history_id"])  # type: ignore[union-attr]
+        prev_record = record.prev_record
+        context["record"] = record
+        context["changes"] = resolve_changes(Disease, record, prev_record)
+        return context
 
 
 class DiseaseList(ProtectedViewMixin, ListView):  # type: ignore

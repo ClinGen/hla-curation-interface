@@ -1,0 +1,41 @@
+{% extends "layouts/base.html" %}
+{% block title %}{{ object.slug }} History{% endblock %}
+{% block description %}View the history of changes to {{ object.slug }}.{% endblock %}
+{% block main %}
+    <div class="box mt-6 mb-6">
+
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li>
+                    <a href="{% url 'home' %}">
+                        {% include "common/icon.html" with icon_name="house" %}
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'haplotype-list' %}">
+                        {% include "common/icon.html" with icon_name="search" %}
+                        Haplotype Search
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'haplotype-detail' object.slug %}">
+                        {% include "common/icon.html" with icon_name="journal-text" %}
+                        {{ object.slug }} Details
+                    </a>
+                </li>
+                <li class="is-active">
+                    <b>
+                        <a href="" aria-current="page">
+                            {% include "common/icon.html" with icon_name="clock-history" %}
+                            {{ object.slug }} History
+                        </a>
+                    </b>
+                </li>
+            </ul>
+        </nav>
+
+        {% include "common/history/history_body.html" with table_id="haplotype-history-table" change_url_name="haplotype-change" change_url_slug1=object.slug %}
+
+    </div>
+{% endblock %}

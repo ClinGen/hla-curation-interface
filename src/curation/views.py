@@ -13,6 +13,7 @@ from django.views.generic import DetailView, ListView, UpdateView
 from django.views.generic.edit import CreateView
 
 from auth_.permissions import ProtectedViewMixin, protected_view
+from common.history import resolve_changes
 from curation.constants.models.common import Status
 from curation.constants.views import FRAMEWORK
 from curation.forms import (
@@ -240,6 +241,62 @@ def curation_publish(request: HttpRequest, curation_slug: str) -> HttpResponse:
         f"Curation {curation.slug} has been published to the repository.",
     )
     return redirect("repo-detail", curation_slug=curation.slug)
+
+
+class CurationHistory(ProtectedViewMixin, DetailView):  # type: ignore
+    model = Curation
+    template_name = "curation/history.html"
+    slug_field = "slug"
+    slug_url_kwarg = "curation_slug"
+
+    def get_context_data(self, **kwargs: object) -> dict:
+        context = super().get_context_data(**kwargs)
+        context["history"] = self.object.history.all()  # type: ignore[union-attr]
+        return context
+
+
+class CurationChange(ProtectedViewMixin, DetailView):  # type: ignore
+    model = Curation
+    template_name = "curation/change.html"
+    slug_field = "slug"
+    slug_url_kwarg = "curation_slug"
+
+    def get_context_data(self, **kwargs: object) -> dict:
+        context = super().get_context_data(**kwargs)
+        record = self.object.history.get(history_id=self.kwargs["history_id"])  # type: ignore[union-attr]
+        prev_record = record.prev_record
+        context["record"] = record
+        context["changes"] = resolve_changes(Curation, record, prev_record)
+        return context
+
+
+class EvidenceHistory(ProtectedViewMixin, DetailView):  # type: ignore
+    model = Evidence
+    template_name = "evidence/history.html"
+    slug_field = "slug"
+    slug_url_kwarg = "evidence_slug"
+
+    def get_context_data(self, **kwargs: object) -> dict:
+        context = super().get_context_data(**kwargs)
+        context["history"] = self.object.history.all()  # type: ignore[union-attr]
+        context["curation_slug"] = self.kwargs["curation_slug"]
+        return context
+
+
+class EvidenceChange(ProtectedViewMixin, DetailView):  # type: ignore
+    model = Evidence
+    template_name = "evidence/change.html"
+    slug_field = "slug"
+    slug_url_kwarg = "evidence_slug"
+
+    def get_context_data(self, **kwargs: object) -> dict:
+        context = super().get_context_data(**kwargs)
+        record = self.object.history.get(history_id=self.kwargs["history_id"])  # type: ignore[union-attr]
+        prev_record = record.prev_record
+        context["record"] = record
+        context["changes"] = resolve_changes(Evidence, record, prev_record)
+        context["curation_slug"] = self.kwargs["curation_slug"]
+        return context
 
 
 class CurationList(ProtectedViewMixin, ListView):  # type: ignore

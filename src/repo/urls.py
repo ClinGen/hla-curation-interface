@@ -15,4 +15,14 @@ urlpatterns = [
         views.download_single_json,
         name="repo-download-single",
     ),
+    path(
+        "<slug:curation_slug>/history",
+        views.PublishedCurationHistory.as_view(),
+        name="repo-history",
+    ),
+    path(
+        "<slug:curation_slug>/history/<int:history_id>/change",
+        views.PublishedCurationChange.as_view(),
+        name="repo-change",
+    ),
 ]

@@ -1,0 +1,53 @@
+{% extends "layouts/base.html" %}
+{% block title %}{{ object.slug }} Change{% endblock %}
+{% block description %}View a change to {{ object.slug }}.{% endblock %}
+{% block main %}
+    <div class="box mt-6 mb-6">
+
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li>
+                    <a href="{% url 'home' %}">
+                        {% include "common/icon.html" with icon_name="house" %}
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'disease-list' %}">
+                        {% include "common/icon.html" with icon_name="search" %}
+                        Disease Search
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'disease-detail' object.slug %}">
+                        {% include "common/icon.html" with icon_name="journal-text" %}
+                        {{ object.slug }} Details
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'disease-history' object.slug %}">
+                        {% include "common/icon.html" with icon_name="clock-history" %}
+                        {{ object.slug }} History
+                    </a>
+                </li>
+                <li class="is-active">
+                    <b>
+                        <a href="" aria-current="page">
+                            {% if record.history_type == "+" %}
+                                {% include "common/icon.html" with icon_name="file-plus" %}
+                            {% elif record.history_type == "~" %}
+                                {% include "common/icon.html" with icon_name="pencil-square" %}
+                            {% elif record.history_type == "-" %}
+                                {% include "common/icon.html" with icon_name="file-minus" %}
+                            {% endif %}
+                            Change on {{ record.history_date|date:"Y-m-d H:i" }}
+                        </a>
+                    </b>
+                </li>
+            </ul>
+        </nav>
+
+        {% include "common/history/change_body.html" %}
+
+    </div>
+{% endblock %}
