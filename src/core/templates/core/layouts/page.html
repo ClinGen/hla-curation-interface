@@ -1,9 +1,29 @@
 {% extends "layouts/base.html" %}
 {% block main %}
-    <div class="block mt-6">
-        <h1 class="title">{% block heading %}{% endblock %}</h1>
-    </div>
-    <div class="block mb-6">
-        {% block content %}{% endblock %}
+    <div class="box mt-6 mb-6">
+
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li>
+                    <a href="{% url 'home' %}">
+                        {% include "common/icon.html" with icon_name="house" %}
+                        Home
+                    </a>
+                </li>
+                <li class="is-active">
+                    <b>
+                        <a href="" aria-current="page">
+                            {% include "common/icon.html" with icon_name="info-circle" %}
+                            {% block heading %}{% endblock %}
+                        </a>
+                    </b>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="block mb-4">
+            {% block content %}{% endblock %}
+        </div>
+
     </div>
 {% endblock %}
