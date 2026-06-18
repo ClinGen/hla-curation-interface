@@ -159,8 +159,8 @@ def get_step_3c2_points(evidence) -> float | None:
     if not has_confidence_interval:
         return None
     confidence_interval = Interval(
-        start=evidence.ci_start,  # type: ignore
-        end=evidence.ci_end,  # type: ignore
+        start=evidence.ci_start,
+        end=evidence.ci_end,
         start_inclusive=True,
         end_inclusive=True,
         variable="CI",

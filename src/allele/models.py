@@ -64,7 +64,7 @@ class Allele(models.Model):
         """Adds a human-readable ID."""
         super().save(*args, **kwargs)
         if not self.slug:
-            self.slug = f"A{self.id:06d}"
+            self.slug = f"A{self.pk:06d}"
             self.save(update_fields=["slug"])
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:

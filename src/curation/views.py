@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.http import (
     HttpRequest,
     HttpResponse,
-    HttpResponseBase,
+    HttpResponseRedirect,
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -38,7 +38,7 @@ from curation.validators.views import (
 )
 
 
-class CurationCreate(ProtectedViewMixin, CreateView):  # type: ignore
+class CurationCreate(ProtectedViewMixin, CreateView):
     model = Curation
     form_class = CurationCreateForm
     template_name = "curation/create.html"
@@ -52,21 +52,23 @@ class CurationCreate(ProtectedViewMixin, CreateView):  # type: ignore
         return super().form_valid(form)
 
 
-class CurationDetail(ProtectedViewMixin, DetailView):  # type: ignore
+class CurationDetail(ProtectedViewMixin, DetailView):
     model = Curation
     template_name = "curation/detail.html"
     slug_field = "slug"
     slug_url_kwarg = "curation_slug"
 
 
-class CurationEdit(ProtectedViewMixin, UpdateView):  # type: ignore
+class CurationEdit(ProtectedViewMixin, UpdateView):
     model = Curation
     form_class = CurationEditForm
     template_name = "curation/edit/curation.html"
     slug_field = "slug"
     slug_url_kwarg = "curation_slug"
 
-    def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponseBase:  # type: ignore[override]
+    def dispatch(
+        self, request: HttpRequest, *args, **kwargs
+    ) -> HttpResponse | HttpResponseRedirect | None:
         """Check if curation is published before allowing edit.
 
         Returns:
@@ -119,7 +121,7 @@ def curation_edit_evidence(request: HttpRequest, curation_slug: str) -> HttpResp
     return render(request, "curation/edit/evidence.html", context)
 
 
-class EvidenceCreate(ProtectedViewMixin, CreateView):  # type: ignore
+class EvidenceCreate(ProtectedViewMixin, CreateView):
     model = Evidence
     form_class = EvidenceCreateForm
     template_name = "evidence/create.html"
@@ -139,7 +141,7 @@ class EvidenceCreate(ProtectedViewMixin, CreateView):  # type: ignore
         return context
 
 
-class EvidenceDetail(ProtectedViewMixin, DetailView):  # type: ignore
+class EvidenceDetail(ProtectedViewMixin, DetailView):
     model = Evidence
     template_name = "evidence/detail.html"
     slug_field = "slug"
@@ -152,14 +154,16 @@ class EvidenceDetail(ProtectedViewMixin, DetailView):  # type: ignore
         return context
 
 
-class EvidenceEdit(ProtectedViewMixin, UpdateView):  # type: ignore
+class EvidenceEdit(ProtectedViewMixin, UpdateView):
     model = Evidence
     form_class = EvidenceEditForm
     template_name = "evidence/edit.html"
     slug_field = "slug"
     slug_url_kwarg = "evidence_slug"
 
-    def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponseBase:  # type: ignore[override]
+    def dispatch(
+        self, request: HttpRequest, *args, **kwargs
+    ) -> HttpResponse | HttpResponseRedirect | None:
         """Check if parent curation is published before allowing edit.
 
         Returns:
@@ -243,7 +247,7 @@ def curation_publish(request: HttpRequest, curation_slug: str) -> HttpResponse:
     return redirect("repo-detail", curation_slug=curation.slug)
 
 
-class CurationHistory(ProtectedViewMixin, DetailView):  # type: ignore
+class CurationHistory(ProtectedViewMixin, DetailView):
     model = Curation
     template_name = "curation/history.html"
     slug_field = "slug"
@@ -251,11 +255,12 @@ class CurationHistory(ProtectedViewMixin, DetailView):  # type: ignore
 
     def get_context_data(self, **kwargs: object) -> dict:
         context = super().get_context_data(**kwargs)
-        context["history"] = self.object.history.all()  # type: ignore[union-attr]
+        obj = cast(Curation, self.object)
+        context["history"] = obj.history.all()  # type: ignore
         return context
 
 
-class CurationChange(ProtectedViewMixin, DetailView):  # type: ignore
+class CurationChange(ProtectedViewMixin, DetailView):
     model = Curation
     template_name = "curation/change.html"
     slug_field = "slug"
@@ -263,14 +268,15 @@ class CurationChange(ProtectedViewMixin, DetailView):  # type: ignore
 
     def get_context_data(self, **kwargs: object) -> dict:
         context = super().get_context_data(**kwargs)
-        record = self.object.history.get(history_id=self.kwargs["history_id"])  # type: ignore[union-attr]
+        obj = cast(Curation, self.object)
+        record = obj.history.get(history_id=self.kwargs["history_id"])  # type: ignore
         prev_record = record.prev_record
         context["record"] = record
         context["changes"] = resolve_changes(Curation, record, prev_record)
         return context
 
 
-class EvidenceHistory(ProtectedViewMixin, DetailView):  # type: ignore
+class EvidenceHistory(ProtectedViewMixin, DetailView):
     model = Evidence
     template_name = "evidence/history.html"
     slug_field = "slug"
@@ -278,12 +284,13 @@ class EvidenceHistory(ProtectedViewMixin, DetailView):  # type: ignore
 
     def get_context_data(self, **kwargs: object) -> dict:
         context = super().get_context_data(**kwargs)
-        context["history"] = self.object.history.all()  # type: ignore[union-attr]
+        obj = cast(Evidence, self.object)
+        context["history"] = obj.history.all()  # type: ignore
         context["curation_slug"] = self.kwargs["curation_slug"]
         return context
 
 
-class EvidenceChange(ProtectedViewMixin, DetailView):  # type: ignore
+class EvidenceChange(ProtectedViewMixin, DetailView):
     model = Evidence
     template_name = "evidence/change.html"
     slug_field = "slug"
@@ -291,7 +298,8 @@ class EvidenceChange(ProtectedViewMixin, DetailView):  # type: ignore
 
     def get_context_data(self, **kwargs: object) -> dict:
         context = super().get_context_data(**kwargs)
-        record = self.object.history.get(history_id=self.kwargs["history_id"])  # type: ignore[union-attr]
+        obj = cast(Evidence, self.object)
+        record = obj.history.get(history_id=self.kwargs["history_id"])  # type: ignore
         prev_record = record.prev_record
         context["record"] = record
         context["changes"] = resolve_changes(Evidence, record, prev_record)
@@ -299,7 +307,7 @@ class EvidenceChange(ProtectedViewMixin, DetailView):  # type: ignore
         return context
 
 
-class CurationList(ProtectedViewMixin, ListView):  # type: ignore
+class CurationList(ProtectedViewMixin, ListView):
     model = Curation
     template_name = "curation/list.html"
     ordering = ["-updated_at"]

@@ -101,7 +101,7 @@ class Publication(models.Model):
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
         if not self.slug:
-            self.slug = f"P{self.id:06d}"
+            self.slug = f"P{self.pk:06d}"
             self.save(update_fields=["slug"])
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:

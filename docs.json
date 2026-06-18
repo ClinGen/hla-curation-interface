@@ -15,7 +15,6 @@
   ],
   "ignore": [
     "*.bak",
-    ".mypy_cache",
     ".venv",
     "__pycache__",
     "migrations",

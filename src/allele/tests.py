@@ -52,10 +52,10 @@ class AlleleCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Allele.objects.count(), initial_allele_count + 1)
         new_allele = Allele.objects.first()
-        self.assertIsNotNone(new_allele)
-        self.assertEqual(new_allele.name, "ASH*01:02:03")  # type: ignore[union-attr]
-        self.assertEqual(new_allele.car_id, "XAHLA123")  # type: ignore[union-attr]
-        self.assertEqual(new_allele.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
+        assert new_allele is not None
+        self.assertEqual(new_allele.name, "ASH*01:02:03")
+        self.assertEqual(new_allele.car_id, "XAHLA123")
+        self.assertEqual(new_allele.added_by, self.user4_yes_phi_yes_perms)
 
     def test_does_not_create_allele_with_invalid_form_data(self):
         initial_allele_count = Allele.objects.count()

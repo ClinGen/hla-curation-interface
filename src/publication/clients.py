@@ -90,7 +90,7 @@ def get_pubmed_year(soup: BeautifulSoup) -> int | None:
     """
     pub_date = soup.find("PubDate")
     if pub_date:
-        year = pub_date.find("Year")  # type: ignore
+        year = pub_date.find("Year")
         if isinstance(year, PageElement):
             year_text = year.get_text(strip=True)
             try:

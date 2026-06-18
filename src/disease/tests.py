@@ -45,11 +45,11 @@ class DiseaseCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Disease.objects.count(), initial_disease_count + 1)
         new_disease = Disease.objects.first()
-        self.assertIsNotNone(new_disease)
-        self.assertEqual(new_disease.mondo_id, "MONDO:123")  # type: ignore[union-attr]
-        self.assertEqual(new_disease.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
-        self.assertEqual(new_disease.name, "acute oran berry intoxication")  # type: ignore[union-attr]
-        self.assertEqual(new_disease.iri, "http://purl.obolibrary.org/obo/MONDO_123")  # type: ignore[union-attr]
+        assert new_disease is not None
+        self.assertEqual(new_disease.mondo_id, "MONDO:123")
+        self.assertEqual(new_disease.added_by, self.user4_yes_phi_yes_perms)
+        self.assertEqual(new_disease.name, "acute oran berry intoxication")
+        self.assertEqual(new_disease.iri, "http://purl.obolibrary.org/obo/MONDO_123")
 
     def test_does_not_create_disease_with_invalid_form_data(self):
         initial_disease_count = Disease.objects.count()

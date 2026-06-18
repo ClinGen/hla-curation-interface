@@ -31,9 +31,9 @@ class HaplotypeCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Haplotype.objects.count(), initial_haplotype_count + 1)
         new_haplotype = Haplotype.objects.first()
-        self.assertIsNotNone(new_haplotype)
-        self.assertEqual(new_haplotype.name, "A*01:02:03~B*04:05:06")  # type: ignore[union-attr]
-        self.assertEqual(new_haplotype.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
+        assert new_haplotype is not None
+        self.assertEqual(new_haplotype.name, "A*01:02:03~B*04:05:06")
+        self.assertEqual(new_haplotype.added_by, self.user4_yes_phi_yes_perms)
 
     def test_reversed_allele_order_produces_same_sorted_name(self):
         initial_haplotype_count = Haplotype.objects.count()
@@ -42,7 +42,8 @@ class HaplotypeCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Haplotype.objects.count(), initial_haplotype_count + 1)
         new_haplotype = Haplotype.objects.first()
-        self.assertEqual(new_haplotype.name, "A*01:02:03~B*04:05:06")  # type: ignore[union-attr]
+        assert new_haplotype is not None
+        self.assertEqual(new_haplotype.name, "A*01:02:03~B*04:05:06")
 
     def test_duplicate_allele_combination_returns_form_error(self):
         self.client.post(self.url, {"alleles": ["1", "2"]})

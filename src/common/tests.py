@@ -2,6 +2,7 @@
 
 import logging
 from contextlib import contextmanager
+from typing import Any
 
 from django.contrib.auth.models import User
 from django.test import Client
@@ -11,6 +12,17 @@ from auth_.models import UserProfile
 
 class BaseViewTestMixin:
     """Base mixin with common view tests."""
+
+    url: str
+    template: str
+    page_name: str
+    expected_text: list[str]
+    # The following are provided by TestCase in concrete test classes.
+    client: Any
+    setUp: Any
+    assertEqual: Any
+    assertContains: Any
+    assertTemplateUsed: Any
 
     def test_template(self):
         response = self.client.get(self.url)

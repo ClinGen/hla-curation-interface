@@ -155,7 +155,7 @@ class Curation(models.Model):
         """Adds a human-readable ID."""
         super().save(*args, **kwargs)
         if not self.slug:
-            self.slug = f"C{self.id:06d}"
+            self.slug = f"C{self.pk:06d}"
             self.save(update_fields=["slug"])
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:
@@ -171,7 +171,7 @@ class Curation(models.Model):
     def score(self) -> float:
         """Returns the score for the curation."""
         total = 0.0
-        for evidence in self.evidence.all():
+        for evidence in self.evidence.all():  # type: ignore
             if evidence.is_included and evidence.is_conflicting:
                 total -= evidence.score
             elif evidence.is_included and not evidence.is_conflicting:
@@ -540,7 +540,7 @@ class Evidence(models.Model):
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
         if not self.slug:
-            self.slug = f"E{self.id:06d}"
+            self.slug = f"E{self.pk:06d}"
             self.save(update_fields=["slug"])
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:

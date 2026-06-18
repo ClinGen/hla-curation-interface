@@ -64,7 +64,7 @@ class Haplotype(models.Model):
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
         if not self.slug:
-            self.slug = f"H{self.id:06d}"
+            self.slug = f"H{self.pk:06d}"
             self.save(update_fields=["slug"])
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:

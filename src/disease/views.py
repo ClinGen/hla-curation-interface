@@ -1,3 +1,5 @@
+from typing import cast
+
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -11,7 +13,7 @@ from disease.forms import DiseaseForm
 from disease.models import Disease
 
 
-class DiseaseCreate(ProtectedViewMixin, CreateView):  # type: ignore
+class DiseaseCreate(ProtectedViewMixin, CreateView):
     model = Disease
     form_class = DiseaseForm
     template_name = "disease/create.html"
@@ -33,35 +35,37 @@ class DiseaseCreate(ProtectedViewMixin, CreateView):  # type: ignore
         return redirect("disease-create")
 
 
-class DiseaseDetail(ProtectedViewMixin, DetailView):  # type: ignore
+class DiseaseDetail(ProtectedViewMixin, DetailView):
     model = Disease
     template_name = "disease/detail.html"
 
 
-class DiseaseHistory(ProtectedViewMixin, DetailView):  # type: ignore
+class DiseaseHistory(ProtectedViewMixin, DetailView):
     model = Disease
     template_name = "disease/history.html"
 
     def get_context_data(self, **kwargs: object) -> dict:
         context = super().get_context_data(**kwargs)
-        context["history"] = self.object.history.all()  # type: ignore[union-attr]
+        obj = cast(Disease, self.object)
+        context["history"] = obj.history.all()  # type: ignore
         return context
 
 
-class DiseaseChange(ProtectedViewMixin, DetailView):  # type: ignore
+class DiseaseChange(ProtectedViewMixin, DetailView):
     model = Disease
     template_name = "disease/change.html"
 
     def get_context_data(self, **kwargs: object) -> dict:
         context = super().get_context_data(**kwargs)
-        record = self.object.history.get(history_id=self.kwargs["history_id"])  # type: ignore[union-attr]
+        obj = cast(Disease, self.object)
+        record = obj.history.get(history_id=self.kwargs["history_id"])  # type: ignore
         prev_record = record.prev_record
         context["record"] = record
         context["changes"] = resolve_changes(Disease, record, prev_record)
         return context
 
 
-class DiseaseList(ProtectedViewMixin, ListView):  # type: ignore
+class DiseaseList(ProtectedViewMixin, ListView):
     model = Disease
     template_name = "disease/list.html"
     ordering = ["-updated_at"]

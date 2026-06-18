@@ -8,6 +8,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 
+from auth_.models import UserProfile
 from config.settings.base import LOGIN_URL
 
 PERMISSION_DENIED_MESSAGE = "You don't have permission to access this page."
@@ -36,7 +37,8 @@ class ProtectedViewMixin(AccessMixin):
         """
         if not request.user.is_authenticated:
             return self.handle_no_permission()
-        if hasattr(request.user, "profile") and request.user.profile.can_curate:
+        profile = getattr(request.user, "profile", None)
+        if isinstance(profile, UserProfile) and profile.can_curate:
             return super().dispatch(request, *args, **kwargs)  # type: ignore
         raise PermissionDenied(PERMISSION_DENIED_MESSAGE)
 
@@ -67,7 +69,8 @@ def protected_view(view_function: Callable) -> Callable:
         """
         if not request.user.is_authenticated:
             return redirect(f"{LOGIN_URL}?next={request.path}")
-        if hasattr(request.user, "profile") and request.user.profile.can_curate:
+        profile = getattr(request.user, "profile", None)
+        if isinstance(profile, UserProfile) and profile.can_curate:
             return view_function(request, *args, **kwargs)
         raise PermissionDenied(PERMISSION_DENIED_MESSAGE)
 

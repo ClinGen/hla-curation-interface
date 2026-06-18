@@ -1,3 +1,5 @@
+from typing import cast
+
 from django.contrib import messages
 from django.http import HttpResponse
 from django.urls import reverse_lazy
@@ -11,7 +13,7 @@ from haplotype.forms import HaplotypeForm
 from haplotype.models import Haplotype
 
 
-class HaplotypeCreate(ProtectedViewMixin, CreateView):  # type: ignore
+class HaplotypeCreate(ProtectedViewMixin, CreateView):
     model = Haplotype
     form_class = HaplotypeForm
     template_name = "haplotype/create.html"
@@ -23,13 +25,13 @@ class HaplotypeCreate(ProtectedViewMixin, CreateView):  # type: ignore
         Returns:
              The success page if valid or the form with errors if not.
         """
-        unsorted_alleles = []
+        unsorted_alleles: list[tuple[str, int]] = []
         for allele in form.cleaned_data["alleles"]:
             gene = allele.name.split("*")[0]
             index = GENE_LIST.index(gene)
-            unsorted_alleles.append({"allele": allele.name, "index": index})
-        sorted_alleles = sorted(unsorted_alleles, key=lambda item: item["index"])
-        computed_name = "~".join(item["allele"] for item in sorted_alleles)
+            unsorted_alleles.append((allele.name, index))
+        sorted_alleles = sorted(unsorted_alleles, key=lambda item: item[1])
+        computed_name = "~".join(item[0] for item in sorted_alleles)
         if Haplotype.objects.filter(name=computed_name).exists():
             form.add_error("alleles", "A haplotype with these alleles already exists.")
             return self.form_invalid(form)
@@ -39,35 +41,37 @@ class HaplotypeCreate(ProtectedViewMixin, CreateView):  # type: ignore
         return super().form_valid(form)
 
 
-class HaplotypeDetail(ProtectedViewMixin, DetailView):  # type: ignore
+class HaplotypeDetail(ProtectedViewMixin, DetailView):
     model = Haplotype
     template_name = "haplotype/detail.html"
 
 
-class HaplotypeHistory(ProtectedViewMixin, DetailView):  # type: ignore
+class HaplotypeHistory(ProtectedViewMixin, DetailView):
     model = Haplotype
     template_name = "haplotype/history.html"
 
     def get_context_data(self, **kwargs: object) -> dict:
         context = super().get_context_data(**kwargs)
-        context["history"] = self.object.history.all()  # type: ignore[union-attr]
+        obj = cast(Haplotype, self.object)
+        context["history"] = obj.history.all()  # type: ignore
         return context
 
 
-class HaplotypeChange(ProtectedViewMixin, DetailView):  # type: ignore
+class HaplotypeChange(ProtectedViewMixin, DetailView):
     model = Haplotype
     template_name = "haplotype/change.html"
 
     def get_context_data(self, **kwargs: object) -> dict:
         context = super().get_context_data(**kwargs)
-        record = self.object.history.get(history_id=self.kwargs["history_id"])  # type: ignore[union-attr]
+        obj = cast(Haplotype, self.object)
+        record = obj.history.get(history_id=self.kwargs["history_id"])  # type: ignore
         prev_record = record.prev_record
         context["record"] = record
         context["changes"] = resolve_changes(Haplotype, record, prev_record)
         return context
 
 
-class HaplotypeList(ProtectedViewMixin, ListView):  # type: ignore
+class HaplotypeList(ProtectedViewMixin, ListView):
     model = Haplotype
     template_name = "haplotype/list.html"
     ordering = ["-updated_at"]

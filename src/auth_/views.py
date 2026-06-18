@@ -1,4 +1,3 @@
-# mypy: ignore-errors
 import logging
 import os
 
@@ -104,7 +103,9 @@ def profile_history(request: HttpRequest) -> HttpResponse:
         return redirect("login")
     p = get_object_or_404(UserProfile, user=request.user)
     return render(
-        request, "auth_/history.html", {"user_profile": p, "history": p.history.all()}
+        request,
+        "auth_/history.html",
+        {"user_profile": p, "history": p.history.all()},  # type: ignore
     )
 
 
@@ -114,7 +115,7 @@ def profile_change(request: HttpRequest, history_id: int) -> HttpResponse:
         messages.info(request, "Not logged in.")
         return redirect("login")
     p = get_object_or_404(UserProfile, user=request.user)
-    record = p.history.get(history_id=history_id)
+    record = p.history.get(history_id=history_id)  # type: ignore
     prev_record = record.prev_record
     changes = resolve_changes(UserProfile, record, prev_record)
     return render(
@@ -129,7 +130,7 @@ def phi(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = PHIForm(request.POST)
         if form.is_valid() and form.agree:
-            p = UserProfile.objects.get(user=request.user)  # type: ignore
+            p = UserProfile.objects.get(user=request.user)
             p.has_signed_phi_agreement = True
             p.save()
             messages.success(request, "PHI agreement signed.")

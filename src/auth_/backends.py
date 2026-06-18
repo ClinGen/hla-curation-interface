@@ -1,4 +1,3 @@
-# mypy: ignore-errors
 """Provides a custom WorkOS authentication backend."""
 
 import logging
@@ -64,13 +63,13 @@ class WorkOSBackend(BaseBackend):
                 except Exception:  # noqa (Normally I don't like doing this, but this is how WorkOS does it.)
                     logger.exception("Error refreshing session")
                     return None
-            user_info = auth_response.user
+            user_info = auth_response.user  # type: ignore
             user, created_user = User.objects.get_or_create(
-                username=user_info["email"],
+                username=user_info["email"],  # type: ignore
                 defaults={
-                    "email": user_info["email"],
-                    "first_name": user_info.get("first_name") or "",
-                    "last_name": user_info.get("last_name") or "",
+                    "email": user_info["email"],  # type: ignore
+                    "first_name": user_info.get("first_name") or "",  # type: ignore
+                    "last_name": user_info.get("last_name") or "",  # type: ignore
                 },
             )
             profile, created_profile = UserProfile.objects.get_or_create(user=user)

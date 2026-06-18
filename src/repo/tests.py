@@ -64,7 +64,7 @@ class PublishedCurationModelTest(TestCase):
             curation=self.curation,
             published_by=self.user,
         )
-        self.assertEqual(self.curation.publication, published)
+        self.assertEqual(self.curation.publication, published)  # type: ignore
 
     def test_get_absolute_url(self):
         self.curation.save()  # Ensure slug is generated.

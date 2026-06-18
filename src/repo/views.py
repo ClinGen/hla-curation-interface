@@ -23,7 +23,7 @@ class PublishedCurationDetail(DetailView):
     model = PublishedCuration
     template_name = "repo/detail.html"
 
-    def get_object(self, _queryset: QuerySet[Any] | None = None) -> PublishedCuration:
+    def get_object(self, queryset: QuerySet[Any] | None = None) -> PublishedCuration:  # noqa: ARG002
         """Get PublishedCuration by the curation's slug.
 
         Returns:
@@ -50,7 +50,7 @@ class PublishedCurationHistory(DetailView):
     model = PublishedCuration
     template_name = "repo/history.html"
 
-    def get_object(self, _queryset: QuerySet[Any] | None = None) -> PublishedCuration:
+    def get_object(self, queryset: QuerySet[Any] | None = None) -> PublishedCuration:  # noqa: ARG002
         return get_object_or_404(
             PublishedCuration, curation__slug=self.kwargs["curation_slug"]
         )
@@ -66,7 +66,7 @@ class PublishedCurationChange(DetailView):
     model = PublishedCuration
     template_name = "repo/change.html"
 
-    def get_object(self, _queryset: QuerySet[Any] | None = None) -> PublishedCuration:
+    def get_object(self, queryset: QuerySet[Any] | None = None) -> PublishedCuration:  # noqa: ARG002
         return get_object_or_404(
             PublishedCuration, curation__slug=self.kwargs["curation_slug"]
         )

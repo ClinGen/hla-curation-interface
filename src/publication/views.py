@@ -1,3 +1,5 @@
+from typing import cast
+
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -22,7 +24,7 @@ from publication.forms import PublicationForm
 from publication.models import Publication
 
 
-class PublicationCreate(ProtectedViewMixin, CreateView):  # type: ignore
+class PublicationCreate(ProtectedViewMixin, CreateView):
     model = Publication
     form_class = PublicationForm
     template_name = "publication/create.html"
@@ -58,35 +60,37 @@ class PublicationCreate(ProtectedViewMixin, CreateView):  # type: ignore
         return redirect("publication-create")
 
 
-class PublicationDetail(ProtectedViewMixin, DetailView):  # type: ignore
+class PublicationDetail(ProtectedViewMixin, DetailView):
     model = Publication
     template_name = "publication/detail.html"
 
 
-class PublicationHistory(ProtectedViewMixin, DetailView):  # type: ignore
+class PublicationHistory(ProtectedViewMixin, DetailView):
     model = Publication
     template_name = "publication/history.html"
 
     def get_context_data(self, **kwargs: object) -> dict:
         context = super().get_context_data(**kwargs)
-        context["history"] = self.object.history.all()  # type: ignore[union-attr]
+        obj = cast(Publication, self.object)
+        context["history"] = obj.history.all()  # type: ignore
         return context
 
 
-class PublicationChange(ProtectedViewMixin, DetailView):  # type: ignore
+class PublicationChange(ProtectedViewMixin, DetailView):
     model = Publication
     template_name = "publication/change.html"
 
     def get_context_data(self, **kwargs: object) -> dict:
         context = super().get_context_data(**kwargs)
-        record = self.object.history.get(history_id=self.kwargs["history_id"])  # type: ignore[union-attr]
+        obj = cast(Publication, self.object)
+        record = obj.history.get(history_id=self.kwargs["history_id"])  # type: ignore
         prev_record = record.prev_record
         context["record"] = record
         context["changes"] = resolve_changes(Publication, record, prev_record)
         return context
 
 
-class PublicationList(ProtectedViewMixin, ListView):  # type: ignore
+class PublicationList(ProtectedViewMixin, ListView):
     model = Publication
     template_name = "publication/list.html"
     ordering = ["-updated_at"]

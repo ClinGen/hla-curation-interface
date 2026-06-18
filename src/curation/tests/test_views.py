@@ -48,11 +48,11 @@ class CurationCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Curation.objects.count(), initial_curation_count + 1)
         new_curation = Curation.objects.first()
-        self.assertIsNotNone(new_curation)
-        self.assertEqual(new_curation.curation_type, "ALL")  # type: ignore[union-attr]
-        self.assertEqual(new_curation.allele, Allele.objects.get(pk=1))  # type: ignore[union-attr]
-        self.assertEqual(new_curation.disease, Disease.objects.get(pk=1))  # type: ignore[union-attr]
-        self.assertEqual(new_curation.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
+        assert new_curation is not None
+        self.assertEqual(new_curation.curation_type, "ALL")
+        self.assertEqual(new_curation.allele, Allele.objects.get(pk=1))
+        self.assertEqual(new_curation.disease, Disease.objects.get(pk=1))
+        self.assertEqual(new_curation.added_by, self.user4_yes_phi_yes_perms)
 
     def test_creates_haplotype_curation_with_valid_form_data(self):
         initial_curation_count = Curation.objects.count()
@@ -61,11 +61,11 @@ class CurationCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Curation.objects.count(), initial_curation_count + 1)
         new_curation = Curation.objects.first()
-        self.assertIsNotNone(new_curation)
-        self.assertEqual(new_curation.curation_type, "HAP")  # type: ignore[union-attr]
-        self.assertEqual(new_curation.haplotype, Haplotype.objects.get(pk=1))  # type: ignore[union-attr]
-        self.assertEqual(new_curation.disease, Disease.objects.get(pk=1))  # type: ignore[union-attr]
-        self.assertEqual(new_curation.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
+        assert new_curation is not None
+        self.assertEqual(new_curation.curation_type, "HAP")
+        self.assertEqual(new_curation.haplotype, Haplotype.objects.get(pk=1))
+        self.assertEqual(new_curation.disease, Disease.objects.get(pk=1))
+        self.assertEqual(new_curation.added_by, self.user4_yes_phi_yes_perms)
 
 
 class CurationDetailTest(ProtectedViewTestMixin, TestCase):
@@ -206,13 +206,13 @@ class EvidenceCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Evidence.objects.count(), initial_evidence_count + 1)
         new_evidence = Evidence.objects.first()
-        self.assertIsNotNone(new_evidence)
-        self.assertEqual(new_evidence.curation.allele, Allele.objects.get(pk=1))  # type: ignore[union-attr]
-        self.assertEqual(new_evidence.curation.disease, Disease.objects.get(pk=1))  # type: ignore[union-attr]
-        self.assertEqual(new_evidence.publication, Publication.objects.get(pk=1))  # type: ignore[union-attr]
-        self.assertTrue(new_evidence.needs_review)  # type: ignore[union-attr]
-        self.assertEqual(new_evidence.status, Status.IN_PROGRESS)  # type: ignore[union-attr]
-        self.assertEqual(new_evidence.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
+        assert new_evidence is not None
+        self.assertEqual(new_evidence.curation.allele, Allele.objects.get(pk=1))
+        self.assertEqual(new_evidence.curation.disease, Disease.objects.get(pk=1))
+        self.assertEqual(new_evidence.publication, Publication.objects.get(pk=1))
+        self.assertTrue(new_evidence.needs_review)
+        self.assertEqual(new_evidence.status, Status.IN_PROGRESS)
+        self.assertEqual(new_evidence.added_by, self.user4_yes_phi_yes_perms)
 
 
 class EvidenceDetailTest(ProtectedViewTestMixin, TestCase):

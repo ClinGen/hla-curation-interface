@@ -1,3 +1,5 @@
+from typing import cast
+
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -11,7 +13,7 @@ from auth_.permissions import ProtectedViewMixin
 from common.history import resolve_changes
 
 
-class AlleleCreate(ProtectedViewMixin, CreateView):  # type: ignore
+class AlleleCreate(ProtectedViewMixin, CreateView):
     model = Allele
     form_class = AlleleForm
     template_name = "allele/create.html"
@@ -38,35 +40,37 @@ class AlleleCreate(ProtectedViewMixin, CreateView):  # type: ignore
         return redirect("allele-create")
 
 
-class AlleleDetail(ProtectedViewMixin, DetailView):  # type: ignore
+class AlleleDetail(ProtectedViewMixin, DetailView):
     model = Allele
     template_name = "allele/detail.html"
 
 
-class AlleleHistory(ProtectedViewMixin, DetailView):  # type: ignore
+class AlleleHistory(ProtectedViewMixin, DetailView):
     model = Allele
     template_name = "allele/history.html"
 
     def get_context_data(self, **kwargs: object) -> dict:
         context = super().get_context_data(**kwargs)
-        context["history"] = self.object.history.all()  # type: ignore[union-attr]
+        obj = cast(Allele, self.object)
+        context["history"] = obj.history.all()  # type: ignore
         return context
 
 
-class AlleleChange(ProtectedViewMixin, DetailView):  # type: ignore
+class AlleleChange(ProtectedViewMixin, DetailView):
     model = Allele
     template_name = "allele/change.html"
 
     def get_context_data(self, **kwargs: object) -> dict:
         context = super().get_context_data(**kwargs)
-        record = self.object.history.get(history_id=self.kwargs["history_id"])  # type: ignore[union-attr]
+        obj = cast(Allele, self.object)
+        record = obj.history.get(history_id=self.kwargs["history_id"])  # type: ignore
         prev_record = record.prev_record
         context["record"] = record
         context["changes"] = resolve_changes(Allele, record, prev_record)
         return context
 
 
-class AlleleList(ProtectedViewMixin, ListView):  # type: ignore
+class AlleleList(ProtectedViewMixin, ListView):
     model = Allele
     template_name = "allele/list.html"
     ordering = ["-updated_at"]

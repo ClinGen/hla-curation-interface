@@ -65,7 +65,7 @@ alias pylf := py-lint-fix
 # Check Python type hints. -------------------------------------------
 [group('python')]
 py-type-check:
-    cd src && uv run mypy .
+    cd src && uv run ty check
 alias pytc := py-type-check
 
 #=====================================================================

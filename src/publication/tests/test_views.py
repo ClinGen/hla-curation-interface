@@ -60,13 +60,13 @@ class PublicationCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Publication.objects.count(), initial_publication_count + 1)
         new_publication = Publication.objects.first()
-        self.assertIsNotNone(new_publication)
-        self.assertEqual(new_publication.publication_type, "PUB")  # type: ignore[union-attr]
-        self.assertEqual(new_publication.pubmed_id, "123")  # type: ignore[union-attr]
-        self.assertEqual(new_publication.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
-        self.assertEqual(new_publication.author, "Oak")  # type: ignore[union-attr]
-        self.assertEqual(new_publication.title, "Common diseases in Pokémon")  # type: ignore[union-attr]
-        self.assertEqual(new_publication.publication_year, 1999)  # type: ignore[union-attr]
+        assert new_publication is not None
+        self.assertEqual(new_publication.publication_type, "PUB")
+        self.assertEqual(new_publication.pubmed_id, "123")
+        self.assertEqual(new_publication.added_by, self.user4_yes_phi_yes_perms)
+        self.assertEqual(new_publication.author, "Oak")
+        self.assertEqual(new_publication.title, "Common diseases in Pokémon")
+        self.assertEqual(new_publication.publication_year, 1999)
 
     @patch("publication.views.fetch_rxiv_data")
     def test_creates_biorxiv_publication_with_valid_form_data(
@@ -87,13 +87,13 @@ class PublicationCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Publication.objects.count(), initial_publication_count + 1)
         new_publication = Publication.objects.first()
-        self.assertIsNotNone(new_publication)
-        self.assertEqual(new_publication.publication_type, "BIO")  # type: ignore[union-attr]
-        self.assertEqual(new_publication.doi, "10.1101/123")  # type: ignore[union-attr]
-        self.assertEqual(new_publication.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
-        self.assertEqual(new_publication.author, "Oak, P.")  # type: ignore[union-attr]
-        self.assertEqual(new_publication.title, "Common diseases in Pokémon")  # type: ignore[union-attr]
-        self.assertEqual(new_publication.publication_year, 2020)  # type: ignore[union-attr]
+        assert new_publication is not None
+        self.assertEqual(new_publication.publication_type, "BIO")
+        self.assertEqual(new_publication.doi, "10.1101/123")
+        self.assertEqual(new_publication.added_by, self.user4_yes_phi_yes_perms)
+        self.assertEqual(new_publication.author, "Oak, P.")
+        self.assertEqual(new_publication.title, "Common diseases in Pokémon")
+        self.assertEqual(new_publication.publication_year, 2020)
 
     @patch("publication.views.fetch_rxiv_data")
     def test_creates_medrxiv_publication_with_valid_form_data(
@@ -114,13 +114,13 @@ class PublicationCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Publication.objects.count(), initial_publication_count + 1)
         new_publication = Publication.objects.first()
-        self.assertIsNotNone(new_publication)
-        self.assertEqual(new_publication.publication_type, "MED")  # type: ignore[union-attr]
-        self.assertEqual(new_publication.doi, "10.1101/456")  # type: ignore[union-attr]
-        self.assertEqual(new_publication.added_by, self.user4_yes_phi_yes_perms)  # type: ignore[union-attr]
-        self.assertEqual(new_publication.author, "Elm, P.")  # type: ignore[union-attr]
-        self.assertEqual(new_publication.title, "Diseases in Johto region Pokémon")  # type: ignore[union-attr]
-        self.assertEqual(new_publication.publication_year, 2021)  # type: ignore[union-attr]
+        assert new_publication is not None
+        self.assertEqual(new_publication.publication_type, "MED")
+        self.assertEqual(new_publication.doi, "10.1101/456")
+        self.assertEqual(new_publication.added_by, self.user4_yes_phi_yes_perms)
+        self.assertEqual(new_publication.author, "Elm, P.")
+        self.assertEqual(new_publication.title, "Diseases in Johto region Pokémon")
+        self.assertEqual(new_publication.publication_year, 2021)
 
     def test_does_not_create_publication_with_invalid_form_data(self):
         initial_publication_count = Publication.objects.count()
