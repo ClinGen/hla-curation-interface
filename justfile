@@ -260,33 +260,10 @@ alias djlp := django-loaddata-prod
 # Docs Recipes
 #=====================================================================
 
-# Build new docs and open new docs. ----------------------------------
-[group('docs')]
-docs-new: docs-clean docs-build-html docs-open-html
-alias dnw := docs-new
-
-# Build the developer documentation site. ----------------------------
-[group('docs')]
-docs-build-html:
-    cd docs && uv run sphinx-build source build
-alias dbh := docs-build-html
-
-# Open the developer documentation site in your browser. -------------
-[group('docs')]
-docs-open-html:
-    open docs/build/index.html
-alias doh := docs-open-html
-
-# Remove the built documentation directory. --------------------------
-[group('docs')]
-docs-clean:
-    rm -rf docs/build/
-alias dcl := docs-clean
-
+# Format the Markdown docs. ------------------------------------------
 [group('docs')]
 docs-format:
-    uv run mdformat docs/plans --wrap 88 --number
-    uv run mdformat docs/prompts --wrap 88 --number
+    uv run mdformat --wrap 88 --number docs
 alias dofm := docs-format
 
 #=====================================================================

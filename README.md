@@ -7,7 +7,6 @@
 [![continuous integration](https://github.com/ClinGen/hla-curation-interface/actions/workflows/ci.yml/badge.svg)](https://github.com/ClinGen/hla-curation-interface/actions/workflows/ci.yml)
 [![continuous deployment](https://github.com/ClinGen/hla-curation-interface/actions/workflows/cd.yml/badge.svg)](https://github.com/ClinGen/hla-curation-interface/actions/workflows/cd.yml)
 [![codecov](https://codecov.io/gh/ClinGen/hla-curation-interface/graph/badge.svg?token=23NGX9GT02)](https://codecov.io/gh/ClinGen/hla-curation-interface)
-[![docs](https://readthedocs.org/projects/hla-curation-interface/badge/?version=latest)](https://hla-curation-interface.readthedocs.io/latest/index.html)
 [![production uptime](https://img.shields.io/uptimerobot/status/m800642420-9a8efef310bf567dfbec33a0)](https://stats.uptimerobot.com/fcfUfhnSRA)
 </div>
 
@@ -27,16 +26,6 @@ The HCI is maintained by the Stanford contingent of
 - Install [just](https://github.com/casey/just).
 - Create and populate a `.env` file in the root of the repository.
 - Run the development server: `just django-runserver`.
-
-## Documentation
-
-The developer documentation for the HCI is hosted on Read the Docs
-[here](https://hla-curation-interface.readthedocs.io/latest/index.html).
-
-- [Tutorials](https://hla-curation-interface.readthedocs.io/latest/tutorials.html)
-- [How-To Guides](https://hla-curation-interface.readthedocs.io/latest/how-to-guides.html)
-- [Explanations](https://hla-curation-interface.readthedocs.io/latest/explanations.html)
-- [Reference Guides](https://hla-curation-interface.readthedocs.io/latest/reference-guides.html)
 
 ## Contributing
 
