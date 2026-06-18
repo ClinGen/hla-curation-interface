@@ -1,96 +1,115 @@
 # `disease`
 
-This directory contains the `disease` Django app for the HLA Curation Interface
-(HCI). The app stores the diseases that curations are paired with. Each
-`Disease` is identified by a Mondo Disease Ontology ID; when a curator submits
-a new Mondo ID, the app fetches the corresponding term from the EBI Ontology
-Lookup Service (OLS) and persists the disease's name and IRI alongside the ID.
-Only Mondo-typed diseases are supported for now, but the model leaves room for
-additional ontologies.
+Django app that manages Mondo Disease Ontology entries used in HLA curations. It
+provides a `Disease` model backed by the Mondo ontology, a client that fetches disease
+names and IRIs from the EBI Ontology Lookup Service (OLS), and the full set of views,
+forms, templates, and URL routes for creating, browsing, and auditing diseases within
+the HCI.
 
 ### `__init__.py`
 
-Marks the directory as a Python package.
+Empty file; marks this directory as a Python package.
 
 ### `admin.py`
 
-Registers the `Disease` model with Django's admin site and configures its list
-display, list filter, search fields, and read-only fields (`added_by`,
-`added_at`).
+Registers the `Disease` model with the Django admin site using `SimpleHistoryAdmin`,
+exposing list display, filtering by `disease_type`, and search by name and Mondo ID,
+with `added_by` and `added_at` as read-only fields.
 
 ### `apps.py`
 
-Django `AppConfig` for the `disease` app.
+Defines the `DiseasesConfig` app configuration, setting `BigAutoField` as the default
+primary key type and registering the app under the name `disease`.
 
 ### `clients.py`
 
-Houses code that interacts with the EBI Ontology Lookup Service:
-`fetch_disease_data` retrieves a Mondo term by ID, and `get_name` and `get_iri`
-extract the disease's label and IRI from the OLS response.
+Contains functions that interact with the EBI Ontology Lookup Service:
+`fetch_disease_data` retrieves the raw JSON for a given Mondo ID, and `get_name` and
+`get_iri` extract the disease label and IRI from that response, returning empty strings
+and logging warnings on failure.
 
 ### `constants/__init__.py`
 
-Marks the directory as a Python package.
+Empty file; marks this directory as a Python package.
 
 ### `constants/models.py`
 
-Enum-style constants used by the `Disease` model: defines `DiseaseTypes`
-(currently just `MONDO`) and the matching `DISEASE_TYPE_CHOICES` mapping.
+Defines the `DiseaseTypes` class with the single supported type code `MONDO = "MON"` and
+the corresponding `DISEASE_TYPE_CHOICES` dict used by the `Disease` model field.
 
 ### `fixtures/test_diseases.json`
 
-Django fixture containing test `Disease` records used by `DiseaseDetailTest`
-and `DiseaseListTest`.
+Django fixture providing three sample `disease.disease` records (slugs
+`D000001`–`D000003`) used by the test suite to pre-populate the database without hitting
+external APIs.
 
 ### `forms.py`
 
-Defines `DiseaseForm`, a `ModelForm` exposing only the `mondo_id` field; the
-name and IRI are populated from OLS in the view.
+Defines `DiseaseForm`, a `ModelForm` for the `Disease` model that exposes only the
+`mondo_id` field, which the user supplies when adding a new disease.
 
 ### `models.py`
 
-Defines the `Disease` model with `slug` (a `D######` human-readable ID
-generated on save), `disease_type`, `mondo_id`, `iri`, `name`, `added_by`, and
-`added_at`. Its `clean` method calls the validators in `validators/models.py`,
-and `get_absolute_url` points at the `disease-detail` view.
+Defines the `Disease` model with fields for slug, disease type, Mondo ID, IRI, name, and
+audit metadata (`added_by`, `added_at`, `updated_at`). The `save` method auto-generates
+a zero-padded slug (`D000001` style), and `clean` delegates to the model validators.
+Historical change tracking is provided via `simple_history`.
+
+### `templates/disease/change.html`
+
+Displays a single historical change record for a disease, with a breadcrumb trail back
+through the disease list, detail, and history pages, and the change body rendered via
+the shared `common/history/change_body.html` partial.
 
 ### `templates/disease/create.html`
 
-HTML template that renders the disease creation form for the `DiseaseCreate`
-view.
+Renders the "Add Disease" form, showing a Mondo ID text input with a link to the EBI OLS
+search for Mondo and a submit button.
 
 ### `templates/disease/detail.html`
 
-HTML template that renders the disease detail page for the `DiseaseDetail`
-view.
+Shows the detail view for a single disease, displaying its HCI ID, Mondo ID (linked to
+its IRI), and timestamps. If any curations reference the disease, they are listed in a
+collapsible section.
+
+### `templates/disease/history.html`
+
+Shows the full edit history for a disease using the shared
+`common/history/history_body.html` partial, with breadcrumbs to the list and detail
+pages.
 
 ### `templates/disease/list.html`
 
-HTML template that renders the disease list for the `DiseaseList` view.
+Renders a searchable DataTables table of all diseases with columns for HCI ID, name,
+Mondo ID (external link), and last-updated date, plus an "Add Disease" button.
 
 ### `tests.py`
 
-Tests for the create, detail, and list views, including a patched
-`fetch_disease_data` to verify that valid form submissions persist the disease
-and copy the OLS-supplied name and IRI onto the record.
+Contains `TestCase` classes for `DiseaseCreate`, `DiseaseDetail`, and `DiseaseList`
+views, verifying page content, access control via `ProtectedViewTestMixin`, form
+validation, and that a successful POST creates a disease with data fetched from a mocked
+OLS client.
 
 ### `urls.py`
 
-URL routes for the app: `disease-create`, `disease-detail`, and `disease-list`.
+Maps the five disease URL patterns — `create`, `<slug>/detail`, `<slug>/history`,
+`<slug>/history/<id>/change`, and `list` — to their corresponding view classes.
 
 ### `validators/__init__.py`
 
-Marks the directory as a Python package.
+Empty file; marks this directory as a Python package.
 
 ### `validators/models.py`
 
-Model-level `clean()` validators for the `Disease` model:
-`validate_disease_type_mondo` (requires a Mondo ID when the disease type is
-Mondo) and `validate_mondo_id` (requires the `MONDO:` prefix).
+Provides two validation functions called from `Disease.clean`:
+`validate_disease_type_mondo` raises a `ValidationError` if a Mondo disease has no Mondo
+ID, and `validate_mondo_id` raises a `ValidationError` if the Mondo ID does not start
+with the `MONDO:` prefix.
 
 ### `views.py`
 
-Class-based views for the app: `DiseaseCreate` (overrides `form_valid` to
-fetch OLS data, populate `name`/`iri`/`added_by`, and warn the user if the OLS
-call fails), `DiseaseDetail`, and `DiseaseList`. All views inherit from
-`ProtectedViewMixin`.
+Implements five class-based views — `DiseaseCreate`, `DiseaseDetail`, `DiseaseHistory`,
+`DiseaseChange`, and `DiseaseList` — all protected by `ProtectedViewMixin`.
+`DiseaseCreate.form_valid` calls the OLS client to populate the `name` and `iri` fields
+before saving, and `DiseaseChange` uses `resolve_changes` to build a diff for the
+selected history record.

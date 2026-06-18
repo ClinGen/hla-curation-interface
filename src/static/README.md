@@ -1,150 +1,155 @@
 # `static`
 
-This directory contains the static assets served by Django for the HLA
-Curation Interface (HCI): vendored CSS and JavaScript libraries, project
-imagery (logos, favicons, third-party source logos), web fonts, and the
-PWA web app manifest. All assets live under a single `hci/` namespace
-subdirectory so that Django's `collectstatic` produces predictable,
-collision-free URLs (e.g. `/static/hci/img/hci-logo.png`).
+This directory contains all static assets served by the application, organized under
+`hci/`. It includes vendored third-party CSS and JavaScript libraries, project-specific
+custom styles, web fonts, and image assets such as logos, favicons, and PWA icons.
 
 ### `hci/css/bootstrap-icons.css`
 
-Vendored Bootstrap Icons stylesheet. Defines the `bi-*` icon font
-classes used throughout the templates and references the WOFF/WOFF2
-files in `hci/css/fonts/`.
+Vendored Bootstrap Icons stylesheet that maps icon class names to the corresponding web
+font glyphs used throughout the UI.
 
 ### `hci/css/bulma.css`
 
-Vendored Bulma CSS framework. Provides the base styling, layout, and
-component classes (containers, columns, buttons, forms, tables, etc.)
-used by the HCI templates.
+Vendored Bulma CSS framework stylesheet that provides the utility classes, layout
+system, and component styles used as the primary UI framework.
 
 ### `hci/css/choices.css.map`
 
-Source map for `choices.min.css`. Lets browser dev tools map the
-minified rules back to the original Choices.js stylesheet.
+Source map for the Choices.js CSS, used by browser developer tools to map minified
+styles back to their original source locations.
 
 ### `hci/css/choices.min.css`
 
-Minified stylesheet for the Choices.js library. Styles the enhanced
-`<select>` widgets used on curation, allele, haplotype, disease, and
-publication forms.
+Vendored minified stylesheet for the Choices.js library, which styles the enhanced
+select-box components used in forms.
 
 ### `hci/css/custom.css`
 
-Project-specific CSS overrides on top of Bulma. Defines
-`.entity-type-logo` (sizing for inline source logos like Mondo,
-PubMed), `.footer-logo-container` (padding for the footer logos), and
-`.scroll-container` (horizontally scrollable wrapper used for wide
-tables).
+Project-specific stylesheet that defines custom rules for entity-type logo image sizing,
+footer logo container spacing, and a horizontal-scroll container class used for wide
+tables.
+
+### `hci/css/dataTables.dataTables.min.css`
+
+Vendored minified stylesheet for the DataTables jQuery plugin, which styles the sortable
+and searchable data tables used on list pages.
 
 ### `hci/css/fonts/bootstrap-icons.woff`
 
-WOFF font file for Bootstrap Icons. Referenced by
-`bootstrap-icons.css` as a fallback for browsers that do not support
-WOFF2.
+Bootstrap Icons web font in WOFF format, referenced by `bootstrap-icons.css` for broader
+browser compatibility.
 
 ### `hci/css/fonts/bootstrap-icons.woff2`
 
-WOFF2 font file for Bootstrap Icons. The primary, compressed font file
-referenced by `bootstrap-icons.css`.
+Bootstrap Icons web font in WOFF2 format, referenced by `bootstrap-icons.css` as the
+preferred modern font format.
 
 ### `hci/img/android-chrome-192x192.png`
 
-192x192 PNG home-screen icon for Android Chrome, referenced from
-`site.webmanifest`.
+192x192 px PNG version of the HCI logo, used as the Android Chrome home-screen icon and
+referenced in `site.webmanifest`.
 
 ### `hci/img/android-chrome-512x512.png`
 
-512x512 PNG home-screen icon for Android Chrome, referenced from
-`site.webmanifest`.
+512x512 px PNG version of the HCI logo, used as the high-resolution Android Chrome
+home-screen icon and referenced in `site.webmanifest`.
 
 ### `hci/img/apple-touch-icon.png`
 
-PNG touch icon used by iOS Safari when the site is added to the home
-screen.
+PNG icon used when a user adds the site to the home screen on an Apple iOS device.
 
 ### `hci/img/biorxiv-logo.png`
 
-Logo for bioRxiv, displayed alongside publication entries whose source
-is bioRxiv.
+Logo image for bioRxiv, used to identify bioRxiv preprint publications in the UI.
 
 ### `hci/img/car-logo.png`
 
-Logo for the ClinGen Allele Registry (CAR), displayed alongside allele
-entries that link out to CAR.
+Logo for the ClinGen Allele Registry (CAR), used to link out to or identify CAR allele
+identifiers in the UI.
 
 ### `hci/img/clingen-logo-with-text.svg`
 
-ClinGen wordmark logo (SVG), shown in the site footer.
+SVG logo for the Clinical Genome Resource (ClinGen), including the organization's name
+text; displayed in the site footer.
 
 ### `hci/img/favicon-16x16.png`
 
-16x16 PNG favicon used by browsers that prefer a PNG favicon at this
-size.
+16x16 px PNG favicon for the site, linked in the base template for standard browser tab
+display.
 
 ### `hci/img/favicon-32x32.png`
 
-32x32 PNG favicon used by browsers that prefer a PNG favicon at this
-size.
+32x32 px PNG favicon for the site, linked in the base template for higher-resolution
+browser tab display.
 
 ### `hci/img/favicon.ico`
 
-Multi-resolution ICO favicon used by browsers (and Windows shortcuts)
-that request `/favicon.ico`.
+ICO-format favicon for the site, provided for legacy browser compatibility.
 
 ### `hci/img/hci-logo-circle.png`
 
-Circular variant of the HCI logo, used in contexts that require a
-round avatar-style mark.
+Circular variant of the HLA Curation Interface logo, used where a round icon format is
+needed.
 
 ### `hci/img/hci-logo.png`
 
-Primary HCI logo, displayed in the site header.
+Standard rectangular version of the HLA Curation Interface logo.
 
 ### `hci/img/medrxiv-logo.png`
 
-Logo for medRxiv, displayed alongside publication entries whose source
-is medRxiv.
+Logo image for medRxiv, used to identify medRxiv preprint publications in the UI.
 
 ### `hci/img/mondo-logo.png`
 
-Logo for the Mondo Disease Ontology, displayed alongside disease
-entries that link out to Mondo.
+Logo for the Mondo Disease Ontology, used to identify or link to Mondo disease terms in
+the UI.
 
 ### `hci/img/pubmed-logo.svg`
 
-Logo for PubMed (SVG), displayed alongside publication entries whose
-source is PubMed.
+SVG logo for PubMed, used to identify or link to PubMed publication records in the UI.
 
 ### `hci/img/stanford-medicine-logo.png`
 
-Stanford Medicine logo, shown in the site footer alongside the ClinGen
-logo to acknowledge institutional affiliation.
+Stanford Medicine logo image, displayed in the site footer as an institutional
+affiliation.
 
 ### `hci/img/under-construction.gif`
 
-Animated GIF placeholder shown on pages or sections that are not yet
-implemented.
+Animated "under construction" GIF used to indicate pages or features that are not yet
+complete.
 
 ### `hci/js/choices.js`
 
-Unminified source of the Choices.js library, kept alongside the
-minified build for debugging.
+Vendored unminified source of the Choices.js library, which enhances native `<select>`
+elements with search and custom styling.
 
 ### `hci/js/choices.min.js`
 
-Minified build of Choices.js. Powers the enhanced searchable select
-widgets used on the various curation forms.
+Vendored minified production build of Choices.js, loaded by the base template for
+enhanced select inputs.
+
+### `hci/js/dataTables.bulma.min.js`
+
+Vendored minified DataTables integration plugin that applies Bulma CSS classes to
+DataTables-generated markup.
+
+### `hci/js/dataTables.min.js`
+
+Vendored minified DataTables jQuery plugin used to add sorting, searching, and
+pagination to HTML tables on list pages.
 
 ### `hci/js/htmx.js`
 
-Vendored htmx library. Provides the `hx-*` attributes used by the
-templates to perform partial-page updates (e.g. autocomplete and
-search-as-you-type) without a full page reload.
+Vendored HTMX library that enables AJAX-driven partial page updates via HTML attributes,
+used throughout the application to avoid full page reloads.
+
+### `hci/js/jquery.min.js`
+
+Vendored minified jQuery library, required as a dependency by DataTables.
 
 ### `hci/site.webmanifest`
 
-PWA web app manifest. Declares the application name (`HLA Curation
-Interface`), short name (`HCI`), the Android home-screen icons,
-theme/background colors, and `standalone` display mode.
+Web app manifest file that defines the application's name ("HLA Curation Interface"),
+short name ("HCI"), home-screen icons, theme color, and standalone display mode for PWA
+installation support.

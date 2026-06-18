@@ -1,65 +1,86 @@
 # `auth_`
 
-This directory contains the `auth_` Django app for the HLA Curation Interface
-(HCI). The app handles user authentication and authorization, integrating with
-WorkOS for hosted login, extending Django's built-in `User` model with an
-HCI-specific `UserProfile`, and exposing the permission primitives used by
-other apps to gate curation views. The trailing underscore in the package name
-avoids a clash with Django's bundled `auth` app.
+The `auth_` app handles authentication and user profile management for the HCI. It
+integrates with WorkOS for SSO login via a custom authentication backend, extends
+Django's built-in `User` model with a `UserProfile` that tracks PHI agreement and
+curation permissions, and provides views for login/logout, profile inspection, PHI
+agreement signing, and profile change history.
 
 ### `__init__.py`
 
-Marks the directory as a Python package.
+Empty file; marks this directory as a Python package.
 
 ### `admin.py`
 
-Registers `UserProfile` with Django's admin site (showing the user, curation
-permission flag, and PHI-agreement flag) and unregisters the built-in `Group`
-model since HCI does not use groups.
+Registers the `UserProfile` model with the Django admin site using `SimpleHistoryAdmin`,
+exposes `user`, `has_curation_permissions`, and `has_signed_phi_agreement` in the list
+view, and unregisters the built-in `Group` model (which is not used by this
+application).
 
 ### `apps.py`
 
-Django `AppConfig` for the `auth_` app.
+Defines the `AuthConfig` app configuration, setting the app name to `auth_` and the
+default primary-key field type to `BigAutoField`.
 
 ### `backends.py`
 
-Defines `WorkOSBackend`, a custom Django authentication backend that loads and
-refreshes a WorkOS sealed session from the `wos_session` cookie, and creates
-the corresponding `User` and `UserProfile` records on first login.
+Implements `WorkOSBackend`, a custom Django authentication backend that authenticates
+users by loading and verifying a WorkOS sealed session cookie. On successful
+authentication it creates or retrieves the Django `User` and associated `UserProfile`
+records, and handles session refresh when the initial authentication has expired.
 
 ### `forms.py`
 
-Defines `PHIForm`, a minimal form with a single `agree` checkbox used to record
-acceptance of the PHI agreement.
+Defines `PHIForm`, a simple Django `Form` with a single `CheckboxInput` field used to
+record a user's agreement to the PHI terms.
 
 ### `models.py`
 
-Defines `UserProfile`, a one-to-one extension of Django's `User` model with
-`has_curation_permissions` and `has_signed_phi_agreement` flags and a
-`can_curate` property combining authentication and both flags.
+Defines `UserProfile`, a one-to-one extension of Django's `User` model that stores
+whether the user has signed the PHI agreement and whether they have been granted
+curation permissions. The `can_curate` property returns `True` only when the user is
+authenticated and both flags are set; history tracking is added via `HistoricalRecords`.
 
 ### `permissions.py`
 
-Provides `ProtectedViewMixin` (for class-based views) and the `protected_view`
-decorator (for function-based views), both of which require the user to be
-authenticated and to have `can_curate` evaluate to `True`.
+Defines `ProtectedViewMixin` (for class-based views) and the `protected_view` decorator
+(for function-based views), both of which enforce that a user must be authenticated and
+have `can_curate == True` to access a view, raising `PermissionDenied` otherwise.
+
+### `templates/auth_/change.html`
+
+Renders a detail page for a single history change record on the current user's profile,
+with a breadcrumb trail from Home through Profile and Profile History, then including
+the shared `common/history/change_body.html` partial.
+
+### `templates/auth_/history.html`
+
+Renders a page listing the full change history of the current user's profile, with a
+breadcrumb trail from Home through Profile, then including the shared
+`common/history/history_body.html` partial.
 
 ### `templates/auth_/phi.html`
 
-HTML template that renders the PHI agreement form for the `phi` view.
+Renders the PHI Agreement page, presenting the agreement text and a required checkbox
+that the user must check before submitting to record that they have signed the
+agreement.
 
 ### `templates/auth_/profile.html`
 
-HTML template that renders the user's profile page for the `profile` view.
+Renders the User Profile page, displaying the user's email alongside a table showing the
+status of their PHI agreement and curation permissions, with contextual links to sign
+the agreement or contact HCI support if either is missing.
 
 ### `urls.py`
 
-URL routes for the app: `login`, `callback`, `logout`, `profile`, and `phi`.
+Maps URL patterns for the auth app: `login`, `callback`, `logout`, `profile`,
+`profile/history`, `profile/history/<history_id>/change`, and `phi`, each wired to the
+corresponding view function.
 
 ### `views.py`
 
-Function-based views for the app: `login_` (redirects to the WorkOS hosted
-login page), `callback` (handles the WorkOS auth code and sets the
-sealed-session cookie), `logout_` (clears the cookie and logs out), `profile`
-(renders the user's profile page), and `phi` (renders and processes the PHI
-agreement form).
+Provides function-based views for the full authentication and profile lifecycle:
+`login_` redirects to WorkOS AuthKit, `callback` exchanges the OAuth code for a sealed
+session cookie and logs the user in, `logout_` deletes the cookie and logs the user out,
+`profile` displays the user's profile, `profile_history` and `profile_change` display
+history records, and `phi` handles PHI agreement form submission.

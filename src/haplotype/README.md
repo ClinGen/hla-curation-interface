@@ -1,86 +1,104 @@
 # `haplotype`
 
-This directory contains the `haplotype` Django app for the HLA Curation Interface
-(HCI). The app manages HLA haplotypes, which are sets of HLA alleles that travel
-together on the same chromosome. A `Haplotype` is built from existing `Allele`
-records via a many-to-many relationship; when a curator selects the constituent
-alleles, the app derives the haplotype's name by sorting the alleles by gene
-location on chromosome 6 (using `GENE_LIST`) and joining them with `~` (e.g.,
-`DRB1*15:01~DQB1*06:02`). Each record stores a human-readable slug ID, the
-derived name, and metadata about who added it and when.
+Django app that manages HLA haplotypes — ordered combinations of alleles across HLA
+genes — within the HCI. It provides a `Haplotype` model that stores a many-to-many
+relationship with alleles, derives a canonical tilde-separated name by sorting alleles
+according to their chromosomal gene order, and supplies the full set of views, forms,
+templates, and URL routes for creating, browsing, and auditing haplotypes.
 
 ### `__init__.py`
 
-Marks the directory as a Python package.
+Empty file; marks this directory as a Python package.
 
 ### `admin.py`
 
-Registers the `Haplotype` model with Django's admin site and configures its
-list display, search fields, and read-only fields (`added_by`, `added_at`).
+Registers the `Haplotype` model with the Django admin site using `SimpleHistoryAdmin`,
+showing `name`, `added_by`, and `added_at` in the list view, with search by name and
+`added_by` and `added_at` as read-only fields.
 
 ### `apps.py`
 
-Django `AppConfig` for the `haplotype` app.
+Defines the `HaplotypeConfig` app configuration, setting `BigAutoField` as the default
+primary key type and registering the app under the name `haplotype`.
 
 ### `constants/__init__.py`
 
-Marks the directory as a Python package.
+Empty file; marks this directory as a Python package.
 
 ### `constants/models.py`
 
-Defines `GENE_LIST`, the list of chromosome 6 genes ordered by genomic
-location, used to sort the constituent alleles when deriving a haplotype's
-name.
+Defines `GENE_LIST`, an ordered list of HLA gene names on chromosome 6 arranged by
+ascending chromosomal position, which is used to sort constituent alleles into a
+canonical haplotype name.
 
 ### `fixtures/test_haplotypes.json`
 
-Django fixture containing test `Haplotype` records used by
-`HaplotypeDetailTest` and `HaplotypeListTest`.
+Django fixture providing one sample `haplotype.haplotype` record (slug `H000001`, name
+`A*01:02:03~B*04:05:06`) used by the test suite together with `test_alleles.json`.
 
 ### `forms.py`
 
-Defines `HaplotypeForm`, a `ModelForm` exposing the `alleles` many-to-many
-field via a `SelectMultiple` widget.
+Defines `HaplotypeForm`, a `ModelForm` for `Haplotype` that exposes only the `alleles`
+field rendered as a `SelectMultiple` widget, allowing the user to select two or more
+alleles when creating a haplotype.
 
 ### `models.py`
 
-Defines the `Haplotype` model with `slug` (an `H######` human-readable ID
-generated on save), `alleles` (M2M to `Allele`), `name`, `added_by`, and
-`added_at`. Provides `get_absolute_url` pointing at the `haplotype-detail`
-view.
+Defines the `Haplotype` model with a slug, a many-to-many `alleles` relation to `Allele`
+(stored in the `haplotype_allele_map` join table), a computed `name` field, and audit
+metadata. The `save` method auto-generates a zero-padded slug (`H000001` style).
+Historical change tracking is provided via `simple_history`.
+
+### `templates/haplotype/change.html`
+
+Displays a single historical change record for a haplotype, with a breadcrumb trail back
+through the haplotype list, detail, and history pages, and the change body rendered via
+the shared `common/history/change_body.html` partial.
 
 ### `templates/haplotype/create.html`
 
-HTML template that renders the haplotype creation form for the
-`HaplotypeCreate` view.
+Renders the "Add Haplotype" form, showing the alleles multi-select field (rendered via
+the shared search select partial) and a submit button.
 
 ### `templates/haplotype/detail.html`
 
-HTML template that renders the haplotype detail page for the `HaplotypeDetail`
-view, including the haplotype's constituent alleles and any related curations.
+Shows the detail view for a single haplotype, displaying its HCI ID, name, and
+timestamps. If the haplotype has associated curations or alleles, each is listed in a
+collapsible section using the respective app's table partial.
+
+### `templates/haplotype/history.html`
+
+Shows the full edit history for a haplotype using the shared
+`common/history/history_body.html` partial, with breadcrumbs to the list and detail
+pages.
 
 ### `templates/haplotype/list.html`
 
-HTML template that renders the haplotype list for the `HaplotypeList` view.
+Delegates to the `haplotype/partials/table.html` partial to render the haplotype
+DataTable, and provides an "Add Haplotype" button below it.
 
 ### `templates/haplotype/partials/table.html`
 
-Reusable partial that renders the haplotype list table.
+Renders a DataTables table of haplotypes with columns for HCI ID (linked to the detail
+page), name, and last-updated date. This partial is included by both the list page and
+other apps that need to embed a haplotype table.
 
 ### `tests.py`
 
-Tests for the create, detail, and list views, including an assertion that
-submitting two alleles produces a haplotype whose name is the gene-ordered,
-`~`-joined concatenation of the allele names.
+Contains `TestCase` classes for `HaplotypeCreate`, `HaplotypeDetail`, and
+`HaplotypeList` views, verifying page content, access control, form validation,
+canonical allele-order sorting, and duplicate-allele-combination detection.
 
 ### `urls.py`
 
-URL routes for the app: `haplotype-create`, `haplotype-detail`, and
-`haplotype-list`.
+Maps the five haplotype URL patterns — `create`, `<slug>/detail`, `<slug>/history`,
+`<slug>/history/<id>/change`, and `list` — to their corresponding view classes.
 
 ### `views.py`
 
-Class-based views for the app: `HaplotypeCreate` (overrides `form_valid` to
-sort the selected alleles by gene location, build the haplotype name, and
-record the user), `HaplotypeDetail`, and `HaplotypeList`. All views inherit
-from `ProtectedViewMixin`.
+Implements five class-based views — `HaplotypeCreate`, `HaplotypeDetail`,
+`HaplotypeHistory`, `HaplotypeChange`, and `HaplotypeList` — all protected by
+`ProtectedViewMixin`. `HaplotypeCreate.form_valid` sorts the selected alleles by their
+position in `GENE_LIST` to compute the canonical `~`-separated name, rejects duplicate
+combinations, and sets `added_by`. `HaplotypeChange` uses `resolve_changes` to build a
+diff for the selected history record.
