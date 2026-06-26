@@ -28,3 +28,9 @@
       ansible.builtin.include_tasks: ../tasks/placement/caddy.yml
     - name: Admin | Caddy start
       ansible.builtin.include_tasks: ../tasks/admin/caddy_start.yml
+    - name: Install | fail2ban
+      ansible.builtin.include_tasks: ../tasks/install/fail2ban.yml
+    - name: Placement | fail2ban files
+      ansible.builtin.include_tasks: ../tasks/placement/fail2ban.yml
+    - name: Admin | fail2ban start
+      ansible.builtin.include_tasks: ../tasks/admin/fail2ban_start.yml
