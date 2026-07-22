@@ -7,8 +7,8 @@ DB-level constraints, model validators, form validators, and view-level checks.
 
 ### Allele
 
-When a curator submits an allele name, the system immediately looks it up in the
-ClinGen Allele Registry. If the registry does not recognize the name (or is temporarily
+When a curator submits an allele name, the system immediately looks it up in the ClinGen
+Allele Registry. If the registry does not recognize the name (or is temporarily
 unavailable), the allele is not saved. This ensures that every allele in the HCI is a
 real, registry-confirmed entry. The system also prevents two records from sharing the
 same name or the same registry ID.
@@ -17,9 +17,9 @@ same name or the same registry ID.
 
 A haplotype is a combination of alleles, so the system enforces two things when one is
 created. First, it automatically arranges the selected alleles into a canonical order
-based on their position on chromosome 6, so the same combination always has the same name
-regardless of the order the curator picked them in. Second, it rejects the submission if
-that exact combination already exists in the system.
+based on their position on chromosome 6, so the same combination always has the same
+name regardless of the order the curator picked them in. Second, it rejects the
+submission if that exact combination already exists in the system.
 
 ### Disease
 
@@ -105,8 +105,7 @@ required-field validation.
    a field error ("A haplotype with these alleles already exists.") and returns
    `form_invalid`.
 
-The computed canonical name is set on the instance. Users never enter the name
-directly.
+The computed canonical name is set on the instance. Users never enter the name directly.
 
 ### Disease
 
@@ -123,8 +122,8 @@ directly.
 from `blank=False`.
 
 **View** (`DiseaseCreate.form_valid`): calls the EBI Ontology Lookup Service. If the API
-fails, the save is aborted. The `name` and `iri` fields are populated from the API.
-They are never user-entered.
+fails, the save is aborted. The `name` and `iri` fields are populated from the API. They
+are never user-entered.
 
 ### Publication
 
