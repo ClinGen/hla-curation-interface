@@ -98,6 +98,7 @@
                 <div class="box">
                     <h2 id="demographics" class="title is-4">Demographics</h2>
                     {% include "common/form/select/search.html" with field=form.demographics hide_label=True %}
+                    {% include "common/form/textarea.html" with field=form.demographics_text_quotes show_help=True %}
                     {% include "common/form/textarea.html" with field=form.demographics_notes %}
                 </div>
                 <div class="box">

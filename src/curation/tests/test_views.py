@@ -349,3 +349,69 @@ class EvidenceEditTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(response.status_code, 302)
         evidence = Evidence.objects.get(pk=1)
         self.assertEqual(evidence.score, 20.0)
+
+    @staticmethod
+    def _base_evidence_data() -> dict:
+        return {
+            "is_gwas": True,
+            "is_gwas_notes": "",
+            "num_fields": 3,
+            "num_fields_notes": "",
+            "zygosity": Zygosity.BIALLELIC,
+            "zygosity_notes": "",
+            "phase_confirmed": True,
+            "phase_confirmed_notes": "",
+            "typing_method": "",
+            "typing_method_notes": "",
+            "demographics_text_quotes": "",
+            "demographics": [],
+            "demographics_notes": "",
+            "p_value_string": "",
+            "p_value_notes": "",
+            "multiple_testing_correction": "",
+            "multiple_testing_correction_notes": "",
+            "effect_size_statistic": "",
+            "effect_size_statistic_notes": "",
+            "odds_ratio_string": "",
+            "relative_risk_string": "",
+            "beta_string": "",
+            "ci_start_string": "",
+            "ci_end_string": "",
+            "ci_notes": "",
+            "cohort_size": "",
+            "cohort_size_notes": "",
+            "additional_phenotypes": "",
+            "additional_phenotypes_notes": "",
+            "has_association": False,
+            "has_association_notes": "",
+            "is_protective": False,
+            "is_protective_notes": "",
+            "needs_review": False,
+            "needs_review_notes": "",
+        }
+
+    def test_requires_text_quotes_when_demographics_provided(self):
+        demographic = Demographic.objects.create(group="Asian")
+        data = self._base_evidence_data()
+        data["demographics"] = [demographic.pk]
+        data["demographics_text_quotes"] = ""
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(
+            response.context["form"],
+            "demographics_text_quotes",
+            "Text quotes must be provided when demographics are entered.",
+        )
+
+    def test_saves_demographics_text_quotes(self):
+        demographic = Demographic.objects.create(group="Asian")
+        data = self._base_evidence_data()
+        data["demographics"] = [demographic.pk]
+        data["demographics_text_quotes"] = "Patients were predominantly Asian (n=1500)."
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        evidence = Evidence.objects.get(pk=1)
+        self.assertEqual(
+            evidence.demographics_text_quotes,
+            "Patients were predominantly Asian (n=1500).",
+        )

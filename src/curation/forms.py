@@ -58,6 +58,7 @@ class EvidenceEditForm(ModelForm):
             "phase_confirmed_notes",
             "typing_method",
             "typing_method_notes",
+            "demographics_text_quotes",
             "demographics",
             "demographics_notes",
             "p_value_string",
@@ -92,6 +93,7 @@ class EvidenceEditForm(ModelForm):
             "phase_confirmed": forms.RadioSelect(choices=YN_BOOL_CHOICES),
             "phase_confirmed_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
             "typing_method_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
+            "demographics_text_quotes": forms.Textarea(attrs=TEXTAREA_ATTRS),
             "demographics": forms.SelectMultiple,
             "demographics_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
             "p_value_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
@@ -112,6 +114,7 @@ class EvidenceEditForm(ModelForm):
         cleaned_data = super().clean()
         typing_method = cleaned_data.get("typing_method")  # type: ignore
         demographics = cleaned_data.get("demographics")  # type: ignore
+        demographics_text_quotes = cleaned_data.get("demographics_text_quotes")  # type: ignore
 
         # Avoid circular imports.
         from curation.constants.models.evidence import TypingMethod
@@ -119,5 +122,9 @@ class EvidenceEditForm(ModelForm):
         if typing_method == TypingMethod.IMPUTATION and not demographics:
             error = "Demographics must be provided if typing method is imputation."
             raise forms.ValidationError({"demographics": error})
+
+        if demographics and not demographics_text_quotes:
+            error = "Text quotes must be provided when demographics are entered."
+            raise forms.ValidationError({"demographics_text_quotes": error})
 
         return cleaned_data

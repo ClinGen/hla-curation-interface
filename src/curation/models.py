@@ -311,6 +311,12 @@ class Evidence(models.Model):
         default="",
         verbose_name="Notes",
     )
+    demographics_text_quotes = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Text Quotes",
+        help_text="Relevant quotes from the publication about the demographics.",
+    )
     demographics = models.ManyToManyField(
         Demographic,
         blank=True,

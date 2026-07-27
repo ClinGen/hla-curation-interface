@@ -137,6 +137,9 @@ class TestEvidence(TestCase):
             initial_points + Points.S2_LONG_READ_SEQ,
         )
 
+    def test_demographics_text_quotes_is_empty_when_created(self):
+        self.assertEqual(self.evidence.demographics_text_quotes, "")
+
     def test_demographics_is_empty_when_created(self):
         self.assertEqual(len(self.evidence.demographics.all()), 0)
 

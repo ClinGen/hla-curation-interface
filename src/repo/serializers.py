@@ -98,6 +98,7 @@ def serialize_evidence(evidence: "Evidence") -> dict[str, Any]:
         "zygosity": evidence.zygosity,
         "phase_confirmed": evidence.phase_confirmed,
         "typing_method": evidence.typing_method,
+        "demographics_text_quotes": evidence.demographics_text_quotes,
         "demographics": [demo.group for demo in evidence.demographics.all()],
         "p_value": str(evidence.p_value) if evidence.p_value else None,
         "multiple_testing_correction": evidence.multiple_testing_correction,

@@ -60,6 +60,18 @@
                 <td>{{ object.typing_method_notes }}</td>
             </tr>
             <tr>
+                <td>Demographics Text Quotes</td>
+                <td>
+                    {% if object.demographics_text_quotes %}
+                        {% include "common/tags/provided.html" %}
+                    {% else %}
+                        {% include "common/tags/not_provided.html" %}
+                    {% endif %}
+                </td>
+                <td>{{ object.demographics_text_quotes }}</td>
+                <td></td>
+            </tr>
+            <tr>
                 <td>Demographics</td>
                 <td>
                     {% if object.demographics.all %}
