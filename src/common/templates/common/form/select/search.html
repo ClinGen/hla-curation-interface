@@ -20,6 +20,10 @@
             noResultsText: "No items found for your search.",
             removeItemButton: true,
             searchEnabled: true,
+            fuseOptions: {
+                includeScore: true,
+                ignoreLocation: true,
+            },
         };
         const choices = new Choices(select, config);
     });
