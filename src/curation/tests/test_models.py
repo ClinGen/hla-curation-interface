@@ -15,6 +15,7 @@ from curation.constants.models.evidence import (
     AdditionalPhenotypes,
     EffectSizeStatistic,
     MultipleTestingCorrection,
+    PValueComparator,
     TypingMethod,
     Zygosity,
 )
@@ -176,6 +177,18 @@ class TestEvidence(TestCase):
         self.assertEqual(
             self.evidence.score_before_multipliers,
             initial_points + Points.S3A_INTERVAL_4,
+        )
+
+    def test_lt_comparator_at_bracket_boundary_scores_higher_bracket(self):
+        # "< 0.0001" means the true value is strictly below 0.0001, which puts
+        # it in NON_GWAS_5 (2 pts), not NON_GWAS_4 (1.5 pts).
+        initial_points = self.evidence.score_before_multipliers
+        self.evidence.p_value = Decimal("0.0001")
+        self.evidence.p_value_comparator = PValueComparator.LESS_THAN
+        self.evidence.save()
+        self.assertEqual(
+            self.evidence.score_before_multipliers,
+            initial_points + Points.S3A_INTERVAL_5,
         )
 
     def test_multiple_testing_correction_is_empty_when_created(self):

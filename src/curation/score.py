@@ -7,6 +7,7 @@ from curation.constants.models.evidence import (
     AdditionalPhenotypes,
     EffectSizeStatistic,
     MultipleTestingCorrection,
+    PValueComparator,
     TypingMethod,
     Zygosity,
 )
@@ -100,8 +101,19 @@ def get_step_3a_points(evidence) -> float | None:
 
     intervals = gwas_intervals if evidence.is_gwas else non_gwas_intervals
 
+    p_value = evidence.p_value
+
+    if evidence.p_value_comparator == PValueComparator.LESS_THAN:
+        # "< X": find the interval whose exclusive upper bound is exactly X.
+        # Every bracket boundary is an exact Decimal, so == is safe here.
+        for interval, points in intervals:
+            if not interval.end_inclusive and interval.end == p_value:
+                return points
+        # p_value isn't exactly on a bracket boundary, so "just below X"
+        # lands in the same bracket as X itself. Fall through to normal containment.
+
     for interval, points in intervals:
-        if interval.contains(evidence.p_value):
+        if interval.contains(p_value):
             return points
     return None
 
