@@ -10,6 +10,21 @@ from django.test import Client
 from auth_.models import UserProfile
 
 
+class SuppressRequestLoggingMixin:
+    """Mixin that provides a context manager to silence expected django.request logs."""
+
+    @contextmanager
+    def suppress_request_logging(self):
+        """Temporarily suppress django.request logging to hide expected 403s."""
+        logger = logging.getLogger("django.request")
+        previous_level = logger.level
+        logger.setLevel(logging.CRITICAL)
+        try:
+            yield
+        finally:
+            logger.setLevel(previous_level)
+
+
 class BaseViewTestMixin:
     """Base mixin with common view tests."""
 
@@ -49,7 +64,7 @@ class OpenViewTestMixin(BaseViewTestMixin):
         self.assertEqual(response.status_code, 200)
 
 
-class ProtectedViewTestMixin(BaseViewTestMixin):
+class ProtectedViewTestMixin(SuppressRequestLoggingMixin, BaseViewTestMixin):
     """Mixin for views that require authentication and curation permissions.
 
     Sets up 4 test users with different permission combinations and tests
@@ -96,17 +111,6 @@ class ProtectedViewTestMixin(BaseViewTestMixin):
             has_signed_phi_agreement=True,
             has_curation_permissions=True,
         )
-
-    @contextmanager
-    def suppress_request_logging(self):
-        """Temporarily suppress django.request logging to hide expected 403s."""
-        logger = logging.getLogger("django.request")
-        previous_level = logger.level
-        logger.setLevel(logging.CRITICAL)
-        try:
-            yield
-        finally:
-            logger.setLevel(previous_level)
 
     def test_redirects_anonymous_user_to_login(self):
         self.client.logout()

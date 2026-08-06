@@ -29,7 +29,7 @@
             </ul>
         </nav>
 
-        {% if object.publication %}
+        {% if object.status == "PUB" %} {# Published #}
             <div class="notification is-info is-light">
                 <p>
                     <strong>This curation has been published and is read-only.</strong>
@@ -37,6 +37,23 @@
                 <p class="mt-2">
                     <a href="{% url 'repo-detail' object.slug %}">View in HLArepo</a>
                 </p>
+            </div>
+        {% elif object.status == "RFR" %} {# Ready for Review #}
+            <div class="notification is-warning is-light">
+                <strong>This curation is awaiting expert panel review and is locked.</strong>
+            </div>
+        {% elif object.status == "PRO" %} {# Provisional #}
+            <div class="notification is-success is-light">
+                <strong>This curation has been approved by the expert panel and is ready to publish.</strong>
+            </div>
+        {% endif %}
+
+        {% if object.ep_classification %}
+            <div class="notification is-info is-light mt-2">
+                <p class="mt-2"><strong>Classification Notes:</strong> {{ object.ep_evidence_summary }}</p>
+                {% if object.ep_additional_notes %}
+                    <p class="mt-2"><strong>Additional Notes:</strong> {{ object.ep_additional_notes }}</p>
+                {% endif %}
             </div>
         {% endif %}
 

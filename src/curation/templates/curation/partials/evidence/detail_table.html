@@ -10,7 +10,6 @@
                     <th>Publication</th>
                     <th>Needs Review</th>
                     <th>Status</th>
-                    <th>Conflicting</th>
                     <th>Included</th>
                     <th>Score</th>
                 </tr>
@@ -42,15 +41,6 @@
                         </td>
                         <td>
                             <label class="checkbox" disabled>
-                                {% if evidence.is_conflicting %}
-                                    <input type="checkbox" disabled checked/>
-                                {% else %}
-                                    <input type="checkbox" disabled />
-                                {% endif %}
-                            </label>
-                        </td>
-                        <td>
-                            <label class="checkbox" disabled>
                                 {% if evidence.is_included %}
                                     <input type="checkbox" disabled checked/>
                                 {% else %}
@@ -65,7 +55,7 @@
             </table>
         </div>
 
-        {% if not object.publication %}
+        {% if not object.publication and object.status == "INP" %}
             <a href="{% url 'curation-edit-evidence' object.slug %}" class="button">
                 {% include "common/icon.html" with icon_name="pencil" %}
                 Edit Evidence

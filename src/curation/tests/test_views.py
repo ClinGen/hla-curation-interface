@@ -1,11 +1,14 @@
 """Houses tests for the curation app's views."""
 
+from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
 from allele.models import Allele
-from common.tests import ProtectedViewTestMixin
+from auth_.models import UserProfile
+from common.tests import ProtectedViewTestMixin, SuppressRequestLoggingMixin
 from curation.constants.models.common import Status
+from curation.constants.models.curation import Classification, CurationTypes
 from curation.constants.models.evidence import (
     AdditionalPhenotypes,
     EffectSizeStatistic,
@@ -21,6 +24,7 @@ from curation.models import (
 from disease.models import Disease
 from haplotype.models import Haplotype
 from publication.models import Publication
+from repo.models import PublishedCuration
 
 
 class CurationCreateTest(ProtectedViewTestMixin, TestCase):
@@ -84,13 +88,11 @@ class CurationDetailTest(ProtectedViewTestMixin, TestCase):
         "A*01:02:03",
         "acute oran berry intoxication",
         "In Progress",
-        "Limited",
         "1970-01-01",
         "ID",
         "Publication",
         "Needs Review",
         "Status",
-        "Conflicting",
         "Included",
         "Score",
     ]
@@ -108,30 +110,6 @@ class CurationDetailTest(ProtectedViewTestMixin, TestCase):
         self.assertContains(response, "0.0")  # Should default to a score of 0.0.
 
 
-class CurationEditTest(ProtectedViewTestMixin, TestCase):
-    fixtures = [
-        "test_alleles.json",
-        "test_diseases.json",
-        "test_publications.json",
-        "test_curations.json",
-        "test_evidence.json",
-    ]
-    url = reverse("curation-edit", kwargs={"curation_slug": "C000001"})
-    template = "curation/edit/curation.html"
-    page_name = "Edit Curation"
-    expected_text = [
-        "Edit Curation",
-        "Status",
-        "Classification",
-        "Save",
-        "Cancel",
-    ]
-
-    def setUp(self):
-        super().setUp()
-        self.client.force_login(self.user4_yes_phi_yes_perms)
-
-
 class CurationEditEvidenceTest(ProtectedViewTestMixin, TestCase):
     fixtures = [
         "test_alleles.json",
@@ -146,7 +124,6 @@ class CurationEditEvidenceTest(ProtectedViewTestMixin, TestCase):
     expected_text = [
         "Edit Evidence",
         "Status",
-        "Conflicting",
         "Included",
         "Save",
         "Cancel",
@@ -415,3 +392,307 @@ class EvidenceEditTest(ProtectedViewTestMixin, TestCase):
             evidence.demographics_text_quotes,
             "Patients were predominantly Asian (n=1500).",
         )
+
+
+def _make_user_with_profile(
+    *, username: str, phi: bool = True, curate: bool = True, review: bool = False
+) -> User:
+    user = User.objects.create_user(username=username, password="pw")  # noqa: S106
+    UserProfile.objects.create(
+        user=user,
+        has_signed_phi_agreement=phi,
+        has_curation_permissions=curate,
+        has_review_permissions=review,
+    )
+    return user
+
+
+def _make_curation(
+    allele: Allele, disease: Disease, status: str = Status.IN_PROGRESS
+) -> Curation:
+    return Curation.objects.create(
+        curation_type=CurationTypes.ALLELE,
+        allele=allele,
+        disease=disease,
+        status=status,
+    )
+
+
+class CurationSubmitTest(SuppressRequestLoggingMixin, TestCase):
+    fixtures = [
+        "test_alleles.json",
+        "test_diseases.json",
+        "test_publications.json",
+        "demographics.json",
+    ]
+
+    def setUp(self):
+        self.allele = Allele.objects.get(pk=1)
+        self.disease = Disease.objects.get(pk=1)
+        self.user = _make_user_with_profile(username="curator_s")
+        self.client.force_login(self.user)
+        self.curation = _make_curation(self.allele, self.disease)
+
+    def _url(self) -> str:
+        return reverse("curation-submit", kwargs={"curation_slug": self.curation.slug})
+
+    def test_submit_moves_status_to_ready_for_review(self):
+        pub = Publication.objects.get(pk=1)
+        Evidence.objects.create(
+            curation=self.curation,
+            publication=pub,
+            is_included=True,
+            status=Status.DONE,
+            needs_review=False,
+        )
+        response = self.client.post(self._url())
+        self.assertEqual(response.status_code, 302)
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.status, Status.READY_FOR_REVIEW)
+
+    def test_submit_fails_when_no_included_evidence(self):
+        pub = Publication.objects.get(pk=1)
+        Evidence.objects.create(
+            curation=self.curation,
+            publication=pub,
+            is_included=False,
+            status=Status.DONE,
+        )
+        response = self.client.post(self._url())
+        self.assertEqual(response.status_code, 302)
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.status, Status.IN_PROGRESS)
+
+    def test_submit_fails_when_included_evidence_not_done(self):
+        pub = Publication.objects.get(pk=1)
+        Evidence.objects.create(
+            curation=self.curation,
+            publication=pub,
+            is_included=True,
+            status=Status.IN_PROGRESS,
+        )
+        response = self.client.post(self._url())
+        self.assertEqual(response.status_code, 302)
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.status, Status.IN_PROGRESS)
+
+    def test_submit_fails_when_included_evidence_needs_review(self):
+        pub = Publication.objects.get(pk=1)
+        Evidence.objects.create(
+            curation=self.curation,
+            publication=pub,
+            is_included=True,
+            status=Status.DONE,
+            needs_review=True,
+        )
+        response = self.client.post(self._url())
+        self.assertEqual(response.status_code, 302)
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.status, Status.IN_PROGRESS)
+
+    def test_submit_fails_when_not_in_progress(self):
+        self.curation.status = Status.READY_FOR_REVIEW
+        self.curation.save()
+        response = self.client.post(self._url())
+        self.assertEqual(response.status_code, 302)
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.status, Status.READY_FOR_REVIEW)
+
+    def test_non_curator_gets_403(self):
+        anon = User.objects.create_user(username="anon_s", password="pw")  # noqa: S106
+        self.client.force_login(anon)
+        with self.suppress_request_logging():
+            response = self.client.post(self._url())
+        self.assertEqual(response.status_code, 403)
+
+
+class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
+    fixtures = ["test_alleles.json", "test_diseases.json", "demographics.json"]
+
+    def setUp(self):
+        self.allele = Allele.objects.get(pk=1)
+        self.disease = Disease.objects.get(pk=1)
+        self.reviewer = _make_user_with_profile(username="reviewer_r", review=True)
+        self.curator = _make_user_with_profile(username="curator_r")
+        self.curation = _make_curation(
+            self.allele, self.disease, status=Status.READY_FOR_REVIEW
+        )
+
+    def _url(self) -> str:
+        return reverse("curation-review", kwargs={"curation_slug": self.curation.slug})
+
+    @staticmethod
+    def _approval_data() -> dict[str, str]:
+        return {
+            "decision": "approved",
+            "ep_classification": Classification.MODERATE,
+            "ep_evidence_summary": "Panel consensus.",
+            "ep_additional_notes": "",
+            "ep": "40033",
+        }
+
+    def test_approval_sets_status_to_provisional(self):
+        self.client.force_login(self.reviewer)
+        response = self.client.post(self._url(), self._approval_data())
+        self.assertEqual(response.status_code, 302)
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.status, Status.PROVISIONAL)
+        self.assertEqual(self.curation.ep_classification, Classification.MODERATE)
+
+    def test_needs_revision_saves_reviewer_notes(self):
+        self.client.force_login(self.reviewer)
+        response = self.client.post(
+            self._url(),
+            {
+                "decision": "needs_revision",
+                "ep_evidence_summary": "Insufficient cohort size.",
+                "ep_additional_notes": "Please address the power calculation.",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.status, Status.IN_PROGRESS)
+        self.assertEqual(self.curation.ep_evidence_summary, "Insufficient cohort size.")
+        self.assertEqual(
+            self.curation.ep_additional_notes, "Please address the power calculation."
+        )
+
+    def test_non_ep_user_gets_403(self):
+        self.client.force_login(self.curator)
+        with self.suppress_request_logging():
+            response = self.client.post(self._url(), self._approval_data())
+        self.assertEqual(response.status_code, 403)
+
+
+class CurationForkTest(SuppressRequestLoggingMixin, TestCase):
+    fixtures = [
+        "test_alleles.json",
+        "test_diseases.json",
+        "test_publications.json",
+        "demographics.json",
+    ]
+
+    def setUp(self):
+        self.allele = Allele.objects.get(pk=1)
+        self.disease = Disease.objects.get(pk=1)
+        self.user = _make_user_with_profile(username="curator_f")
+        self.client.force_login(self.user)
+        self.curation = _make_curation(
+            self.allele, self.disease, status=Status.PUBLISHED
+        )
+        self.published = PublishedCuration.objects.create(
+            curation=self.curation,
+            published_by=self.user,
+        )
+
+    def _url(self) -> str:
+        return reverse("curation-fork", kwargs={"curation_slug": self.curation.slug})
+
+    def test_fork_creates_new_curation_with_forked_from_set(self):
+        response = self.client.post(self._url())
+        self.assertEqual(response.status_code, 302)
+        fork = Curation.objects.exclude(pk=self.curation.pk).first()
+        assert fork is not None
+        self.assertEqual(fork.forked_from, self.curation)
+        self.assertEqual(fork.status, Status.IN_PROGRESS)
+
+    def test_fork_deep_copies_evidence(self):
+        pub = Publication.objects.get(pk=1)
+        Evidence.objects.create(
+            curation=self.curation, publication=pub, is_included=True
+        )
+        response = self.client.post(self._url())
+        self.assertEqual(response.status_code, 302)
+        fork = Curation.objects.exclude(pk=self.curation.pk).first()
+        assert fork is not None
+        self.assertEqual(fork.evidence.count(), 1)  # type: ignore
+
+    def test_fork_fails_when_source_not_published(self):
+        curation2 = _make_curation(self.allele, self.disease)
+        url = reverse("curation-fork", kwargs={"curation_slug": curation2.slug})
+        with self.suppress_request_logging():
+            response = self.client.post(url)
+        self.assertEqual(response.status_code, 400)
+
+
+class LockingTest(TestCase):
+    fixtures = [
+        "test_alleles.json",
+        "test_diseases.json",
+        "test_publications.json",
+        "demographics.json",
+    ]
+
+    def setUp(self):
+        self.allele = Allele.objects.get(pk=1)
+        self.disease = Disease.objects.get(pk=1)
+        self.user = _make_user_with_profile(username="curator_l")
+        self.client.force_login(self.user)
+
+    def _assert_locked(self, curation: Curation, expected_redirect: str) -> None:
+        ev_edit_url = reverse(
+            "curation-edit-evidence", kwargs={"curation_slug": curation.slug}
+        )
+        response = self.client.get(ev_edit_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, expected_redirect)
+
+    def test_ready_for_review_locks_evidence_edit(self):
+        curation = _make_curation(
+            self.allele, self.disease, status=Status.READY_FOR_REVIEW
+        )
+        self._assert_locked(
+            curation,
+            reverse("curation-detail", kwargs={"curation_slug": curation.slug}),
+        )
+
+    def test_provisional_locks_evidence_edit(self):
+        curation = _make_curation(self.allele, self.disease, status=Status.PROVISIONAL)
+        self._assert_locked(
+            curation,
+            reverse("curation-detail", kwargs={"curation_slug": curation.slug}),
+        )
+
+    def test_ready_for_review_locks_evidence_create(self):
+        curation = _make_curation(
+            self.allele, self.disease, status=Status.READY_FOR_REVIEW
+        )
+        url = reverse("evidence-create", kwargs={"curation_slug": curation.slug})
+        response = self.client.post(url, {"publication": "1"})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Evidence.objects.filter(curation=curation).count(), 0)
+
+    def test_published_locks_evidence_edit(self):
+        curation = _make_curation(self.allele, self.disease, status=Status.PUBLISHED)
+        self._assert_locked(
+            curation,
+            reverse("curation-detail", kwargs={"curation_slug": curation.slug}),
+        )
+
+
+class CurationPublishUpdatedTest(TestCase):
+    """Verify publish now requires PROVISIONAL status, not DONE."""
+
+    fixtures = ["test_alleles.json", "test_diseases.json"]
+
+    def setUp(self):
+        self.allele = Allele.objects.get(pk=1)
+        self.disease = Disease.objects.get(pk=1)
+        self.user = _make_user_with_profile(username="curator_p")
+        self.client.force_login(self.user)
+
+    def test_publish_requires_provisional_status(self):
+        curation = _make_curation(self.allele, self.disease, status=Status.IN_PROGRESS)
+        url = reverse("curation-publish", kwargs={"curation_slug": curation.slug})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(PublishedCuration.objects.count(), 0)
+
+    def test_publish_succeeds_with_provisional_status(self):
+        curation = _make_curation(self.allele, self.disease, status=Status.PROVISIONAL)
+        url = reverse("curation-publish", kwargs={"curation_slug": curation.slug})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(PublishedCuration.objects.count(), 1)
+        curation.refresh_from_db()
+        self.assertEqual(curation.status, Status.PUBLISHED)

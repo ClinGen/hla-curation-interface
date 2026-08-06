@@ -43,6 +43,46 @@ class ProtectedViewMixin(AccessMixin):
         raise PermissionDenied(PERMISSION_DENIED_MESSAGE)
 
 
+class ReviewerViewMixin(AccessMixin):
+    """Ensures the user has EP reviewer permissions."""
+
+    def dispatch(
+        self,
+        request: HttpRequest,
+        *args,
+        **kwargs,
+    ) -> HttpResponse | HttpResponseRedirect | None:
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        profile = getattr(request.user, "profile", None)
+        if isinstance(profile, UserProfile) and profile.can_review:
+            return super().dispatch(request, *args, **kwargs)  # type: ignore
+        raise PermissionDenied(PERMISSION_DENIED_MESSAGE)
+
+
+def reviewer_view(view_function: Callable) -> Callable:
+    """Ensures the user has EP reviewer permissions.
+
+    Returns:
+        Wrapped view that enforces reviewer-only access.
+    """
+
+    @wraps(view_function)
+    def _wrapped_view(
+        request: HttpRequest,
+        *args,
+        **kwargs,
+    ) -> HttpResponse | HttpResponseRedirect | None:
+        if not request.user.is_authenticated:
+            return redirect(f"{LOGIN_URL}?next={request.path}")
+        profile = getattr(request.user, "profile", None)
+        if isinstance(profile, UserProfile) and profile.can_review:
+            return view_function(request, *args, **kwargs)
+        raise PermissionDenied(PERMISSION_DENIED_MESSAGE)
+
+    return _wrapped_view
+
+
 def protected_view(view_function: Callable) -> Callable:
     """Ensures the user has the correct permissions to access protected views.
 

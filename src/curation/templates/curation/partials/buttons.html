@@ -1,21 +1,35 @@
-{% if not object.publication %}
+{% if object.status == "INP" %} {# In Progress #}
     <div class="buttons">
-            <a href="{% url 'curation-edit' object.slug %}" class="button">
-                {% include "common/icon.html" with icon_name="pencil" %}
-                Edit Curation
+        <a href="{% url 'evidence-create' object.slug %}" class="button is-link">
+            {% include "common/icon.html" with icon_name="plus-circle" %}
+            Add Evidence
+        </a>
+        <form method="post" action="{% url 'curation-submit' object.slug %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit"
+                    class="button is-link"
+                    onclick="return confirm('Submit this curation for expert panel review? It will be locked until the panel acts.');">
+                {% include "common/icon.html" with icon_name="send" %}
+                Submit for Review
+            </button>
+        </form>
+    </div>
+{% elif object.status == "RFR" %} {# Ready for Review #}
+    {% if request.user.profile.can_review %}
+        <div class="buttons">
+            <a href="{% url 'curation-review' object.slug %}" class="button is-warning">
+                {% include "common/icon.html" with icon_name="clipboard-check" %}
+                Review
             </a>
-            <a href="{% url 'evidence-create' object.slug %}" class="button is-link">
-                {% include "common/icon.html" with icon_name="plus-circle" %}
-                Add Evidence
-            </a>
-
-        {% if object.status == "DNE" %}
-            <a href="{% url 'curation-publish' object.slug %}"
-               class="button is-success"
-               onclick="return confirm('Are you sure you want to publish this curation to the repository? This will make it read-only.');">
-                {% include "common/icon.html" with icon_name="upload" %}
-                Publish to Repository
-            </a>
-        {% endif %}
+        </div>
+    {% endif %}
+{% elif object.status == "PRO" %} {# Provisional #}
+    <div class="buttons">
+        <a href="{% url 'curation-publish' object.slug %}"
+           class="button is-success"
+           onclick="return confirm('Publish this curation to the repository? It will become permanently read-only.');">
+            {% include "common/icon.html" with icon_name="upload" %}
+            Publish to Repository
+        </a>
     </div>
 {% endif %}

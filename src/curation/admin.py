@@ -9,12 +9,15 @@ class CurationAdmin(SimpleHistoryAdmin):
     list_display = [
         "pk",
         "curation_type",
+        "status",
+        "ep_classification",
+        "ep",
         "allele",
         "haplotype",
         "added_by",
         "added_at",
     ]
-    list_filter = ["curation_type"]
+    list_filter = ["curation_type", "status"]
     search_fields = ["allele", "haplotype"]
     readonly_fields = ["added_by", "added_at"]
 

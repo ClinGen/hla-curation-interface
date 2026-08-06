@@ -24,13 +24,25 @@
                 <td>{{ curation.haplotype|default_if_none:"------" }}</td>
                 <td>{{ curation.disease|default_if_none:"------" }}</td>
                 <td>
-                    {% if curation.publication %}
-                        {{ curation.get_status_display|default_if_none:"------" }}/Published
+                    {{ curation.get_status_display|default_if_none:"------" }}
+                </td>
+                <td>
+                    {% if curation.ep_classification %}
+                        {{ curation.get_ep_classification_display }}
                     {% else %}
-                        {{ curation.get_status_display|default_if_none:"------" }}
+                        {% with sc=curation.suggested_classification %}
+                            {% if sc == "DEF" %}Definitive
+                            {% elif sc == "STR" %}Strong
+                            {% elif sc == "MOD" %}Moderate
+                            {% elif sc == "LIM" %}Limited
+                            {% elif sc == "NOK" %}No Known Association
+                            {% elif sc == "DIS" %}Disputed
+                            {% elif sc == "REF" %}Refuted
+                            {% else %}------
+                            {% endif %}
+                        {% endwith %}
                     {% endif %}
                 </td>
-                <td>{{ curation.get_classification_display|default_if_none:"------" }}</td>
                 <td>{{ curation.updated_at|default_if_none:"------"|date:"Y-m-d" }}</td>
             </tr>
         {% endfor %}

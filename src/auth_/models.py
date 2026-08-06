@@ -20,6 +20,11 @@ class UserProfile(models.Model):
         verbose_name="PHI Agreement",
         help_text="Whether the user has signed the PHI agreement.",
     )
+    has_review_permissions = models.BooleanField(
+        default=False,
+        verbose_name="EP Review Permissions",
+        help_text="Whether the user can act as an EP reviewer.",
+    )
     updated_at = models.DateTimeField(
         auto_now=True,
         verbose_name="Updated At",
@@ -46,3 +51,8 @@ class UserProfile(models.Model):
             and self.has_curation_permissions
             and self.has_signed_phi_agreement
         )
+
+    @property
+    def can_review(self) -> bool:
+        """Returns whether the user can act as an EP reviewer."""
+        return self.has_review_permissions and self.can_curate

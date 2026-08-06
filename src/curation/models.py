@@ -1,5 +1,7 @@
 """Houses database models for the curation app."""
 
+import copy
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.http import HttpResponseBase
@@ -7,7 +9,12 @@ from django.urls import reverse
 from simple_history.models import HistoricalRecords
 
 from allele.models import Allele
-from curation.constants.models.common import STATUS_CHOICES, Status
+from curation.constants.models.common import (
+    CURATION_STATUS_CHOICES,
+    CURATION_STATUS_TRANSITIONS,
+    STATUS_CHOICES,
+    Status,
+)
 from curation.constants.models.curation import (
     CLASSIFICATION_CHOICES,
     CURATION_TYPE_CHOICES,
@@ -40,7 +47,6 @@ from curation.score import (
     get_step_6b_multiplier,
 )
 from curation.validators.models.curation import (
-    validate_classification,
     validate_curation_type,
     validate_status,
 )
@@ -71,13 +77,11 @@ class Curation(models.Model):
     )
     status = models.CharField(
         blank=False,
-        choices=STATUS_CHOICES,
+        choices=CURATION_STATUS_CHOICES,
         default=Status.IN_PROGRESS,
         max_length=3,
         verbose_name="Status",
-        help_text=(
-            f"Either '{Status.IN_PROGRESS}' (in progress) or '{Status.DONE}' (done)."
-        ),
+        help_text="The current lifecycle status of the curation.",
     )
     curation_type = models.CharField(
         blank=False,
@@ -90,13 +94,44 @@ class Curation(models.Model):
             f"'{CurationTypes.HAPLOTYPE}' (haplotype)."
         ),
     )
-    classification = models.CharField(
-        blank=False,
-        choices=CLASSIFICATION_CHOICES,
-        default=Classification.NO_KNOWN,
+    # null=True on EP fields is intentional: null means "not yet reviewed" (fields were
+    # never touched), whereas empty string would mean "reviewer explicitly left blank."
+    # Collapsing these two states would lose information.
+    ep_classification = models.CharField(  # noqa: DJ001
         max_length=3,
-        verbose_name="Classification",
-        help_text="The classification level for the curation.",
+        choices=CLASSIFICATION_CHOICES,
+        null=True,
+        blank=True,
+        verbose_name="EP Classification",
+        help_text="The classification set by the expert panel at review time.",
+    )
+    ep_evidence_summary = models.TextField(  # noqa: DJ001
+        null=True,
+        blank=True,
+        verbose_name="EP Evidence Summary",
+        help_text="The expert panel's summary of the evidence.",
+    )
+    ep_additional_notes = models.TextField(  # noqa: DJ001
+        null=True,
+        blank=True,
+        verbose_name="EP Additional Notes",
+        help_text="Additional notes from the expert panel.",
+    )
+    ep = models.CharField(  # noqa: DJ001
+        max_length=5,
+        null=True,
+        blank=True,
+        verbose_name="Expert Panel",
+        help_text="Five-digit numeric ID of the expert panel.",
+    )
+    forked_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="forks",
+        verbose_name="Forked From",
+        help_text="The published curation this curation was forked from, if any.",
     )
     allele = models.ForeignKey(
         Allele,
@@ -117,7 +152,7 @@ class Curation(models.Model):
     disease = models.ForeignKey(
         Disease,
         blank=False,
-        null=True,
+        null=False,
         on_delete=models.CASCADE,
         related_name="curations",
         help_text="Select the disease for this curation.",
@@ -152,7 +187,6 @@ class Curation(models.Model):
         return f"Curation #{self.pk} ({self.curation_type})"
 
     def save(self, *args, **kwargs) -> None:
-        """Adds a human-readable ID."""
         super().save(*args, **kwargs)
         if not self.slug:
             self.slug = f"C{self.pk:06d}"
@@ -165,16 +199,70 @@ class Curation(models.Model):
         super().clean()
         validate_status(self)
         validate_curation_type(self)
-        validate_classification(self)
+
+    @property
+    def is_locked(self) -> bool:
+        return self.status in (
+            Status.READY_FOR_REVIEW,
+            Status.PROVISIONAL,
+            Status.PUBLISHED,
+        )
+
+    def can_submit(self) -> list[str]:
+        """Returns a list of error messages; empty means submission is valid."""
+        errors: list[str] = []
+        if self.status != Status.IN_PROGRESS:
+            errors.append("Only in-progress curations can be submitted for review.")
+            return errors
+        included = list(self.evidence.filter(is_included=True))  # type: ignore
+        if not included:
+            errors.append(
+                "At least one evidence item must be included before submitting."
+            )
+        else:
+            if any(e.status == Status.IN_PROGRESS for e in included):
+                errors.append(
+                    "All included evidence must be marked as done before submitting."
+                )
+            if any(e.needs_review for e in included):
+                errors.append(
+                    "All included evidence must have their 'needs review' flag"
+                    " cleared before submitting."
+                )
+        return errors
+
+    def transition_to(self, new_status: str) -> None:
+        """Transitions to a new status, raising ValueError on illegal moves.
+
+        Raises:
+            ValueError: If the transition from the current status is not allowed.
+        """
+        allowed = CURATION_STATUS_TRANSITIONS.get(self.status, frozenset())
+        if new_status not in allowed:
+            msg = f"Cannot transition curation from {self.status!r} to {new_status!r}."
+            raise ValueError(msg)
+        self.status = new_status
+        self.save()
+
+    @property
+    def suggested_classification(self) -> str | None:
+        if self.pk is None:
+            return None
+        s = self.score
+        if s == 0:
+            return None
+        if s < 25:
+            return Classification.LIMITED
+        if s <= 50:
+            return Classification.MODERATE
+        return Classification.STRONG
 
     @property
     def score(self) -> float:
         """Returns the score for the curation."""
         total = 0.0
         for evidence in self.evidence.all():  # type: ignore
-            if evidence.is_included and evidence.is_conflicting:
-                total -= evidence.score
-            elif evidence.is_included and not evidence.is_conflicting:
+            if evidence.is_included:
                 total += evidence.score
         return total
 
@@ -240,11 +328,6 @@ class Evidence(models.Model):
         on_delete=models.CASCADE,
         related_name="evidence",
         help_text="The publication that the evidence comes from.",
-    )
-    is_conflicting = models.BooleanField(
-        default=False,
-        verbose_name="Conflicts",
-        help_text="Is the evidence in this association conflicting?",
     )
     is_included = models.BooleanField(
         default=False,
@@ -558,6 +641,23 @@ class Evidence(models.Model):
                 "evidence_slug": self.slug,
             },
         )
+
+    def copy_to(self, curation: "Curation", added_by: User | None = None) -> "Evidence":
+        """Creates and returns a copy of this evidence attached to the given curation.
+
+        Returns:
+            The newly created Evidence copy.
+        """
+        demographics = list(self.demographics.all())
+        new = copy.copy(self)
+        new.pk = None
+        new.slug = ""
+        new._state.adding = True  # noqa: SLF001
+        new.curation = curation
+        new.added_by = added_by
+        new.save()
+        new.demographics.set(demographics)
+        return new
 
     def clean(self) -> None:
         validate_publication(self)

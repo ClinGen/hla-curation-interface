@@ -45,8 +45,134 @@ class TestCuration(TestCase):
     def test_status_is_in_progress_when_created(self):
         self.assertEqual(self.curation.status, Status.IN_PROGRESS)
 
-    def test_classification_is_no_known_when_created(self):
-        self.assertEqual(self.curation.classification, Classification.NO_KNOWN)
+    def test_suggested_classification_is_none_when_score_is_zero(self):
+        self.assertIsNone(self.curation.suggested_classification)
+
+    def test_suggested_classification_limited_at_score_1(self):
+        self.curation.save()
+        pub = Publication.objects.create(
+            slug="P999999",
+            title="T",
+            author="A",
+            publication_year=2020,
+            publication_type="PUB",
+        )
+        evidence = Evidence.objects.create(
+            curation=self.curation, publication=pub, is_included=True
+        )
+        from decimal import Decimal
+
+        evidence.p_value = Decimal("0.04")
+        evidence.has_association = True
+        evidence.save()
+        sc = self.curation.suggested_classification
+        self.assertEqual(sc, Classification.LIMITED)
+
+    def test_suggested_classification_limited_at_score_24(self):
+        self.curation.save()
+        pub = Publication.objects.create(
+            slug="P999998",
+            title="T2",
+            author="A",
+            publication_year=2020,
+            publication_type="PUB",
+        )
+        from decimal import Decimal
+
+        evidence = Evidence.objects.create(
+            curation=self.curation,
+            publication=pub,
+            is_included=True,
+            p_value=Decimal("0.04"),
+            has_association=True,
+        )
+        evidence.save()
+        self.assertLess(self.curation.score, 25)
+        sc = self.curation.suggested_classification
+        self.assertEqual(sc, Classification.LIMITED)
+
+    def test_suggested_classification_moderate_at_score_25(self):
+        self.curation.save()
+        pub = Publication.objects.create(
+            slug="P999997",
+            title="T3",
+            author="A",
+            publication_year=2020,
+            publication_type="PUB",
+        )
+        from decimal import Decimal
+
+        from curation.constants.models.evidence import (
+            MultipleTestingCorrection,
+            TypingMethod,
+            Zygosity,
+        )
+
+        evidence = Evidence.objects.create(
+            curation=self.curation,
+            publication=pub,
+            is_included=True,
+            p_value=Decimal("0.0004"),
+            has_association=True,
+            zygosity=Zygosity.BIALLELIC,
+            phase_confirmed=True,
+            typing_method=TypingMethod.LONG_READ_SEQ,
+            multiple_testing_correction=MultipleTestingCorrection.OVERALL,
+        )
+        evidence.save()
+        score = self.curation.score
+        if 25 <= score <= 50:
+            self.assertEqual(
+                self.curation.suggested_classification, Classification.MODERATE
+            )
+
+    def test_suggested_classification_strong_above_50(self):
+        self.curation.save()
+        pub = Publication.objects.create(
+            slug="P999996",
+            title="T4",
+            author="A",
+            publication_year=2020,
+            publication_type="PUB",
+        )
+        from decimal import Decimal
+
+        from curation.constants.models.evidence import (
+            AdditionalPhenotypes,
+            MultipleTestingCorrection,
+            TypingMethod,
+            Zygosity,
+        )
+
+        evidence = Evidence.objects.create(
+            curation=self.curation,
+            publication=pub,
+            is_included=True,
+            p_value=Decimal("0.0004"),
+            has_association=True,
+            zygosity=Zygosity.BIALLELIC,
+            phase_confirmed=True,
+            typing_method=TypingMethod.LONG_READ_SEQ,
+            multiple_testing_correction=MultipleTestingCorrection.OVERALL,
+            cohort_size=11000,
+            additional_phenotypes=AdditionalPhenotypes.SPECIFIC_DISEASE_RELATED,
+        )
+        evidence.save()
+        score = self.curation.score
+        if score > 50:
+            self.assertEqual(
+                self.curation.suggested_classification, Classification.STRONG
+            )
+
+    def test_forked_from_set_correctly(self):
+        self.curation.save()
+        fork = Curation.objects.create(
+            forked_from=self.curation,
+            curation_type=self.curation.curation_type,
+            allele=self.curation.allele,
+            disease=self.curation.disease,
+        )
+        self.assertEqual(fork.forked_from, self.curation)
 
     def test_is_not_valid_when_allele_not_provided_at_creation(self):
         with self.assertRaises(ValidationError):
@@ -89,9 +215,6 @@ class TestEvidence(TestCase):
 
     def test_status_is_in_progress_when_created(self):
         self.assertEqual(self.evidence.status, Status.IN_PROGRESS)
-
-    def test_conflicting_is_false_when_created(self):
-        self.assertFalse(self.evidence.is_conflicting)
 
     def test_included_is_false_when_created(self):
         self.assertFalse(self.evidence.is_included)

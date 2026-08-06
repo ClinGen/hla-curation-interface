@@ -27,7 +27,7 @@ class PublishedCurationModelTest(TestCase):
             curation_type=CurationTypes.ALLELE,
             allele=self.allele,
             disease=self.disease,
-            status=Status.DONE,
+            status=Status.PROVISIONAL,
         )
 
     def test_create_published_curation(self):
@@ -94,7 +94,7 @@ class CurationPublishViewTest(ProtectedViewTestMixin, TestCase):
             curation_type=CurationTypes.ALLELE,
             allele=self.allele,
             disease=self.disease,
-            status=Status.DONE,
+            status=Status.PROVISIONAL,
         )
         self.curation.save()  # Ensure slug is generated.
         self.url = reverse(
@@ -118,13 +118,14 @@ class CurationPublishViewTest(ProtectedViewTestMixin, TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
 
-    def test_publish_done_curation(self):
+    def test_publish_provisional_curation(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(hasattr(self.curation, "publication"))
         self.assertEqual(PublishedCuration.objects.count(), 1)
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.status, Status.PUBLISHED)
 
     def test_cannot_publish_in_progress_curation(self):
         curation = Curation.objects.create(
@@ -142,6 +143,8 @@ class CurationPublishViewTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(PublishedCuration.objects.count(), 0)
 
     def test_cannot_publish_already_published_curation(self):
+        self.curation.status = Status.PUBLISHED
+        self.curation.save()
         PublishedCuration.objects.create(
             curation=self.curation,
             published_by=self.user4_yes_phi_yes_perms,
@@ -173,7 +176,7 @@ class RepoSearchViewTest(TestCase):
             curation_type=CurationTypes.ALLELE,
             allele=allele,
             disease=disease,
-            status=Status.DONE,
+            status=Status.PUBLISHED,
         )
         curation.save()
         PublishedCuration.objects.create(
@@ -198,7 +201,7 @@ class PublishedCurationDetailViewTest(TestCase):
             curation_type=CurationTypes.ALLELE,
             allele=allele,
             disease=disease,
-            status=Status.DONE,
+            status=Status.PUBLISHED,
         )
         self.curation.save()
         self.published = PublishedCuration.objects.create(
@@ -231,7 +234,7 @@ class JSONDownloadViewTest(TestCase):
             curation_type=CurationTypes.ALLELE,
             allele=allele,
             disease=disease,
-            status=Status.DONE,
+            status=Status.PUBLISHED,
         )
         self.curation.save()
         self.published = PublishedCuration.objects.create(
@@ -287,22 +290,12 @@ class ReadOnlyEnforcementTest(TestCase):
             curation_type=CurationTypes.ALLELE,
             allele=allele,
             disease=disease,
-            status=Status.DONE,
+            status=Status.PUBLISHED,
         )
         self.curation.save()
         self.published = PublishedCuration.objects.create(
             curation=self.curation,
             published_by=self.user,
-        )
-
-    def test_cannot_edit_published_curation(self):
-        url = reverse("curation-edit", kwargs={"curation_slug": self.curation.slug})
-        response = self.client.get(url)
-
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(
-            response,
-            reverse("curation-detail", kwargs={"curation_slug": self.curation.slug}),
         )
 
     def test_cannot_edit_published_evidence(self):
@@ -316,3 +309,95 @@ class ReadOnlyEnforcementTest(TestCase):
             response,
             reverse("curation-detail", kwargs={"curation_slug": self.curation.slug}),
         )
+
+
+class SupersessionTest(TestCase):
+    fixtures = ["test_alleles.json", "test_diseases.json"]
+
+    def setUp(self):
+        self.allele = Allele.objects.get(pk=1)
+        self.disease = Disease.objects.get(pk=1)
+        self.user = User.objects.create_user(username="superuser_t", password="pw")  # noqa: S106
+        UserProfile.objects.create(
+            user=self.user,
+            has_signed_phi_agreement=True,
+            has_curation_permissions=True,
+        )
+
+    def _make_published(self, forked_from: Curation | None = None) -> PublishedCuration:
+        curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=self.allele,
+            disease=self.disease,
+            status=Status.PUBLISHED,
+            forked_from=forked_from,
+        )
+        return PublishedCuration.objects.create(
+            curation=curation, published_by=self.user
+        )
+
+    def test_is_superseded_false_when_no_fork(self):
+        from repo.views import is_superseded
+
+        published = self._make_published()
+        self.assertFalse(is_superseded(published))
+
+    def test_is_superseded_true_when_fork_is_published(self):
+        from repo.views import is_superseded
+
+        original = self._make_published()
+        self._make_published(forked_from=original.curation)
+        self.assertTrue(is_superseded(original))
+
+    def test_is_superseded_true_for_multi_hop_chain(self):
+        from repo.views import is_superseded
+
+        original = self._make_published()
+        fork1 = self._make_published(forked_from=original.curation)
+        self._make_published(forked_from=fork1.curation)
+        self.assertTrue(is_superseded(original))
+
+    def test_get_superseding_returns_none_when_not_superseded(self):
+        from repo.views import get_superseding
+
+        published = self._make_published()
+        self.assertIsNone(get_superseding(published))
+
+    def test_get_superseding_returns_fork(self):
+        from repo.views import get_superseding
+
+        original = self._make_published()
+        fork_pub = self._make_published(forked_from=original.curation)
+        result = get_superseding(original)
+        self.assertEqual(result, fork_pub)
+
+
+class ForkButtonTest(TestCase):
+    fixtures = ["test_alleles.json", "test_diseases.json"]
+
+    def setUp(self):
+        self.client = Client()
+        self.allele = Allele.objects.get(pk=1)
+        self.disease = Disease.objects.get(pk=1)
+        self.user = User.objects.create_user(username="fork_button_user", password="pw")  # noqa: S106
+        UserProfile.objects.create(
+            user=self.user,
+            has_signed_phi_agreement=True,
+            has_curation_permissions=True,
+        )
+        self.curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=self.allele,
+            disease=self.disease,
+            status=Status.PUBLISHED,
+        )
+        self.curation.save()
+        self.published = PublishedCuration.objects.create(
+            curation=self.curation, published_by=self.user
+        )
+
+    def test_fork_button_visible_for_curators(self):
+        self.client.force_login(self.user)
+        url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
+        response = self.client.get(url)
+        self.assertContains(response, "Fork")

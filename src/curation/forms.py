@@ -1,7 +1,12 @@
 from django import forms
 from django.forms import ModelForm, modelformset_factory
 
+from curation.constants.models.curation import CLASSIFICATION_CHOICES
 from curation.models import Curation, Evidence
+
+HLA_CURATION_TASKFORCE_ID = "40033"
+
+EP_CHOICES = [(HLA_CURATION_TASKFORCE_ID, "HLA Curation Taskforce")]
 
 
 class CurationCreateForm(ModelForm):
@@ -11,10 +16,49 @@ class CurationCreateForm(ModelForm):
         widgets = {"curation_type": forms.RadioSelect}
 
 
-class CurationEditForm(ModelForm):
-    class Meta:
-        model = Curation
-        fields = ["status", "classification"]
+class EPReviewForm(forms.Form):
+    DECISION_CHOICES = [
+        ("needs_revision", "Needs Revision"),
+        ("approved", "Approved"),
+    ]
+    decision = forms.ChoiceField(
+        choices=DECISION_CHOICES,
+        widget=forms.RadioSelect,
+    )
+    ep_classification = forms.ChoiceField(
+        label="Classification",
+        choices=[("", "---------"), *CLASSIFICATION_CHOICES.items()],
+        required=False,
+    )
+    ep_evidence_summary = forms.CharField(
+        label="Evidence Summary",
+        widget=forms.Textarea(attrs={"class": "textarea", "rows": 3}),
+        required=False,
+    )
+    ep_additional_notes = forms.CharField(
+        label="Additional Notes",
+        widget=forms.Textarea(attrs={"class": "textarea", "rows": 3}),
+        required=False,
+    )
+    ep = forms.ChoiceField(
+        label="Expert Panel",
+        choices=EP_CHOICES,
+        required=False,
+    )
+
+    def clean(self) -> dict | None:
+        cleaned_data = super().clean()
+        if not cleaned_data:
+            return cleaned_data
+        decision = cleaned_data.get("decision")
+        if decision == "approved":
+            if not cleaned_data.get("ep_classification"):
+                self.add_error("ep_classification", "Required when approving.")
+            if not cleaned_data.get("ep_evidence_summary"):
+                self.add_error("ep_evidence_summary", "Required when approving.")
+            if not cleaned_data.get("ep"):
+                self.add_error("ep", "Required when approving.")
+        return cleaned_data
 
 
 class EvidenceCreateForm(ModelForm):
@@ -26,9 +70,8 @@ class EvidenceCreateForm(ModelForm):
 class EvidenceTopLevelEditForm(ModelForm):
     class Meta:
         model = Evidence
-        fields = ["status", "is_conflicting", "is_included"]
+        fields = ["status", "is_included"]
         widgets = {
-            "is_conflicting": forms.CheckboxInput(),
             "is_included": forms.CheckboxInput(),
         }
 

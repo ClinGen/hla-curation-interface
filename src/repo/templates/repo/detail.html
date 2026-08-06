@@ -29,19 +29,50 @@
             </ul>
         </nav>
 
+        {% if superseded and superseding %}
+            <div class="notification is-warning is-light">
+                <p>
+                    This curation has been superseded by
+                    <a href="{% url 'repo-detail' superseding.curation.slug %}">{{ superseding.curation.slug }}</a>.
+                </p>
+            </div>
+        {% endif %}
+
+        {% if curation.forked_from %}
+            <div class="notification is-info is-light">
+                <p>
+                    This curation is an update of
+                    <a href="{% url 'repo-detail' curation.forked_from.slug %}">{{ curation.forked_from.slug }}</a>.
+                </p>
+            </div>
+        {% endif %}
+
         {% include "curation/partials/curation/detail_table.html" with object=curation %}
 
-        <a href="{% url 'repo-download-single' curation.slug %}"
-           class="button">
-            {% include "common/icon.html" with icon_name="download" %}
-            Download as JSON
-        </a>
-        <a href="{% url 'repo-history' curation.slug %}"
-           class="button">
-            {% include "common/icon.html" with icon_name="clock-history" %}
-            History
-        </a>
-    
+        <div class="buttons">
+            <a href="{% url 'repo-download-single' curation.slug %}"
+               class="button">
+                {% include "common/icon.html" with icon_name="download" %}
+                Download as JSON
+            </a>
+            <a href="{% url 'repo-history' curation.slug %}"
+               class="button">
+                {% include "common/icon.html" with icon_name="clock-history" %}
+                History
+            </a>
+            {% if request.user.is_authenticated and request.user.profile.can_curate %}
+                <form method="post" action="{% url 'curation-fork' curation.slug %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="button"
+                            onclick="return confirm('Fork this curation? A new editable copy will be created.');">
+                        {% include "common/icon.html" with icon_name="diagram-2" %}
+                        Fork
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+
         {% include "curation/partials/evidence/detail_table.html" with object=curation %}
 
     </div>

@@ -139,7 +139,23 @@
                                             {{ evidence.curation.get_status_display|default_if_none:"------" }}
                                         {% endif %}
                                     </td>
-                                    <td>{{ evidence.curation.get_classification_display|default_if_none:"------" }}</td>
+                                    <td>
+                                        {% if evidence.curation.ep_classification %}
+                                            {{ evidence.curation.get_ep_classification_display|default_if_none:"------" }}
+                                        {% else %}
+                                            {% with sc=evidence.curation.suggested_classification %}
+                                                {% if sc == "DEF" %}Definitive
+                                                {% elif sc == "STR" %}Strong
+                                                {% elif sc == "MOD" %}Moderate
+                                                {% elif sc == "LIM" %}Limited
+                                                {% elif sc == "NOK" %}No Known Association
+                                                {% elif sc == "DIS" %}Disputed
+                                                {% elif sc == "REF" %}Refuted
+                                                {% else %}------
+                                                {% endif %}
+                                            {% endwith %}
+                                        {% endif %}
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>

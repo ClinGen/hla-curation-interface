@@ -20,11 +20,6 @@ urlpatterns = [
         name="curation-list",
     ),
     path(
-        "<slug:curation_slug>/edit-curation",
-        views.CurationEdit.as_view(),
-        name="curation-edit",
-    ),
-    path(
         "<slug:curation_slug>/edit-evidence",
         views.curation_edit_evidence,
         name="curation-edit-evidence",
@@ -33,6 +28,21 @@ urlpatterns = [
         "<slug:curation_slug>/publish",
         views.curation_publish,
         name="curation-publish",
+    ),
+    path(
+        "<slug:curation_slug>/submit",
+        views.curation_submit,
+        name="curation-submit",
+    ),
+    path(
+        "<slug:curation_slug>/review",
+        views.curation_review,
+        name="curation-review",
+    ),
+    path(
+        "<slug:curation_slug>/fork",
+        views.curation_fork,
+        name="curation-fork",
     ),
     path(
         "<slug:curation_slug>/evidence/create",

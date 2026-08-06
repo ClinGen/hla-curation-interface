@@ -46,8 +46,9 @@ it for review, which moves it to **Ready for Review** and locks it — no furthe
 are possible until the expert panel acts. If the panel approves, the curation moves to
 **Provisional**, where it stays locked but is now eligible for publication. A curator
 with the correct permissions can publish it, moving it to **Published**, at which point
-it is permanently read-only. If the panel sends it back, it returns to In Progress, the
-panel's fields are cleared, and the curator can edit it again.
+it is permanently read-only. If the panel sends it back, it returns to In Progress and
+the curator can edit it again; the panel's notes are retained so the curator can see the
+reason for the rejection.
 
 ### Classification
 
@@ -90,14 +91,14 @@ links forward to the current one, so the full history of a curation is always na
 
 ### Keeping expert panel fields visible after a rejection
 
-When the panel sends a curation back for revision, the plan clears all EP fields. An
-alternative was to keep those fields visible — or at least the reviewer's notes — so the
-curator could see on the curation page why their work was returned. We also considered a
+When the panel sends a curation back for revision, the plan retains all EP fields so the
+curator can see the reason for the rejection on the curation detail page. An alternative
+was to clear those fields on revert, on the assumption that curators are closely enough
+involved in EP proceedings that they already know the reason. We also considered a
 middle path: keep the fields intact while the curation is In Progress, then clear them
-when the curator re-submits, so the next reviewer starts fresh. Ultimately we cleared on
-revert because curators in this community are closely enough involved in EP proceedings
-that they already know the reason; surfacing it inside the system would add complexity
-for marginal benefit.
+when the curator re-submits, so the next reviewer always starts fresh. Ultimately we
+retained the fields because surfacing the panel's notes inside the system is useful even
+when the curator already knows the outcome informally.
 
 ### Snapshot-based versioning
 
@@ -118,6 +119,17 @@ versions over time, each with a version number. This was ruled out because it co
 two things that should be separate: the curation (a specific allele-disease pairing and
 its evidence) and a revision to that curation (which is substantively different work
 that warrants its own record). The fork model keeps these separate cleanly.
+
+### Dedicated status-transition timestamp fields
+
+The original plan added four `DateTimeField` columns (`in_progress_at`,
+`ready_for_review_at`, `provisional_at`, `published_at`) to be stamped by the relevant
+view at each transition. These were removed in favor of relying on
+`django-simple-history`, which already records every field change together with a
+timestamp on every save. Separate columns create a second source of truth for the same
+information, with no mechanism to stay in sync if status changes outside the normal view
+paths (admin, shell, tests). When the timestamp for a given transition is needed, it can
+be derived from the history record where `status` changed to that value.
 
 ### Storing a superseded flag
 
@@ -152,15 +164,19 @@ earlier ones.
 Done before submitting a curation for review), so `DONE` must be kept. Do not remove it
 from `Status`.
 
-Add two new constants following the existing 3-character uppercase code convention:
-`READY_FOR_REVIEW = "RFR"` and `PROVISIONAL = "PRO"`.
+Add three new constants following the existing 3-character uppercase code convention:
+`READY_FOR_REVIEW = "RFR"`, `PROVISIONAL = "PRO"`, and `PUBLISHED = "PUB"`.
 
 Split the single shared `STATUS_CHOICES` dict into two:
 
 - `STATUS_CHOICES` — keep as-is (`IN_PROGRESS` + `DONE`); still used by
   `Evidence.status`.
-- `CURATION_STATUS_CHOICES` — new dict containing `IN_PROGRESS`, `READY_FOR_REVIEW`, and
-  `PROVISIONAL`; used by `Curation.status` instead of `STATUS_CHOICES`.
+- `CURATION_STATUS_CHOICES` — new dict containing `IN_PROGRESS`, `READY_FOR_REVIEW`,
+  `PROVISIONAL`, and `PUBLISHED`; used by `Curation.status` instead of `STATUS_CHOICES`.
+
+Also add `CURATION_STATUS_TRANSITIONS`, a module-level dict mapping each curation status
+to the `frozenset` of statuses it may legally transition to. This is the single source of
+truth for the state machine and is imported by the `Curation` model.
 
 Update `Curation.status` in `src/curation/models.py` to use `CURATION_STATUS_CHOICES`
 and update its `max_length` if needed (current value is 3, which fits all codes). Leave
@@ -198,21 +214,14 @@ pair.
 - The `classification` `CharField` and its validator reference. Classification is no
   longer curator-controlled.
 
-*Add — EP review fields* (all `null=True, blank=True`; cleared when a curation is
-reverted to `In Progress`):
+*Add — EP review fields* (all `null=True, blank=True`; retained when a curation is
+reverted to `In Progress` so the curator can see the rejection reason):
 
 - `ep_classification = models.CharField(max_length=3, choices=CLASSIFICATION_CHOICES, null=True, blank=True)`
-- `ep_classification_notes = models.TextField(null=True, blank=True)`
-- `ep_notes = models.TextField(null=True, blank=True)`
+- `ep_evidence_summary = models.TextField(null=True, blank=True)`
+- `ep_additional_notes = models.TextField(null=True, blank=True)`
 - `ep = models.CharField(max_length=5, null=True, blank=True)` — five-digit numeric ID
   identifying the expert panel or affiliation
-
-*Add — status transition timestamps* (all `null=True, blank=True`; stamped by views,
-never entered manually):
-
-- `in_progress_at = models.DateTimeField(null=True, blank=True)`
-- `ready_for_review_at = models.DateTimeField(null=True, blank=True)`
-- `provisional_at = models.DateTimeField(null=True, blank=True)`
 
 *Add — lineage:*
 
@@ -234,10 +243,30 @@ def suggested_classification(self):
         return Classification.STRONG
 ```
 
-*Modify — `save()`:*
+*Add — lifecycle methods:*
 
-Stamp `in_progress_at` with the current time when a `Curation` is first created (i.e.,
-when `self.pk` is `None` before the super call).
+- `CURATION_STATUS_TRANSITIONS` — imported from `constants/models/common.py`; see Step 1.
+- `is_locked` — property returning `True` when `status` is `READY_FOR_REVIEW`,
+  `PROVISIONAL`, or `PUBLISHED`.
+- `can_submit()` — returns a list of human-readable error strings; an empty list means
+  the curation is ready to submit. Runs all pre-submit checks (status, included
+  evidence, evidence done, `needs_review` cleared) using a queryset `filter` rather than
+  a Python list comprehension.
+- `transition_to(new_status)` — validates the move against `CURATION_STATUS_TRANSITIONS`
+  and raises `ValueError` on an illegal transition, then sets `status` and saves.
+
+*Add — `Evidence.copy_to(curation, added_by=None)`:*
+
+Returns a new `Evidence` instance with all field values copied, bound to `curation`.
+Re-adds the `demographics` M2M relation. Moves the deep-copy logic out of the fork view
+and onto the model so that adding a new `Evidence` field requires only one place to
+update.
+
+*Fix — `Curation.disease`:*
+
+Change `null=True` to `null=False`. `blank=False` was already set; allowing a DB NULL
+contradicted it and permitted disease-less curations to be created via the shell, admin,
+or fixtures.
 
 ### Step 4 — Migrations
 
@@ -266,15 +295,17 @@ Use Django to create migrations instead of creating them manually.
   - `decision` — `ChoiceField` with choices `needs_revision` / `approved`; drives view
     logic but is not persisted as a model field
   - `ep_classification` — `ChoiceField` drawing from `CLASSIFICATION_CHOICES`
-  - `ep_classification_notes` — `CharField` with `Textarea` widget
-  - `ep_notes` — `CharField` with `Textarea` widget, `required=False`
+  - `ep_evidence_summary` — `CharField` with `Textarea` widget
+  - `ep_additional_notes` — `CharField` with `Textarea` widget, `required=False`
   - `ep` — `ChoiceField` rendered as a `<select>`; currently contains a single option:
     the generic HLA Curation Taskforce ID. In a future update the choices will be
     populated from the expert panels associated with the reviewer's user account.
 
-`clean()` enforces that `ep_classification`, `ep_classification_notes`, and `ep` are
+`clean()` enforces that `ep_classification`, `ep_evidence_summary`, and `ep` are
 non-empty when `decision == "approved"`. When `decision == "needs_revision"` these
-fields are not required — the view will clear them anyway.
+fields are optional — the reviewer may leave them blank, in which case the view stores
+`None`; any previously-set EP values are retained if the reviewer leaves the fields
+populated.
 
 ### Step 7 — Views
 
@@ -282,53 +313,50 @@ fields are not required — the view will clear them anyway.
 
 *Locking changes:*
 
-The existing published-curation lock currently checks `hasattr(obj, "publication")` (the
-reverse accessor name for `PublishedCuration`). This check appears in `CurationEdit`,
-`curation_edit_evidence`, and `EvidenceEdit`. It must be extended to also lock when
-`curation.status in (Status.READY_FOR_REVIEW, Status.PROVISIONAL)`. Additionally,
-`EvidenceCreate` currently has no locking check at all and needs one added — it should
-redirect with an error if the parent curation is locked.
+The locking check appears in `curation_edit_evidence`, `EvidenceCreate`, and
+`EvidenceEdit`. All three use `curation.is_locked` (the model property) rather than an
+inline status tuple, eliminating a three-site duplication. (`CurationEdit` was removed
+in Step 15.)
 
 *`curation_publish` — modify:*
 
-Change the status guard from `curation.status != Status.DONE` to
-`curation.status != Status.PROVISIONAL`. Update the error message accordingly.
-Everything else — the idempotency guard, `PublishedCuration.objects.create(...)`, and
-the redirect to `repo-detail` — stays the same.
+Calls `curation.transition_to(Status.PUBLISHED)` inside `transaction.atomic()`, with
+`PublishedCuration` creation inside the same block. `transition_to` enforces the
+`PROVISIONAL → PUBLISHED` guard and raises `ValueError` if the curation is in any other
+state, which the view catches and converts to an error message. Redirects to
+`repo-detail` on success.
 
 *`curation_submit` — new:*
 
-A `@protected_view` POST-only function. Checks that
-`curation.status == Status.IN_PROGRESS`. Runs the same evidence-completeness check that
-`validate_status` enforces (all included evidence must have status `Done`). On success,
-sets `curation.status = Status.READY_FOR_REVIEW` and
-`curation.ready_for_review_at = now()`, saves, and redirects to the curation detail page
-with a success message. On failure, flashes an error and redirects back to the detail
-page.
+A `@protected_view` POST-only function. Delegates all pre-submit validation to
+`curation.can_submit()`, which returns a list of error strings. If the list is
+non-empty, all errors are surfaced as messages and the view redirects back to the detail
+page. On success, calls `curation.transition_to(Status.READY_FOR_REVIEW)` and redirects
+with a success message.
 
 *`curation_review` — new:*
 
-A `@reviewer_view` GET/POST function. GET renders `curation/ep_review.html` with a fresh
-`EPReviewForm` and a read-only curation summary. POST validates `EPReviewForm` and
-branches on `decision`:
+A `@reviewer_view` GET/POST function. GET renders `curation/review.html` with a fresh
+`EPReviewForm` pre-populated with any existing EP fields. POST validates `EPReviewForm`,
+sets all four EP fields on the curation object, then branches on `decision`:
 
-- `needs_revision`: sets `curation.status = Status.IN_PROGRESS` and
-  `curation.in_progress_at = now()`, clears `ep_classification`,
-  `ep_classification_notes`, `ep_notes`, and `ep`. Saves and redirects to curation
-  detail with an informational message.
-- `approved`: saves all four EP fields from the form, sets
-  `curation.status = Status.PROVISIONAL` and `curation.provisional_at = now()`. Saves
-  and redirects to curation detail with a success message.
+- `needs_revision`: calls `curation.transition_to(Status.IN_PROGRESS)`, which saves all
+  dirty fields (including the EP notes) in a single write. EP fields are retained so the
+  curator can see the rejection reason.
+- `approved`: calls `curation.transition_to(Status.PROVISIONAL)`, again saving
+  everything in one write.
+
+Both paths redirect to the curation detail page.
 
 *`curation_fork` — new:*
 
-A `@protected_view` POST-only function. Verifies that the source curation has a
-`PublishedCuration` record (`hasattr(source, "publication")`), returning 400 if not.
-Creates a new `Curation` with `forked_from=source`, copying `curation_type`, `allele`,
-`haplotype`, and `disease`. Sets `status = IN_PROGRESS` and `in_progress_at = now()`.
-Deep-copies all `Evidence` records from the source: for each `Evidence`, creates a new
-instance with the same field values bound to the new `Curation`, then re-adds the
-`demographics` M2M relation. Redirects to the new curation's detail page.
+A `@protected_view` POST-only function. Verifies that
+`source.status == Status.PUBLISHED`, returning 400 if not. Wraps the entire fork in
+`transaction.atomic()` so a partial failure (e.g., an exception mid-loop) rolls back
+both the new `Curation` and any partially-created `Evidence` records. Creates a new
+`Curation` with `forked_from=source`, then iterates over
+`source.evidence.prefetch_related("demographics").all()` calling `evidence.copy_to()`
+for each record. Redirects to the new curation's detail page.
 
 ### Step 8 — URLs
 
@@ -359,7 +387,7 @@ Replace the current static button set with status-dependent rendering:
 Update the classification row:
 
 - When `curation.ep_classification` is set: show `ep_classification` with an "EP
-  Classification" label; render `ep_classification_notes` and `ep_notes` in a
+  Classification" label; render `ep_evidence_summary` and `ep_additional_notes` in a
   collapsible section below.
 - Otherwise: show `curation.suggested_classification` with a "Suggested" label, or
   "------" if `suggested_classification` is `None`.
@@ -370,6 +398,7 @@ This partial renders the classification row inside the detail table. Apply the s
 suggested/EP-set conditional as in `detail.html`.
 
 #### `src/curation/templates/curation/list.html` — modify
+
 #### `src/curation/templates/curation/partials/table.html` — modify
 
 The classification column currently renders `curation.classification`. Update both to
@@ -379,12 +408,13 @@ render `curation.ep_classification` if set, otherwise
 without any view changes.
 
 #### `src/curation/templates/curation/edit/curation.html` — modify
+
 #### `src/curation/templates/curation/forms/curation.html` — modify
 
 Remove the classification field from both the edit template and its reusable form
 partial.
 
-#### `src/curation/templates/curation/ep_review.html` — create
+#### `src/curation/templates/curation/review.html` — create
 
 New template for the EP review page, accessible only to users with
 `has_review_permissions`. Contains:
@@ -415,10 +445,11 @@ so `ep_classification` is always set by the time this serializer runs.
 Add two helpers:
 
 - `is_superseded(published_curation)` — returns `True` if any direct or transitive fork
-  of `published_curation.curation` has its own `PublishedCuration` record. Implemented
-  as a recursive traversal of `curation.forks.all()`.
+  of `published_curation.curation` has `status == Status.PUBLISHED`. Implemented as a
+  recursive traversal of `curation.forks.all()`.
 - `get_superseding(published_curation)` — follows the fork chain forward and returns the
-  most recently published descendant, or `None` if not superseded.
+  most recently published descendant (`status == Status.PUBLISHED`), or `None` if not
+  superseded.
 
 Pass both results as context to the list and detail templates.
 
@@ -478,19 +509,108 @@ Remove tests for `validate_classification`. Update `validate_status` tests to us
 - Add `curation_submit` tests: success path; failure when evidence is not done; failure
   when curation is not `IN_PROGRESS`; access control (non-curator gets 403).
 - Add `curation_review` tests: approval path (EP fields set, status → `PROVISIONAL`);
-  needs-revision path (EP fields cleared, status → `IN_PROGRESS`); access control
+  needs-revision path (EP fields retained, status → `IN_PROGRESS`); access control
   (non-EP user gets 403).
 - Add `curation_fork` tests: success path (new curation created, evidence deep-copied,
   `forked_from` set); failure when source is not published.
 - Update `curation_publish` tests: change setup from `status=Status.DONE` to
   `status=Status.PROVISIONAL`.
-- Update locking tests for `CurationEdit`, `curation_edit_evidence`, `EvidenceCreate`,
-  and `EvidenceEdit`: add cases asserting that `READY_FOR_REVIEW` and `PROVISIONAL`
-  statuses trigger the lock redirect.
+- Update locking tests for `curation_edit_evidence`, `EvidenceCreate`, and
+  `EvidenceEdit`: add cases asserting that `READY_FOR_REVIEW` and `PROVISIONAL` statuses
+  trigger the lock redirect. (`CurationEdit` was removed in Step 15.)
 
 #### `src/repo/tests.py` — modify
 
-Seven existing test setup calls use `status=Status.DONE`. Update all to
-`status=Status.PROVISIONAL`. Add tests for `is_superseded` and `get_superseding`,
-including a multi-hop fork chain. Add a test that the Fork button appears on the repo
-detail page for users with `can_curate`.
+Test setups that simulate published curations use `status=Status.PUBLISHED`. Add tests
+for `is_superseded` and `get_superseding`, including a multi-hop fork chain. Add a test
+that the Fork button appears on the repo detail page for users with `can_curate`.
+
+### Step 15 — Remove manual status editing
+
+`CurationEditForm` only exposes the `status` field. Because the lifecycle now manages
+status transitions automatically (submit → RFR, EP review → PROVISIONAL or back to
+IN_PROGRESS, publish → PUBLISHED), curators must not be able to set status manually.
+
+#### `src/curation/forms.py` — modify
+
+Delete `CurationEditForm` entirely.
+
+#### `src/curation/views.py` — modify
+
+Delete the `CurationEdit` class-based view and remove its import of `CurationEditForm`.
+
+#### `src/curation/urls.py` — modify
+
+Remove the `curation-edit` route.
+
+#### `src/curation/templates/curation/partials/buttons.html` — modify
+
+Remove the "Edit Curation" button that linked to `curation-edit`.
+
+#### `src/curation/templates/curation/edit/curation.html` — delete
+
+The template is no longer referenced by any view.
+
+#### `src/curation/tests/test_views.py` — modify
+
+Delete `CurationEditTest`. Update `LockingTest._assert_locked` to no longer hit the
+removed `curation-edit` URL — it should test `curation-edit-evidence` only.
+
+#### `src/repo/tests.py` — modify
+
+Delete `ReadOnlyEnforcementTest.test_cannot_edit_published_curation` (the removed URL
+made it untestable this way); the remaining `test_cannot_edit_published_evidence` test
+is sufficient to verify the locking behaviour for published curations.
+
+### Step 16 — Remove the conflicting evidence field
+
+The `is_conflicting` field on `Evidence` is removed. Evidence is either included or not;
+the distinction between conflicting and non-conflicting included evidence is no longer
+part of the scoring model.
+
+#### `src/curation/models.py` — modify
+
+Delete the `is_conflicting` field. Simplify the `score` property: instead of subtracting
+the score for conflicting included evidence and adding for non-conflicting, simply add
+the score for all included evidence.
+
+#### `src/curation/forms.py` — modify
+
+Remove `is_conflicting` from `EvidenceTopLevelEditFormSet.Meta.fields` and `widgets`.
+
+#### `src/curation/models.py` — modify (`Evidence.copy_to`)
+
+Remove `is_conflicting` from the field list in `Evidence.copy_to()`. The inline
+deep-copy loop in `curation_fork` no longer exists — copying is handled by the model
+method.
+
+#### `src/repo/serializers.py` — modify
+
+Remove `"is_conflicting"` from the evidence serializer output.
+
+#### `src/curation/templates/curation/partials/evidence/detail_table.html` — modify
+
+Remove the "Conflicting" column header and its corresponding cell.
+
+#### `src/curation/templates/curation/forms/evidence.html` — modify
+
+Remove the "Conflicting" column header (the field will no longer appear in the formset
+since it is removed from `EvidenceTopLevelEditFormSet.Meta.fields`).
+
+#### `src/curation/fixtures/test_evidence.json` — modify
+
+Remove the `"is_conflicting"` key from the fixture.
+
+#### `src/curation/tests/test_models.py` — modify
+
+Delete `test_conflicting_is_false_when_created`.
+
+#### `src/curation/tests/test_views.py` — modify
+
+Remove `"Conflicting"` from `expected_text` in `CurationDetailTest` and
+`CurationEditEvidenceTest`.
+
+#### Migration — add
+
+Generate a migration to remove `is_conflicting` from `Evidence` and
+`HistoricalEvidence`.

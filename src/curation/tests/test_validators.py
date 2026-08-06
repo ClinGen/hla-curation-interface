@@ -1,4 +1,4 @@
-"""Houses tests for the curation app's scoring module."""
+"""Houses tests for the curation app's validators."""
 
 from decimal import Decimal
 

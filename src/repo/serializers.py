@@ -49,7 +49,11 @@ def serialize_published_curation(published: "PublishedCuration") -> dict[str, An
         "version": published.version,
         "curation": {
             "status": curation.status,
-            "classification": curation.classification,
+            "classification": curation.ep_classification,
+            "ep_evidence_summary": curation.ep_evidence_summary,
+            "ep_additional_notes": curation.ep_additional_notes,
+            "ep": curation.ep,
+            "forked_from": curation.forked_from.slug if curation.forked_from else None,
             "score": float(curation.score),
             **entity_data,
             "disease": (
@@ -81,7 +85,6 @@ def serialize_evidence(evidence: "Evidence") -> dict[str, Any]:
     return {
         "evidence_id": evidence.slug,
         "status": evidence.status,
-        "is_conflicting": evidence.is_conflicting,
         "is_included": evidence.is_included,
         "publication": (
             {

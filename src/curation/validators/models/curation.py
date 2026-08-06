@@ -3,17 +3,17 @@
 from django.core.exceptions import ValidationError
 
 from curation.constants.models.common import Status
-from curation.constants.models.curation import Classification, CurationTypes
+from curation.constants.models.curation import CurationTypes
 
 
 def validate_status(curation) -> None:
-    """Makes sure a curation isn't marked done if evidence marked in progress.
+    """Blocks submit-for-review if included evidence is still in progress.
 
     Raises:
-        ValidationError: If curation is marked as done but has included evidence
-                        that is still in progress.
+        ValidationError: If curation is being submitted for review but has
+                         included evidence that is still in progress.
     """
-    if curation.status == Status.DONE:
+    if curation.status == Status.READY_FOR_REVIEW:
         for evidence in curation.evidence.all():
             if evidence.status == Status.IN_PROGRESS and evidence.is_included:
                 raise ValidationError(
@@ -40,30 +40,3 @@ def validate_curation_type(curation) -> None:
         curation.haplotype = None
     if curation.curation_type == CurationTypes.HAPLOTYPE and curation.allele:
         curation.allele = None
-
-
-def validate_classification(curation) -> None:
-    """Makes sure the classification is correct for the score.
-
-    Raises:
-        ValidationError: If the classification isn't correct for the score.
-    """
-    if not curation.pk:
-        return
-
-    score = curation.score
-
-    if curation.classification == Classification.NO_KNOWN and score != 0:
-        raise ValidationError({"classification": "Score must be 0."})
-
-    if curation.classification == Classification.LIMITED and score >= 25:
-        raise ValidationError({"classification": "Score must be less than 25."})
-
-    if curation.classification == Classification.MODERATE and not (25 <= score <= 50):
-        raise ValidationError({"classification": "Score must be in 25-50."})
-
-    if curation.classification == Classification.STRONG and score < 50:
-        raise ValidationError({"classification": "Score must be greater than 50."})
-
-    if curation.classification == Classification.DEFINITIVE and score < 50:
-        raise ValidationError({"classification": "Score must be greater than 50."})

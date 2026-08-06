@@ -10,4 +10,15 @@ admin.site.unregister(Group)
 
 @admin.register(UserProfile)
 class UserProfileAdmin(SimpleHistoryAdmin):
-    list_display = ["user", "has_curation_permissions", "has_signed_phi_agreement"]
+    list_display = [
+        "user",
+        "has_curation_permissions",
+        "has_signed_phi_agreement",
+        "has_review_permissions",
+    ]
+    fields = [
+        "user",
+        "has_curation_permissions",
+        "has_signed_phi_agreement",
+        "has_review_permissions",
+    ]

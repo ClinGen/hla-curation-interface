@@ -2,6 +2,7 @@ from typing import cast
 
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.db import transaction
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -9,16 +10,20 @@ from django.http import (
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
-from django.views.generic import DetailView, ListView, UpdateView
-from django.views.generic.edit import CreateView
+from django.views.generic import DetailView, ListView
+from django.views.generic.edit import CreateView, UpdateView
 
-from auth_.permissions import ProtectedViewMixin, protected_view
+from auth_.permissions import (
+    ProtectedViewMixin,
+    protected_view,
+    reviewer_view,
+)
 from common.history import resolve_changes
 from curation.constants.models.common import Status
 from curation.constants.views import FRAMEWORK
 from curation.forms import (
     CurationCreateForm,
-    CurationEditForm,
+    EPReviewForm,
     EvidenceCreateForm,
     EvidenceEditForm,
     EvidenceTopLevelEditFormSet,
@@ -59,32 +64,6 @@ class CurationDetail(ProtectedViewMixin, DetailView):
     slug_url_kwarg = "curation_slug"
 
 
-class CurationEdit(ProtectedViewMixin, UpdateView):
-    model = Curation
-    form_class = CurationEditForm
-    template_name = "curation/edit/curation.html"
-    slug_field = "slug"
-    slug_url_kwarg = "curation_slug"
-
-    def dispatch(
-        self, request: HttpRequest, *args, **kwargs
-    ) -> HttpResponse | HttpResponseRedirect | None:
-        """Check if curation is published before allowing edit.
-
-        Returns:
-            HttpResponse redirecting to detail view if published, else normal.
-        """
-        self.object = self.get_object()
-        if hasattr(self.object, "publication"):
-            messages.error(
-                request,
-                "This curation has been published and cannot be edited. "
-                "It is now read-only.",
-            )
-            return redirect("curation-detail", curation_slug=self.object.slug)
-        return super().dispatch(request, *args, **kwargs)  # type: ignore[return-value]
-
-
 @protected_view
 def curation_edit_evidence(request: HttpRequest, curation_slug: str) -> HttpResponse:
     """Returns the editable curation details page with editable top-level evidence.
@@ -95,13 +74,8 @@ def curation_edit_evidence(request: HttpRequest, curation_slug: str) -> HttpResp
     """
     curation = get_object_or_404(Curation, slug=curation_slug)
 
-    # Check if published
-    if hasattr(curation, "publication"):
-        messages.error(
-            request,
-            "This curation has been published and cannot be edited. "
-            "It is now read-only.",
-        )
+    if curation.is_locked:
+        messages.error(request, "This curation is locked and cannot be edited.")
         return redirect("curation-detail", curation_slug=curation.slug)
 
     evidence = Evidence.objects.filter(curation=curation)
@@ -127,6 +101,15 @@ class EvidenceCreate(ProtectedViewMixin, CreateView):
     template_name = "evidence/create.html"
     slug_field = "slug"
     slug_url_kwarg = "evidence_slug"
+
+    def dispatch(
+        self, request: HttpRequest, *args, **kwargs
+    ) -> HttpResponse | HttpResponseRedirect | None:
+        curation = get_object_or_404(Curation, slug=kwargs.get("curation_slug"))
+        if curation.is_locked:
+            messages.error(request, "This curation is locked and cannot be edited.")
+            return redirect("curation-detail", curation_slug=curation.slug)
+        return super().dispatch(request, *args, **kwargs)  # type: ignore[return-value]
 
     def form_valid(self, form: EvidenceCreateForm) -> HttpResponse:
         curation = Curation.objects.get(slug=self.kwargs["curation_slug"])
@@ -164,21 +147,21 @@ class EvidenceEdit(ProtectedViewMixin, UpdateView):
     def dispatch(
         self, request: HttpRequest, *args, **kwargs
     ) -> HttpResponse | HttpResponseRedirect | None:
-        """Check if parent curation is published before allowing edit.
+        """Check if parent curation is locked before allowing edit.
 
         Returns:
-            HttpResponse redirecting to detail view if published, else normal.
+            Redirect to evidence detail if locked, otherwise the normal dispatch result.
         """
         self.object = self.get_object()
-        if hasattr(self.object.curation, "publication"):
+        curation = self.object.curation
+        if curation.is_locked:
             messages.error(
                 request,
-                "This evidence belongs to a published curation and cannot be edited. "
-                "It is now read-only.",
+                "This evidence belongs to a locked curation and cannot be edited.",
             )
             return redirect(
                 "evidence-detail",
-                curation_slug=self.object.curation.slug,
+                curation_slug=curation.slug,
                 evidence_slug=self.object.slug,
             )
         return super().dispatch(request, *args, **kwargs)  # type: ignore[return-value]
@@ -207,44 +190,135 @@ class EvidenceEdit(ProtectedViewMixin, UpdateView):
 
 @protected_view
 def curation_publish(request: HttpRequest, curation_slug: str) -> HttpResponse:
-    """Publishes a curation to the repository.
-
-    Args:
-        request: The Django request object.
-        curation_slug: The curation object's slug (human-readable ID).
+    """Publishes a provisional curation to the repository.
 
     Returns:
-        Redirect to the repository detail page if successful, otherwise redirect to
-        the curation detail page with an error message.
+        Redirect to the repo detail page on success, or curation detail on error.
     """
     from repo.models import PublishedCuration
 
     curation = get_object_or_404(Curation, slug=curation_slug)
-
-    if curation.status != Status.DONE:
-        messages.error(
-            request,
-            "Only curations with status 'Done' can be published.",
-        )
+    try:
+        with transaction.atomic():
+            curation.transition_to(Status.PUBLISHED)
+            PublishedCuration.objects.create(
+                curation=curation,
+                published_by=cast(User, request.user),
+            )
+    except ValueError as e:
+        messages.error(request, str(e))
         return redirect("curation-detail", curation_slug=curation.slug)
-
-    if hasattr(curation, "publication"):
-        messages.info(
-            request,
-            f"Curation {curation.slug} is already published.",
-        )
-        return redirect("curation-detail", curation_slug=curation.slug)
-
-    PublishedCuration.objects.create(
-        curation=curation,
-        published_by=cast(User, request.user),
-    )
 
     messages.success(
         request,
         f"Curation {curation.slug} has been published to the repository.",
     )
     return redirect("repo-detail", curation_slug=curation.slug)
+
+
+@protected_view
+def curation_submit(request: HttpRequest, curation_slug: str) -> HttpResponse:
+    """Submits a curation for EP review.
+
+    Returns:
+        Redirect to curation detail, with success or error messages set.
+    """
+    if request.method != "POST":
+        return redirect("curation-detail", curation_slug=curation_slug)
+
+    curation = get_object_or_404(Curation, slug=curation_slug)
+    errors = curation.can_submit()
+    if errors:
+        for err in errors:
+            messages.error(request, err)
+        return redirect("curation-detail", curation_slug=curation.slug)
+
+    curation.transition_to(Status.READY_FOR_REVIEW)
+    messages.success(
+        request, f"Curation {curation.slug} has been submitted for review."
+    )
+    return redirect("curation-detail", curation_slug=curation.slug)
+
+
+@reviewer_view
+def curation_review(request: HttpRequest, curation_slug: str) -> HttpResponse:
+    """Renders and processes the EP review form.
+
+    Returns:
+        Redirect on POST success, or the review form page on GET.
+    """
+    curation = get_object_or_404(Curation, slug=curation_slug)
+
+    if request.method == "POST":
+        form = EPReviewForm(request.POST)
+        if form.is_valid():
+            decision = form.cleaned_data["decision"]
+            curation.ep_classification = form.cleaned_data["ep_classification"] or None
+            curation.ep_evidence_summary = (
+                form.cleaned_data["ep_evidence_summary"] or None
+            )
+            curation.ep_additional_notes = (
+                form.cleaned_data["ep_additional_notes"] or None
+            )
+            curation.ep = form.cleaned_data["ep"] or None
+            if decision == "needs_revision":
+                curation.transition_to(Status.IN_PROGRESS)
+                messages.info(
+                    request,
+                    f"Curation {curation.slug} has been sent back for revision.",
+                )
+            else:
+                curation.transition_to(Status.PROVISIONAL)
+                messages.success(
+                    request, f"Curation {curation.slug} has been approved."
+                )
+            return redirect("curation-detail", curation_slug=curation.slug)
+    else:
+        form = EPReviewForm(
+            initial={
+                "ep_classification": curation.ep_classification,
+                "ep_evidence_summary": curation.ep_evidence_summary,
+                "ep_additional_notes": curation.ep_additional_notes,
+                "ep": curation.ep,
+            }
+        )
+
+    context = {"object": curation, "form": form}
+    return render(request, "curation/review.html", context)
+
+
+@protected_view
+def curation_fork(request: HttpRequest, curation_slug: str) -> HttpResponse:
+    """Creates a new editable curation forked from a published one.
+
+    Returns:
+        Redirect to the new fork's detail page, or curation detail on non-POST.
+    """
+    if request.method != "POST":
+        return redirect("curation-detail", curation_slug=curation_slug)
+
+    source = get_object_or_404(Curation, slug=curation_slug)
+
+    if source.status != Status.PUBLISHED:
+        from django.http import HttpResponseBadRequest
+
+        return HttpResponseBadRequest("Only published curations can be forked.")
+
+    with transaction.atomic():
+        new_curation = Curation.objects.create(
+            forked_from=source,
+            curation_type=source.curation_type,
+            allele=source.allele,
+            haplotype=source.haplotype,
+            disease=source.disease,
+            status=Status.IN_PROGRESS,
+            added_by=cast(User, request.user),
+        )
+        for evidence in source.evidence.prefetch_related("demographics").all():  # type: ignore
+            evidence.copy_to(new_curation, added_by=cast(User, request.user))
+
+    messages.success(request, f"Forked curation created as {new_curation.slug}.")
+    return redirect("curation-detail", curation_slug=new_curation.slug)
 
 
 class CurationHistory(ProtectedViewMixin, DetailView):

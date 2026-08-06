@@ -1,4 +1,7 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from curation.models import Curation
 
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, JsonResponse
@@ -7,8 +10,43 @@ from django.utils import timezone
 from django.views.generic import DetailView, ListView
 
 from common.history import resolve_changes
+from curation.constants.models.common import Status
 from repo.models import PublishedCuration
 from repo.serializers import serialize_published_curation
+
+
+def is_superseded(published_curation: PublishedCuration) -> bool:
+    """Returns True if a direct or transitive fork is also published."""
+
+    def _has_published_fork(curation: "Curation") -> bool:
+        for fork in curation.forks.all():  # type: ignore
+            if fork.status == Status.PUBLISHED:
+                return True
+            if _has_published_fork(fork):
+                return True
+        return False
+
+    return _has_published_fork(published_curation.curation)
+
+
+def get_superseding(published_curation: PublishedCuration) -> PublishedCuration | None:
+    """Returns the most recently published descendant, or None if not superseded."""
+
+    def _find_latest(curation: "Curation") -> PublishedCuration | None:
+        result = None
+        for fork in curation.forks.all():  # type: ignore
+            if fork.status == Status.PUBLISHED:
+                candidate = fork.publication
+                if result is None or candidate.published_at > result.published_at:
+                    result = candidate
+            deeper = _find_latest(fork)
+            if deeper is not None and (
+                result is None or deeper.published_at > result.published_at
+            ):
+                result = deeper
+        return result
+
+    return _find_latest(published_curation.curation)
 
 
 class PublishedCurationList(ListView):
@@ -39,10 +77,12 @@ class PublishedCurationDetail(DetailView):
         """Add curation to context for template convenience.
 
         Returns:
-            Context dictionary with curation added for template use.
+            Context dict with curation, superseded, and superseding keys added.
         """
         context = super().get_context_data(**kwargs)
         context["curation"] = self.object.curation
+        context["superseded"] = is_superseded(self.object)
+        context["superseding"] = get_superseding(self.object)
         return context
 
 
