@@ -21,44 +21,13 @@
                 </li>
             </ul>
         </nav>
-        <table id="publication-list-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Author</th>
-                    <th>Year</th>
-                    <th>PMID</th>
-                    <th>DOI</th>
-                    <th>Updated</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for publication in object_list %}
-                    <tr>
-                        <td>
-                            <a href="{% url 'publication-detail' publication.slug %}">
-                                {{ publication.slug }}
-                            </a>
-                        </td>
-                        <td>
-                            <i>{{ publication.title }}</i>
-                        </td>
-                        <td>{{ publication.author|default_if_none:"------" }}</td>
-                        <td>{{ publication.publication_year|default_if_none:"------" }}</td>
-                        <td>{{ publication.pubmed_id|default_if_none:"------" }}</td>
-                        <td>{{ publication.doi|default_if_none:"------" }}</td>
-                        <td>{{ publication.updated_at|default_if_none:"------"|date:"Y-m-d" }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+        {% include "common/partials/search_input.html" %}
+        <div id="search-results">{% include "common/partials/search_results.html" %}</div>
+
         <a href="{% url 'publication-create' %}" class="button is-link">
             {% include "common/icon.html" with icon_name="plus-circle" %}
             Add Publication
         </a>
     </div>
-    <script>
-        let table = new DataTable("#publication-list-table", {"order": []});
-    </script>
 {% endblock %}

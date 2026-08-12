@@ -23,7 +23,8 @@
             </ul>
         </nav>
 
-        {% include "haplotype/partials/table.html" with haplotypes=object_list %}
+        {% include "common/partials/search_input.html" %}
+        <div id="search-results">{% include "common/partials/search_results.html" %}</div>
 
         <a href="{% url 'haplotype-create' %}" class="button is-link">
             {% include "common/icon.html" with icon_name="plus-circle" %}

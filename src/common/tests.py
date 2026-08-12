@@ -5,7 +5,8 @@ from contextlib import contextmanager
 from typing import Any
 
 from django.contrib.auth.models import User
-from django.test import Client
+from django.test import Client, TestCase
+from django.urls import reverse
 
 from auth_.models import UserProfile
 
@@ -139,3 +140,57 @@ class ProtectedViewTestMixin(SuppressRequestLoggingMixin, BaseViewTestMixin):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
+
+
+class SearchListViewTest(ProtectedViewTestMixin, TestCase):
+    """Tests for the two behaviors SearchListView adds beyond a plain ListView.
+
+    Uses the allele list view as a representative endpoint since it has a
+    simple fixture and short search_fields list. ProtectedViewTestMixin is
+    included so setUp() creates the four permission-combination users; each
+    test logs in as user4 (PHI + curation permissions) to satisfy the view's
+    ProtectedViewMixin before exercising SearchListView behavior.
+    """
+
+    fixtures = ["test_alleles.json"]
+    url = reverse("allele-list")
+    template = "allele/list.html"
+    page_name = "Allele Search"
+    expected_text = []
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)
+
+    def test_full_page_returned_without_hx_request_header(self):
+        response = self.client.get(self.url)
+        # Full page: list.html is the top-level template (it includes the partial).
+        self.assertTemplateUsed(response, "allele/list.html")
+
+    def test_partial_returned_with_hx_request_header(self):
+        response = self.client.get(self.url, HTTP_HX_REQUEST="true")
+        # HTMX response: only the partial is rendered, not the full page.
+        self.assertTemplateUsed(response, "common/partials/search_results.html")
+        self.assertTemplateNotUsed(response, "allele/list.html")
+
+    def test_search_returns_matching_rows(self):
+        response = self.client.get(self.url, {"q": "A*01:02:03"})
+        self.assertContains(response, "A000001")
+        self.assertContains(response, "1 result")
+        self.assertNotContains(response, "A000002")
+
+    def test_search_with_no_match_returns_zero_results(self):
+        response = self.client.get(self.url, {"q": "zzz_no_match"})
+        self.assertContains(response, "0 results")
+        self.assertNotContains(response, "A000001")
+
+    def test_empty_query_returns_all_rows(self):
+        response_no_q = self.client.get(self.url)
+        response_empty_q = self.client.get(self.url, {"q": ""})
+        self.assertEqual(
+            response_no_q.context["result_count"],
+            response_empty_q.context["result_count"],
+        )
+        self.assertContains(response_empty_q, "A000001")
+        self.assertContains(response_empty_q, "A000002")
+        self.assertContains(response_empty_q, "A000003")

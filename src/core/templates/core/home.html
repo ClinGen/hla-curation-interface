@@ -1,5 +1,6 @@
 {% extends "layouts/base.html" %}
 {% load static %}
+{% load django_tables2 %}
 {% block title %}Home{% endblock %}
 {% block description %}Curate information about HLA alleles and haplotypes.{% endblock %}
 {% block main %}
@@ -101,10 +102,10 @@
             </table>
         </div>
 
-        {% if user.is_authenticated and user.curations_added.all %}
+        {% if user.is_authenticated and curation_table %}
             <hr>
             <h2 class="title is-4">Your Curations</h2>
-            {% include "curation/partials/table.html" with curations=user.curations_added.all %}
+            {% render_table curation_table %}
         {% endif %}
     </div>
 

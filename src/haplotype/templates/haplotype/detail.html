@@ -61,16 +61,18 @@
         </div>
 
         {% if object.curations.all %}
-            <details class="mt-2">
+            {% load django_tables2 %}
+            <details class="mt-2" open>
                 <summary><b>Curations</b></summary>
-                {% include "curation/partials/table.html" with curations=object.curations.all %}
+                {% render_table curation_table %}
             </details>
         {% endif %}
 
         {% if object.alleles.all %}
-            <details class="mt-2">
+            {% load django_tables2 %}
+            <details class="mt-2" open>
                 <summary><b>Alleles</b></summary>
-                {% include "allele/partials/table.html" with alleles=object.alleles.all %}
+                {% render_table allele_table %}
             </details>
         {% endif %}
     </div>

@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "simple_history",
+    "django_tables2",
     "allele",
     "auth_",
     "core",
@@ -131,3 +132,5 @@ STORAGES = {
 }
 
 LOGIN_URL = "/auth/login"
+
+DJANGO_TABLES2_TEMPLATE = "tables.html"

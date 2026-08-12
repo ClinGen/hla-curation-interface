@@ -7,12 +7,16 @@ from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView
+from django_tables2 import RequestConfig
 
 from common.history import resolve_changes
+from common.tables import HistoryTable
+from common.views import SearchListView
 from curation.constants.models.common import Status
 from repo.models import PublishedCuration
 from repo.serializers import serialize_published_curation
+from repo.tables import PublishedCurationTable
 
 
 def is_superseded(published_curation: PublishedCuration) -> bool:
@@ -49,12 +53,18 @@ def get_superseding(published_curation: PublishedCuration) -> PublishedCuration 
     return _find_latest(published_curation.curation)
 
 
-class PublishedCurationList(ListView):
+class PublishedCurationList(SearchListView):
     model = PublishedCuration
     template_name = "repo/list.html"
-
-    def get_queryset(self) -> QuerySet[PublishedCuration]:
-        return PublishedCuration.objects.order_by("-curation__updated_at")
+    ordering = ["-curation__updated_at"]
+    table_class = PublishedCurationTable
+    search_fields = [
+        "curation__slug",
+        "curation__allele__name",
+        "curation__haplotype__name",
+        "curation__disease__name",
+    ]
+    table_pagination = {"per_page": 25}
 
 
 class PublishedCurationDetail(DetailView):
@@ -97,7 +107,13 @@ class PublishedCurationHistory(DetailView):
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        context["history"] = self.object.history.all()
+        history_table = HistoryTable(
+            self.object.history.all(),
+            change_url_name="repo-change",
+            change_url_slug1=self.object.curation.slug,
+        )
+        RequestConfig(self.request).configure(history_table)
+        context["history_table"] = history_table
         context["curation"] = self.object.curation
         return context
 

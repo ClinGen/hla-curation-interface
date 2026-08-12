@@ -5,12 +5,14 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
+from django_tables2 import RequestConfig
 from workos import WorkOSClient
 from workos.session import seal_session_from_auth_response
 
 from auth_.forms import PHIForm
 from auth_.models import UserProfile
 from common.history import resolve_changes
+from common.tables import HistoryTable
 
 logger = logging.getLogger(__name__)
 
@@ -102,10 +104,15 @@ def profile_history(request: HttpRequest) -> HttpResponse:
         messages.info(request, "Not logged in.")
         return redirect("login")
     p = get_object_or_404(UserProfile, user=request.user)
+    history_table = HistoryTable(
+        p.history.all(),  # type: ignore
+        change_url_name="profile-change",
+    )
+    RequestConfig(request).configure(history_table)
     return render(
         request,
         "auth_/history.html",
-        {"user_profile": p, "history": p.history.all()},  # type: ignore
+        {"user_profile": p, "history_table": history_table},
     )
 
 

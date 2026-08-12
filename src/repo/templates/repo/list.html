@@ -32,45 +32,10 @@
             </a>
         </div>
 
-        <table id="published-curation-list-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Type</th>
-                    <th>Allele</th>
-                    <th>Haplotype</th>
-                    <th>Disease</th>
-                    <th>Classification</th>
-                    <th>Updated</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for published in object_list %}
-                    <tr>
-                        <td>
-                            <a href="{% url 'repo-detail' published.curation.slug %}">
-                                {{ published.curation.slug|default_if_none:"------" }}
-                            </a>
-                        </td>
-                        <td>{{ published.curation.get_curation_type_display|default_if_none:"------" }}</td>
-                        <td>{{ published.curation.allele|default_if_none:"------" }}</td>
-                        <td>{{ published.curation.haplotype|default_if_none:"------" }}</td>
-                        <td>{{ published.curation.disease|default_if_none:"------" }}</td>
-                        <td>{{ published.curation.get_ep_classification_display|default_if_none:"------" }}</td>
-                        <td>{{ published.curation.updated_at|default_if_none:"------"|date:"Y-m-d" }}</td>
-                        <td>
-                            <a href="{% url 'repo-download-single' published.curation.slug %}" class="button is-small">
-                                {% include "common/icon.html" with icon_name="download" %}
-                                JSON
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        {% include "common/partials/search_input.html" %}
+        <div id="search-results">
+            {% include "common/partials/search_results.html" %}
+        </div>
+
     </div>
-    <script>
-        let table = new DataTable("#published-curation-list-table", {"order": []});
-    </script>
 {% endblock %}

@@ -1,0 +1,7 @@
+{% load django_tables2 %}
+<div hx-boost="true" hx-target="#search-results" class="mb-4">
+    <p class="mb-3">{{ result_count }} result{{ result_count|pluralize }}</p>
+    {% if result_count %}
+        {% render_table table %}
+    {% endif %}
+</div>

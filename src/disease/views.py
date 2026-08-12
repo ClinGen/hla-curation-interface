@@ -4,13 +4,18 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView, ListView
+from django.views.generic import CreateView, DetailView
+from django_tables2 import RequestConfig
 
 from auth_.permissions import ProtectedViewMixin
 from common.history import resolve_changes
+from common.tables import HistoryTable
+from common.views import SearchListView
+from curation.tables import CurationTable
 from disease.clients import fetch_disease_data, get_iri, get_name
 from disease.forms import DiseaseForm
 from disease.models import Disease
+from disease.tables import DiseaseTable
 
 
 class DiseaseCreate(ProtectedViewMixin, CreateView):
@@ -39,6 +44,14 @@ class DiseaseDetail(ProtectedViewMixin, DetailView):
     model = Disease
     template_name = "disease/detail.html"
 
+    def get_context_data(self, **kwargs: object) -> dict:
+        context = super().get_context_data(**kwargs)
+        obj = cast(Disease, self.object)
+        curation_table = CurationTable(obj.curations.all())  # type: ignore
+        RequestConfig(self.request).configure(curation_table)
+        context["curation_table"] = curation_table
+        return context
+
 
 class DiseaseHistory(ProtectedViewMixin, DetailView):
     model = Disease
@@ -47,7 +60,13 @@ class DiseaseHistory(ProtectedViewMixin, DetailView):
     def get_context_data(self, **kwargs: object) -> dict:
         context = super().get_context_data(**kwargs)
         obj = cast(Disease, self.object)
-        context["history"] = obj.history.all()  # type: ignore
+        history_table = HistoryTable(
+            obj.history.all(),  # type: ignore
+            change_url_name="disease-change",
+            change_url_slug1=obj.slug,
+        )
+        RequestConfig(self.request).configure(history_table)
+        context["history_table"] = history_table
         return context
 
 
@@ -65,7 +84,10 @@ class DiseaseChange(ProtectedViewMixin, DetailView):
         return context
 
 
-class DiseaseList(ProtectedViewMixin, ListView):
+class DiseaseList(ProtectedViewMixin, SearchListView):
     model = Disease
     template_name = "disease/list.html"
     ordering = ["-updated_at"]
+    table_class = DiseaseTable
+    search_fields = ["slug", "name", "mondo_id"]
+    table_pagination = {"per_page": 25}

@@ -10,8 +10,9 @@ from django.http import (
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, UpdateView
+from django_tables2 import RequestConfig
 
 from auth_.permissions import (
     ProtectedViewMixin,
@@ -19,6 +20,8 @@ from auth_.permissions import (
     reviewer_view,
 )
 from common.history import resolve_changes
+from common.tables import HistoryTable
+from common.views import SearchListView
 from curation.constants.models.common import Status
 from curation.constants.views import FRAMEWORK
 from curation.forms import (
@@ -32,6 +35,7 @@ from curation.models import (
     Curation,
     Evidence,
 )
+from curation.tables import CurationTable
 from curation.validators.views import (
     validate_beta,
     validate_ci_end,
@@ -330,7 +334,13 @@ class CurationHistory(ProtectedViewMixin, DetailView):
     def get_context_data(self, **kwargs: object) -> dict:
         context = super().get_context_data(**kwargs)
         obj = cast(Curation, self.object)
-        context["history"] = obj.history.all()  # type: ignore
+        history_table = HistoryTable(
+            obj.history.all(),  # type: ignore
+            change_url_name="curation-change",
+            change_url_slug1=obj.slug,
+        )
+        RequestConfig(self.request).configure(history_table)
+        context["history_table"] = history_table
         return context
 
 
@@ -359,7 +369,14 @@ class EvidenceHistory(ProtectedViewMixin, DetailView):
     def get_context_data(self, **kwargs: object) -> dict:
         context = super().get_context_data(**kwargs)
         obj = cast(Evidence, self.object)
-        context["history"] = obj.history.all()  # type: ignore
+        history_table = HistoryTable(
+            obj.history.all(),  # type: ignore
+            change_url_name="evidence-change",
+            change_url_slug1=self.kwargs["curation_slug"],
+            change_url_slug2=obj.slug,
+        )
+        RequestConfig(self.request).configure(history_table)
+        context["history_table"] = history_table
         context["curation_slug"] = self.kwargs["curation_slug"]
         return context
 
@@ -381,7 +398,10 @@ class EvidenceChange(ProtectedViewMixin, DetailView):
         return context
 
 
-class CurationList(ProtectedViewMixin, ListView):
+class CurationList(ProtectedViewMixin, SearchListView):
     model = Curation
     template_name = "curation/list.html"
     ordering = ["-updated_at"]
+    table_class = CurationTable
+    search_fields = ["slug", "allele__name", "haplotype__name", "disease__name"]
+    table_pagination = {"per_page": 25}

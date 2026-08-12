@@ -1,10 +1,18 @@
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
+from django_tables2 import RequestConfig
+
+from curation.tables import CurationTable
 
 
 def home(request: HttpRequest) -> HttpResponse:
     """Returns the home page."""
-    return render(request, "core/home.html")
+    context: dict = {}
+    if request.user.is_authenticated:
+        table = CurationTable(request.user.curations_added.all())  # type: ignore
+        RequestConfig(request).configure(table)
+        context["curation_table"] = table
+    return render(request, "core/home.html", context)
 
 
 def about(request: HttpRequest) -> HttpResponse:

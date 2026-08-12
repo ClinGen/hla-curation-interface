@@ -175,8 +175,8 @@ Split the single shared `STATUS_CHOICES` dict into two:
   `PROVISIONAL`, and `PUBLISHED`; used by `Curation.status` instead of `STATUS_CHOICES`.
 
 Also add `CURATION_STATUS_TRANSITIONS`, a module-level dict mapping each curation status
-to the `frozenset` of statuses it may legally transition to. This is the single source of
-truth for the state machine and is imported by the `Curation` model.
+to the `frozenset` of statuses it may legally transition to. This is the single source
+of truth for the state machine and is imported by the `Curation` model.
 
 Update `Curation.status` in `src/curation/models.py` to use `CURATION_STATUS_CHOICES`
 and update its `max_length` if needed (current value is 3, which fits all codes). Leave
@@ -245,7 +245,8 @@ def suggested_classification(self):
 
 *Add — lifecycle methods:*
 
-- `CURATION_STATUS_TRANSITIONS` — imported from `constants/models/common.py`; see Step 1.
+- `CURATION_STATUS_TRANSITIONS` — imported from `constants/models/common.py`; see Step
+  1\.
 - `is_locked` — property returning `True` when `status` is `READY_FOR_REVIEW`,
   `PROVISIONAL`, or `PUBLISHED`.
 - `can_submit()` — returns a list of human-readable error strings; an empty list means

@@ -1,5 +1,6 @@
 {% extends "layouts/base.html" %}
 {% load static %}
+{% load django_tables2 %}
 {% block title %}{{ object.slug }} Details{% endblock %}
 {% block description %}View information about {{ object.slug }}.{% endblock %}
 {% block main %}
@@ -73,16 +74,16 @@
         </div>
 
         {% if object.curations.all %}
-            <details class="mt-2">
+            <details class="mt-2" open>
                 <summary><b>Curations</b></summary>
-                {% include "curation/partials/table.html" with curations=object.curations.all %}
+                {% render_table curation_table %}
             </details>
         {% endif %}
 
         {% if object.haplotypes.all %}
-            <details class="mt-2">
+            <details class="mt-2" open>
                 <summary><b>Haplotypes</b></summary>
-                {% include "haplotype/partials/table.html" with haplotypes=object.haplotypes.all %}
+                {% render_table haplotype_table %}
             </details>
         {% endif %}
 

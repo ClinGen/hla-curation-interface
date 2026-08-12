@@ -1,0 +1,16 @@
+<div class="field mb-4">
+    <div class="control has-icons-left">
+        <input class="input"
+               type="text"
+               name="q"
+               value="{{ query }}"
+               placeholder="Search..."
+               hx-get="{{ request.path }}"
+               hx-target="#search-results"
+               hx-trigger="keyup changed delay:500ms"
+               hx-push-url="true">
+        <span class="icon is-left">
+            <i class="bi bi-search"></i>
+        </span>
+    </div>
+</div>

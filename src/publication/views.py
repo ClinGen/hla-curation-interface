@@ -4,11 +4,14 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView
 from django.views.generic.edit import CreateView
+from django_tables2 import RequestConfig
 
 from auth_.permissions import ProtectedViewMixin
 from common.history import resolve_changes
+from common.tables import HistoryTable
+from common.views import SearchListView
 from publication.clients import (
     fetch_pubmed_data,
     fetch_rxiv_data,
@@ -22,6 +25,7 @@ from publication.clients import (
 from publication.constants.models import PublicationTypes
 from publication.forms import PublicationForm
 from publication.models import Publication
+from publication.tables import PublicationTable
 
 
 class PublicationCreate(ProtectedViewMixin, CreateView):
@@ -72,7 +76,13 @@ class PublicationHistory(ProtectedViewMixin, DetailView):
     def get_context_data(self, **kwargs: object) -> dict:
         context = super().get_context_data(**kwargs)
         obj = cast(Publication, self.object)
-        context["history"] = obj.history.all()  # type: ignore
+        history_table = HistoryTable(
+            obj.history.all(),  # type: ignore
+            change_url_name="publication-change",
+            change_url_slug1=obj.slug,
+        )
+        RequestConfig(self.request).configure(history_table)
+        context["history_table"] = history_table
         return context
 
 
@@ -90,7 +100,10 @@ class PublicationChange(ProtectedViewMixin, DetailView):
         return context
 
 
-class PublicationList(ProtectedViewMixin, ListView):
+class PublicationList(ProtectedViewMixin, SearchListView):
     model = Publication
     template_name = "publication/list.html"
     ordering = ["-updated_at"]
+    table_class = PublicationTable
+    search_fields = ["slug", "title", "author", "doi", "pubmed_id"]
+    table_pagination = {"per_page": 25}
