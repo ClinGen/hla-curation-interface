@@ -20,17 +20,17 @@ from repo.tables import PublishedCurationTable
 
 
 def is_superseded(published_curation: PublishedCuration) -> bool:
-    """Returns True if a direct or transitive fork is also published."""
+    """Returns True if a direct or transitive copy is also published."""
 
-    def _has_published_fork(curation: "Curation") -> bool:
-        for fork in curation.forks.all():  # type: ignore
-            if fork.status == Status.PUBLISHED:
+    def _has_published_copy(curation: "Curation") -> bool:
+        for copy in curation.copies.all():  # type: ignore
+            if copy.status == Status.PUBLISHED:
                 return True
-            if _has_published_fork(fork):
+            if _has_published_copy(copy):
                 return True
         return False
 
-    return _has_published_fork(published_curation.curation)
+    return _has_published_copy(published_curation.curation)
 
 
 def get_superseding(published_curation: PublishedCuration) -> PublishedCuration | None:
@@ -38,12 +38,12 @@ def get_superseding(published_curation: PublishedCuration) -> PublishedCuration 
 
     def _find_latest(curation: "Curation") -> PublishedCuration | None:
         result = None
-        for fork in curation.forks.all():  # type: ignore
-            if fork.status == Status.PUBLISHED:
-                candidate = fork.publication
+        for copy in curation.copies.all():  # type: ignore
+            if copy.status == Status.PUBLISHED:
+                candidate = copy.publication
                 if result is None or candidate.published_at > result.published_at:
                     result = candidate
-            deeper = _find_latest(fork)
+            deeper = _find_latest(copy)
             if deeper is not None and (
                 result is None or deeper.published_at > result.published_at
             ):

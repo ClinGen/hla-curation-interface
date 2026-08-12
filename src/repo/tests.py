@@ -324,37 +324,37 @@ class SupersessionTest(TestCase):
             has_curation_permissions=True,
         )
 
-    def _make_published(self, forked_from: Curation | None = None) -> PublishedCuration:
+    def _make_published(self, copied_from: Curation | None = None) -> PublishedCuration:
         curation = Curation.objects.create(
             curation_type=CurationTypes.ALLELE,
             allele=self.allele,
             disease=self.disease,
             status=Status.PUBLISHED,
-            forked_from=forked_from,
+            copied_from=copied_from,
         )
         return PublishedCuration.objects.create(
             curation=curation, published_by=self.user
         )
 
-    def test_is_superseded_false_when_no_fork(self):
+    def test_is_superseded_false_when_no_copy(self):
         from repo.views import is_superseded
 
         published = self._make_published()
         self.assertFalse(is_superseded(published))
 
-    def test_is_superseded_true_when_fork_is_published(self):
+    def test_is_superseded_true_when_copy_is_published(self):
         from repo.views import is_superseded
 
         original = self._make_published()
-        self._make_published(forked_from=original.curation)
+        self._make_published(copied_from=original.curation)
         self.assertTrue(is_superseded(original))
 
     def test_is_superseded_true_for_multi_hop_chain(self):
         from repo.views import is_superseded
 
         original = self._make_published()
-        fork1 = self._make_published(forked_from=original.curation)
-        self._make_published(forked_from=fork1.curation)
+        copy1 = self._make_published(copied_from=original.curation)
+        self._make_published(copied_from=copy1.curation)
         self.assertTrue(is_superseded(original))
 
     def test_get_superseding_returns_none_when_not_superseded(self):
@@ -363,23 +363,23 @@ class SupersessionTest(TestCase):
         published = self._make_published()
         self.assertIsNone(get_superseding(published))
 
-    def test_get_superseding_returns_fork(self):
+    def test_get_superseding_returns_copy(self):
         from repo.views import get_superseding
 
         original = self._make_published()
-        fork_pub = self._make_published(forked_from=original.curation)
+        copy_pub = self._make_published(copied_from=original.curation)
         result = get_superseding(original)
-        self.assertEqual(result, fork_pub)
+        self.assertEqual(result, copy_pub)
 
 
-class ForkButtonTest(TestCase):
+class CopyButtonTest(TestCase):
     fixtures = ["test_alleles.json", "test_diseases.json"]
 
     def setUp(self):
         self.client = Client()
         self.allele = Allele.objects.get(pk=1)
         self.disease = Disease.objects.get(pk=1)
-        self.user = User.objects.create_user(username="fork_button_user", password="pw")  # noqa: S106
+        self.user = User.objects.create_user(username="copy_button_user", password="pw")  # noqa: S106
         UserProfile.objects.create(
             user=self.user,
             has_signed_phi_agreement=True,
@@ -396,8 +396,8 @@ class ForkButtonTest(TestCase):
             curation=self.curation, published_by=self.user
         )
 
-    def test_fork_button_visible_for_curators(self):
+    def test_copy_button_visible_for_curators(self):
         self.client.force_login(self.user)
         url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
         response = self.client.get(url)
-        self.assertContains(response, "Fork")
+        self.assertContains(response, "Copy and Recurate")

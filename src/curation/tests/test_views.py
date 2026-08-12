@@ -564,7 +564,7 @@ class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
         self.assertEqual(response.status_code, 403)
 
 
-class CurationForkTest(SuppressRequestLoggingMixin, TestCase):
+class CurationCopyTest(SuppressRequestLoggingMixin, TestCase):
     fixtures = [
         "test_alleles.json",
         "test_diseases.json",
@@ -586,30 +586,30 @@ class CurationForkTest(SuppressRequestLoggingMixin, TestCase):
         )
 
     def _url(self) -> str:
-        return reverse("curation-fork", kwargs={"curation_slug": self.curation.slug})
+        return reverse("curation-copy", kwargs={"curation_slug": self.curation.slug})
 
-    def test_fork_creates_new_curation_with_forked_from_set(self):
+    def test_copy_creates_new_curation_with_copied_from_set(self):
         response = self.client.post(self._url())
         self.assertEqual(response.status_code, 302)
-        fork = Curation.objects.exclude(pk=self.curation.pk).first()
-        assert fork is not None
-        self.assertEqual(fork.forked_from, self.curation)
-        self.assertEqual(fork.status, Status.IN_PROGRESS)
+        copy = Curation.objects.exclude(pk=self.curation.pk).first()
+        assert copy is not None
+        self.assertEqual(copy.copied_from, self.curation)
+        self.assertEqual(copy.status, Status.IN_PROGRESS)
 
-    def test_fork_deep_copies_evidence(self):
+    def test_copy_deep_copies_evidence(self):
         pub = Publication.objects.get(pk=1)
         Evidence.objects.create(
             curation=self.curation, publication=pub, is_included=True
         )
         response = self.client.post(self._url())
         self.assertEqual(response.status_code, 302)
-        fork = Curation.objects.exclude(pk=self.curation.pk).first()
-        assert fork is not None
-        self.assertEqual(fork.evidence.count(), 1)  # type: ignore
+        copy = Curation.objects.exclude(pk=self.curation.pk).first()
+        assert copy is not None
+        self.assertEqual(copy.evidence.count(), 1)  # type: ignore
 
-    def test_fork_fails_when_source_not_published(self):
+    def test_copy_fails_when_source_not_published(self):
         curation2 = _make_curation(self.allele, self.disease)
-        url = reverse("curation-fork", kwargs={"curation_slug": curation2.slug})
+        url = reverse("curation-copy", kwargs={"curation_slug": curation2.slug})
         with self.suppress_request_logging():
             response = self.client.post(url)
         self.assertEqual(response.status_code, 400)

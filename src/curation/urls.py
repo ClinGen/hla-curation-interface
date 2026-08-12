@@ -40,9 +40,9 @@ urlpatterns = [
         name="curation-review",
     ),
     path(
-        "<slug:curation_slug>/fork",
-        views.curation_fork,
-        name="curation-fork",
+        "<slug:curation_slug>/copy",
+        views.curation_copy,
+        name="curation-copy",
     ),
     path(
         "<slug:curation_slug>/evidence/create",

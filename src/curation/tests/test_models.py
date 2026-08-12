@@ -164,15 +164,15 @@ class TestCuration(TestCase):
                 self.curation.suggested_classification, Classification.STRONG
             )
 
-    def test_forked_from_set_correctly(self):
+    def test_copied_from_set_correctly(self):
         self.curation.save()
-        fork = Curation.objects.create(
-            forked_from=self.curation,
+        copy = Curation.objects.create(
+            copied_from=self.curation,
             curation_type=self.curation.curation_type,
             allele=self.curation.allele,
             disease=self.curation.disease,
         )
-        self.assertEqual(fork.forked_from, self.curation)
+        self.assertEqual(copy.copied_from, self.curation)
 
     def test_is_not_valid_when_allele_not_provided_at_creation(self):
         with self.assertRaises(ValidationError):

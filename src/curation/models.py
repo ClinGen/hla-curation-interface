@@ -124,14 +124,14 @@ class Curation(models.Model):
         verbose_name="Expert Panel",
         help_text="Five-digit numeric ID of the expert panel.",
     )
-    forked_from = models.ForeignKey(
+    copied_from = models.ForeignKey(
         "self",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name="forks",
-        verbose_name="Forked From",
-        help_text="The published curation this curation was forked from, if any.",
+        related_name="copies",
+        verbose_name="Copied From",
+        help_text="The published curation this curation was copied from, if any.",
     )
     allele = models.ForeignKey(
         Allele,

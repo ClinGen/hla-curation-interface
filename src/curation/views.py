@@ -292,11 +292,11 @@ def curation_review(request: HttpRequest, curation_slug: str) -> HttpResponse:
 
 
 @protected_view
-def curation_fork(request: HttpRequest, curation_slug: str) -> HttpResponse:
-    """Creates a new editable curation forked from a published one.
+def curation_copy(request: HttpRequest, curation_slug: str) -> HttpResponse:
+    """Creates a new editable curation copied from a published one.
 
     Returns:
-        Redirect to the new fork's detail page, or curation detail on non-POST.
+        Redirect to the new copy's detail page, or curation detail on non-POST.
     """
     if request.method != "POST":
         return redirect("curation-detail", curation_slug=curation_slug)
@@ -306,11 +306,11 @@ def curation_fork(request: HttpRequest, curation_slug: str) -> HttpResponse:
     if source.status != Status.PUBLISHED:
         from django.http import HttpResponseBadRequest
 
-        return HttpResponseBadRequest("Only published curations can be forked.")
+        return HttpResponseBadRequest("Only published curations can be copied.")
 
     with transaction.atomic():
         new_curation = Curation.objects.create(
-            forked_from=source,
+            copied_from=source,
             curation_type=source.curation_type,
             allele=source.allele,
             haplotype=source.haplotype,
@@ -321,7 +321,7 @@ def curation_fork(request: HttpRequest, curation_slug: str) -> HttpResponse:
         for evidence in source.evidence.prefetch_related("demographics").all():  # type: ignore
             evidence.copy_to(new_curation, added_by=cast(User, request.user))
 
-    messages.success(request, f"Forked curation created as {new_curation.slug}.")
+    messages.success(request, f"Copy created as {new_curation.slug}.")
     return redirect("curation-detail", curation_slug=new_curation.slug)
 
 
