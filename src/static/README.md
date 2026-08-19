@@ -1,8 +1,13 @@
 # `static`
 
-This directory contains all static assets served by the application, organized under
-`hci/`. It includes vendored third-party CSS and JavaScript libraries, project-specific
-custom styles, web fonts, and image assets such as logos, favicons, and PWA icons.
+## Directory Overview
+
+This directory contains all static assets served by the Django application, organized
+under `hci/`. It includes vendored third-party CSS and JavaScript libraries,
+project-specific custom styles, web fonts, and image assets such as logos, favicons, and
+PWA icons. Django's `staticfiles` app collects these files and serves them to the
+browser; the `hci/` namespace prevents name collisions with assets from other installed
+apps.
 
 ### `hci/css/bootstrap-icons.css`
 
@@ -129,20 +134,15 @@ elements with search and custom styling.
 Vendored minified production build of Choices.js, loaded by the base template for
 enhanced select inputs.
 
-### `hci/js/dataTables.bulma.min.js`
-
-Vendored minified DataTables integration plugin that applies Bulma CSS classes to
-DataTables-generated markup.
-
 ### `hci/js/dataTables.min.js`
 
-Vendored minified DataTables jQuery plugin used to add sorting, searching, and
+Vendored minified DataTables 2.x jQuery plugin used to add sorting, searching, and
 pagination to HTML tables on list pages.
 
 ### `hci/js/htmx.js`
 
-Vendored HTMX library that enables AJAX-driven partial page updates via HTML attributes,
-used throughout the application to avoid full page reloads.
+Vendored HTMX library (v2.0.10) that enables AJAX-driven partial page updates via HTML
+attributes, used throughout the application to avoid full page reloads.
 
 ### `hci/js/jquery.min.js`
 
@@ -151,5 +151,5 @@ Vendored minified jQuery library, required as a dependency by DataTables.
 ### `hci/site.webmanifest`
 
 Web app manifest file that defines the application's name ("HLA Curation Interface"),
-short name ("HCI"), home-screen icons, theme color, and standalone display mode for PWA
-installation support.
+short name ("HCI"), home-screen icons, theme color (#ffffff), and standalone display
+mode for PWA installation support.

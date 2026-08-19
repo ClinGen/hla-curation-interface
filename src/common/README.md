@@ -2,9 +2,10 @@
 
 The `common` app provides shared utilities, template partials, and test helpers used
 across the rest of the HCI. It includes a context processor for injecting environment
-metadata, a utility for generating human-readable history diffs, a library of reusable
-form and tag templates, and base test mixins that encode the application's standard
-access-control assumptions.
+metadata, a utility for generating human-readable history diffs, a reusable list view
+with HTMX-powered search, a `django-tables2` table for history records, a library of
+reusable form and tag templates, and base test mixins that encode the application's
+standard access-control assumptions.
 
 ### `__init__.py`
 
@@ -21,6 +22,21 @@ Defines `resolve_changes`, which compares two `django-simple-history` records an
 returns a list of field-level diffs with human-readable field labels and choice display
 values. Returns `None` when there is no previous record (i.e. the record represents a
 creation event).
+
+### `tables.py`
+
+Defines `HistoryTable`, a `django-tables2` table that renders "Changed By", "Change",
+and "Date" columns for a model's history queryset. The change-type cell is rendered as a
+linked icon label (Created / Updated / Deleted) whose URL is built from up to two
+configurable slug arguments passed at instantiation time.
+
+### `views.py`
+
+Defines `SearchListView`, a `ListView` subclass that mixes in `SingleTableMixin` and
+adds case-insensitive substring search across a configurable `search_fields` list. When
+the request carries an `HX-Request` header the view returns only the
+`common/partials/search_results.html` partial; otherwise it returns the view's normal
+template.
 
 ### `templates/common/form/input/radio.html`
 
@@ -58,9 +74,8 @@ field-level before/after diff table when the change type is an update.
 
 ### `templates/common/history/history_body.html`
 
-A reusable partial that renders a DataTables-powered table of history records (Changed
-By, Change type with icon, Date), building the per-record URL dynamically from up to two
-slug arguments passed via template context.
+A reusable partial that renders a `django-tables2` history table by calling
+`{% render_table history_table %}` inside a scrollable block container.
 
 ### `templates/common/icon.html`
 
@@ -70,6 +85,18 @@ A one-line partial that renders a Bootstrap Icons `<i>` element for a given `ico
 
 A reusable partial that renders an external hyperlink that opens in a new tab, appending
 a Bootstrap Icons "box arrow up right" icon to indicate it leaves the site.
+
+### `templates/common/partials/search_input.html`
+
+A reusable partial that renders a Bulma text input wired for live HTMX search: on keyup
+(with a 500 ms delay) it GETs the current path, targets `#search-results`, and pushes
+the updated URL.
+
+### `templates/common/partials/search_results.html`
+
+A reusable partial returned by `SearchListView` for HTMX requests. It displays a
+pluralized result count and, when results exist, renders the `django-tables2` table via
+`{% render_table table %}`.
 
 ### `templates/common/tags/_generic.html`
 
@@ -118,7 +145,10 @@ from a model instance), `get_item` (retrieves a value from a dictionary by key),
 
 ### `tests.py`
 
-Provides `BaseViewTestMixin`, `OpenViewTestMixin`, and `ProtectedViewTestMixin` —
-reusable test mixins imported by other apps' test suites. `ProtectedViewTestMixin`
+Provides `SuppressRequestLoggingMixin`, `BaseViewTestMixin`, `OpenViewTestMixin`,
+`ProtectedViewTestMixin`, and `SearchListViewTest` — reusable mixins and a concrete test
+class imported or subclassed by other apps' test suites. `ProtectedViewTestMixin`
 creates four users covering all combinations of PHI-agreement and curation-permission
 flags and asserts that only the user with both flags set can access a protected view.
+`SearchListViewTest` exercises `SearchListView`'s HTMX partial-response and
+query-filtering behavior against the allele list endpoint.

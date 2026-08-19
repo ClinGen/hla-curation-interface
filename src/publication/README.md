@@ -3,8 +3,8 @@
 Django app that manages scientific publications — PubMed articles, bioRxiv preprints,
 and medRxiv preprints — referenced by HLA curations. It provides a `Publication` model,
 clients that fetch metadata from the PubMed E-utilities API and the bioRxiv/medRxiv API,
-and the full set of views, forms, templates, and URL routes for creating, browsing, and
-auditing publications within the HCI.
+and the full set of views, forms, tables, templates, and URL routes for creating,
+browsing, and auditing publications within the HCI.
 
 ### `__init__.py`
 
@@ -58,6 +58,12 @@ title, primary author surname, publication year, and audit metadata. The `save` 
 auto-generates a zero-padded slug (`P000001` style), `clean` delegates to the three
 model validators, and historical change tracking is provided via `simple_history`.
 
+### `tables.py`
+
+Defines `PublicationTable`, a `django-tables2` table for the publication list view, with
+columns for slug (linked to the detail page), title (italicized), author, year, PMID,
+DOI, and last-updated date.
+
 ### `templates/publication/change.html`
 
 Displays a single historical change record for a publication, with a breadcrumb trail
@@ -76,7 +82,8 @@ visibility based on the selected type.
 Shows the detail view for a single publication, displaying its HCI ID, title, primary
 author, publication year, PubMed ID (linked to PubMed), DOI (linked via doi.org), and
 timestamps. If any evidence items reference the publication, they are listed in a
-collapsible table showing curation and classification details.
+collapsible table showing evidence ID, curation ID, allele, haplotype, disease, status,
+and classification.
 
 ### `templates/publication/history.html`
 
@@ -86,8 +93,9 @@ pages.
 
 ### `templates/publication/list.html`
 
-Renders a searchable DataTables table of all publications with columns for HCI ID,
-title, author, year, PMID, DOI, and last-updated date, plus an "Add Publication" button.
+Renders a searchable list of publications using the shared
+`common/partials/search_input.html` and `common/partials/search_results.html` partials,
+plus an "Add Publication" button.
 
 ### `templates/publication/partials/rxiv_warning.html`
 
@@ -134,5 +142,7 @@ Implements five class-based views — `PublicationCreate`, `PublicationDetail`,
 `PublicationHistory`, `PublicationChange`, and `PublicationList` — all protected by
 `ProtectedViewMixin`. `PublicationCreate.form_valid` branches on publication type to
 call either the PubMed or Rxiv client, populating `author`, `title`, `publication_year`,
-and `added_by` before saving. `PublicationChange` uses `resolve_changes` to build a diff
-for the selected history record.
+and `added_by` before saving. `PublicationHistory` builds a `HistoryTable` via
+`get_context_data`. `PublicationChange` uses `resolve_changes` to build a diff for the
+selected history record. `PublicationList` extends `SearchListView` with
+`PublicationTable` and filters across slug, title, author, DOI, and PubMed ID.

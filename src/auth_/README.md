@@ -3,8 +3,8 @@
 The `auth_` app handles authentication and user profile management for the HCI. It
 integrates with WorkOS for SSO login via a custom authentication backend, extends
 Django's built-in `User` model with a `UserProfile` that tracks PHI agreement and
-curation permissions, and provides views for login/logout, profile inspection, PHI
-agreement signing, and profile change history.
+curation/review permissions, and provides views for login/logout, profile inspection,
+PHI agreement signing, and profile change history.
 
 ### `__init__.py`
 
@@ -13,9 +13,9 @@ Empty file; marks this directory as a Python package.
 ### `admin.py`
 
 Registers the `UserProfile` model with the Django admin site using `SimpleHistoryAdmin`,
-exposes `user`, `has_curation_permissions`, and `has_signed_phi_agreement` in the list
-view, and unregisters the built-in `Group` model (which is not used by this
-application).
+exposes `user`, `has_curation_permissions`, `has_signed_phi_agreement`, and
+`has_review_permissions` in the list view, and unregisters the built-in `Group` model
+(which is not used by this application).
 
 ### `apps.py`
 
@@ -37,15 +37,19 @@ record a user's agreement to the PHI terms.
 ### `models.py`
 
 Defines `UserProfile`, a one-to-one extension of Django's `User` model that stores
-whether the user has signed the PHI agreement and whether they have been granted
-curation permissions. The `can_curate` property returns `True` only when the user is
-authenticated and both flags are set; history tracking is added via `HistoricalRecords`.
+`has_curation_permissions`, `has_signed_phi_agreement`, and `has_review_permissions`
+boolean flags, plus an `updated_at` timestamp. The `can_curate` property returns `True`
+only when the user is authenticated and both curation and PHI flags are set;
+`can_review` additionally requires `has_review_permissions`. History tracking is
+provided via `HistoricalRecords`.
 
 ### `permissions.py`
 
-Defines `ProtectedViewMixin` (for class-based views) and the `protected_view` decorator
-(for function-based views), both of which enforce that a user must be authenticated and
-have `can_curate == True` to access a view, raising `PermissionDenied` otherwise.
+Defines two class-based view mixins (`ProtectedViewMixin` for curation access,
+`ReviewerViewMixin` for EP reviewer access) and two function-based view decorators
+(`protected_view` and `reviewer_view`), all of which enforce the corresponding
+`can_curate` or `can_review` check on the user's profile, raising `PermissionDenied` or
+redirecting to login as appropriate.
 
 ### `templates/auth_/change.html`
 

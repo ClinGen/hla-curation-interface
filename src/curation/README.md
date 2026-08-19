@@ -1,9 +1,10 @@
 # `curation`
 
 The `curation` app is the core feature app of the HCI. It defines the `Curation` and
-`Evidence` database models, implements the multistep HLA scoring framework, provides
-all CRUD views and forms for curations and evidence records, and exposes templates for
-listing, viewing, editing, and auditing change history for both objects.
+`Evidence` database models, implements the multistep HLA scoring framework, provides all
+CRUD views and forms for curations and evidence records, manages the curation lifecycle
+(In Progress → Ready for Review → Provisional → Published), and exposes templates for
+listing, viewing, editing, reviewing, and auditing change history for both objects.
 
 ### `__init__.py`
 
@@ -12,8 +13,9 @@ Empty file; marks this directory as a Python package.
 ### `admin.py`
 
 Registers `Curation`, `Demographic`, and `Evidence` with the Django admin using
-`SimpleHistoryAdmin`; configures list display columns, list filters, search fields, and
-read-only audit fields for each model.
+`SimpleHistoryAdmin`; configures list display columns (including EP classification and
+panel ID for curations), list filters, search fields, and read-only audit fields for
+each model.
 
 ### `apps.py`
 
@@ -30,8 +32,10 @@ Empty file; marks this directory as a Python package.
 
 ### `constants/models/common.py`
 
-Defines the `Status` class with `IN_PROGRESS` and `DONE` codes and the corresponding
-`STATUS_CHOICES` dict shared by both the `Curation` and `Evidence` models.
+Defines the `Status` class with all lifecycle status codes (`IN_PROGRESS`, `DONE`,
+`READY_FOR_REVIEW`, `PROVISIONAL`, `PUBLISHED`), plus `STATUS_CHOICES` (for evidence),
+`CURATION_STATUS_CHOICES` (for the full curation lifecycle), and
+`CURATION_STATUS_TRANSITIONS` (a dict encoding the allowed status transitions).
 
 ### `constants/models/curation.py`
 
@@ -77,11 +81,14 @@ pk=1 and publication pk=1) for use in tests.
 
 ### `forms.py`
 
-Defines all Django `ModelForm` classes used by the curation app: `CurationCreateForm`,
-`CurationEditForm`, `EvidenceCreateForm`, `EvidenceTopLevelEditForm` (and its formset
-factory), and the detailed `EvidenceEditForm` covering all scoring fields with
-appropriate widgets; `EvidenceEditForm.clean()` enforces that demographics are provided
-when the typing method is imputation.
+Defines all Django form classes used by the curation app: `CurationCreateForm`,
+`EPReviewForm` (a plain `Form` with decision, classification, evidence summary, notes,
+and expert panel fields, requiring classification/summary/panel when the decision is
+"approved"), `EvidenceCreateForm`, `EvidenceTopLevelEditForm` (and its formset factory),
+and the detailed `EvidenceEditForm` covering all scoring fields with appropriate
+widgets; `EvidenceEditForm.clean()` enforces that demographics are provided when the
+typing method is imputation and that text quotes are provided when demographics are
+entered.
 
 ### `interval.py`
 
@@ -91,11 +98,13 @@ determine which scoring tier a p-value, effect size, or cohort size falls into.
 
 ### `models.py`
 
-Defines the three database models: `Curation` (type, classification, status,
-allele/haplotype/disease FK, audit fields, computed `score` property), `Demographic`
+Defines the three database models: `Curation` (type, full lifecycle status, EP review
+fields, `copied_from` self-FK, allele/haplotype/disease FKs, audit fields, `is_locked`
+property, `can_submit()` validation method, `transition_to()` status-machine method,
+`suggested_classification` property, and computed `score` property), `Demographic`
 (biogeographic group name), and `Evidence` (all scoring data fields, FK to `Curation`
-and `Publication`, computed per-step score properties that delegate to `score.py`, and
-change history via `simple_history`).
+and `Publication`, `copy_to()` method, computed per-step score properties that delegate
+to `score.py`, and change history via `simple_history`).
 
 ### `score.py`
 
@@ -103,6 +112,14 @@ Implements the per-step scoring functions (`get_step_1a_points` through
 `get_step_6b_multiplier`) that translate an `Evidence` instance's field values into
 numeric point contributions according to the HLA scoring framework; these functions are
 called by the corresponding score properties on the `Evidence` model.
+
+### `tables.py`
+
+Defines `CurationTable`, a `django-tables2` `Table` subclass used by `CurationList`;
+declares columns for slug (linked to curation detail), curation type, allele, haplotype,
+disease, status, classification (showing EP classification when set, otherwise the
+suggested classification), and updated date, with `render_status` producing styled Bulma
+tags for each lifecycle state.
 
 ### `templates/curation/change.html`
 
@@ -118,19 +135,16 @@ hide the allele/haplotype field based on the selected curation type.
 
 ### `templates/curation/detail.html`
 
-Full-page template for the curation detail view; embeds the curation detail table
-partial, the action-button partial, and the evidence summary table partial, and shows a
-read-only notification banner if the curation has been published.
-
-### `templates/curation/edit/curation.html`
-
-Full-page template for editing a curation's status and classification; embeds the
-`curation/forms/curation.html` form partial and the evidence summary table partial.
+Full-page template for the curation detail view; shows status-specific notification
+banners (locked warning for Ready for Review, approval notice for Provisional, read-only
+notice with HLArepo link for Published, and EP classification notes when present), then
+embeds the curation detail table partial, the action-button partial, and the evidence
+summary table partial.
 
 ### `templates/curation/edit/evidence.html`
 
-Full-page template for bulk-editing top-level evidence fields (status, conflicting,
-included) across all evidence in a curation via an inline formset table.
+Full-page template for bulk-editing top-level evidence fields (status and included)
+across all evidence in a curation via an inline formset table.
 
 ### `templates/curation/forms/curation.html`
 
@@ -141,8 +155,8 @@ classification selects.
 ### `templates/curation/forms/evidence.html`
 
 Partial template that renders the `EvidenceTopLevelEditFormSet` as a table, displaying
-each evidence record's ID, publication, needs-review flag, status, conflicting checkbox,
-included checkbox, and score.
+each evidence record's ID, publication, needs-review flag, status, included checkbox,
+and score.
 
 ### `templates/curation/history.html`
 
@@ -157,9 +171,10 @@ Full-page template for the curation search/list page; includes the
 
 ### `templates/curation/partials/buttons.html`
 
-Partial that renders the action buttons on the curation detail page (Edit Curation, Add
-Evidence, and — when status is Done — Publish to Repository); the entire partial is
-suppressed when the curation is already published.
+Partial that renders the status-dependent action buttons on the curation detail page:
+Add Evidence and Submit for Review when In Progress; a Review button (visible only to
+reviewers) when Ready for Review; and a Publish to Repository button when Provisional;
+no buttons are shown for Published curations.
 
 ### `templates/curation/partials/curation/detail_table.html`
 
@@ -172,13 +187,21 @@ a View History button.
 Partial that renders a collapsible evidence summary table on the curation detail page,
 listing each evidence record's ID, publication, needs-review flag, status,
 conflicting/included checkboxes, and score, with an Edit Evidence link when the curation
-is not published.
+is not locked.
 
 ### `templates/curation/partials/table.html`
 
 Partial that renders all curations as a DataTables-enhanced HTML table with columns for
 ID, type, allele, haplotype, disease, status, classification, and updated date; used on
 both the home page and the curation list page.
+
+### `templates/curation/review.html`
+
+Full-page template for the expert panel review form; renders the curation summary and
+evidence tables for reference, then a form with fields for EP classification, evidence
+summary, additional notes, expert panel, and an Approved/Needs Revision radio decision;
+a JavaScript confirmation warns the reviewer if the chosen classification differs from
+the suggested classification before submitting an approval.
 
 ### `templates/evidence/change.html`
 
@@ -195,7 +218,7 @@ and a Submit button, with breadcrumbs back to the parent curation.
 
 Full-page template for the evidence detail view; renders the evidence summary table,
 then a tab bar toggling between the Data tab (all scored field values) and the Scoring
-Matrix tab, with an Edit Data button when the curation is not published.
+Matrix tab, with an Edit Data button when the curation is not locked.
 
 ### `templates/evidence/edit.html`
 
@@ -276,9 +299,10 @@ score calculation using `ProtectedViewTestMixin`.
 
 ### `urls.py`
 
-Defines all URL patterns for the curation app: create/detail/list/edit routes for
-curations, evidence create/detail/edit, publish, and history/change routes for both
-curations and evidence.
+Defines all URL patterns for the curation app: create/detail/list routes for curations;
+`edit-evidence`, `publish`, `submit`, `review`, and `copy` action routes for curations;
+evidence create/detail/edit routes; and history/change routes for both curations and
+evidence.
 
 ### `validators/__init__.py`
 
@@ -297,10 +321,9 @@ Empty file; marks this directory as a Python package.
 ### `validators/models/curation.py`
 
 Defines model-level validators for the `Curation` model: `validate_status` (blocks
-marking a curation done if included evidence is still in progress),
-`validate_curation_type` (ensures the correct allele or haplotype is provided and clears
-the unused FK), and `validate_classification` (checks the score falls within the allowed
-range for the chosen classification).
+transitioning to Ready for Review if any included evidence is still in progress) and
+`validate_curation_type` (ensures the correct allele or haplotype FK is set and clears
+the unused FK).
 
 ### `validators/models/evidence.py`
 
@@ -321,7 +344,12 @@ the form instance.
 ### `views.py`
 
 Defines all class-based and function-based views for the curation app: `CurationCreate`,
-`CurationDetail`, `CurationEdit`, `CurationList`, `CurationHistory`, `CurationChange`,
-`curation_edit_evidence`, `curation_publish`, `EvidenceCreate`, `EvidenceDetail`,
-`EvidenceEdit`, `EvidenceHistory`, and `EvidenceChange`; all views require
-authentication and curation permissions via `ProtectedViewMixin`.
+`CurationDetail`, `CurationList`, `CurationHistory`, `CurationChange`,
+`curation_edit_evidence`, `curation_submit` (transitions curation to Ready for Review
+after validating included evidence), `curation_review` (reviewer-only view that renders
+the EP review form and transitions the curation to Provisional or back to In Progress),
+`curation_publish` (transitions to Published and creates a `PublishedCuration` record),
+`curation_copy` (clones a published curation and all its evidence into a new In Progress
+curation), `EvidenceCreate`, `EvidenceDetail`, `EvidenceEdit`, `EvidenceHistory`, and
+`EvidenceChange`; all views require authentication and curation permissions via
+`ProtectedViewMixin` or `protected_view`/`reviewer_view` decorators.

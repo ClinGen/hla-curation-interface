@@ -492,16 +492,16 @@ Choices.js scripts are unaffected.
 
 The existing list-view test classes (e.g., `AlleleListTest`, `DiseaseListTest`) each
 inherit `ProtectedViewTestMixin`, which verifies access control, correct template usage,
-and that expected column headers and row values appear in the response. These tests still
-pass after the migration and implicitly confirm that django-tables2 is rendering the table
-correctly. However, the two behaviors that are entirely new — server-side search
-filtering and HTMX partial responses — have no test coverage at all.
+and that expected column headers and row values appear in the response. These tests
+still pass after the migration and implicitly confirm that django-tables2 is rendering
+the table correctly. However, the two behaviors that are entirely new — server-side
+search filtering and HTMX partial responses — have no test coverage at all.
 
-**`common/tests.py` — UPDATE.** This file defines `SearchListViewTest`, a
-`TestCase` subclass that exercises `SearchListView` directly using Django's test client
-against the allele list view as a representative endpoint. This avoids mocking the view
-class and tests the full request-response cycle. It requires the `test_alleles` fixture
-(already used by `AlleleListTest`) so that records exist in the database.
+**`common/tests.py` — UPDATE.** This file defines `SearchListViewTest`, a `TestCase`
+subclass that exercises `SearchListView` directly using Django's test client against the
+allele list view as a representative endpoint. This avoids mocking the view class and
+tests the full request-response cycle. It requires the `test_alleles` fixture (already
+used by `AlleleListTest`) so that records exist in the database.
 
 The test class covers four cases:
 
@@ -515,12 +515,12 @@ The test class covers four cases:
 
 3. **Search filtering returns only matching rows.** A GET with `?q=A*01:02:03` (the
    allele name in the fixture) must include the matching row's ID and must include a
-   result-count string like "1 result". A GET with `?q=zzz_no_match` must include
-   "0 results" and must not include the matching allele's ID.
+   result-count string like "1 result". A GET with `?q=zzz_no_match` must include "0
+   results" and must not include the matching allele's ID.
 
 4. **Empty query returns all rows.** A GET with `?q=` (empty string) must behave
-   identically to a GET with no `q` parameter at all — the queryset is not filtered,
-   and all fixture records appear.
+   identically to a GET with no `q` parameter at all — the queryset is not filtered, and
+   all fixture records appear.
 
 Each test logs in as a user with full curation permissions (PHI agreement signed,
 curation permissions granted) to satisfy `ProtectedViewMixin`, following the same

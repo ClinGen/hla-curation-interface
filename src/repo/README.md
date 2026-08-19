@@ -33,6 +33,12 @@ Provides `serialize_published_curation` and `serialize_evidence`, two plain func
 that convert a `PublishedCuration` instance and its associated `Evidence` records into
 plain Python dictionaries suitable for JSON export.
 
+### `tables.py`
+
+Defines `PublishedCurationTable`, a `django-tables2` table for the HLArepo list view,
+with columns for curation ID (linked to the detail page), type, allele, haplotype,
+disease, classification, last-updated date, and a per-row JSON download button.
+
 ### `templates/repo/change.html`
 
 Displays the field-level diff for a single historical change to a published curation,
@@ -42,24 +48,28 @@ history list.
 ### `templates/repo/detail.html`
 
 Shows the full details and evidence table for a single published curation, with buttons
-to download the record as JSON and to view its change history.
+to download the record as JSON and to view its change history; also displays a
+supersession warning when the curation has been replaced by a newer published copy, and
+a "Copy and Recurate" button for authenticated curators.
 
 ### `templates/repo/history.html`
 
-Lists all historical revisions for a published curation in a DataTables table, with each
-row linking to the corresponding change-diff view.
+Lists all historical revisions for a published curation via the shared
+`common/history/history_body.html` partial, with a breadcrumb trail linking back to
+HLArepo and the curation detail page.
 
 ### `templates/repo/list.html`
 
-Renders a searchable DataTables table of all published curations, with columns for ID,
-type, allele, haplotype, disease, classification, and last-updated date, plus a per-row
-JSON download button and a bulk "Download All as JSON" button.
+Renders the HLArepo search page with a "Download All as JSON" button and a search input
+that dynamically filters results via the shared `SearchListView` partials.
 
 ### `tests.py`
 
-Contains unit and integration tests for the `PublishedCuration` model (creation, string
-representation, one-to-one constraint, reverse relationship, `get_absolute_url`) and for
-the publish, search, detail, JSON download, and read-only enforcement views.
+Contains unit and integration tests covering the `PublishedCuration` model (creation,
+string representation, one-to-one constraint, reverse relationship, `get_absolute_url`),
+the publish, search, detail, JSON download, and read-only enforcement views,
+supersession logic (`is_superseded`, `get_superseding`), and the "Copy and Recurate"
+button visibility.
 
 ### `urls.py`
 
@@ -68,7 +78,9 @@ endpoint, and per-curation detail, single JSON download, history, and change-dif
 
 ### `views.py`
 
-Implements the `PublishedCurationList`, `PublishedCurationDetail`,
-`PublishedCurationHistory`, and `PublishedCurationChange` class-based views, as well as
-the `download_all_json` and `download_single_json` function-based views that return
-serialized curation data as downloadable JSON attachments.
+Implements the `is_superseded` and `get_superseding` helper functions for detecting
+whether a published curation has been replaced by a newer copy, the
+`PublishedCurationList`, `PublishedCurationDetail`, `PublishedCurationHistory`, and
+`PublishedCurationChange` class-based views, and the `download_all_json` and
+`download_single_json` function-based views that return serialized curation data as
+downloadable JSON attachments.

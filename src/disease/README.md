@@ -3,8 +3,8 @@
 Django app that manages Mondo Disease Ontology entries used in HLA curations. It
 provides a `Disease` model backed by the Mondo ontology, a client that fetches disease
 names and IRIs from the EBI Ontology Lookup Service (OLS), and the full set of views,
-forms, templates, and URL routes for creating, browsing, and auditing diseases within
-the HCI.
+forms, tables, templates, and URL routes for creating, browsing, and auditing diseases
+within the HCI.
 
 ### `__init__.py`
 
@@ -13,8 +13,8 @@ Empty file; marks this directory as a Python package.
 ### `admin.py`
 
 Registers the `Disease` model with the Django admin site using `SimpleHistoryAdmin`,
-exposing list display, filtering by `disease_type`, and search by name and Mondo ID,
-with `added_by` and `added_at` as read-only fields.
+exposing list display of name, Mondo ID, and disease type, filtering by `disease_type`,
+and search by name and Mondo ID, with `added_by` and `added_at` as read-only fields.
 
 ### `apps.py`
 
@@ -48,12 +48,24 @@ external APIs.
 Defines `DiseaseForm`, a `ModelForm` for the `Disease` model that exposes only the
 `mondo_id` field, which the user supplies when adding a new disease.
 
+### `migrations/`
+
+Standard Django migrations directory containing the database schema migrations for the
+`Disease` model, including initial table creation, altering the `mondo_id` field, adding
+`updated_at`, and adding historical records support.
+
 ### `models.py`
 
 Defines the `Disease` model with fields for slug, disease type, Mondo ID, IRI, name, and
 audit metadata (`added_by`, `added_at`, `updated_at`). The `save` method auto-generates
 a zero-padded slug (`D000001` style), and `clean` delegates to the model validators.
 Historical change tracking is provided via `simple_history`.
+
+### `tables.py`
+
+Defines `DiseaseTable`, a `django_tables2` table for the disease list view. It renders
+the slug as a link to the detail page and the Mondo ID as an external link to the OLS
+IRI, falling back to `------` when no IRI is available.
 
 ### `templates/disease/change.html`
 
@@ -80,8 +92,9 @@ pages.
 
 ### `templates/disease/list.html`
 
-Renders a searchable DataTables table of all diseases with columns for HCI ID, name,
-Mondo ID (external link), and last-updated date, plus an "Add Disease" button.
+Renders a searchable table of all diseases (via `SearchListView` and `DiseaseTable`)
+with columns for HCI ID, name, Mondo ID (external link), and last-updated date, plus an
+"Add Disease" button.
 
 ### `tests.py`
 

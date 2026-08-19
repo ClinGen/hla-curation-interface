@@ -68,3 +68,10 @@ mobile.
 
 Renders a single `<a>` navbar item that applies a bold weight class when the link's URL
 name matches the currently active view.
+
+### `tables.html`
+
+A custom django-tables2 template that wraps the rendered table in a scrollable container
+and replaces the default pagination with Bulma-styled Previous/Next buttons and a
+numbered page list; also sets `hx-boost="false"` on each row to prevent HTMX from
+intercepting table row navigations.

@@ -13,8 +13,8 @@ Empty file; marks this directory as a Python package.
 ### `admin.py`
 
 Registers the `Allele` model with the Django admin site using `SimpleHistoryAdmin`,
-exposing `name`, `car_id`, `added_by`, and `added_at` in the list view and making
-`added_by` and `added_at` read-only.
+exposing `name`, `car_id`, `added_by`, and `added_at` in the list view, enabling search
+by `car_id`, and making `added_by` and `added_at` read-only.
 
 ### `apps.py`
 
@@ -45,6 +45,12 @@ Defines the `Allele` model with fields for a human-readable slug (auto-generated
 History tracking is added via `HistoricalRecords`, and `get_absolute_url` resolves to
 the allele detail view.
 
+### `tables.py`
+
+Defines `AlleleTable`, a `django-tables2` table for the `Allele` model with columns for
+slug (linked to the detail page), name, CAR ID (rendered as an external linkout when
+present), and updated date.
+
 ### `templates/allele/change.html`
 
 Renders a detail page for a single history change record on an allele, displaying a
@@ -60,7 +66,8 @@ and a POST form containing the allele name text input and a Submit button.
 
 Renders a detail page for a single allele, displaying its HCI Allele ID, name, ClinGen
 Allele Registry ID (as a linkout when present), and timestamps. It also includes
-collapsible sections for associated curations and haplotypes when they exist.
+`django-tables2`-rendered tables for associated curations and haplotypes when they
+exist.
 
 ### `templates/allele/history.html`
 
@@ -70,13 +77,9 @@ Allele Search and the allele's detail page, then including the shared
 
 ### `templates/allele/list.html`
 
-Renders the Allele Search page, showing the `allele/partials/table.html` partial with
-all alleles and a link to the Add Allele page.
-
-### `templates/allele/partials/table.html`
-
-Renders a DataTables-powered HTML table of alleles with columns for ID (linked to the
-detail page), Name, CAR ID (as a linkout when present), and Updated date.
+Renders the Allele Search page with a search input (via
+`common/partials/search_input.html`) and an HTMX-driven results area (via
+`common/partials/search_results.html`), plus a link to the Add Allele page.
 
 ### `tests.py`
 
@@ -94,6 +97,8 @@ class-based view.
 
 Defines five class-based views — `AlleleCreate`, `AlleleDetail`, `AlleleHistory`,
 `AlleleChange`, and `AlleleList` — all protected by `ProtectedViewMixin`. `AlleleCreate`
-fetches CAR data on form submission and stores the CAR ID; `AlleleHistory` and
-`AlleleChange` populate context with history records and field-level diffs via
-`resolve_changes`.
+fetches CAR data on form submission and stores the CAR ID; `AlleleDetail` populates
+context with `django-tables2` tables for related curations and haplotypes;
+`AlleleHistory` and `AlleleChange` populate context with history records and field-level
+diffs via `resolve_changes`; `AlleleList` uses `SearchListView` with `AlleleTable` and
+filters on `slug`, `name`, and `car_id`.

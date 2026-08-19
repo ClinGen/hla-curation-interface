@@ -13,7 +13,7 @@ Empty file; marks this directory as a Python package.
 ### `admin.py`
 
 Registers the `Haplotype` model with the Django admin site using `SimpleHistoryAdmin`,
-showing `name`, `added_by`, and `added_at` in the list view, with search by name and
+showing `name`, `added_by`, and `added_at` in the list view, with search by `name` and
 `added_by` and `added_at` as read-only fields.
 
 ### `apps.py`
@@ -49,6 +49,12 @@ Defines the `Haplotype` model with a slug, a many-to-many `alleles` relation to 
 metadata. The `save` method auto-generates a zero-padded slug (`H000001` style).
 Historical change tracking is provided via `simple_history`.
 
+### `tables.py`
+
+Defines `HaplotypeTable`, a `django_tables2` table with columns for slug (linked to the
+detail page), name, and last-updated date. It is used by `HaplotypeList` to render
+paginated, sortable haplotype results.
+
 ### `templates/haplotype/change.html`
 
 Displays a single historical change record for a haplotype, with a breadcrumb trail back
@@ -62,9 +68,9 @@ the shared search select partial) and a submit button.
 
 ### `templates/haplotype/detail.html`
 
-Shows the detail view for a single haplotype, displaying its HCI ID, name, and
-timestamps. If the haplotype has associated curations or alleles, each is listed in a
-collapsible section using the respective app's table partial.
+Shows the detail view for a single haplotype, displaying its HCI ID, name, added date,
+and updated date. If the haplotype has associated curations or alleles, each is rendered
+in a collapsible `<details>` section using `django_tables2`.
 
 ### `templates/haplotype/history.html`
 
@@ -74,14 +80,9 @@ pages.
 
 ### `templates/haplotype/list.html`
 
-Delegates to the `haplotype/partials/table.html` partial to render the haplotype
-DataTable, and provides an "Add Haplotype" button below it.
-
-### `templates/haplotype/partials/table.html`
-
-Renders a DataTables table of haplotypes with columns for HCI ID (linked to the detail
-page), name, and last-updated date. This partial is included by both the list page and
-other apps that need to embed a haplotype table.
+Renders the "Haplotype Search" page using the shared `common/partials/search_input.html`
+and `common/partials/search_results.html` partials, and provides an "Add Haplotype"
+button below the results.
 
 ### `tests.py`
 
@@ -101,4 +102,5 @@ Implements five class-based views — `HaplotypeCreate`, `HaplotypeDetail`,
 `ProtectedViewMixin`. `HaplotypeCreate.form_valid` sorts the selected alleles by their
 position in `GENE_LIST` to compute the canonical `~`-separated name, rejects duplicate
 combinations, and sets `added_by`. `HaplotypeChange` uses `resolve_changes` to build a
-diff for the selected history record.
+diff for the selected history record. `HaplotypeList` extends `SearchListView` and
+supports searching by `slug` and `name`.

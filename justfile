@@ -263,7 +263,7 @@ alias djlp := django-loaddata-prod
 # Format the Markdown docs. ------------------------------------------
 [group('docs')]
 docs-format:
-    uv run mdformat --wrap 88 --number docs
+    uv run mdformat --wrap 88 --number docs src
 alias dofm := docs-format
 
 #=====================================================================
