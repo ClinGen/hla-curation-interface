@@ -166,8 +166,9 @@ name.
 
 ### `templates/curation/list.html`
 
-Full-page template for the curation search/list page; includes the
-`curation/partials/table.html` DataTable partial and an "Add Curation" button.
+Full-page template for the curation search/list page; includes the shared
+`common/partials/search_input.html` and `common/partials/search_results.html` partials
+for server-side HTMX search and an "Add Curation" button.
 
 ### `templates/curation/partials/buttons.html`
 
@@ -188,12 +189,6 @@ Partial that renders a collapsible evidence summary table on the curation detail
 listing each evidence record's ID, publication, needs-review flag, status,
 conflicting/included checkboxes, and score, with an Edit Evidence link when the curation
 is not locked.
-
-### `templates/curation/partials/table.html`
-
-Partial that renders all curations as a DataTables-enhanced HTML table with columns for
-ID, type, allele, haplotype, disease, status, classification, and updated date; used on
-both the home page and the curation list page.
 
 ### `templates/curation/review.html`
 

@@ -35,11 +35,6 @@ Project-specific stylesheet that defines custom rules for entity-type logo image
 footer logo container spacing, and a horizontal-scroll container class used for wide
 tables.
 
-### `hci/css/dataTables.dataTables.min.css`
-
-Vendored minified stylesheet for the DataTables jQuery plugin, which styles the sortable
-and searchable data tables used on list pages.
-
 ### `hci/css/fonts/bootstrap-icons.woff`
 
 Bootstrap Icons web font in WOFF format, referenced by `bootstrap-icons.css` for broader
@@ -134,19 +129,10 @@ elements with search and custom styling.
 Vendored minified production build of Choices.js, loaded by the base template for
 enhanced select inputs.
 
-### `hci/js/dataTables.min.js`
-
-Vendored minified DataTables 2.x jQuery plugin used to add sorting, searching, and
-pagination to HTML tables on list pages.
-
 ### `hci/js/htmx.js`
 
 Vendored HTMX library (v2.0.10) that enables AJAX-driven partial page updates via HTML
 attributes, used throughout the application to avoid full page reloads.
-
-### `hci/js/jquery.min.js`
-
-Vendored minified jQuery library, required as a dependency by DataTables.
 
 ### `hci/site.webmanifest`
 

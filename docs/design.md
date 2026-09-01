@@ -78,7 +78,7 @@ research communities.
 - **Frontend CSS** — Bulma
 - **Partial page updates** — HTMX
 - **Enhanced selects** — Choices.js
-- **Sortable tables** — DataTables + jQuery
+- **Sortable, searchable tables** — django-tables2 + HTMX
 
 ### Data Model
 
@@ -131,10 +131,13 @@ The UI is fully server-rendered Django templates with no client-side routing. Ja
 is used narrowly:
 
 - **HTMX** — partial page updates (e.g. toggling field visibility on the Create
-  Publication form based on publication type).
-- **DataTables** — sortable, searchable tables on list pages.
+  Publication form based on publication type; live search on list pages).
 - **Choices.js** — searchable multi-select and single-select inputs (e.g. the allele
   picker on the haplotype creation form).
+
+List pages use server-side search powered by `SearchListView` (in `common/views.py`) and
+django-tables2, replacing the former client-side DataTables + jQuery setup. HTMX wires
+the search input to the results area so the table updates without a full page reload.
 
 Bulma provides the CSS framework. All JS and CSS dependencies are vendored under
 `src/static/hci/` — there is no build step at runtime.
