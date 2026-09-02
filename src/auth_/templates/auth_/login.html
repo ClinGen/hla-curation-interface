@@ -1,0 +1,15 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block title %}Sign In{% endblock %}
+
+{% block main %}
+<section class="section">
+  <div class="columns is-centered">
+    <div class="column is-narrow">
+      <div id="clerk-sign-in" data-publishable-key="{{ clerk_publishable_key }}"></div>
+    </div>
+  </div>
+</section>
+<script src="{% static 'hci/js/sign-in.js' %}"></script>
+{% endblock %}

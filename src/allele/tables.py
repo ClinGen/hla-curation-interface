@@ -15,7 +15,7 @@ class AlleleTable(tables.Table):
         attrs = {"class": "table is-fullwidth is-hoverable"}
         sequence = ("slug", "name", "car_id", "updated_at")
 
-    def render_car_id(self, value: str | None, record: Allele) -> str:  # noqa: ARG002
+    def render_car_id(self, value: str | None, record: Allele) -> str:  # ruff: ignore[unused-method-argument]
         if value:
             url = f"https://reg.clinicalgenome.org/allele/ui/hla/id/{value}"
             return format_html(

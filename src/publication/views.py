@@ -100,7 +100,7 @@ class PublicationChange(ProtectedViewMixin, DetailView):
         return context
 
 
-class PublicationList(ProtectedViewMixin, SearchListView):
+class PublicationList(ProtectedViewMixin, SearchListView):  # ty: ignore[invalid-method-override]
     model = Publication
     template_name = "publication/list.html"
     ordering = ["-updated_at"]

@@ -67,7 +67,7 @@ class AccountActivationMessageTest(TestCase):
     def setUp(self):
         self.user1_no_phi_no_perms = User.objects.create(
             username="user1",
-            password="user1pw",  # noqa: S106 (Hard-coded for testing.)
+            password="user1pw",  # ruff: ignore[hardcoded-password-func-arg] (Hard-coded for testing.)
         )
         self.user1_profile = UserProfile.objects.create(
             user=self.user1_no_phi_no_perms,
@@ -76,7 +76,7 @@ class AccountActivationMessageTest(TestCase):
         )
         self.user2_yes_phi_no_perms = User.objects.create(
             username="user2",
-            password="user2pw",  # noqa: S106 (Hard-coded for testing.)
+            password="user2pw",  # ruff: ignore[hardcoded-password-func-arg] (Hard-coded for testing.)
         )
         self.user2_profile = UserProfile.objects.create(
             user=self.user2_yes_phi_no_perms,
@@ -85,7 +85,7 @@ class AccountActivationMessageTest(TestCase):
         )
         self.user3_no_phi_yes_perms = User.objects.create(
             username="user3",
-            password="user3pw",  # noqa: S106 (Hard-coded for testing.)
+            password="user3pw",  # ruff: ignore[hardcoded-password-func-arg] (Hard-coded for testing.)
         )
         self.user3_profile = UserProfile.objects.create(
             user=self.user3_no_phi_yes_perms,
@@ -94,7 +94,7 @@ class AccountActivationMessageTest(TestCase):
         )
         self.user4_yes_phi_yes_perms = User.objects.create(
             username="user4",
-            password="user4pw",  # noqa: S106 (Hard-coded for testing.)
+            password="user4pw",  # ruff: ignore[hardcoded-password-func-arg] (Hard-coded for testing.)
         )
         self.user4_profile = UserProfile.objects.create(
             user=self.user4_yes_phi_yes_perms,

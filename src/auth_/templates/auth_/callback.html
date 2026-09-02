@@ -1,0 +1,12 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Completing sign-in...</title>
+</head>
+<body>
+  <div id="clerk-callback" data-publishable-key="{{ clerk_publishable_key }}"></div>
+  <script src="{% static 'hci/js/callback.js' %}"></script>
+</body>
+</html>

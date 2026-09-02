@@ -6,7 +6,7 @@ from django.db import transaction
 from django.http import (
     HttpRequest,
     HttpResponse,
-    HttpResponseRedirect,
+    HttpResponseBase,
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -106,14 +106,12 @@ class EvidenceCreate(ProtectedViewMixin, CreateView):
     slug_field = "slug"
     slug_url_kwarg = "evidence_slug"
 
-    def dispatch(
-        self, request: HttpRequest, *args, **kwargs
-    ) -> HttpResponse | HttpResponseRedirect | None:
+    def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponseBase:
         curation = get_object_or_404(Curation, slug=kwargs.get("curation_slug"))
         if curation.is_locked:
             messages.error(request, "This curation is locked and cannot be edited.")
             return redirect("curation-detail", curation_slug=curation.slug)
-        return super().dispatch(request, *args, **kwargs)  # type: ignore[return-value]
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form: EvidenceCreateForm) -> HttpResponse:
         curation = Curation.objects.get(slug=self.kwargs["curation_slug"])
@@ -121,7 +119,7 @@ class EvidenceCreate(ProtectedViewMixin, CreateView):
         form.instance.added_by = self.request.user
         return super().form_valid(form)
 
-    def get_context_data(self, **kwargs):  # noqa
+    def get_context_data(self, **kwargs):  # ruff: ignore[missing-return-type-undocumented-public-function]
         """Returns the context with the human-readable curation ID."""
         context = super().get_context_data(**kwargs)
         context["curation_slug"] = self.kwargs["curation_slug"]
@@ -134,7 +132,7 @@ class EvidenceDetail(ProtectedViewMixin, DetailView):
     slug_field = "slug"
     slug_url_kwarg = "evidence_slug"
 
-    def get_context_data(self, **kwargs):  # noqa
+    def get_context_data(self, **kwargs):  # ruff: ignore[missing-return-type-undocumented-public-function]
         """Returns the context with the framework."""
         context = super().get_context_data(**kwargs)
         context["framework"] = FRAMEWORK
@@ -148,9 +146,7 @@ class EvidenceEdit(ProtectedViewMixin, UpdateView):
     slug_field = "slug"
     slug_url_kwarg = "evidence_slug"
 
-    def dispatch(
-        self, request: HttpRequest, *args, **kwargs
-    ) -> HttpResponse | HttpResponseRedirect | None:
+    def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponseBase:
         """Check if parent curation is locked before allowing edit.
 
         Returns:
@@ -168,7 +164,7 @@ class EvidenceEdit(ProtectedViewMixin, UpdateView):
                 curation_slug=curation.slug,
                 evidence_slug=self.object.slug,
             )
-        return super().dispatch(request, *args, **kwargs)  # type: ignore[return-value]
+        return super().dispatch(request, *args, **kwargs)
 
     def form_invalid(self, form: EvidenceEditForm) -> HttpResponse:
         message = (
@@ -398,7 +394,7 @@ class EvidenceChange(ProtectedViewMixin, DetailView):
         return context
 
 
-class CurationList(ProtectedViewMixin, SearchListView):
+class CurationList(ProtectedViewMixin, SearchListView):  # ty: ignore[invalid-method-override]
     model = Curation
     template_name = "curation/list.html"
     ordering = ["-updated_at"]

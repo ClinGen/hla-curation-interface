@@ -25,6 +25,20 @@ session. On subsequent requests, Django's session middleware handles authenticat
 before. This means no per-request calls to the Clerk SDK and no changes to any view or
 middleware outside `auth_`.
 
+### Sign-in UI
+
+The login view renders Clerk's embedded sign-in widget using `clerk.browser.js` loaded
+directly from the Clerk Frontend API (FAPI). The FAPI domain is decoded from the
+publishable key at runtime, so no separate environment variable is needed. After a
+successful sign-in, the widget sets the `__session` cookie for the HCI domain and
+redirects to `/auth/callback`.
+
+This approach was chosen over redirecting to Clerk's hosted Account Portal
+(`accounts.clinicalgenome.org`) to avoid a cross-domain cookie scoping problem: the
+Account Portal sets `__session` with `Domain=accounts.clinicalgenome.org`, so the
+browser never sends it to `hci-test.clinicalgenome.org` or `hci.clinicalgenome.org`.
+With the embedded widget, the cookie is set for the HCI domain directly.
+
 ### User matching
 
 `UserProfile` stores a `clerk_user_id` field (the `sub` claim from the Clerk JWT). On
@@ -52,6 +66,18 @@ cookie. The Clerk session ID is available from the verified token payload (`sid`
 
 ## Alternatives
 
+### Redirect to Clerk's hosted Account Portal instead of embedding the widget
+
+Instead of mounting the sign-in widget on the HCI login page, `login_` could redirect
+the user to `https://accounts.clinicalgenome.org/sign-in?redirect_url=<callback>`. This
+requires no JavaScript on the login page. The problem is cross-domain cookie scoping:
+the Account Portal sets `__session` with `Domain=accounts.clinicalgenome.org`, so the
+cookie is never sent to `hci-test.clinicalgenome.org` or `hci.clinicalgenome.org` on
+the callback request. The workaround is Clerk's satellite domain feature (a paid
+add-on, ~$10/month per domain) or the `__clerk_handshake` URL-parameter fallback, which
+requires serving an intermediate page that loads Clerk.js to exchange the token. The
+embedded widget avoids both complications entirely.
+
 ### Verify the Clerk session on every request instead of using Django sessions
 
 Instead of logging the user into a Django session at callback time, we could verify the
@@ -62,15 +88,6 @@ incurs a JWKS-based JWT verification (fast, local) or, for revocation checking, 
 call (slower). For a small internal tool, the extra latency is acceptable, but the extra
 complexity is not warranted given that the Django session approach already works
 reliably and can be extended to support forced logout later if needed.
-
-### Use Clerk's embedded sign-in component instead of the hosted page
-
-Clerk provides a JavaScript component that renders the sign-in UI directly on the
-application's login page. This gives a more seamless experience — the user never leaves
-the site — and makes it easy to apply custom branding. The tradeoff is that it requires
-loading Clerk's frontend JavaScript bundle and integrating it with the Django template.
-Since the sign-in page is visited infrequently, the UX difference is negligible, and the
-hosted page approach requires zero frontend changes.
 
 ### Include email in the Clerk JWT template
 
@@ -95,7 +112,8 @@ Add `clerk-backend-api` to the `dependencies` list.
 
 Remove all four WorkOS environment variables: `WORKOS_API_KEY`, `WORKOS_CLIENT_ID`,
 `WORKOS_COOKIE_PASSWORD`, and `WORKOS_REDIRECT_URI`. Add `CLERK_SECRET_KEY` and
-`CLERK_PUBLISHABLE_KEY` with the values from the Clerk dashboard.
+`CLERK_PUBLISHABLE_KEY` with the values from the Clerk dashboard. No `CLERK_SIGN_IN_URL`
+is needed; the FAPI domain is decoded from the publishable key at runtime.
 
 #### `src/config/settings/base.py` — modify
 
@@ -109,8 +127,8 @@ the second entry so that `force_login()` continues to work in tests.
 
 Remove `SECURE_CROSS_ORIGIN_OPENER_POLICY`. The current comment explains it is needed
 "for logging in with Google and Microsoft via Firebase." Firebase is no longer involved;
-Clerk handles Google and Microsoft OAuth entirely on its hosted sign-in page via a
-redirect flow, not a popup, so the setting is not needed.
+Clerk handles Google and Microsoft OAuth entirely within the embedded widget via a
+redirect flow, so the setting is not needed.
 
 ### Step 3 — Add `clerk_user_id` to `UserProfile`
 
@@ -123,7 +141,7 @@ because two Django accounts must never be linked to the same Clerk identity.
 
 #### Migration — add
 
-Generate a migration for the new field using `uv run manage.py makemigrations`.
+Generate a migration for the new field using `python manage.py makemigrations`.
 
 ### Step 4 — Replace the authentication backend
 
@@ -161,12 +179,10 @@ Remove the module-level WorkOS client, cookie-password, and
 and `profile_change` views entirely unchanged. Replace `login_`, `callback`, and
 `logout_` as described below.
 
-**`login_`** should build the absolute URI for the callback endpoint and redirect the
-user to Clerk's hosted sign-in page, passing the callback URI as the `redirect_url`
-parameter. The sign-in URL is derived from the Clerk instance's domain, which is
-available from the publishable key; confirm the exact URL format against the Clerk
-dashboard during implementation. The existing early-return for already-authenticated
-users can be kept as-is.
+**`login_`** should render `auth_/login.html`, passing `CLERK_PUBLISHABLE_KEY` as
+context. The template loads `clerk.browser.js` from the FAPI (decoded from the
+publishable key) and mounts the sign-in widget with `afterSignInUrl: "/auth/callback"`.
+The existing early-return for already-authenticated users can be kept as-is.
 
 **`callback`** should read the `__session` cookie from the request. If the cookie is
 absent, redirect to login. Otherwise, call `verify_token` from
@@ -179,28 +195,65 @@ email address by matching `primary_email_address_id` against the user's
 Django's `authenticate` passing both `clerk_user_id` and `clerk_email`, call `login`
 with the returned user, and redirect to `core:home`.
 
-**`logout_`** should attempt to revoke the Clerk session before clearing the Django
-session. Read the `__session` cookie, and if present, verify it to extract the `sid`
-claim, then call `clerk.sessions.revoke` with that session ID. Wrap the entire Clerk
-interaction in a try/except so that a stale or already-invalid token does not block the
-user from being logged out. Regardless of whether Clerk revocation succeeds, call
-Django's `logout` and redirect to the login page.
+The callback also handles Clerk's fallback token delivery mechanisms. Three cases are
+detected and all cause `auth_/callback.html` to be rendered so that Clerk.js can
+perform the exchange and set the real `__session` cookie:
 
-### Step 6 — URL patterns
+- `__clerk_db_jwt` as a **URL query parameter** — the original dev fallback path.
+- `__clerk_handshake` as a **URL query parameter** — the production cross-domain
+  fallback when no satellite domain is configured.
+- `__clerk_db_jwt` as a **browser cookie** (no `__session` cookie present) — the path
+  actually observed in dev after a Google OAuth redirect. Clerk sets `__clerk_db_jwt` as
+  a cookie rather than a URL parameter; the cookie-based check must come after the URL
+  parameter checks so it doesn't shadow a real `__session` cookie that is already
+  present.
+
+**`logout_`** should attempt to revoke the Clerk session before clearing the Django
+session. The `sid` claim from the Clerk token is stashed in `request.session["clerk_session_id"]`
+at login time (after `login()` regenerates the session), so `logout_` reads it from
+there rather than re-reading and re-verifying the `__session` cookie. Call
+`clerk.sessions.revoke` with that session ID. Wrap the entire Clerk interaction in a
+try/except so that a stale or already-invalid token does not block the user from being
+logged out. Regardless of whether Clerk revocation succeeds, call Django's `logout` and
+redirect to the login page.
+
+### Step 6 — Add the login template
+
+#### `src/auth_/templates/auth_/login.html` — add
+
+Extend `layouts/base.html`. Render a centered Bulma section containing a
+`<div id="clerk-sign-in">`. In a script tag, decode the FAPI domain from the
+publishable key (base64-encoded in the key itself), load `clerk.browser.js` from that
+FAPI, then call `Clerk.load()`. After `Clerk.load()` resolves:
+
+1. Check `window.Clerk.session`. If a session already exists (e.g. the user navigated
+   back to the login page while still signed in to Clerk), redirect immediately to
+   `/auth/callback` and return without mounting the widget. Mounting the widget while a
+   session is active causes Clerk to override any subsequent `window.location.replace()`
+   calls, redirecting to its own home URL instead of `/auth/callback`.
+2. Register a `Clerk.addListener` callback before calling `mountSignIn` so that a
+   session event fired synchronously on load is not missed. When the listener receives a
+   non-null session, redirect to `/auth/callback`.
+3. Call `Clerk.mountSignIn` with `afterSignInUrl: "/auth/callback"`. The
+   `afterSignInUrl` option sets `_final_redirect_url` in Clerk's OAuth redirect chain;
+   without it, Clerk redirects to the application root after the OAuth callback instead
+   of to `/auth/callback`.
+
+### Step 7 — URL patterns
 
 #### `src/auth_/urls.py` — no changes required
 
 The existing URL patterns (`login`, `callback`, `logout`, `profile`, `phi`, etc.) map to
 the same view function names. No URL changes are needed.
 
-### Step 7 — Remove the WorkOS SDK
+### Step 8 — Remove the WorkOS SDK
 
 #### `pyproject.toml` — modify
 
 Remove `"workos~=8.0"` from the `dependencies` list. Verify that no other file in the
 codebase imports from `workos` before removing.
 
-### Step 8 — Tests
+### Step 9 — Tests
 
 #### `src/common/tests.py` — no changes required
 

@@ -397,7 +397,7 @@ class EvidenceEditTest(ProtectedViewTestMixin, TestCase):
 def _make_user_with_profile(
     *, username: str, phi: bool = True, curate: bool = True, review: bool = False
 ) -> User:
-    user = User.objects.create_user(username=username, password="pw")  # noqa: S106
+    user = User.objects.create_user(username=username, password="pw")  # ruff: ignore[hardcoded-password-func-arg]
     UserProfile.objects.create(
         user=user,
         has_signed_phi_agreement=phi,
@@ -499,7 +499,7 @@ class CurationSubmitTest(SuppressRequestLoggingMixin, TestCase):
         self.assertEqual(self.curation.status, Status.READY_FOR_REVIEW)
 
     def test_non_curator_gets_403(self):
-        anon = User.objects.create_user(username="anon_s", password="pw")  # noqa: S106
+        anon = User.objects.create_user(username="anon_s", password="pw")  # ruff: ignore[hardcoded-password-func-arg]
         self.client.force_login(anon)
         with self.suppress_request_logging():
             response = self.client.post(self._url())

@@ -2,7 +2,7 @@
 
 from django.contrib import messages
 
-from .base import *  # noqa: F403 (We want to import everything.)
+from .base import *  # ruff: ignore[undefined-local-with-import-star] (We want to import everything.)
 from .base import BASE_DIR
 
 DEBUG = False
@@ -29,7 +29,7 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
-            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {name} {message}",  # noqa: E501
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {name} {message}",  # ruff: ignore[line-too-long]
             "style": "{",
         },
         "simple": {

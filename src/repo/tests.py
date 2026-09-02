@@ -22,7 +22,7 @@ class PublishedCurationModelTest(TestCase):
     def setUp(self):
         self.allele = Allele.objects.get(pk=1)
         self.disease = Disease.objects.get(pk=1)
-        self.user = User.objects.create_user(username="testuser", password="testpass")  # noqa: S106
+        self.user = User.objects.create_user(username="testuser", password="testpass")  # ruff: ignore[hardcoded-password-func-arg]
         self.curation = Curation.objects.create(
             curation_type=CurationTypes.ALLELE,
             allele=self.allele,
@@ -170,7 +170,7 @@ class RepoSearchViewTest(TestCase):
     def test_displays_published_curations(self):
         allele = Allele.objects.get(pk=1)
         disease = Disease.objects.get(pk=1)
-        user = User.objects.create_user(username="testuser", password="testpass")  # noqa: S106
+        user = User.objects.create_user(username="testuser", password="testpass")  # ruff: ignore[hardcoded-password-func-arg]
 
         curation = Curation.objects.create(
             curation_type=CurationTypes.ALLELE,
@@ -195,7 +195,7 @@ class PublishedCurationDetailViewTest(TestCase):
         self.client = Client()
         allele = Allele.objects.get(pk=1)
         disease = Disease.objects.get(pk=1)
-        user = User.objects.create_user(username="testuser", password="testpass")  # noqa: S106
+        user = User.objects.create_user(username="testuser", password="testpass")  # ruff: ignore[hardcoded-password-func-arg]
 
         self.curation = Curation.objects.create(
             curation_type=CurationTypes.ALLELE,
@@ -228,7 +228,7 @@ class JSONDownloadViewTest(TestCase):
         self.client = Client()
         allele = Allele.objects.get(pk=1)
         disease = Disease.objects.get(pk=1)
-        user = User.objects.create_user(username="testuser", password="testpass")  # noqa: S106
+        user = User.objects.create_user(username="testuser", password="testpass")  # ruff: ignore[hardcoded-password-func-arg]
 
         self.curation = Curation.objects.create(
             curation_type=CurationTypes.ALLELE,
@@ -278,7 +278,7 @@ class ReadOnlyEnforcementTest(TestCase):
         self.client = Client()
         allele = Allele.objects.get(pk=1)
         disease = Disease.objects.get(pk=1)
-        self.user = User.objects.create_user(username="testuser", password="testpass")  # noqa: S106
+        self.user = User.objects.create_user(username="testuser", password="testpass")  # ruff: ignore[hardcoded-password-func-arg]
         UserProfile.objects.create(
             user=self.user,
             has_signed_phi_agreement=True,
@@ -317,7 +317,7 @@ class SupersessionTest(TestCase):
     def setUp(self):
         self.allele = Allele.objects.get(pk=1)
         self.disease = Disease.objects.get(pk=1)
-        self.user = User.objects.create_user(username="superuser_t", password="pw")  # noqa: S106
+        self.user = User.objects.create_user(username="superuser_t", password="pw")  # ruff: ignore[hardcoded-password-func-arg]
         UserProfile.objects.create(
             user=self.user,
             has_signed_phi_agreement=True,
@@ -379,7 +379,7 @@ class CopyButtonTest(TestCase):
         self.client = Client()
         self.allele = Allele.objects.get(pk=1)
         self.disease = Disease.objects.get(pk=1)
-        self.user = User.objects.create_user(username="copy_button_user", password="pw")  # noqa: S106
+        self.user = User.objects.create_user(username="copy_button_user", password="pw")  # ruff: ignore[hardcoded-password-func-arg]
         UserProfile.objects.create(
             user=self.user,
             has_signed_phi_agreement=True,

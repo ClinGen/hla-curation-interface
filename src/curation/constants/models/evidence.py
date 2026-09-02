@@ -104,7 +104,7 @@ class AdditionalPhenotypes:
 
 
 ADDITIONAL_PHENOTYPES_CHOICES = {
-    AdditionalPhenotypes.SPECIFIC_DISEASE_RELATED: "Has specific disease-related phenotype",  # noqa: E501
+    AdditionalPhenotypes.SPECIFIC_DISEASE_RELATED: "Has specific disease-related phenotype",  # ruff: ignore[line-too-long]
     AdditionalPhenotypes.ONLY_DISEASE_TESTED: "Only disease tested",
 }
 

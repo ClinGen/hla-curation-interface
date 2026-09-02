@@ -130,7 +130,7 @@ FRAMEWORK = [
     },
     {
         "text": None,
-        "category": "Molecular genotyping (low and high resolution) / Whole exome sequencing / RNA sequencing ",  # noqa: E501
+        "category": "Molecular genotyping (low and high resolution) / Whole exome sequencing / RNA sequencing ",  # ruff: ignore[line-too-long]
         "split_horizontal": False,
         "split_vertical": False,
         "score": "score_step_2",
@@ -150,7 +150,7 @@ FRAMEWORK = [
     },
     {
         "text": None,
-        "category": "Whole genome sequencing / Panel-based next generation sequencing (> 50x coverage) / Long-read sequencing",  # noqa: E501
+        "category": "Whole genome sequencing / Panel-based next generation sequencing (> 50x coverage) / Long-read sequencing",  # ruff: ignore[line-too-long]
         "split_horizontal": False,
         "split_vertical": False,
         "score": "score_step_2",
@@ -362,7 +362,7 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_6a",
         "points": Points.S6A_ASSOCIATION,
-        "operator": "×",  # noqa: RUF001 (I want a multiplication sign here.)
+        "operator": "×",  # ruff: ignore[ambiguous-unicode-character-string] (I want a multiplication sign here.)
         "style": "white",
         "rowspan": 2,
     },
@@ -373,7 +373,7 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_6a",
         "points": Points.S6A_NO_ASSOCIATION,
-        "operator": "×",  # noqa: RUF001 (I want a multiplication sign here.)
+        "operator": "×",  # ruff: ignore[ambiguous-unicode-character-string] (I want a multiplication sign here.)
         "style": "white",
     },
     {
@@ -383,7 +383,7 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_6b",
         "points": Points.S6B_1_FIELD,
-        "operator": "×",  # noqa: RUF001 (I want a multiplication sign here.)
+        "operator": "×",  # ruff: ignore[ambiguous-unicode-character-string] (I want a multiplication sign here.)
         "style": "whitesmoke",
         "rowspan": 2,
     },
@@ -394,7 +394,7 @@ FRAMEWORK = [
         "split_vertical": False,
         "score": "score_step_6b",
         "points": Points.S6B_MORE_THAN_1_FIELD,
-        "operator": "×",  # noqa: RUF001 (I want a multiplication sign here.)
+        "operator": "×",  # ruff: ignore[ambiguous-unicode-character-string] (I want a multiplication sign here.)
         "style": "whitesmoke",
     },
     {

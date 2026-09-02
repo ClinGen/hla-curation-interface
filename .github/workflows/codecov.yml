@@ -11,12 +11,13 @@ jobs:
   collect_and_upload_test_coverage:
     runs-on: "ubuntu-latest"
     env:
+      CLERK_SECRET_KEY: "dummy"
+      CLERK_PUBLISHABLE_KEY: "dummy"
+      CLERK_SIGN_IN_URL: "dummy"
       DJANGO_SETTINGS_MODULE: "config.settings.prod"
       SECRET_KEY: "dummy"
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
       SENTRY_ENV: "ci"
-      WORKOS_API_KEY: ${{ secrets.TEST_WORKOS_API_KEY }}
-      WORKOS_CLIENT_ID: ${{ secrets.TEST_WORKOS_CLIENT_ID }}
     steps:
       - uses: "actions/checkout@v4"
       - uses: "./.github/actions/install-python-dependencies"

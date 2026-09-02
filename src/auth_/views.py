@@ -1,13 +1,15 @@
-import logging
-import os
+"""Houses views for the auth_ app."""
 
+import logging
+
+from clerk_backend_api import Clerk
+from clerk_backend_api.security import VerifyTokenOptions, verify_token
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django_tables2 import RequestConfig
-from workos import WorkOSClient
-from workos.session import seal_session_from_auth_response
 
 from auth_.forms import PHIForm
 from auth_.models import UserProfile
@@ -16,76 +18,159 @@ from common.tables import HistoryTable
 
 logger = logging.getLogger(__name__)
 
-workos = WorkOSClient(
-    api_key=os.getenv("WORKOS_API_KEY"),
-    client_id=os.getenv("WORKOS_CLIENT_ID"),
-)
-
-cookie_password = os.getenv("WORKOS_COOKIE_PASSWORD")
+clerk = Clerk(bearer_auth=settings.CLERK_SECRET_KEY)
 
 
-def login_(request: HttpRequest) -> HttpResponseRedirect:
-    """Logs the user in.
+def login_(request: HttpRequest) -> HttpResponseRedirect | HttpResponse:
+    """Renders Clerk's embedded sign-in widget.
 
     Returns:
-        A redirect response that sends the user to WorkOS's hosted login page.
+        The login page, or a redirect to home if already logged in.
     """
     if request.user.is_authenticated:
         messages.info(request, "Already logged in.")
         return redirect("home")
-    authorization_url = workos.user_management.get_authorization_url(
-        provider="authkit",
-        redirect_uri=os.getenv("WORKOS_REDIRECT_URI"),  # type: ignore
+    logger.info("Login: rendering sign-in page")
+    return render(
+        request,
+        "auth_/login.html",
+        {"clerk_publishable_key": settings.CLERK_PUBLISHABLE_KEY},
     )
-    return redirect(authorization_url)
 
 
-def callback(request: HttpRequest) -> HttpResponseRedirect:
-    """Authenticates the user and redirects them to the home page.
+def callback(request: HttpRequest) -> HttpResponseRedirect | HttpResponse:
+    """Verifies the Clerk session token, establishes a Django session, redirects home.
 
     Returns:
-        A redirect response that sends the authenticated user to the home page.
+        A redirect to the home page on success, or to the login page on failure.
     """
-    code = request.GET.get("code")
+    # When Clerk cannot deliver the session via a first-party __session cookie it falls
+    # back to URL-based token delivery:
+    #
+    #   __clerk_db_jwt    — development instances / localhost. An opaque value that
+    #                       Clerk.js exchanges for a real __session cookie.
+    #   __clerk_handshake — production cross-domain (e.g. no satellite domain
+    #                       configured). A signed token that Clerk.js exchanges with
+    #                       the FAPI for a real __session cookie.
+    #
+    # In both cases we serve a minimal page that loads Clerk.js. Clerk.js detects
+    # whichever parameter is present, performs the exchange, sets the cookie, and
+    # redirects back here. On the second request the cookie is present and we fall
+    # through to the verify path below.
+    # These parameters take priority over any stale __session cookie that may be
+    # lingering in the browser from a previous, now-expired session.
+    param = (
+        "__clerk_db_jwt"
+        if request.GET.get("__clerk_db_jwt")
+        else "__clerk_handshake"
+        if request.GET.get("__clerk_handshake")
+        else None
+    )
+    # In dev mode, Clerk may deliver __clerk_db_jwt as a cookie (not a URL parameter)
+    # after an OAuth redirect. Serve the exchange page in this case too.
+    if not param and not any(k.startswith("__session") for k in request.COOKIES):
+        if request.COOKIES.get("__clerk_db_jwt"):
+            param = "__clerk_db_jwt"
+    if param:
+        logger.info("Callback: token delivery via %s; serving exchange page", param)
+        return render(
+            request,
+            "auth_/callback.html",
+            {"clerk_publishable_key": settings.CLERK_PUBLISHABLE_KEY},
+        )
+
+    # Clerk sometimes appends a numeric suffix to the cookie name (e.g. __session.1),
+    # so we scan by prefix rather than doing an exact lookup.
+    session_cookies = {
+        k: v for k, v in request.COOKIES.items() if k.startswith("__session")
+    }
+    logger.info("Callback: session cookies found: %s", list(session_cookies.keys()))
+    token = next(iter(session_cookies.values()), None)
+    if not token:
+        logger.warning("Callback: no __session cookie; redirecting to login")
+        return redirect("login")
+
+    # Verify the session token using our secret key. Any exception means the token
+    # is malformed, expired, or signed by a different Clerk instance.
     try:
-        auth_response = workos.user_management.authenticate_with_code(
-            code=code,  # type: ignore
+        options = VerifyTokenOptions(secret_key=settings.CLERK_SECRET_KEY)
+        payload = verify_token(token, options)
+    except Exception:
+        logger.exception("Callback: token verification failed")
+        return redirect("login")
+
+    # The verified payload carries the Clerk user ID in the `sub` claim, but not the
+    # user's email. We fetch the full user record from the Clerk API to get it.
+    clerk_user_id = payload["sub"]
+    logger.info("Callback: token verified for Clerk user %s", clerk_user_id)
+
+    try:
+        clerk_user = clerk.users.get(user_id=clerk_user_id)
+    except Exception:
+        logger.exception("Callback: failed to fetch Clerk user %s", clerk_user_id)
+        return redirect("login")
+
+    # Locate the primary email address by matching primary_email_address_id against
+    # the list of email objects on the Clerk user record.
+    primary_email = next(
+        (
+            e.email_address
+            for e in (clerk_user.email_addresses or [])
+            if e.id == clerk_user.primary_email_address_id
+        ),
+        None,
+    )
+    if not primary_email:
+        logger.warning("Callback: no primary email for Clerk user %s", clerk_user_id)
+        return redirect("login")
+    logger.info(
+        "Callback: resolved email %s for Clerk user %s", primary_email, clerk_user_id
+    )
+
+    # Stash the Clerk session ID before calling login() so we can revoke it on logout.
+    # login() flushes and recreates the Django session, so we write the ID afterward.
+    clerk_session_id = payload.get("sid")
+
+    user = authenticate(
+        request,
+        clerk_user_id=clerk_user_id,
+        clerk_email=primary_email,
+    )
+    if user is None:
+        logger.error(
+            "Callback: authenticate() returned None for Clerk user %s", clerk_user_id
         )
-        sealed_session = seal_session_from_auth_response(
-            access_token=auth_response.access_token,
-            refresh_token=auth_response.refresh_token,
-            user=auth_response.user.to_dict(),
-            cookie_password=cookie_password,  # type: ignore
-        )
-        response = redirect("home")
-        response.set_cookie(
-            "wos_session",
-            sealed_session,
-            secure=True,
-            httponly=True,
-            samesite="Lax",
-        )
-        user = authenticate(request, sealed_session=sealed_session)
-        if user is not None:
-            login(request, user)
-    except Exception:  # noqa (Normally I don't like doing this, but this is how WorkOS does it.)
-        logger.exception("Error authenticating with code")  # noqa
-        message = (
-            "Oops, an error occurred while trying to log you in."
-            " Please try again later."
-        )
-        messages.error(request, message)
-        return redirect("home")
-    else:
-        return response
+        return redirect("login")
+
+    login(request, user)
+    if clerk_session_id:
+        request.session["clerk_session_id"] = clerk_session_id
+    logger.info(
+        "Callback: logged in Django user %s (Clerk user %s)",
+        user.get_username(),
+        clerk_user_id,
+    )
+    return redirect("home")
 
 
 def logout_(request: HttpRequest) -> HttpResponseRedirect:
-    """Returns the user to the home page after deleting their cookie."""
-    response = redirect("home")
-    response.delete_cookie("wos_session")
+    """Revokes the Clerk session server-side, clears the Django session, and redirects.
+
+    Returns:
+        A redirect to the login page.
+    """
+    sid = request.session.get("clerk_session_id")
+    if sid:
+        logger.info("Logout: revoking Clerk session %s", sid)
+        try:
+            clerk.sessions.revoke(session_id=sid)
+            logger.info("Logout: Clerk session revoked")
+        except Exception:
+            logger.exception("Logout: failed to revoke Clerk session %s", sid)
+    else:
+        logger.info("Logout: no Clerk session ID in Django session")
     logout(request)
-    return response
+    return redirect("home")
 
 
 def profile(request: HttpRequest) -> HttpResponse:

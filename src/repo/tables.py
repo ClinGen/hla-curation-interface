@@ -10,25 +10,25 @@ from repo.models import PublishedCuration
 class PublishedCurationTable(tables.Table):
     slug = tables.LinkColumn(
         "repo-detail",
-        kwargs={"curation_slug": A("curation.slug")},
-        accessor="curation.slug",
+        kwargs={"curation_slug": A("curation__slug")},
+        accessor="curation__slug",
         verbose_name="ID",
     )
     curation_type = tables.Column(
-        accessor="curation.get_curation_type_display",
+        accessor="curation__get_curation_type_display",
         verbose_name="Type",
         orderable=False,
     )
-    allele = tables.Column(accessor="curation.allele", default="------")
-    haplotype = tables.Column(accessor="curation.haplotype", default="------")
-    disease = tables.Column(accessor="curation.disease", default="------")
+    allele = tables.Column(accessor="curation__allele", default="------")
+    haplotype = tables.Column(accessor="curation__haplotype", default="------")
+    disease = tables.Column(accessor="curation__disease", default="------")
     classification = tables.Column(
-        accessor="curation.ep_classification",
+        accessor="curation__ep_classification",
         verbose_name="Classification",
         orderable=False,
     )
     updated_at = tables.DateColumn(
-        accessor="curation.updated_at",
+        accessor="curation__updated_at",
         verbose_name="Updated",
         format="Y-m-d",
     )

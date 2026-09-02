@@ -6,6 +6,21 @@
 
 import { copyFile } from "node:fs/promises";
 
+// Bundle the Clerk React components for the auth pages.
+await Bun.build({
+  entrypoints: [
+    "./src/auth_/js/sign-in.jsx",
+    "./src/auth_/js/callback.jsx",
+  ],
+  outdir: "./src/static/hci/js",
+  target: "browser",
+  format: "iife",
+  minify: true,
+  define: {
+    "process.env.NODE_ENV": '"production"',
+  },
+});
+
 const CSS_STATIC_DIR = "./src/static/hci/css";
 const JS_STATIC_DIR = "./src/static/hci/js";
 

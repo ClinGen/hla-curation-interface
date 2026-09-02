@@ -26,5 +26,5 @@ class PublicationTable(tables.Table):
             "updated_at",
         )
 
-    def render_title(self, value: str, record: Publication) -> str:  # noqa: ARG002
+    def render_title(self, value: str, record: Publication) -> str:  # ruff: ignore[unused-method-argument]
         return format_html("<i>{}</i>", value)

@@ -94,7 +94,7 @@ class HaplotypeChange(ProtectedViewMixin, DetailView):
         return context
 
 
-class HaplotypeList(ProtectedViewMixin, SearchListView):
+class HaplotypeList(ProtectedViewMixin, SearchListView):  # ty: ignore[invalid-method-override]
     model = Haplotype
     template_name = "haplotype/list.html"
     ordering = ["-updated_at"]

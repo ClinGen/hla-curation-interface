@@ -5,7 +5,7 @@ from functools import wraps
 
 from django.contrib.auth.mixins import AccessMixin
 from django.core.exceptions import PermissionDenied
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponseBase
 from django.shortcuts import redirect
 
 from auth_.models import UserProfile
@@ -25,7 +25,7 @@ class ProtectedViewMixin(AccessMixin):
         request: HttpRequest,
         *args,
         **kwargs,
-    ) -> HttpResponse | HttpResponseRedirect | None:
+    ) -> HttpResponseBase:
         """Defines permission logic.
 
         Returns:
@@ -51,7 +51,7 @@ class ReviewerViewMixin(AccessMixin):
         request: HttpRequest,
         *args,
         **kwargs,
-    ) -> HttpResponse | HttpResponseRedirect | None:
+    ) -> HttpResponseBase:
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         profile = getattr(request.user, "profile", None)
@@ -72,7 +72,7 @@ def reviewer_view(view_function: Callable) -> Callable:
         request: HttpRequest,
         *args,
         **kwargs,
-    ) -> HttpResponse | HttpResponseRedirect | None:
+    ) -> HttpResponseBase:
         if not request.user.is_authenticated:
             return redirect(f"{LOGIN_URL}?next={request.path}")
         profile = getattr(request.user, "profile", None)
@@ -97,7 +97,7 @@ def protected_view(view_function: Callable) -> Callable:
         request: HttpRequest,
         *args,
         **kwargs,
-    ) -> HttpResponse | HttpResponseRedirect | None:
+    ) -> HttpResponseBase:
         """Defines permission logic.
 
         Returns:

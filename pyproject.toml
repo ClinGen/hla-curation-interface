@@ -6,6 +6,7 @@ readme = "README.rst"
 requires-python = ">=3.13"
 dependencies = [
     "beautifulsoup4>=4.13.4",
+    "clerk-backend-api==7.0.0",
     "django>=5.2.1",
     "django-simple-history>=3.11.0",
     "django-tables2>=3.0.0",
@@ -15,7 +16,6 @@ dependencies = [
     "requests>=2.32.3",
     "sentry-sdk[django]>=2.29.1",
     "whitenoise[brotli]>=6.9.0",
-    "workos~=8.0",
 ]
 
 [dependency-groups]
@@ -29,6 +29,11 @@ dev = [
     "mdformat>=1.0.0",
     "ty>=0.0.50",
     "django-stubs>=6.0.5",
+    "pytest>=9.1.1",
+    "pytest-django>=4.14.0",
+    "pytest-xdist>=3.8.0",
+    "pytest-randomly>=4.1.0",
+    "pytest-dotenv>=0.5.2",
 ]
 
 [tool.ruff]
@@ -93,19 +98,19 @@ select = [
     "TRY",   # tryceratops (provide a set of lint rules for try-except statements)
 ]
 ignore = [
-    "COM812", # This rule clashes with Ruff.
-    "G004",   # Not using f-strings in logs seems like a premature optimization.
-    "RUF012", # Django models be like that.
-    "RUF100", # With Ruff 0.11.5, I'm seeing false positives.
-    "S314",   # While I agree with this rule, it suggests using an outdated third-party package.
-    "S405",   # While I agree with this rule, it suggests using an outdated third-party package.
-    "ANN002",  # I almost always ignore these checks when overriding a method on a Django class.
-    "ANN003",  # I almost always ignore these checks when overriding a method on a Django class.
-    "D100",  # Django projects have modules that are self-explanatory.
-    "D101",  # Django projects have classes that are self-explanatory.
-    "D102",  # Django projects have methods that are self-explanatory.
-    "D105",  # Django projects require you to implement magic methods (e.g. `__str__`) that don't need docstrings.
-    "D106",  # Django projects have nested classes that are self-explanatory.
+    "missing-trailing-comma", # This rule clashes with Ruff.
+    "logging-f-string",   # Not using f-strings in logs seems like a premature optimization.
+    "mutable-class-default", # Django models be like that.
+    "unused-noqa", # With Ruff 0.11.5, I'm seeing false positives.
+    "suspicious-xml-element-tree-usage",   # While I agree with this rule, it suggests using an outdated third-party package.
+    "suspicious-xml-etree-import",   # While I agree with this rule, it suggests using an outdated third-party package.
+    "missing-type-args",  # I almost always ignore these checks when overriding a method on a Django class.
+    "missing-type-kwargs",  # I almost always ignore these checks when overriding a method on a Django class.
+    "undocumented-public-module",  # Django projects have modules that are self-explanatory.
+    "undocumented-public-class",  # Django projects have classes that are self-explanatory.
+    "undocumented-public-method",  # Django projects have methods that are self-explanatory.
+    "undocumented-magic-method",  # Django projects require you to implement magic methods (e.g. `__str__`) that don't need docstrings.
+    "undocumented-public-nested-class",  # Django projects have nested classes that are self-explanatory.
 ]
 
 [tool.ruff.lint.pydocstyle]
@@ -113,32 +118,32 @@ convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = [
-    "D104", # Docstrings in these files are overkill.
+    "undocumented-public-package", # Docstrings in these files are overkill.
 ]
 "test*.py" = [
-    "ANN201", # Tests should always return `None`.
-    "D102", # Tests should be obvious enough not to require docstrings.
-    "N815", # Django TestCase methods are mixedCase; mixin stubs must match.
-    "S101", # Asserts are fine in test code.
+    "missing-return-type-undocumented-public-function", # Tests should always return `None`.
+    "undocumented-public-method", # Tests should be obvious enough not to require docstrings.
+    "mixed-case-variable-in-class-scope", # Django TestCase methods are mixedCase; mixin stubs must match.
+    "assert", # Asserts are fine in test code.
 ]
 "*test.py" = [
-    "ANN201",
-    "D102",
-    "N815",
-    "S101",
+    "missing-return-type-undocumented-public-function",
+    "undocumented-public-method",
+    "mixed-case-variable-in-class-scope",
+    "assert",
 ]
 "*/validators/*" = [
-    "ANN001", # Don't want to cause a circular import issue, and don't want to do forward declarations.
+    "missing-type-function-argument", # Don't want to cause a circular import issue, and don't want to do forward declarations.
 ]
 "score.py" = [
-    "ANN001", # Don't want to cause a circular import issue, and don't want to do forward declarations.
-    "D103",  # Don't care about docstrings.
+    "missing-type-function-argument", # Don't want to cause a circular import issue, and don't want to do forward declarations.
+    "undocumented-public-function",  # Don't care about docstrings.
 ]
 "views.py" = [
-    "ARG001", # Sometimes you need a default parameter that goes unused.
+    "unused-function-argument", # Sometimes you need a default parameter that goes unused.
 ]
 "docs.py" = [
-    "T201", # CLI tool: print is the intended output mechanism.
+    "print", # CLI tool: print is the intended output mechanism.
 ]
 
 [tool.coverage.run]
@@ -157,6 +162,12 @@ omit = [
 
 [tool.coverage.html]
 directory = "coverage"
+
+[tool.pytest.ini_options]
+addopts = "--ds=config.settings.test"
+pythonpath = ["src"]
+env_files = [".env"]
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
 
 [tool.django-stubs]
 django_settings_module = "config.settings.dev"

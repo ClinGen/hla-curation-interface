@@ -93,7 +93,7 @@ class AlleleChange(ProtectedViewMixin, DetailView):
         return context
 
 
-class AlleleList(ProtectedViewMixin, SearchListView):
+class AlleleList(ProtectedViewMixin, SearchListView):  # ty: ignore[invalid-method-override]
     model = Allele
     template_name = "allele/list.html"
     ordering = ["-updated_at"]
