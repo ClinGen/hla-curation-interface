@@ -8,8 +8,8 @@ from django.db import models
 
 def resolve_changes(
     model_class: type[models.Model],
-    record: Any,  # noqa
-    prev_record: Any,  # noqa
+    record: Any,  # ruff: ignore[any-type]
+    prev_record: Any,  # ruff: ignore[any-type]
 ) -> list[dict[str, Any]] | None:
     """Returns a human-readable diff between two history records.
 
@@ -28,17 +28,17 @@ def resolve_changes(
         try:
             field: models.Field | None = None
             try:
-                field = model_class._meta.get_field(change.field)  # type: ignore # noqa
+                field = model_class._meta.get_field(change.field)  # type: ignore # ruff: ignore[private-member-access]
             except FieldDoesNotExist:
                 if change.field.endswith("_id"):
-                    field = model_class._meta.get_field(change.field[:-3])  # type: ignore # noqa
+                    field = model_class._meta.get_field(change.field[:-3])  # type: ignore # ruff: ignore[private-member-access]
             if field is not None:
                 label = str(getattr(field, "verbose_name", field.name))
                 choices = dict(getattr(field, "choices", None) or [])
                 if choices:
                     old_val = choices.get(change.old, change.old)
                     new_val = choices.get(change.new, change.new)
-        except Exception:  # noqa
+        except Exception:  # ruff: ignore[try-except-pass]
             pass
         result.append({"field": label, "old": old_val, "new": new_val})
     return result

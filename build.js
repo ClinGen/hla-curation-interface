@@ -41,6 +41,10 @@ await copyFile(
   `${JS_STATIC_DIR}/choices.min.js`,
 );
 
+// Copy Clerk browser SDK into our Django static directory.
+const clerkJsPath = "./node_modules/@clerk/clerk-js/dist/clerk.browser.js";
+await copyFile(clerkJsPath, `${JS_STATIC_DIR}/clerk.browser.js`);
+
 // Copy Choices.js CSS into our Django static directory.
 const choicesCssPath = "./node_modules/choices.js/public/assets/styles";
 await copyFile(

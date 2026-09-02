@@ -5,7 +5,7 @@ import sys
 from dotenv import load_dotenv
 
 
-def main() -> None:  # noqa: D103
+def main() -> None:  # ruff: ignore[undocumented-public-function]
     # Load environment variables from the .env file.
     load_dotenv()
     try:

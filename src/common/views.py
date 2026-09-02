@@ -3,7 +3,7 @@ from django.views.generic import ListView
 from django_tables2 import SingleTableMixin
 
 
-class SearchListView(SingleTableMixin, ListView):
+class SearchListView(SingleTableMixin, ListView):  # ty: ignore[invalid-method-override]
     search_fields: list[str] = []
 
     def get_queryset(self) -> QuerySet:
@@ -17,7 +17,7 @@ class SearchListView(SingleTableMixin, ListView):
         return qs
 
     def get_table_data(self) -> QuerySet:
-        return self.object_list
+        return self.object_list  # ty: ignore[invalid-return-type]
 
     def get_template_names(self) -> list[str]:
         if self.request.headers.get("HX-Request"):

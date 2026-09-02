@@ -42,7 +42,7 @@ class CurationTable(tables.Table):
             "updated_at",
         )
 
-    def render_status(self, value: str, record: Curation) -> str:  # noqa: ARG002
+    def render_status(self, value: str, record: Curation) -> str:  # ruff: ignore[unused-method-argument]
         if value == Status.IN_PROGRESS:
             return format_html(
                 '<span class="tag is-warning">'

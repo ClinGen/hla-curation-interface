@@ -21,4 +21,5 @@ class UserProfileAdmin(SimpleHistoryAdmin):
         "has_curation_permissions",
         "has_signed_phi_agreement",
         "has_review_permissions",
+        "clerk_user_id",
     ]

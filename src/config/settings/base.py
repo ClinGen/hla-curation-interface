@@ -47,10 +47,6 @@ INSTALLED_APPS = [
     "repo",
 ]
 
-# This needs to be set to "same-origin-allow-popups" for logging in with Google and
-# Microsoft via Firebase to work.
-SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
-
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -93,7 +89,7 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",  # noqa: E501
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",  # ruff: ignore[line-too-long]
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
@@ -107,9 +103,12 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    "auth_.backends.WorkOSBackend",
+    "auth_.backends.ClerkBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
+
+CLERK_SECRET_KEY = os.environ["CLERK_SECRET_KEY"]
+CLERK_PUBLISHABLE_KEY = os.environ["CLERK_PUBLISHABLE_KEY"]
 
 LANGUAGE_CODE = "en-us"
 

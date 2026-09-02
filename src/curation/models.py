@@ -97,7 +97,7 @@ class Curation(models.Model):
     # null=True on EP fields is intentional: null means "not yet reviewed" (fields were
     # never touched), whereas empty string would mean "reviewer explicitly left blank."
     # Collapsing these two states would lose information.
-    ep_classification = models.CharField(  # noqa: DJ001
+    ep_classification = models.CharField(  # ruff: ignore[django-nullable-model-string-field]
         max_length=3,
         choices=CLASSIFICATION_CHOICES,
         null=True,
@@ -105,19 +105,19 @@ class Curation(models.Model):
         verbose_name="EP Classification",
         help_text="The classification set by the expert panel at review time.",
     )
-    ep_evidence_summary = models.TextField(  # noqa: DJ001
+    ep_evidence_summary = models.TextField(  # ruff: ignore[django-nullable-model-string-field]
         null=True,
         blank=True,
         verbose_name="EP Evidence Summary",
         help_text="The expert panel's summary of the evidence.",
     )
-    ep_additional_notes = models.TextField(  # noqa: DJ001
+    ep_additional_notes = models.TextField(  # ruff: ignore[django-nullable-model-string-field]
         null=True,
         blank=True,
         verbose_name="EP Additional Notes",
         help_text="Additional notes from the expert panel.",
     )
-    ep = models.CharField(  # noqa: DJ001
+    ep = models.CharField(  # ruff: ignore[django-nullable-model-string-field]
         max_length=5,
         null=True,
         blank=True,
@@ -259,7 +259,7 @@ class Curation(models.Model):
 
     @property
     def score(self) -> float:
-        """Returns the score for the curation."""
+        """The score for the curation."""
         total = 0.0
         for evidence in self.evidence.all():  # type: ignore
             if evidence.is_included:
@@ -652,7 +652,7 @@ class Evidence(models.Model):
         new = copy.copy(self)
         new.pk = None
         new.slug = ""
-        new._state.adding = True  # noqa: SLF001
+        new._state.adding = True  # ruff: ignore[private-member-access]
         new.curation = curation
         new.added_by = added_by
         new.save()
@@ -678,7 +678,7 @@ class Evidence(models.Model):
 
     @property
     def score_before_multipliers(self) -> float:
-        """Returns the score for the evidence before multipliers are applied."""
+        """The score for the evidence before multipliers are applied."""
         return (
             (self.score_step_1a if self.score_step_1a else 0)
             + (self.score_step_1b if self.score_step_1b else 0)

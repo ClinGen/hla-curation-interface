@@ -153,7 +153,7 @@ alias sbl := src-build
 # Run all tests. -----------------------------------------------------
 [group('test')]
 test-all:
-    cd src && uv run manage.py test --shuffle --parallel auto
+    uv run pytest -n auto
 alias tal := test-all
 
 #=====================================================================
@@ -168,37 +168,37 @@ alias cnw := coverage-new
 # Collect test coverage stats. ---------------------------------------
 [group('coverage')]
 coverage-collect:
-    cd src && uv run coverage run --rcfile=../pyproject.toml manage.py test
+    uv run coverage run -m pytest
 alias cco := coverage-collect
 
 # Print test coverage stats. -----------------------------------------
 [group('coverage')]
 coverage-report:
-    cd src && uv run coverage report --rcfile=../pyproject.toml
+    uv run coverage report
 alias crp := coverage-report
 
 # Generate test coverage XML. ----------------------------------------
 [group('coverage')]
 coverage-xml:
-    cd src && uv run coverage xml --rcfile=../pyproject.toml
+    uv run coverage xml
 alias cxm := coverage-xml
 
 # Build the test coverage site. --------------------------------------
 [group('coverage')]
 coverage-build-html:
-    cd src && uv run coverage html --rcfile=../pyproject.toml
+    uv run coverage html
 alias cbh := coverage-build-html
 
 # Open the test coverage site in your browser. -----------------------
 [group('coverage')]
 coverage-open-html:
-    open src/coverage/index.html
+    open coverage/index.html
 alias coh := coverage-open-html
 
 # Remove test coverage artifacts. ------------------------------------
 [group('coverage')]
 coverage-clean:
-    cd src && rm -rf coverage*
+    rm -rf coverage.db coverage/
 alias ccl := coverage-clean
 
 #=====================================================================

@@ -25,6 +25,14 @@ class UserProfile(models.Model):
         verbose_name="EP Review Permissions",
         help_text="Whether the user can act as an EP reviewer.",
     )
+    clerk_user_id = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        unique=True,
+        verbose_name="Clerk User ID",
+        help_text="The Clerk user ID for this account; populated on first Clerk login.",
+    )
     updated_at = models.DateTimeField(
         auto_now=True,
         verbose_name="Updated At",
@@ -45,7 +53,7 @@ class UserProfile(models.Model):
 
     @property
     def can_curate(self) -> bool:
-        """Returns whether the user is allowed to create stuff in the HCI."""
+        """Whether the user is allowed to create stuff in the HCI."""
         return (
             self.user.is_authenticated
             and self.has_curation_permissions
@@ -54,5 +62,5 @@ class UserProfile(models.Model):
 
     @property
     def can_review(self) -> bool:
-        """Returns whether the user can act as an EP reviewer."""
+        """Whether the user can act as an EP reviewer."""
         return self.has_review_permissions and self.can_curate

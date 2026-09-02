@@ -1,0 +1,45 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block title %}Sign In{% endblock %}
+
+{% block main %}
+<section class="section">
+  <div class="columns is-centered">
+    <div class="column is-narrow">
+      <div id="clerk-sign-in"></div>
+    </div>
+  </div>
+</section>
+<script>
+  (() => {
+    const script = document.createElement("script");
+    script.setAttribute("data-clerk-publishable-key", "{{ clerk_publishable_key }}");
+    script.src = "{% static 'hci/js/clerk.browser.js' %}";
+    script.async = true;
+    script.addEventListener("load", () => {
+      window.Clerk.load().then(() => {
+        const existing = window.Clerk.session;
+
+        if (existing) {
+          window.location.replace("/auth/callback");
+          return;
+        }
+
+        // Register the listener before mounting so we don't miss the event if
+        // Clerk fires it synchronously on load (e.g. an already-active session).
+        window.Clerk.addListener(({ session }) => {
+          if (session) {
+            window.location.replace("/auth/callback");
+          }
+        });
+
+        window.Clerk.mountSignIn(document.getElementById("clerk-sign-in"), {
+          afterSignInUrl: "/auth/callback",
+        });
+      });
+    });
+    document.body.appendChild(script);
+  })();
+</script>
+{% endblock %}

@@ -2,6 +2,7 @@
   "name": "hla-curation-interface",
   "type": "module",
   "dependencies": {
+    "@clerk/clerk-js": "6.31.0",
     "bootstrap-icons": "^1.13.1",
     "bulma": "^1.0.4",
     "choices.js": "^11.2.3",

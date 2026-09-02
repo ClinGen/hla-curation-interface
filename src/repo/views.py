@@ -71,7 +71,7 @@ class PublishedCurationDetail(DetailView):
     model = PublishedCuration
     template_name = "repo/detail.html"
 
-    def get_object(self, queryset: QuerySet[Any] | None = None) -> PublishedCuration:  # noqa: ARG002
+    def get_object(self, queryset: QuerySet[Any] | None = None) -> PublishedCuration:  # ruff: ignore[unused-method-argument]
         """Get PublishedCuration by the curation's slug.
 
         Returns:
@@ -100,7 +100,7 @@ class PublishedCurationHistory(DetailView):
     model = PublishedCuration
     template_name = "repo/history.html"
 
-    def get_object(self, queryset: QuerySet[Any] | None = None) -> PublishedCuration:  # noqa: ARG002
+    def get_object(self, queryset: QuerySet[Any] | None = None) -> PublishedCuration:  # ruff: ignore[unused-method-argument]
         return get_object_or_404(
             PublishedCuration, curation__slug=self.kwargs["curation_slug"]
         )
@@ -122,7 +122,7 @@ class PublishedCurationChange(DetailView):
     model = PublishedCuration
     template_name = "repo/change.html"
 
-    def get_object(self, queryset: QuerySet[Any] | None = None) -> PublishedCuration:  # noqa: ARG002
+    def get_object(self, queryset: QuerySet[Any] | None = None) -> PublishedCuration:  # ruff: ignore[unused-method-argument]
         return get_object_or_404(
             PublishedCuration, curation__slug=self.kwargs["curation_slug"]
         )

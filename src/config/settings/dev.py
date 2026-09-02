@@ -2,7 +2,7 @@
 
 from django.contrib import messages
 
-from .base import *  # noqa: F403 (We want to import everything.)
+from .base import *  # ruff: ignore[undefined-local-with-import-star] (We want to import everything.)
 
 DEBUG = True
 
@@ -25,6 +25,13 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "simple",
         },
+    },
+    "loggers": {
+        # httpcore generates per-connection DEBUG noise for every Clerk and Sentry
+        # HTTP call (connect_tcp.started, start_tls.complete, etc.). Suppress it.
+        "httpcore": {"level": "WARNING"},
+        # urllib3 generates per-request DEBUG lines for every Sentry envelope POST.
+        "urllib3": {"level": "WARNING"},
     },
     "root": {
         "handlers": ["console"],

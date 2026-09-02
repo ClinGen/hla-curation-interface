@@ -84,7 +84,7 @@ class DiseaseChange(ProtectedViewMixin, DetailView):
         return context
 
 
-class DiseaseList(ProtectedViewMixin, SearchListView):
+class DiseaseList(ProtectedViewMixin, SearchListView):  # ty: ignore[invalid-method-override]
     model = Disease
     template_name = "disease/list.html"
     ordering = ["-updated_at"]
