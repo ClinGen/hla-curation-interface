@@ -13,3 +13,10 @@
   white-space: nowrap;
   width: 100%;
 }
+
+.publication-title {
+  max-width: 20rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

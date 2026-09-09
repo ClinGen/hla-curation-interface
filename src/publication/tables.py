@@ -7,7 +7,12 @@ from publication.models import Publication
 
 class PublicationTable(tables.Table):
     slug = tables.LinkColumn("publication-detail", args=[A("slug")], verbose_name="ID")
-    title = tables.Column()
+    title = tables.Column(
+        attrs={
+            "td": {"class": "publication-title"},
+            "th": {"class": "publication-title"},
+        }
+    )
     author = tables.Column()
     publication_year = tables.Column(verbose_name="Year")
     pubmed_id = tables.Column(verbose_name="PMID")
