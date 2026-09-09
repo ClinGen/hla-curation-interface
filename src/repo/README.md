@@ -1,86 +1,55 @@
 # `repo`
 
-The `repo` app implements HLArepo, the public-facing repository of finalized HLA
-curations. It provides the `PublishedCuration` model that links a completed curation to
-a publication record, and exposes views for listing, viewing, and downloading published
-curations as JSON. It also tracks the full change history of each published record via
-`django-simple-history`.
+This Django app implements HLArepo, the public-facing repository of published HLA curations. It handles the `PublishedCuration` model (which wraps a completed `Curation`), exposes searchable list and detail views, tracks full change history via `django-simple-history`, and provides JSON download endpoints for individual or bulk export of published curation data.
 
 ### `__init__.py`
 
-Empty file; marks this directory as a Python package.
+Empty file that marks `repo` as a Python package.
 
 ### `admin.py`
 
-Registers `PublishedCuration` with the Django admin site using `SimpleHistoryAdmin`,
-displaying the associated curation, publisher, publication timestamp, and version
-number, with the publisher and timestamp fields set as read-only.
+Registers `PublishedCuration` with the Django admin site using `SimpleHistoryAdmin`, displaying the associated curation, publisher, publication timestamp, and version in the list view.
 
 ### `apps.py`
 
-Defines the `RepoConfig` app configuration, setting `BigAutoField` as the default
-primary key type and registering the app under the name `repo`.
+Defines the `RepoConfig` app configuration, setting the app name to `repo` and the default auto field to `BigAutoField`.
 
 ### `models.py`
 
-Defines the `PublishedCuration` model, which records a one-to-one relationship to a
-`Curation`, the user who published it, the publication and update timestamps, and an
-integer version number; full change history is tracked via `HistoricalRecords`.
+Defines the `PublishedCuration` model, which links one-to-one to a `Curation` and records who published it, when, and at what version. Change history is tracked automatically via `HistoricalRecords`.
 
 ### `serializers.py`
 
-Provides `serialize_published_curation` and `serialize_evidence`, two plain functions
-that convert a `PublishedCuration` instance and its associated `Evidence` records into
-plain Python dictionaries suitable for JSON export.
+Provides `serialize_published_curation` and `serialize_evidence`, plain functions that convert `PublishedCuration` and `Evidence` instances to plain Python dictionaries suitable for JSON export, including all related entity, disease, and evidence fields.
 
 ### `tables.py`
 
-Defines `PublishedCurationTable`, a `django-tables2` table for the HLArepo list view,
-with columns for curation ID (linked to the detail page), type, allele, haplotype,
-disease, classification, last-updated date, and a per-row JSON download button.
+Defines `PublishedCurationTable` (a `django-tables2` table) that renders the searchable list of published curations, with columns for ID, type, allele, haplotype, disease, classification, last-updated date, and a per-row JSON download button.
 
 ### `templates/repo/change.html`
 
-Displays the field-level diff for a single historical change to a published curation,
-with a breadcrumb trail linking back to HLArepo, the curation detail page, and the
-history list.
+Renders a single historical change record for a published curation, showing breadcrumbs back through the repo list, detail, and history pages, then including the shared `change_body.html` partial.
 
 ### `templates/repo/detail.html`
 
-Shows the full details and evidence table for a single published curation, with buttons
-to download the record as JSON and to view its change history; also displays a
-supersession warning when the curation has been replaced by a newer published copy, and
-a "Copy and Recurate" button for authenticated curators.
+Renders the detail page for a published curation, including supersession and copied-from notices, the curation and evidence detail tables, and action buttons for JSON download, history navigation, and (for curators) copying the curation for re-curation.
 
 ### `templates/repo/history.html`
 
-Lists all historical revisions for a published curation via the shared
-`common/history/history_body.html` partial, with a breadcrumb trail linking back to
-HLArepo and the curation detail page.
+Renders the full audit-history page for a published curation, listing all historical records via the shared `history_body.html` partial with breadcrumbs linking back to the repo list and curation detail.
 
 ### `templates/repo/list.html`
 
-Renders the HLArepo search page with a "Download All as JSON" button and a search input
-that dynamically filters results via the shared `SearchListView` partials.
+Renders the HLArepo search/list page, providing a search input, paginated results via HTMX partials, and a button to download all published curations as a single JSON file.
 
 ### `tests.py`
 
-Contains unit and integration tests covering the `PublishedCuration` model (creation,
-string representation, one-to-one constraint, reverse relationship, `get_absolute_url`),
-the publish, search, detail, JSON download, and read-only enforcement views,
-supersession logic (`is_superseded`, `get_superseding`), and the "Copy and Recurate"
-button visibility.
+Contains unit and integration tests covering the `PublishedCuration` model (creation, string representation, uniqueness constraint, reverse relation, `get_absolute_url`), publish and read-only enforcement views, JSON download endpoints, supersession logic, and the curator "Copy and Recurate" button visibility.
 
 ### `urls.py`
 
-Maps URL patterns for the repo app: the HLArepo list/search page, the bulk JSON download
-endpoint, and per-curation detail, single JSON download, history, and change-diff views.
+Maps URL patterns for the repo app: the search/list page, bulk and single JSON download endpoints, and the curation detail, history, and change views, all namespaced under the `repo-` prefix.
 
 ### `views.py`
 
-Implements the `is_superseded` and `get_superseding` helper functions for detecting
-whether a published curation has been replaced by a newer copy, the
-`PublishedCurationList`, `PublishedCurationDetail`, `PublishedCurationHistory`, and
-`PublishedCurationChange` class-based views, and the `download_all_json` and
-`download_single_json` function-based views that return serialized curation data as
-downloadable JSON attachments.
+Implements the repo views: `PublishedCurationList` (searchable table list), `PublishedCurationDetail` (with supersession detection), `PublishedCurationHistory` and `PublishedCurationChange` (history audit trail), and `download_all_json` / `download_single_json` function-based views that return serialized JSON responses as file attachments.

@@ -1,141 +1,119 @@
 # `static`
 
-## Directory Overview
-
-This directory contains all static assets served by the Django application, organized
-under `hci/`. It includes vendored third-party CSS and JavaScript libraries,
-project-specific custom styles, web fonts, and image assets such as logos, favicons, and
-PWA icons. Django's `staticfiles` app collects these files and serves them to the
-browser; the `hci/` namespace prevents name collisions with assets from other installed
-apps.
+This directory contains all static assets served by the Django application, organized under `hci/`. It includes third-party CSS frameworks and icon libraries, custom application styles, font files, images (logos, favicons, and icons), and JavaScript libraries. A web app manifest is also included here to support progressive web app metadata.
 
 ### `hci/css/bootstrap-icons.css`
 
-Vendored Bootstrap Icons stylesheet that maps icon class names to the corresponding web
-font glyphs used throughout the UI.
+The Bootstrap Icons icon font stylesheet. It defines CSS classes and `@font-face` rules that map icon names to glyphs in the accompanying WOFF/WOFF2 font files.
 
 ### `hci/css/bulma.css`
 
-Vendored Bulma CSS framework stylesheet that provides the utility classes, layout
-system, and component styles used as the primary UI framework.
+The full Bulma CSS framework stylesheet. It provides a modern, flexbox-based layout system and component styles used throughout the application.
 
 ### `hci/css/choices.css.map`
 
-Source map for the Choices.js CSS, used by browser developer tools to map minified
-styles back to their original source locations.
+The source map for the Choices.js CSS bundle. It maps the minified styles back to their original source locations to aid in browser-based debugging.
 
 ### `hci/css/choices.min.css`
 
-Vendored minified stylesheet for the Choices.js library, which styles the enhanced
-select-box components used in forms.
+The minified Choices.js stylesheet. It provides the styles for the Choices.js custom select/multi-select widget used in the application's forms.
 
 ### `hci/css/custom.css`
 
-Project-specific stylesheet that defines custom rules for entity-type logo image sizing,
-footer logo container spacing, and a horizontal-scroll container class used for wide
-tables.
+Application-specific CSS overrides and utility classes. It defines styles for entity-type logo sizing, footer logo containers, and a horizontal scroll container.
 
 ### `hci/css/fonts/bootstrap-icons.woff`
 
-Bootstrap Icons web font in WOFF format, referenced by `bootstrap-icons.css` for broader
-browser compatibility.
+The Bootstrap Icons icon font in WOFF format. It is referenced by `bootstrap-icons.css` and served as a fallback for browsers that do not support WOFF2.
 
 ### `hci/css/fonts/bootstrap-icons.woff2`
 
-Bootstrap Icons web font in WOFF2 format, referenced by `bootstrap-icons.css` as the
-preferred modern font format.
+The Bootstrap Icons icon font in WOFF2 format. It is the preferred, more compressed version referenced by `bootstrap-icons.css`.
 
 ### `hci/img/android-chrome-192x192.png`
 
-192x192 px PNG version of the HCI logo, used as the Android Chrome home-screen icon and
-referenced in `site.webmanifest`.
+A 192×192 pixel PNG version of the application icon. It is used by Android Chrome when a user adds the site to their home screen, as declared in `site.webmanifest`.
 
 ### `hci/img/android-chrome-512x512.png`
 
-512x512 px PNG version of the HCI logo, used as the high-resolution Android Chrome
-home-screen icon and referenced in `site.webmanifest`.
+A 512×512 pixel PNG version of the application icon. It is used by Android Chrome for higher-resolution home screen and splash screen contexts, as declared in `site.webmanifest`.
 
 ### `hci/img/apple-touch-icon.png`
 
-PNG icon used when a user adds the site to the home screen on an Apple iOS device.
+The application icon in the format expected by Apple devices. It is displayed when a user adds the site to their iOS home screen.
 
 ### `hci/img/biorxiv-logo.png`
 
-Logo image for bioRxiv, used to identify bioRxiv preprint publications in the UI.
+The logo for bioRxiv, a preprint server for biology. It is displayed in the interface when linking to or citing bioRxiv preprints as evidence sources.
 
 ### `hci/img/car-logo.png`
 
-Logo for the ClinGen Allele Registry (CAR), used to link out to or identify CAR allele
-identifiers in the UI.
+The logo for the Classification, Assertion, and Reporting (CAR) system or a related entity. It is used in the interface to identify that data source or partner organization.
 
 ### `hci/img/clingen-logo-with-text.svg`
 
-SVG logo for the Clinical Genome Resource (ClinGen), including the organization's name
-text; displayed in the site footer.
+The ClinGen logo including its text wordmark, in SVG format. It is used in the application header or footer to identify the ClinGen organization.
 
 ### `hci/img/favicon-16x16.png`
 
-16x16 px PNG favicon for the site, linked in the base template for standard browser tab
-display.
+A 16×16 pixel PNG favicon. It is displayed in browser tabs and bookmarks at small sizes.
 
 ### `hci/img/favicon-32x32.png`
 
-32x32 px PNG favicon for the site, linked in the base template for higher-resolution
-browser tab display.
+A 32×32 pixel PNG favicon. It is displayed in browser tabs and bookmarks at standard sizes, and on higher-DPI displays.
 
 ### `hci/img/favicon.ico`
 
-ICO-format favicon for the site, provided for legacy browser compatibility.
+The application favicon in ICO format. It provides broad browser compatibility as the default fallback icon for browser tabs and bookmarks.
 
 ### `hci/img/hci-logo-circle.png`
 
-Circular variant of the HLA Curation Interface logo, used where a round icon format is
-needed.
+The HLA Curation Interface logo in a circular crop. It is used in contexts that require a square or circular icon, such as the web app manifest icons.
 
 ### `hci/img/hci-logo.png`
 
-Standard rectangular version of the HLA Curation Interface logo.
+The primary HLA Curation Interface logo. It is used in the application header and other branding contexts.
 
 ### `hci/img/medrxiv-logo.png`
 
-Logo image for medRxiv, used to identify medRxiv preprint publications in the UI.
+The logo for medRxiv, a preprint server for health sciences. It is displayed in the interface when linking to or citing medRxiv preprints as evidence sources.
 
 ### `hci/img/mondo-logo.png`
 
-Logo for the Mondo Disease Ontology, used to identify or link to Mondo disease terms in
-the UI.
+The logo for the Mondo Disease Ontology. It is displayed in the interface when referencing disease classifications sourced from the Mondo ontology.
 
 ### `hci/img/pubmed-logo.svg`
 
-SVG logo for PubMed, used to identify or link to PubMed publication records in the UI.
+The PubMed logo in SVG format. It is displayed in the interface when linking to or citing PubMed literature as evidence sources.
 
 ### `hci/img/stanford-medicine-logo.png`
 
-Stanford Medicine logo image, displayed in the site footer as an institutional
-affiliation.
+The Stanford Medicine logo. It is displayed in the application footer or about page to acknowledge institutional affiliation.
 
 ### `hci/img/under-construction.gif`
 
-Animated "under construction" GIF used to indicate pages or features that are not yet
-complete.
+An animated "under construction" GIF. It is used as a placeholder on pages or features that are not yet complete.
+
+### `hci/js/callback.js`
+
+A bundled JavaScript file for handling the Clerk authentication OAuth callback flow. It contains the React and Clerk SDK code required to complete sign-in after redirecting back from an external identity provider.
 
 ### `hci/js/choices.js`
 
-Vendored unminified source of the Choices.js library, which enhances native `<select>`
-elements with search and custom styling.
+The full, unminified source of the Choices.js library (v11.2.3). It provides a customizable, accessible replacement for native `<select>` elements, used in the application's forms.
 
 ### `hci/js/choices.min.js`
 
-Vendored minified production build of Choices.js, loaded by the base template for
-enhanced select inputs.
+The minified production build of the Choices.js library. It is the version loaded in production to reduce page load time.
 
 ### `hci/js/htmx.js`
 
-Vendored HTMX library (v2.0.10) that enables AJAX-driven partial page updates via HTML
-attributes, used throughout the application to avoid full page reloads.
+The htmx library (v2.0.10). It enables HTML-first, AJAX-driven interactivity by allowing Django template elements to issue HTTP requests and swap content without a full page reload.
+
+### `hci/js/sign-in.js`
+
+A bundled JavaScript file for rendering the Clerk sign-in component. It contains the React and Clerk SDK code needed to mount the embedded sign-in UI on the application's login page.
 
 ### `hci/site.webmanifest`
 
-Web app manifest file that defines the application's name ("HLA Curation Interface"),
-short name ("HCI"), home-screen icons, theme color (#ffffff), and standalone display
-mode for PWA installation support.
+The web app manifest for the HLA Curation Interface. It declares the application name, short name, theme colors, display mode, and icon paths so that browsers can treat the site as an installable progressive web app.

@@ -1,77 +1,51 @@
 # `templates`
 
-This directory contains the application-wide Django templates: HTTP error pages, the
-site-wide base layout, and reusable partials included across multiple views. These
-templates are not tied to any single Django app and serve as the shared presentation
-layer for the entire project.
+This directory contains the top-level Django templates shared across the entire application. It includes HTTP error pages, the base layout that all views extend, reusable UI partials included by that layout, and a custom django-tables2 rendering template. App-specific templates live in their respective app directories.
 
 ### `400.html`
 
-Renders a Bulma warning message box for HTTP 400 Bad Request errors, with a link back to
-the home page.
+Renders a 400 Bad Request error page, displayed when the server cannot process a malformed or invalid client request. Extends `layouts/base.html` and links back to the home page.
 
 ### `403.html`
 
-Renders a Bulma warning message box for HTTP 403 Forbidden errors, with context-aware
-messaging that distinguishes between unauthenticated users, inactive accounts, users
-lacking curation permissions, and all other cases.
+Renders a 403 Forbidden error page with context-sensitive messaging based on the user's authentication and authorization state. It distinguishes between unauthenticated users, inactive accounts, users lacking curation permissions, and other general access denials.
 
 ### `404.html`
 
-Renders a Bulma warning message box for HTTP 404 Not Found errors, with a link back to
-the home page.
+Renders a 404 Not Found error page when a requested URL does not match any known route. Extends `layouts/base.html` and links back to the home page.
 
 ### `500.html`
 
-Renders a Bulma danger message box for HTTP 500 Internal Server Error responses, with a
-prompt to contact `hci@clinicalgenome.org` and a link back to the home page.
+Renders a 500 Internal Server Error page when an unhandled server-side exception occurs. It instructs the user to try again and provides the support email address for persistent issues.
 
 ### `layouts/base.html`
 
-The root HTML layout extended by all other page templates; loads all CSS and JS assets,
-sets the CSRF token as an HTMX header, and composes the page by including the
-environment banner, navbar, account activation notice, Django messages, main content
-block, and footer partials.
+The root layout template that all other page templates extend. It loads static assets (Bulma CSS, Bootstrap Icons, Choices.js, HTMX), sets up the `<head>` with favicon and meta blocks, and composes the page structure by including the environment banner, navbar, account activation notice, flash messages, and footer partials around a `{% block main %}` content slot.
 
 ### `partials/account_activation.html`
 
-Displays an informational notice to authenticated users who have not yet signed the PHI
-agreement or received curation permissions, with instructions and a link to request each
-requirement.
+Displays an informational banner to authenticated users who have not yet completed account setup. It lists any outstanding steps — signing the PHI agreement or requesting curation permissions — along with a link to the HLA curation standard operating procedure.
 
 ### `partials/env_banner.html`
 
-Shows a Bulma warning notification banner when the `ENV` setting is not `prod`, alerting
-users that they are on a demo instance where data may be periodically deleted.
+Shows a warning notification when the application is running in a non-production environment, alerting users that the site is a demo and that data will be periodically deleted.
 
 ### `partials/footer.html`
 
-Renders the site footer with logos and links for ClinGen and Stanford Medicine,
-navigation links to About, Contact, Citing, Help, Acknowledgements, and Collaborators
-pages, copyright text, NIH/NHGRI funding attribution, a link to the open-source
-repository, and the current git SHA.
+Renders the site-wide footer containing ClinGen and Stanford Medicine logos, navigation links (About, Contact, Citing, Help, Acknowledgements, Collaborators), copyright and funding attribution, a link to the open-source repository, and the current Git SHA.
 
 ### `partials/messages.html`
 
-Iterates over Django's message framework messages and renders each one as a dismissible
-Bulma message component, with styling and an icon chosen based on the message tag
-(debug, info, success, warning, or error).
+Iterates over Django's messages framework queue and renders each message as a dismissible Bulma notification styled by level (debug, info, success, warning, or error). Dismiss buttons use an HTMX inline event to remove the message block from the DOM without a page reload.
 
 ### `partials/navbar.html`
 
-Renders the main site navigation bar with dropdown menus for Alleles, Haplotypes,
-Diseases, Publications, and Curations, plus Log In/Log Out, Profile, and HLArepo
-buttons; also includes the JavaScript needed for the Bulma navbar-burger toggle on
-mobile.
+Renders the main navigation bar with dropdown menus for Alleles, Haplotypes, Diseases, Publications, and Curations (each offering Search and Add links). The right-hand side shows Log In or Log Out and Profile buttons depending on authentication state, plus a link to HLArepo. Includes a small script to enable the responsive burger menu toggle.
 
 ### `partials/navbar_link.html`
 
-Renders a single `<a>` navbar item that applies a bold weight class when the link's URL
-name matches the currently active view.
+A micro-partial that renders a single `<a class="navbar-item">` link. It accepts `url` and `text` context variables and applies `has-text-weight-bold` when the link matches the currently active view.
 
 ### `tables.html`
 
-A custom django-tables2 template that wraps the rendered table in a scrollable container
-and replaces the default pagination with Bulma-styled Previous/Next buttons and a
-numbered page list; also sets `hx-boost="false"` on each row to prevent HTMX from
-intercepting table row navigations.
+A custom django-tables2 table template that wraps rendered tables in a horizontally scrollable container and replaces the default pagination controls with Bulma-styled previous/next buttons and a numbered page list. It also disables HTMX boosting on table rows to prevent unintended partial-page navigation.

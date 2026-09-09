@@ -1,106 +1,71 @@
 # `haplotype`
 
-Django app that manages HLA haplotypes — ordered combinations of alleles across HLA
-genes — within the HCI. It provides a `Haplotype` model that stores a many-to-many
-relationship with alleles, derives a canonical tilde-separated name by sorting alleles
-according to their chromosomal gene order, and supplies the full set of views, forms,
-templates, and URL routes for creating, browsing, and auditing haplotypes.
+This Django app manages HLA haplotypes, which are named combinations of two or more alleles joined by `~` (e.g., `DRB1*15:01~DQB1*06:02`). It provides the full CRUD surface for haplotypes, including creation with automatic name derivation, detail and list views, and change history tracking via `django-simple-history`.
 
 ### `__init__.py`
 
-Empty file; marks this directory as a Python package.
+Empty file that marks this directory as a Python package.
 
 ### `admin.py`
 
-Registers the `Haplotype` model with the Django admin site using `SimpleHistoryAdmin`,
-showing `name`, `added_by`, and `added_at` in the list view, with search by `name` and
-`added_by` and `added_at` as read-only fields.
+Registers the `Haplotype` model with the Django admin site using `SimpleHistoryAdmin`, exposing name, submitter, and submission date in the list view and enabling history tracking.
 
 ### `apps.py`
 
-Defines the `HaplotypeConfig` app configuration, setting `BigAutoField` as the default
-primary key type and registering the app under the name `haplotype`.
+Defines the `HaplotypeConfig` app configuration, setting the app name to `haplotype` and specifying `BigAutoField` as the default primary key type.
 
 ### `constants/__init__.py`
 
-Empty file; marks this directory as a Python package.
+Empty file that makes `constants` a Python subpackage.
 
 ### `constants/models.py`
 
-Defines `GENE_LIST`, an ordered list of HLA gene names on chromosome 6 arranged by
-ascending chromosomal position, which is used to sort constituent alleles into a
-canonical haplotype name.
+Defines `GENE_LIST`, an ordered list of HLA gene names sorted by their chromosomal position on chromosome 6 (sourced from hla.alleles.org). This list is used when constructing a haplotype's canonical name by sorting constituent alleles into genomic order.
 
 ### `fixtures/test_haplotypes.json`
 
-Django fixture providing one sample `haplotype.haplotype` record (slug `H000001`, name
-`A*01:02:03~B*04:05:06`) used by the test suite together with `test_alleles.json`.
+Django fixture containing a single sample `Haplotype` record (`H000001`, `A*01:02:03~B*04:05:06`) used to seed the database during tests.
 
 ### `forms.py`
 
-Defines `HaplotypeForm`, a `ModelForm` for `Haplotype` that exposes only the `alleles`
-field rendered as a `SelectMultiple` widget, allowing the user to select two or more
-alleles when creating a haplotype.
+Defines `HaplotypeForm`, a `ModelForm` for the `Haplotype` model that exposes only the `alleles` field rendered as a multi-select widget.
 
 ### `models.py`
 
-Defines the `Haplotype` model with a slug, a many-to-many `alleles` relation to `Allele`
-(stored in the `haplotype_allele_map` join table), a computed `name` field, and audit
-metadata. The `save` method auto-generates a zero-padded slug (`H000001` style).
-Historical change tracking is provided via `simple_history`.
+Defines the `Haplotype` model with a slug-based human-readable ID (e.g., `H000001`), a many-to-many relationship to `Allele`, a unique `name` field, provenance fields (`added_by`, `added_at`, `updated_at`), and full change history via `HistoricalRecords`. The slug is auto-generated from the primary key on first save.
 
 ### `tables.py`
 
-Defines `HaplotypeTable`, a `django_tables2` table with columns for slug (linked to the
-detail page), name, and last-updated date. It is used by `HaplotypeList` to render
-paginated, sortable haplotype results.
+Defines `HaplotypeTable` using `django-tables2`, displaying the haplotype's ID (as a link to the detail view), name, and last-updated date in a styled Bulma table.
 
 ### `templates/haplotype/change.html`
 
-Displays a single historical change record for a haplotype, with a breadcrumb trail back
-through the haplotype list, detail, and history pages, and the change body rendered via
-the shared `common/history/change_body.html` partial.
+Renders the detail view for a single history record on a haplotype, showing what changed and when, with breadcrumb navigation back through the list, detail, and history views.
 
 ### `templates/haplotype/create.html`
 
-Renders the "Add Haplotype" form, showing the alleles multi-select field (rendered via
-the shared search select partial) and a submit button.
+Renders the haplotype creation form with a multi-select alleles field and a submit button, under a breadcrumb trail leading back to the home page.
 
 ### `templates/haplotype/detail.html`
 
-Shows the detail view for a single haplotype, displaying its HCI ID, name, added date,
-and updated date. If the haplotype has associated curations or alleles, each is rendered
-in a collapsible `<details>` section using `django_tables2`.
+Renders a haplotype's detail page, showing its ID, name, and timestamps in a summary table, along with collapsible `django-tables2` tables for its associated alleles and curations.
 
 ### `templates/haplotype/history.html`
 
-Shows the full edit history for a haplotype using the shared
-`common/history/history_body.html` partial, with breadcrumbs to the list and detail
-pages.
+Renders the full change history for a haplotype by delegating to the shared `common/history/history_body.html` partial, with breadcrumb navigation back to the list and detail views.
 
 ### `templates/haplotype/list.html`
 
-Renders the "Haplotype Search" page using the shared `common/partials/search_input.html`
-and `common/partials/search_results.html` partials, and provides an "Add Haplotype"
-button below the results.
+Renders the haplotype search page with a search input, a results table populated via the shared search partials, and a link to the haplotype creation page.
 
 ### `tests.py`
 
-Contains `TestCase` classes for `HaplotypeCreate`, `HaplotypeDetail`, and
-`HaplotypeList` views, verifying page content, access control, form validation,
-canonical allele-order sorting, and duplicate-allele-combination detection.
+Contains `TestCase` classes for the create, detail, and list views, verifying access control, correct template rendering, form validation (including duplicate detection and allele-order normalization), and successful haplotype creation.
 
 ### `urls.py`
 
-Maps the five haplotype URL patterns — `create`, `<slug>/detail`, `<slug>/history`,
-`<slug>/history/<id>/change`, and `list` — to their corresponding view classes.
+Defines the five URL routes for the app: `create`, `<slug>/detail`, `<slug>/history`, `<slug>/history/<history_id>/change`, and `list`.
 
 ### `views.py`
 
-Implements five class-based views — `HaplotypeCreate`, `HaplotypeDetail`,
-`HaplotypeHistory`, `HaplotypeChange`, and `HaplotypeList` — all protected by
-`ProtectedViewMixin`. `HaplotypeCreate.form_valid` sorts the selected alleles by their
-position in `GENE_LIST` to compute the canonical `~`-separated name, rejects duplicate
-combinations, and sets `added_by`. `HaplotypeChange` uses `resolve_changes` to build a
-diff for the selected history record. `HaplotypeList` extends `SearchListView` and
-supports searching by `slug` and `name`.
+Implements the five class-based views for the app. `HaplotypeCreate` derives the canonical haplotype name by sorting selected alleles using `GENE_LIST` and rejects duplicates. `HaplotypeDetail` populates allele and curation sub-tables. `HaplotypeHistory` and `HaplotypeChange` expose the `django-simple-history` audit trail. `HaplotypeList` provides paginated, searchable listing via `SearchListView`.

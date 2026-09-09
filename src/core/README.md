@@ -1,84 +1,55 @@
 # `core`
 
-The `core` app provides the top-level informational pages of the HLA Curation Interface:
-home, about, contact, help, citing, acknowledgements, and collaborators. It also serves
-as the Django app that owns the root URL configuration and the shared
-`layouts/page.html` template shell used by all of those pages. It has no models of its
-own.
+The `core` Django app serves as the top-level application for the HLA Curation Interface, providing the home page and a set of static informational pages (About, Contact, Help, Citing, Acknowledgements, Collaborators). It defines the URL routing for these pages, their corresponding views, and the shared page layout template that all informational pages inherit from.
 
 ### `__init__.py`
 
-Empty file marking `core` as a Python package.
+Empty file that marks `core` as a Python package.
 
 ### `apps.py`
 
-Defines `CoreConfig`, the Django `AppConfig` for the `core` app, registering it under
-the name `"core"` with `BigAutoField` as the default primary key type.
+Defines `CoreConfig`, the Django `AppConfig` subclass that registers the `core` app with `default_auto_field` set to `BigAutoField`.
 
 ### `templates/core/about.html`
 
-Renders the About page. Extends `core/layouts/page.html` and displays a short paragraph
-describing the HLA Curation Interface and its development by Stanford University's
-ClinGen contingent.
+Renders the About page, which briefly describes the HLA Curation Interface as a tool for curating HLA allele and haplotype information developed by the Stanford University ClinGen team.
 
 ### `templates/core/acknowledgements.html`
 
-Renders the Acknowledgements page. Credits NIH U24 grant U24HG009649 as the funding
-source and thanks Steven Mack (UCSF, Chair of the ClinGen HLA Working Group) for his
-contributions.
+Renders the Acknowledgements page, crediting the NIH/NHGRI U24 grant (U24HG009649) and thanking contributors such as Steven Mack, Chair of the ClinGen HLA Working Group.
 
 ### `templates/core/citing.html`
 
-Renders the Citing page. Provides a recommended citation format for the HCI and
-instructs users to also cite the specific dataset and download date when using HCI data
-in research.
+Renders the Citing page, providing a recommended citation format for the HCI and instructing users to also cite the specific dataset and download date when referencing HCI data in research.
 
 ### `templates/core/collaborators.html`
 
-Renders the Collaborators page. Lists external collaborating organizations — the Baylor
-College of Medicine ClinGen Team and ClinPGx — as a linked bullet list.
+Renders the Collaborators page, listing external collaborating organizations including the Baylor College of Medicine ClinGen Team and ClinPGx.
 
 ### `templates/core/contact.html`
 
-Renders the Contact page. Displays a mailto link to `hci@clinicalgenome.org` for
-reaching HCI maintainers.
+Renders the Contact page, directing users to reach the HCI maintainers at `hci@clinicalgenome.org`.
 
 ### `templates/core/help.html`
 
-Renders the Help page. Links to the HLA curation standard operating procedure (Google
-Doc) and provides email instructions for reporting issues, including what information to
-include (description, reproduction steps, OS, browser, screenshots).
+Renders the Help page, linking to the HLA curation standard operating procedure and providing instructions for reporting issues (including what information to include in a bug report email).
 
 ### `templates/core/home.html`
 
-Renders the Home page. Shows the authenticated user's email (or "not logged in"), a
-navigation table with search and create links for alleles, haplotypes, diseases,
-publications, and curations, and — for authenticated users — a `django-tables2` table of
-that user's own curations.
+Renders the home page, displaying the user's login status, navigation links for searching and adding alleles, haplotypes, diseases, publications, and curations, and a table of the authenticated user's own curations.
 
 ### `templates/core/layouts/page.html`
 
-A shared layout template that extends `layouts/base.html`. It wraps content in a Bulma
-`.box`, renders a breadcrumb nav with a Home link and an active page entry (populated
-via the `heading` block), and provides a `content` block for page-specific body content.
+A shared layout template for all informational pages that extends the base layout, rendering a breadcrumb nav (linking back to Home), a page heading block, and a content block inside a box container.
 
 ### `tests.py`
 
-Contains `OpenViewTestMixin`-based tests for each of the seven core views
-(`HomeViewTest`, `AboutViewTest`, `ContactViewTest`, `HelpViewTest`, `CitingViewTest`,
-`AcknowledgementsViewTest`, `CollaboratorsViewTest`) that verify HTTP 200 responses and
-expected page text. Also contains `AccountActivationMessageTest`, which tests all four
-combinations of PHI agreement and curation permission status to verify the correct
-warning messages appear (or don't appear) on the home page.
+Contains view tests for each core page (Home, About, Contact, Help, Citing, Acknowledgements, Collaborators) using `OpenViewTestMixin`, and an `AccountActivationMessageTest` that verifies the correct PHI agreement and curation-permission warning messages are shown to users in each combination of account activation states.
 
 ### `urls.py`
 
-Defines URL patterns for all seven core views, mapping bare paths (`""`, `"about"`,
-`"acknowledgements"`, `"citing"`, `"collaborators"`, `"contact"`, `"help"`) to their
-respective view functions.
+Maps URL paths to core views: the root path to `home`, and named paths for `about`, `acknowledgements`, `citing`, `collaborators`, `contact`, and `help`.
 
 ### `views.py`
 
-Defines simple function-based views for each core page. The `home` view additionally
-builds a `CurationTable` (via `django-tables2`) of the authenticated user's curations
-and passes it to the template. All other views are thin wrappers around `render`.
+Defines one function-based view per core page. The `home` view additionally queries the authenticated user's curations and passes a `CurationTable` to the template; all other views simply render their corresponding template.

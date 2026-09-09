@@ -1,148 +1,95 @@
 # `publication`
 
-Django app that manages scientific publications — PubMed articles, bioRxiv preprints,
-and medRxiv preprints — referenced by HLA curations. It provides a `Publication` model,
-clients that fetch metadata from the PubMed E-utilities API and the bioRxiv/medRxiv API,
-and the full set of views, forms, tables, templates, and URL routes for creating,
-browsing, and auditing publications within the HCI.
+This Django app manages publications (PubMed articles, bioRxiv papers, and medRxiv papers) used as evidence sources in HLA curations. It handles creation, display, and history tracking of publication records, automatically fetching metadata such as title, author, and year from external APIs when a new publication is added.
 
 ### `__init__.py`
 
-Empty file; marks this directory as a Python package.
+Empty file that marks `publication` as a Python package.
 
 ### `admin.py`
 
-Registers the `Publication` model with the Django admin site using `SimpleHistoryAdmin`,
-displaying `title`, `author`, `publication_type`, and `doi` in the list view with
-filtering by type, search by title/author/DOI, and `added_by`/`added_at` as read-only
-fields.
+Registers the `Publication` model with the Django admin site using `SimpleHistoryAdmin`, enabling browsable change history alongside standard list filtering and search by title, author, and DOI.
 
 ### `apps.py`
 
-Defines the `PublicationConfig` app configuration, setting `BigAutoField` as the default
-primary key type and registering the app under the name `publication`.
+Defines the `PublicationConfig` app configuration class, setting the app name and the default primary key field type.
 
 ### `clients.py`
 
-Contains functions for fetching and parsing publication metadata from external APIs:
-`fetch_pubmed_data` and `get_pubmed_title`/`get_pubmed_author`/`get_pubmed_year` work
-against the NCBI PubMed E-utilities XML endpoint, while `fetch_rxiv_data` and
-`get_rxiv_title`/`get_rxiv_author`/`get_rxiv_year` work against the bioRxiv/medRxiv JSON
-API, always extracting the most recent version from the collection.
+Contains functions for fetching publication metadata from external APIs: the NCBI PubMed E-utilities API (via XML) and the bioRxiv/medRxiv API (via JSON). Provides helpers to extract title, primary author, and publication year from each API's response format.
 
 ### `constants/__init__.py`
 
-Empty file; marks this directory as a Python package.
+Empty file that marks `constants` as a Python package.
 
 ### `constants/models.py`
 
-Defines the `PublicationTypes` class with three type codes (`PUBMED = "PUB"`,
-`BIORXIV = "BIO"`, `MEDRXIV = "MED"`) and the corresponding `PUBLICATION_TYPE_CHOICES`
-dict used by the `Publication` model field.
+Defines the `PublicationTypes` class with short codes (`PUB`, `BIO`, `MED`) for each supported publication source, and the `PUBLICATION_TYPE_CHOICES` dict used to populate the model field's choices.
 
 ### `fixtures/test_publications.json`
 
-Django fixture providing three sample `publication.publication` records (slugs
-`P000001`–`P000003`, covering PubMed, bioRxiv, and medRxiv types) used by the test suite
-to pre-populate the database without hitting external APIs.
+Django fixture containing three sample `Publication` records (one PubMed, one bioRxiv, one medRxiv) used to seed the database during tests.
 
 ### `forms.py`
 
-Defines `PublicationForm`, a `ModelForm` for `Publication` that exposes
-`publication_type` (rendered as radio buttons), `doi`, and `pubmed_id` fields.
+Defines `PublicationForm`, a `ModelForm` for creating a `Publication` that exposes the `publication_type`, `doi`, and `pubmed_id` fields, rendering `publication_type` as a radio button group.
 
 ### `models.py`
 
-Defines the `Publication` model with fields for slug, publication type, PubMed ID, DOI,
-title, primary author surname, publication year, and audit metadata. The `save` method
-auto-generates a zero-padded slug (`P000001` style), `clean` delegates to the three
-model validators, and historical change tracking is provided via `simple_history`.
+Defines the `Publication` model with fields for slug, type, PubMed ID, DOI, title, author, publication year, and audit timestamps. The slug is auto-generated as `P<pk:06d>` on first save, and `django-simple-history` tracks all changes.
 
 ### `tables.py`
 
-Defines `PublicationTable`, a `django-tables2` table for the publication list view, with
-columns for slug (linked to the detail page), title (italicized), author, year, PMID,
-DOI, and last-updated date.
+Defines `PublicationTable` using `django-tables2` to render the publication list, with the slug as a link to the detail page and the title rendered in italics.
 
 ### `templates/publication/change.html`
 
-Displays a single historical change record for a publication, with a breadcrumb trail
-back through the publication list, detail, and history pages, and the change body
-rendered via the shared `common/history/change_body.html` partial.
+Displays the details of a single historical change to a publication, rendered within a breadcrumb trail from Home through Publication Search and publication detail to the specific change event.
 
 ### `templates/publication/create.html`
 
-Renders the "Add Publication" form with radio buttons for publication type, a
-conditional PubMed ID text input (hidden for preprint types), a DOI text input (hidden
-for PubMed type) with the preprint warning partial, and JavaScript that toggles field
-visibility based on the selected type.
+Renders the form for adding a new publication, with JavaScript that shows or hides the PubMed ID and DOI input fields based on the selected publication type radio button.
 
 ### `templates/publication/detail.html`
 
-Shows the detail view for a single publication, displaying its HCI ID, title, primary
-author, publication year, PubMed ID (linked to PubMed), DOI (linked via doi.org), and
-timestamps. If any evidence items reference the publication, they are listed in a
-collapsible table showing evidence ID, curation ID, allele, haplotype, disease, status,
-and classification.
+Displays all fields for a single publication in a table, with external links to PubMed and doi.org, and a collapsible section listing any evidence records associated with the publication.
 
 ### `templates/publication/history.html`
 
-Shows the full edit history for a publication using the shared
-`common/history/history_body.html` partial, with breadcrumbs to the list and detail
-pages.
+Renders the full change history for a publication by including the shared `common/history/history_body.html` partial, with breadcrumb navigation back to the publication detail page.
 
 ### `templates/publication/list.html`
 
-Renders a searchable list of publications using the shared
-`common/partials/search_input.html` and `common/partials/search_results.html` partials,
-plus an "Add Publication" button.
+Renders the publication search/list page, including a search input, a `django-tables2` results table, and a button to navigate to the create publication form.
 
 ### `templates/publication/partials/rxiv_warning.html`
 
-A Bulma warning message component that informs curators that preprint publications may
-be used in curations but cannot be included in published curations.
+A small Bulma warning message box informing users that preprint publications (bioRxiv/medRxiv) cannot be included in published curations.
 
 ### `tests/__init__.py`
 
-Empty file; marks this directory as a Python package.
+Empty file that marks `tests` as a Python package.
 
 ### `tests/test_clients.py`
 
-Contains opt-in contract tests (skipped by default unless `RUN_CONTRACT_TESTS=1` is set)
-that make live API calls to PubMed, bioRxiv, and medRxiv to verify that the client
-functions correctly fetch and extract title, author, and year from real records.
+Contract tests that make real HTTP calls to the PubMed, bioRxiv, and medRxiv APIs to verify that the client functions correctly fetch and parse title, author, and year. These tests are skipped by default and only run when the `RUN_CONTRACT_TESTS=1` environment variable is set.
 
 ### `tests/test_views.py`
 
-Contains `TestCase` classes for `PublicationCreate`, `PublicationDetail`, and
-`PublicationList` views, verifying page content, access control via
-`ProtectedViewTestMixin`, form validation, and that successful POSTs for each
-publication type create records populated with data from mocked API clients.
+Integration tests for the publication views covering creation of PubMed, bioRxiv, and medRxiv publications (with mocked API responses), validation failure behavior, and basic rendering checks for the detail and list views.
 
 ### `urls.py`
 
-Maps the five publication URL patterns — `create`, `<slug>/detail`, `<slug>/history`,
-`<slug>/history/<id>/change`, and `list` — to their corresponding view classes.
+Maps URL patterns to publication views: `create`, `<slug>/detail`, `<slug>/history`, `<slug>/history/<history_id>/change`, and `list`.
 
 ### `validators/__init__.py`
 
-Empty file; marks this directory as a Python package.
+Empty file that marks `validators` as a Python package.
 
 ### `validators/models.py`
 
-Provides three validation functions called from `Publication.clean`:
-`validate_publication_type_pubmed` requires a PubMed ID for PubMed publications,
-`validate_publication_type_biorxiv` requires a DOI for bioRxiv papers, and
-`validate_publication_type_medrxiv` requires a DOI for medRxiv papers, each raising
-`ValidationError` when the required field is absent.
+Contains model-level validation functions called from `Publication.clean()` that raise `ValidationError` if a required identifier is missing for a given publication type (PubMed ID for PubMed, DOI for bioRxiv or medRxiv).
 
 ### `views.py`
 
-Implements five class-based views — `PublicationCreate`, `PublicationDetail`,
-`PublicationHistory`, `PublicationChange`, and `PublicationList` — all protected by
-`ProtectedViewMixin`. `PublicationCreate.form_valid` branches on publication type to
-call either the PubMed or Rxiv client, populating `author`, `title`, `publication_year`,
-and `added_by` before saving. `PublicationHistory` builds a `HistoryTable` via
-`get_context_data`. `PublicationChange` uses `resolve_changes` to build a diff for the
-selected history record. `PublicationList` extends `SearchListView` with
-`PublicationTable` and filters across slug, title, author, DOI, and PubMed ID.
+Implements the five publication views: `PublicationCreate` fetches metadata from external APIs and saves the record; `PublicationDetail` shows a single publication; `PublicationHistory` and `PublicationChange` display the audit trail; and `PublicationList` provides a searchable, paginated table of all publications.

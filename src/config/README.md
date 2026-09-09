@@ -1,52 +1,35 @@
 # `config`
 
-## Directory Overview
-
-`config` is the Django project configuration package. It contains the split settings
-hierarchy (`base`, `dev`, `prod`), the root URL dispatcher that wires together all app
-URL modules, and the WSGI entry point used by the production server. Nothing
-application-specific lives here; all domain logic belongs in the individual Django apps.
+This directory is the Django configuration package for the HLA Curation Interface. It contains the root URL routing, WSGI entry point, and a layered settings system that separates concerns across base, development, production, and test environments.
 
 ### `__init__.py`
 
-Empty file; marks this directory as a Python package.
+Empty file that marks `config` as a Python package.
 
 ### `settings/__init__.py`
 
-Empty file; marks this directory as a Python package.
+Empty file that marks `settings` as a Python package.
 
 ### `settings/base.py`
 
-Defines settings shared across all environments: installed apps, middleware (including
-WhiteNoise for static files and `simple_history` for model history tracking), template
-configuration, the SQLite database, the WorkOS authentication backend alongside Django's
-default `ModelBackend`, and Sentry error monitoring and tracing initialization. Also
-sets `django-tables2` and `LOGIN_URL`.
+Defines settings shared across all environments, including installed apps, middleware, database (SQLite), static file handling via WhiteNoise, Clerk authentication keys and backends, Sentry initialization, and the custom `django-tables2` template. Environment-specific settings files import from this module.
 
 ### `settings/dev.py`
 
-Extends `base.py` for local development: enables `DEBUG`, sets `ALLOWED_HOSTS` to an
-empty list, sets the message level to `DEBUG`, disables timezone support
-(`USE_TZ = False`), and configures a console logging handler that emits all log levels
-down to `DEBUG`.
+Extends `base.py` with development-specific overrides: `DEBUG = True`, no `ALLOWED_HOSTS` restriction, `MESSAGE_LEVEL` set to `DEBUG`, and a console logging configuration that suppresses noisy `httpcore` and `urllib3` debug output. Timezone support (`USE_TZ`) is disabled.
 
 ### `settings/prod.py`
 
-Extends `base.py` for production deployments on `hci.clinicalgenome.org` and
-`hci-test.clinicalgenome.org`: disables `DEBUG`, restricts `ALLOWED_HOSTS`, sets the
-message level to `INFO`, enables timezone support (`USE_TZ = True`), and configures both
-a console handler and a rotating file handler (5 MB max, 5 backups) that writes verbose
-logs to `../logs/hci.log`.
+Extends `base.py` with production-specific overrides: `DEBUG = False`, `ALLOWED_HOSTS` restricted to the ClinGen production and test hostnames, `MESSAGE_LEVEL` set to `INFO`, and a rotating file logger (5 MB, 5 backups) alongside a console handler. Timezone support (`USE_TZ`) is enabled.
+
+### `settings/test.py`
+
+Extends `dev.py` for use during test runs. Disables Sentry to prevent background HTTP flushes from polluting test output, and replaces the console log handler with a null handler so logs are suppressed by default and only surfaced by pytest for failing tests.
 
 ### `urls.py`
 
-Root URL configuration; mounts the Django admin at `admin/` and delegates URL routing
-for each Django app (`core`, `allele`, `auth_`, `curation`, `disease`, `haplotype`,
-`publication`, `repo`) to their respective `urls.py` modules. `core` is mounted at the
-root path (`""`).
+Defines the project-level URL configuration, routing requests to the `core`, `admin`, `allele`, `auth_`, `curation`, `disease`, `haplotype`, `publication`, and `repo` apps.
 
 ### `wsgi.py`
 
-WSGI application entry point; loads environment variables from `.env` via
-`python-dotenv`, then exposes the Django WSGI application object for use by a WSGI
-server such as Gunicorn.
+Configures the WSGI application entry point. Loads environment variables from the `.env` file via `python-dotenv` before initializing the Django application.

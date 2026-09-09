@@ -1,104 +1,67 @@
 # `allele`
 
-The `allele` app manages HLA alleles within the HCI. It provides a model for storing
-allele names and their associated ClinGen Allele Registry (CAR) IDs, a client for
-fetching allele data from the CAR API at creation time, and views for listing, creating,
-and inspecting alleles. Change history is tracked on every allele record via
-`django-simple-history`.
+This Django app manages HLA alleles within the HLA Curation Interface. It handles creating and viewing alleles, looking up their ClinGen Allele Registry (CAR) IDs, and tracking the full change history of each record. The app exposes list, detail, create, history, and change-diff views, all protected behind authentication and permissions.
 
 ### `__init__.py`
 
-Empty file; marks this directory as a Python package.
+Empty file that marks the directory as a Python package.
 
 ### `admin.py`
 
-Registers the `Allele` model with the Django admin site using `SimpleHistoryAdmin`,
-exposing `name`, `car_id`, `added_by`, and `added_at` in the list view, enabling search
-by `car_id`, and making `added_by` and `added_at` read-only.
+Registers the `Allele` model with Django's admin site using `SimpleHistoryAdmin`, exposing name, CAR ID, added-by, and added-at in the list view with CAR ID search and read-only audit fields.
 
 ### `apps.py`
 
-Defines the `AlleleConfig` app configuration, setting the app name to `allele` and the
-default primary-key field type to `BigAutoField`.
+Defines the `AlleleConfig` app configuration, setting the app name to `allele` and using `BigAutoField` as the default primary key type.
 
 ### `clients.py`
 
-Contains functions for interacting with the ClinGen Allele Registry (CAR) API.
-`fetch_allele_data` makes an HTTP GET request to the CAR HLA description endpoint for a
-given allele name and returns the parsed JSON response (or `None` on any error), and
-`get_car_id` extracts the CAR ID string from that response.
+Contains functions for interacting with the ClinGen Allele Registry (CAR) API. `fetch_allele_data` queries the CAR endpoint by allele name and returns the JSON response, while `get_car_id` extracts the registry ID from that response.
 
 ### `fixtures/test_alleles.json`
 
-A Django fixture containing three sample `Allele` records (slugs `A000001`–`A000003`)
-used to seed the database during automated tests.
+Provides three sample `Allele` records (e.g., `A*01:02:03`, `B*04:05:06`, `C*07:08:09`) used as test fixtures in unit tests.
 
 ### `forms.py`
 
-Defines `AlleleForm`, a `ModelForm` for the `Allele` model that exposes only the `name`
-field for user input.
+Defines `AlleleForm`, a `ModelForm` for the `Allele` model that exposes only the `name` field for user input.
 
 ### `models.py`
 
-Defines the `Allele` model with fields for a human-readable slug (auto-generated as
-`A000001`, etc.), allele name, CAR ID, the user who added the record, and timestamps.
-History tracking is added via `HistoricalRecords`, and `get_absolute_url` resolves to
-the allele detail view.
+Defines the `Allele` model with fields for a human-readable slug ID, allele name, CAR ID, and audit timestamps. The `save` method auto-generates the slug in the format `A000001`, and `HistoricalRecords` from `django-simple-history` tracks all changes.
 
 ### `tables.py`
 
-Defines `AlleleTable`, a `django-tables2` table for the `Allele` model with columns for
-slug (linked to the detail page), name, CAR ID (rendered as an external linkout when
-present), and updated date.
+Defines `AlleleTable` using `django-tables2` for rendering paginated allele lists. The slug column links to the detail view, and the CAR ID column renders as an external link to the ClinGen Allele Registry when a value is present.
 
 ### `templates/allele/change.html`
 
-Renders a detail page for a single history change record on an allele, displaying a
-breadcrumb trail from Home through Allele Search and the allele's detail and history
-pages, then including the shared `common/history/change_body.html` partial.
+Displays a single historical change to an allele, including breadcrumb navigation back through the list, detail, and history views. Uses the shared `common/history/change_body.html` partial to render the diff.
 
 ### `templates/allele/create.html`
 
-Renders a form page for adding a new allele to the HCI, with a breadcrumb back to Home
-and a POST form containing the allele name text input and a Submit button.
+Renders the form for adding a new allele, with breadcrumb navigation and a single name input field that submits via POST.
 
 ### `templates/allele/detail.html`
 
-Renders a detail page for a single allele, displaying its HCI Allele ID, name, ClinGen
-Allele Registry ID (as a linkout when present), and timestamps. It also includes
-`django-tables2`-rendered tables for associated curations and haplotypes when they
-exist.
+Shows all fields for a single allele (slug, name, CAR ID, added and updated dates) in a table, with a link to the history view and collapsible sections for associated curations and haplotypes.
 
 ### `templates/allele/history.html`
 
-Renders a history page for a single allele, displaying a breadcrumb trail back through
-Allele Search and the allele's detail page, then including the shared
-`common/history/history_body.html` partial with the allele's change records.
+Lists the full change history for an allele with breadcrumb navigation, delegating the history table rendering to the shared `common/history/history_body.html` partial.
 
 ### `templates/allele/list.html`
 
-Renders the Allele Search page with a search input (via
-`common/partials/search_input.html`) and an HTMX-driven results area (via
-`common/partials/search_results.html`), plus a link to the Add Allele page.
+Renders the allele search page with a search input, a paginated results table, and an "Add Allele" button linking to the create view.
 
 ### `tests.py`
 
-Contains Django `TestCase` classes for the allele create, detail, and list views,
-exercising form validation, CAR API integration (via mocking), access control via
-`ProtectedViewTestMixin`, and correct template rendering.
+Contains tests for the allele create, detail, and list views. Covers access protection (via `ProtectedViewTestMixin`), form validation, CAR API integration on creation (using mocks), and correct rendering of related haplotypes and fixture data.
 
 ### `urls.py`
 
-Maps URL patterns for the allele app: `create`, `<slug>/detail`, `<slug>/history`,
-`<slug>/history/<history_id>/change`, and `list`, each wired to the corresponding
-class-based view.
+Maps URL patterns for the five allele views: `allele-create`, `allele-detail`, `allele-history`, `allele-change`, and `allele-list`.
 
 ### `views.py`
 
-Defines five class-based views — `AlleleCreate`, `AlleleDetail`, `AlleleHistory`,
-`AlleleChange`, and `AlleleList` — all protected by `ProtectedViewMixin`. `AlleleCreate`
-fetches CAR data on form submission and stores the CAR ID; `AlleleDetail` populates
-context with `django-tables2` tables for related curations and haplotypes;
-`AlleleHistory` and `AlleleChange` populate context with history records and field-level
-diffs via `resolve_changes`; `AlleleList` uses `SearchListView` with `AlleleTable` and
-filters on `slug`, `name`, and `car_id`.
+Implements the five class-based views for alleles, all protected by `ProtectedViewMixin`. `AlleleCreate` fetches the CAR ID on form submission; `AlleleDetail` injects related curation and haplotype tables into context; `AlleleHistory` builds a history table; `AlleleChange` resolves the field-level diff for a single history record; and `AlleleList` provides paginated, searchable results.
