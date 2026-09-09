@@ -12,8 +12,8 @@ class NumFields:
 
 NUM_FIELDS_CHOICES = {
     NumFields.ONE: "1-Field",
-    NumFields.TWO: "2-Field",
-    NumFields.THREE: "3-Field, G-Group, P-Group",
+    NumFields.TWO: "2-Field, P-Group",
+    NumFields.THREE: "3-Field, G-Group",
     NumFields.FOUR: "4-Field",
 }
 

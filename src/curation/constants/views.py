@@ -37,7 +37,7 @@ FRAMEWORK = [
     },
     {
         "text": None,
-        "category": "2-field",
+        "category": "2-field, P-group",
         "split_horizontal": False,
         "split_vertical": False,
         "score": "score_step_1b",
@@ -47,7 +47,7 @@ FRAMEWORK = [
     },
     {
         "text": None,
-        "category": "3-field, G-group, P-group",
+        "category": "3-field, G-group",
         "split_horizontal": False,
         "split_vertical": False,
         "score": "score_step_1b",
