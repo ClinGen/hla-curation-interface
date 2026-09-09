@@ -68,9 +68,12 @@ def callback(request: HttpRequest) -> HttpResponseRedirect | HttpResponse:
     )
     # In dev mode, Clerk may deliver __clerk_db_jwt as a cookie (not a URL parameter)
     # after an OAuth redirect. Serve the exchange page in this case too.
-    if not param and not any(k.startswith("__session") for k in request.COOKIES):
-        if request.COOKIES.get("__clerk_db_jwt"):
-            param = "__clerk_db_jwt"
+    if (
+        not param
+        and not any(k.startswith("__session") for k in request.COOKIES)
+        and request.COOKIES.get("__clerk_db_jwt")
+    ):
+        param = "__clerk_db_jwt"
     if param:
         logger.info("Callback: token delivery via %s; serving exchange page", param)
         return render(
