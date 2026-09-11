@@ -95,7 +95,7 @@ class AlleleDetailTest(ProtectedViewTestMixin, TestCase):
         haplotype.alleles.add(allele_2)
         response = self.client.get(self.url)
         self.assertContains(response, haplotype.slug)
-        self.assertContains(response, haplotype_name)
+        self.assertContains(response, haplotype.display_name)
 
 
 class AlleleListTest(ProtectedViewTestMixin, TestCase):

@@ -76,7 +76,12 @@ class HaplotypeDetailTest(ProtectedViewTestMixin, TestCase):
     url = reverse("haplotype-detail", kwargs={"slug": "H000001"})
     template = "haplotype/detail.html"
     page_name = "H000001 Details"
-    expected_text = ["A*01:02:03~B*04:05:06", "1970-01-01", "A000001", "A000002"]
+    expected_text = [
+        "HLA-A*01:02:03~HLA-B*04:05:06",
+        "1970-01-01",
+        "A000001",
+        "A000002",
+    ]
 
     def setUp(self):
         super().setUp()
@@ -93,7 +98,7 @@ class HaplotypeListTest(ProtectedViewTestMixin, TestCase):
         "Name",
         "Updated",
         "H000001",
-        "A*01:02:03~B*04:05:06",
+        "HLA-A*01:02:03~HLA-B*04:05:06",
         "1970-01-01",
     ]
 

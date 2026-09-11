@@ -58,7 +58,7 @@ class Allele(models.Model):
         verbose_name_plural = "Alleles"
 
     def __str__(self) -> str:
-        return self.name
+        return self.display_name
 
     def save(self, *args, **kwargs) -> None:
         """Adds a human-readable ID."""
@@ -69,3 +69,7 @@ class Allele(models.Model):
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         return reverse("allele-detail", kwargs={"slug": self.slug})
+
+    @property
+    def display_name(self) -> str:
+        return f"HLA-{self.name}"

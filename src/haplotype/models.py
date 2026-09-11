@@ -59,7 +59,7 @@ class Haplotype(models.Model):
         verbose_name_plural = "Haplotypes"
 
     def __str__(self) -> str:
-        return self.name
+        return self.display_name
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
@@ -69,3 +69,7 @@ class Haplotype(models.Model):
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         return reverse("haplotype-detail", kwargs={"slug": self.slug})
+
+    @property
+    def display_name(self) -> str:
+        return "~".join(f"HLA-{part}" for part in self.name.split("~"))
