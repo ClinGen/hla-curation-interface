@@ -80,31 +80,31 @@ alias jal := js-all
 # Format JavaScript code. --------------------------------------------
 [group('javascript')]
 js-format:
-    bunx biome format --write .
+    npx biome format --write .
 alias jsfm := js-format
 
 # Check the JavaScript code for formatting issues. -------------------
 [group('javascript')]
 js-format-check:
-    bunx biome format .
+    npx biome format .
 alias jsfc := js-format-check
 
 # Check the JavaScript code for lint errors. -------------------------
 [group('javascript')]
 js-lint:
-    bunx biome lint .
+    npx biome lint .
 alias jslt := js-lint
 
 # Try to fix lint errors in the JavaScript code. ---------------------
 [group('javascript')]
 js-lint-fix:
-    bunx biome lint --write .
+    npx biome lint --write .
 alias jslf := js-lint-fix
 
 # Build our JavaScript dependencies. ---------------------------------
 [group('javascript')]
 js-build:
-    bun build.js
+    node build.js
 alias jsbl := js-build
 
 #=====================================================================

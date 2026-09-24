@@ -5,13 +5,17 @@
  */
 
 import { copyFile } from "node:fs/promises";
+import * as esbuild from "esbuild";
 
-// Bundle the Clerk React components for the auth pages.
-await Bun.build({
-  entrypoints: ["./src/auth_/js/sign-in.jsx", "./src/auth_/js/callback.jsx"],
+// Bundle the Clerk React components for the auth pages. Note that esbuild, unlike
+// some other bundlers, doesn't bundle unless you ask it to, hence bundle: true.
+await esbuild.build({
+  entryPoints: ["./src/auth_/js/sign-in.jsx", "./src/auth_/js/callback.jsx"],
   outdir: "./src/static/hci/js",
-  target: "browser",
+  bundle: true,
+  platform: "browser",
   format: "iife",
+  target: "es2020",
   minify: true,
   define: {
     "process.env.NODE_ENV": '"production"',

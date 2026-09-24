@@ -12,6 +12,6 @@
 - name: Ensure the JavaScript dependencies are installed
   ansible.builtin.command:
     chdir: hla-curation-interface
-    cmd: "~/.bun/bin/bun install"
+    cmd: "npm ci"
   args:
     creates: "{{ repo_dir }}/node_modules"

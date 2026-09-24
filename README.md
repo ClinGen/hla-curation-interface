@@ -19,8 +19,8 @@ The HCI is maintained by the Stanford contingent of
 ## Getting Started
 
 - Install [uv](https://github.com/astral-sh/uv).
-- Install [Bun](https://bun.sh).
-- Install JavaScript dependencies: `bun install`.
+- Install [Node.js](https://nodejs.org) (see `.nvmrc` for the version).
+- Install JavaScript dependencies: `npm ci`.
 - Clone the repository.
 - Install Python dependencies: `uv sync`.
 - Install [just](https://github.com/casey/just).
