@@ -615,3 +615,595 @@ Remove `"Conflicting"` from `expected_text` in `CurationDetailTest` and
 
 Generate a migration to remove `is_conflicting` from `Evidence` and
 `HistoricalEvidence`.
+
+## Follow-Up: Expert Panel Feedback
+
+This section was added after the plan above was implemented (commit `6bc9d88`, with the
+"fork" to "copy" rename in `cec04de`). The sections above describe the lifecycle using
+the status names that shipped (Ready for Review, Provisional). This follow-up renames
+them; where the two disagree, this section is current.
+
+### The Problem
+
+The expert panel has used the review workflow and sent back feedback, and three open
+GitHub issues (#58, #62, #85) that the original plan mostly covered still have loose
+ends. What is left:
+
+- **Status names don't match how the panel talks.** For the panel, "provisional" means
+  "finished by the curator and waiting for us," not "approved by us." Today's
+  Ready for Review status should be called **Provisional**, and today's Provisional
+  status should be called **Approved**. This is more than a label change. The stored
+  code `PRO` means Provisional today, so if we reused `PRO` for the new meaning, one
+  code would mean two different things depending on when a row was written.
+- **The review date is wrong.** The only dates we have are `added_at` and `updated_at`,
+  plus the history row written when the status changed. All of these record when
+  someone clicked a button in the HCI. The panel wants to record the date the panel
+  actually met and reviewed the curation, which can be days or weeks earlier.
+- **An override isn't recorded as an override.** The reviewer picks `ep_classification`
+  from a dropdown. If it differs from `suggested_classification`, a JavaScript
+  `confirm()` pops up, but nothing about the override is saved. #62 asks that an
+  override require a note, and the panel wants that note kept in its own field, apart
+  from the general notes.
+- **EP notes are hard to find on the curation detail page.** `curation/detail.html`
+  shows the EP notes only when `ep_classification` is set. It labels
+  `ep_evidence_summary` as "Classification Notes." It doesn't show the panel or the
+  classification that the notes belong to. When a reviewer sends a curation back
+  without choosing a classification, which is the normal case, the curator can't see
+  the panel's feedback at all. The original plan kept these fields so the curator
+  *could* see them.
+- **The public repository shows too little.** `repo/detail.html` reuses the internal
+  `detail_table.html` and evidence table. It never shows the evidence summary (#85),
+  and it doesn't link out to Mondo or the ClinGen Allele Registry (CAR), even though
+  `Disease.iri` and `Allele.car_id` are stored and the allele and disease detail pages
+  already link to them.
+- **Curators can't tell what will become public.** Some fields end up in HLArepo and
+  the JSON export (the evidence summary, the classification, most evidence data).
+  Others stay internal (every `*_notes` field on `Evidence`). Nothing on the forms tells
+  a curator or reviewer which is which.
+- **A score of 0 shows as `------`.** #62 asks for "No classification set" instead.
+- **Confirmations use `window.confirm`.** #58 asks for a Bulma modal instead. There are
+  four `confirm()` calls: Submit for Review and Publish in
+  `curation/partials/buttons.html`, Copy and Recurate in `repo/detail.html`, and the
+  override warning in `curation/review.html`. Publish is also a plain `<a href>` link,
+  so a `GET` request publishes the curation. Any link prefetcher or crawler that
+  follows the link could publish it.
+
+The goal is to close all of these so the workflow matches the panel's vocabulary and
+records what the panel decided, when it decided, and why. The public record should show
+the parts that matter.
+
+**Split with `docs/plans/007-public-repo-site.md`.** That plan (GitHub #87) makes
+HLArepo reachable without logging in, possibly on its own hostname. It owns access
+control, routing, and hosting for the repo pages. This follow-up owns what those pages
+show: the evidence summary, EP fields, review date, and Mondo/CAR links. Both plans edit
+`repo/templates/repo/detail.html`, so whichever lands second should rebase onto the
+other. This section doesn't change who can see the page. The internal links that the
+reused partials render on the repo page (the "View History" button pointing at
+`curation-history`, and the evidence rows linking to `evidence-detail`) are left to
+007.
+
+### The Technical Plan
+
+**Status rename with new codes.** We rename the codes, not just the labels, and we use
+two codes that have never been stored: Ready for Review `RFR` becomes Provisional `PRV`,
+and Provisional `PRO` becomes Approved `APR`. Because neither `PRV` nor `APR` has ever
+been written, the data migration doesn't depend on order. No row passes through an
+ambiguous state, and `PRO` stops meaning anything. If we reused `PRO` for the new
+Provisional, the migration would have to run `PRO → APR` strictly before `RFR → PRO`,
+and any code or export that saw a `PRO` would have to know which era it came from. In
+Python, `Status.READY_FOR_REVIEW` becomes `Status.PROVISIONAL` and the old
+`Status.PROVISIONAL` becomes `Status.APPROVED`. That Python rename also has an order
+hazard, covered in Step 1. The same migration updates `HistoricalCuration` rows so the
+history views keep resolving status labels.
+
+A local-state wrinkle: the local `src/hci.db` already has
+`curation.0021_rename_status_codes` recorded as applied (on 2026-09-11), and
+`C000005` is stored as `APR`. The migration file is no longer in the tree; only a stale
+`.pyc` remains in `src/curation/migrations/__pycache__/`. The `.pyc` shows it used this
+same mapping, `{"RFR": "PRV", "PRO": "APR"}`, on `Curation` and `HistoricalCuration`,
+followed by an `AlterField` on `Curation.status` and one on `Evidence.num_fields`. The
+local `curation_historicalcuration` table still holds `RFR` and `PRO` rows, so the
+history part didn't take effect locally. `makemigrations --check` also reports pending
+`num_fields` label changes left over from `f85bc1d`. Step 1 recreates the migration
+under the same name so it lines up with the local database (see Open Question 1).
+`docs/tickets/012-max-length-constants.md` also plans a migration for the `num_fields`
+drift. If the name doesn't need to be kept, that ticket's migration takes `0021` and
+this one becomes `0022_rename_status_codes`.
+
+**EP review date.** Add a `DateField`, `ep_review_date`, set by the reviewer on the
+review form. It's required when approving, optional when sending back, and can't be in
+the future. It's shown internally and publicly and included in the JSON export. The
+date the HCI recorded the approval is still available from history, as the original plan
+chose.
+
+**Classification override.** `ep_classification` stays the single authoritative
+classification. Add `ep_override_reason` (a `TextField`). On the review form,
+`ep_classification` starts out set to the suggested classification. If the reviewer
+picks anything else, `EPReviewForm.clean()` requires `ep_override_reason`. "Anything
+else" includes every choice when the suggestion is `None` (score 0), and `DEFINITIVE`,
+which is never suggested. The textarea is shown only when the selection differs from the
+suggestion, so the JavaScript `confirm()` goes away. Add a model property,
+`Curation.is_classification_overridden`, so templates and serializers don't repeat the
+comparison.
+
+**Classification display.** Add one template partial,
+`curation/partials/classification.html`, that renders the EP classification, the
+suggested classification, or "No Classification Set." `detail_table.html`,
+`CurationTable.render_classification`, and
+`PublishedCurationTable.render_classification` all route through the same logic. Today
+each of them has its own copy of the `if` chain.
+
+**EP feedback panel.** Replace the ad hoc notification in `curation/detail.html` with a
+partial, `curation/partials/ep_review.html`. It shows every non-empty EP field: panel,
+review date, classification, override reason, evidence summary, and additional notes.
+It appears whenever *any* EP field is set, and it uses a warning style with a "Sent back
+for revision" heading when the status is In Progress. The review page includes the same
+partial, so a reviewer sees earlier feedback when a curation comes back.
+
+**Public repo content.** Add a repo-specific summary partial,
+`repo/partials/summary.html`, that shows only public information. It covers the entity
+(with a CAR link for alleles, and for each allele in a haplotype), the disease (with a
+Mondo link through `Disease.iri`), the classification, the panel, the review date, the
+publication date, and the evidence summary as its own block. `repo/detail.html` uses it
+in place of `curation/partials/curation/detail_table.html`. The serializer gets the new
+fields and the disease IRI.
+
+**Public-field indicator.** Add a single source of truth, `repo/constants.py`, with
+`PUBLIC_CURATION_FIELDS` and `PUBLIC_EVIDENCE_FIELDS`. The serializers use these lists,
+and a test checks that the lists match what the serializers emit. A small template
+partial, `common/public_badge.html`, renders a globe icon with a tooltip ("Shown
+publicly in HLArepo"). The form field partials show the badge when they receive
+`public=True`. The review form and evidence edit form pass that flag for fields in the
+lists.
+
+**Confirmation modal.** Add one Bulma modal partial, `common/confirm_modal.html`, and a
+small script, `static/hci/js/confirm-modal.js`. The script intercepts form submission on
+any `<form data-confirm="...">` and shows the modal. It submits the form only after the
+user confirms. Publish becomes a `POST` form, and `curation_publish` rejects other
+methods.
+
+### Alternatives
+
+#### Relabel only and keep codes `RFR`/`PRO`
+
+Changing only `CURATION_STATUS_CHOICES` labels would avoid a data migration. We rejected
+it because `PRO` would then mean "Approved" while the Python constant, the code, and
+every old export say "Provisional." New readers would be confused for as long as the
+code exists.
+
+#### Reuse `PRO` for the new Provisional
+
+This keeps the three-letter mnemonic tidy (`PRO` = Provisional), but the migration then
+depends on order. Worse, historical rows and previously downloaded JSON would silently
+change meaning. New codes cost nothing and remove the hazard.
+
+#### A separate `ep_override_classification` field
+
+The notes suggest a "separate field for when you need to override the suggested
+classification." One reading is a second classification column that is null unless the
+panel overrides. That leaves two classification fields that every reader must reconcile
+(`override or ep_classification`). We keep one authoritative `ep_classification` and put
+the separate field on the *reason*. That reason is the information the panel actually
+asked to capture. `is_classification_overridden` gives templates the flag they need.
+
+#### `title` attribute versus a CSS tooltip
+
+Bulma ships no tooltip component. A plain `title` attribute works everywhere and needs
+no CSS, but it doesn't appear on touch devices or keyboard focus. We use a `title` plus
+visually hidden text (`is-sr-only`) for screen readers. We can switch to a CSS tooltip
+in `custom.css` later if the panel finds `title` too subtle.
+
+### Open Questions
+
+1. **Local database and the `0021_rename_status_codes` record.** The local `hci.db`
+   already records `curation.0021_rename_status_codes` as applied, with `PRV`/`APR`
+   codes. Step 1 recreates a migration under that exact name with the same mapping, so
+   the local DB and new environments agree. Because Django won't re-run it locally, the
+   local history rows still holding `RFR`/`PRO` will need a one-off fix, or the local DB
+   can be restored from a backup and migrated from scratch. Was the old migration ever
+   applied to staging or production? If it was, Step 1 must match it exactly. If it
+   wasn't, the name only matters locally. *Blocks Step 1.*
+2. **Which EP fields are public?** Today the JSON export includes `ep_additional_notes`
+   and the internal `ep` ID, and the repo page shows neither. Should
+   `ep_additional_notes` and `ep_override_reason` appear in HLArepo and the JSON, or
+   stay internal? This plan assumes the evidence summary, classification, panel, and
+   review date are public, and the other two are internal. It also assumes
+   `needs_review` and the evidence `*_notes` fields stay internal. *Blocks Step 7, and
+   the public/private split in Steps 3 and 6.*
+3. **Does "standardized" in #85 mean templated text?** The issue title is "Standardized
+   Evidence Summary Text." This plan treats that as free text entered by the reviewer.
+   If the panel wants a generated starting template (for example, "HLA-X has a {class}
+   association with {disease} based on N studies..."), that's a follow-up that
+   pre-fills `ep_evidence_summary` on the review form. *Does not block this plan.*
+4. **Should the repo page credit the reviewer?** The HCI user who recorded the review
+   isn't stored as a field. Only history has it. This plan doesn't show it. *Does not
+   block.*
+
+### Detailed Implementation
+
+#### Step 1 — Rename statuses to Provisional and Approved
+
+Do the Python rename in two passes in this order. First rename `Status.PROVISIONAL` to
+`Status.APPROVED` everywhere. Then rename `Status.READY_FOR_REVIEW` to
+`Status.PROVISIONAL`. The reverse order merges the two constants. Template string
+literals get the same two passes: `"PRO"` → `"APR"` first, then `"RFR"` → `"PRV"`.
+
+##### `src/curation/constants/models/common.py` — modify
+
+`Status` becomes `IN_PROGRESS = "INP"`, `DONE = "DNE"`, `PROVISIONAL = "PRV"`,
+`APPROVED = "APR"`, `PUBLISHED = "PUB"`. `CURATION_STATUS_CHOICES` labels become "In
+Progress," "Provisional," "Approved," and "Published." Update
+`CURATION_STATUS_TRANSITIONS` to match: `INP → {PRV}`, `PRV → {INP, APR}`,
+`APR → {PUB}`.
+
+##### Python status references — modify
+
+- `src/curation/models.py`
+- `src/curation/views.py`
+- `src/curation/validators/models/curation.py`
+
+Apply the two-pass rename. `is_locked`, `curation_submit`, `curation_review`,
+`validate_status`, and the `can_submit` message ("submitted for review") keep their
+behavior. Update the docstrings that say "provisional" in the old sense, such as
+`curation_publish` ("Publishes an approved curation").
+
+##### `src/curation/tables.py` — modify
+
+`render_status`: the `PROVISIONAL` branch renders "Provisional." It currently renders
+"Needs Review" for `RFR`, which doesn't match the detail page either. The `APPROVED`
+branch renders "Approved."
+
+##### Status templates — modify
+
+- `src/curation/templates/curation/detail.html`
+- `src/curation/templates/curation/partials/buttons.html`
+- `src/curation/templates/curation/partials/curation/detail_table.html`
+
+Apply the two-pass literal rename and update the `{# ... #}` comments and tag text. The
+banner for `PRV` reads "This curation is provisional and awaiting expert panel review."
+The banner for `APR` reads "This curation has been approved by the expert panel and is
+ready to publish."
+
+##### `src/curation/migrations/0021_rename_status_codes.py` — create
+
+Generate it with `makemigrations curation --name rename_status_codes` after the
+constants change. That produces the `AlterField` for `Curation.status` and picks up the
+pending `Evidence.num_fields` and `HistoricalEvidence.num_fields` changes. Then add a
+`RunPython` operation *before* the `AlterField`s. It maps `{"RFR": "PRV", "PRO": "APR"}`
+on both `Curation` and `HistoricalCuration` through `apps.get_model`, and its reverse
+function applies the inverse mapping. The operation can run in any order because the
+target codes are new. See Open Question 1 about the name.
+
+##### Tests — modify
+
+- `src/curation/tests/test_views.py`
+- `src/curation/tests/test_models.py`
+- `src/repo/tests.py`
+
+Apply the rename. Write these tests first: a migration test that uses
+`MigrationExecutor` to migrate to `0020`, create rows with `RFR`/`PRO` (including
+historical rows), migrate forward, and assert `PRV`/`APR`; and the reverse. Add
+`CurationTable.render_status` tests for the new labels. Add a transitions test asserting
+that `APR → PRV` is illegal.
+
+##### `src/curation/README.md` — modify
+
+Update the `constants/models/common.py`, `detail.html`, and `buttons.html` entries to
+use the new status names.
+
+#### Step 2 — EP review date
+
+##### `src/curation/models.py` — modify
+
+Add `ep_review_date = models.DateField(null=True, blank=True, verbose_name="EP Review
+Date", help_text="The date the expert panel reviewed the curation.")`.
+
+##### `src/curation/forms.py` — modify
+
+Add `ep_review_date` to `EPReviewForm` as a `DateField` with
+`DateInput(attrs={"type": "date", "class": "input"})`, `required=False`. In `clean()`,
+require it when `decision == "approved"`, and reject dates later than
+`timezone.localdate()` in both branches.
+
+##### `src/curation/views.py` — modify
+
+`curation_review` saves the field and pre-populates it on GET.
+
+##### `src/curation/templates/curation/review.html` — modify
+
+Render the field with `common/form/input/text.html` and `type="date"`.
+
+##### `src/repo/serializers.py` — modify
+
+Add `"ep_review_date"` (ISO date or `None`) under `"curation"`.
+
+##### `src/curation/admin.py` — modify
+
+Add `ep_review_date` to the `Curation` admin's `list_display`.
+
+##### Migration — add
+
+Generate with `makemigrations`.
+
+##### Tests — modify
+
+In `src/curation/tests/test_views.py`, add to `CurationReviewTest`: approving without a
+date fails; approving with a future date fails; approving with today's date saves it;
+needs-revision without a date succeeds. In `src/repo/tests.py`, add to
+`JSONDownloadViewTest`: the export includes `ep_review_date`.
+
+Update the `forms.py`, `models.py`, and `review.html` entries in
+`src/curation/README.md`.
+
+#### Step 3 — Classification override reason
+
+##### `src/curation/models.py` — modify
+
+Add `ep_override_reason = models.TextField(null=True, blank=True, verbose_name="EP
+Override Reason", help_text="Why the panel chose a classification other than the
+suggested one.")`. Add a property, `is_classification_overridden`, that returns `True`
+when `ep_classification` is set and differs from `suggested_classification`.
+
+##### `src/curation/forms.py` — modify
+
+`EPReviewForm.__init__` takes a `suggested_classification` keyword argument and stores
+it. Add `ep_override_reason` (a `Textarea`, `required=False`). In `clean()`, when
+approving and `ep_classification != self.suggested_classification`, require
+`ep_override_reason`. When approving without an override, clear
+`ep_override_reason` so a stale reason from an earlier review isn't kept.
+
+##### `src/curation/views.py` — modify
+
+`curation_review` passes `suggested_classification=curation.suggested_classification`
+to the form. On GET, it sets `initial["ep_classification"]` to
+`curation.ep_classification or curation.suggested_classification`, and it saves
+`ep_override_reason`.
+
+##### `src/curation/templates/curation/review.html` — modify
+
+Remove the `confirm()` script. Render `ep_override_reason` in a wrapper that is hidden
+unless the selected classification differs from the suggestion. A few lines of inline
+JavaScript toggle `is-hidden` on `change`. The server-side `clean()` is the real guard.
+Label the classification select "Classification (suggested: X)."
+
+##### `src/repo/serializers.py` — modify
+
+Include `ep_override_reason` only if Open Question 2 says it is public. Otherwise leave
+it out.
+
+##### Migration — add
+
+Generate with `makemigrations`.
+
+##### Tests — modify
+
+In `src/curation/tests/test_models.py`, test `is_classification_overridden` in these
+cases: no EP classification; matching; differing; `DEFINITIVE`; a score of 0 with any
+classification. In `src/curation/tests/test_views.py`, add to `CurationReviewTest`:
+approving with the suggested classification needs no reason; approving with an
+override and no reason fails with a field error; approving with an override and a
+reason saves both; approving without an override clears an old reason.
+
+Update the `models.py`, `forms.py`, and `review.html` entries in
+`src/curation/README.md`.
+
+#### Step 4 — Shared classification display and "No Classification Set"
+
+##### `src/curation/models.py` — modify
+
+Add a `classification_display` property. It returns
+`get_ep_classification_display()` if `ep_classification` is set, otherwise the
+`CLASSIFICATION_CHOICES` label of `suggested_classification`, otherwise
+`"No Classification Set"`. Add an `is_classification_suggested` property that is `True`
+when no EP classification is set.
+
+##### `src/curation/templates/curation/partials/classification.html` — create
+
+Renders `<span class="tag">{{ object.classification_display }}</span>`. When
+`is_classification_suggested` is true, it adds a light "Suggested" tag next to it.
+
+##### `src/curation/templates/curation/partials/curation/detail_table.html` — modify
+
+Replace the hand-written `if sc == "DEF"` chain with the partial. The row label is
+always "Classification."
+
+##### Table classes — modify
+
+- `src/curation/tables.py`
+- `src/repo/tables.py`
+
+Have `render_classification` return `record.classification_display` (or
+`record.curation.classification_display`). This removes the duplicated fallback logic.
+
+##### Tests — modify
+
+In `src/curation/tests/test_models.py`, test `classification_display` for a score of 0,
+a positive score, and an EP-set classification. In `src/curation/tests/test_views.py`,
+test that `CurationDetailTest` and `CurationListTest` show "No Classification Set" for
+an empty curation. In `src/repo/tests.py`, add the same check to `RepoSearchViewTest`.
+
+Add `partials/classification.html` to `src/curation/README.md` and update the
+`tables.py` entries in `src/curation/README.md` and `src/repo/README.md`.
+
+#### Step 5 — EP feedback on the curation detail page
+
+##### `src/curation/models.py` — modify
+
+Add a `has_ep_feedback` property that is `True` if any of `ep_classification`,
+`ep_evidence_summary`, `ep_additional_notes`, `ep_override_reason`, or
+`ep_review_date` is set.
+
+##### `src/curation/templates/curation/partials/ep_review.html` — create
+
+A Bulma `message` block. Use `is-warning` with the heading "Sent Back for Revision"
+when the status is In Progress, otherwise `is-info` with "Expert Panel Review." Show
+labeled rows for the panel (the display name from `EP_CHOICES`), review date,
+classification, override reason, evidence summary, and additional notes. Skip empty
+rows. Render text with `linebreaks`.
+
+##### `src/curation/templates/curation/detail.html` — modify
+
+Replace the current `{% if object.ep_classification %}` notification with
+`{% if object.has_ep_feedback %}{% include "curation/partials/ep_review.html" %}`.
+
+##### `src/curation/templates/curation/review.html` — modify
+
+Include the same partial above the form when `object.has_ep_feedback`, so a re-review
+shows the previous feedback.
+
+##### Tests — modify
+
+In `src/curation/tests/test_views.py`, add to `CurationDetailTest`: after a
+needs-revision review with only additional notes and no classification, the notes and
+the "Sent Back for Revision" heading appear. After approval, the evidence summary
+appears under "Evidence Summary," not "Classification Notes." Add a
+`has_ep_feedback` model test.
+
+Add `partials/ep_review.html` to `src/curation/README.md` and update the `detail.html`
+entry.
+
+#### Step 6 — Public repo content: evidence summary and linkouts
+
+##### `src/repo/templates/repo/partials/summary.html` — create
+
+A table showing: HCI Curation ID; allele (with CAR linkout via `common/linkout.html` to
+`https://reg.clinicalgenome.org/allele/ui/hla/id/<car_id>`) or haplotype (with each
+member allele and its CAR linkout); disease (with Mondo linkout via `Disease.iri`,
+falling back to plain `mondo_id` text); classification (from the Step 4 partial);
+expert panel; EP review date; and published date (`published.published_at`). Below the
+table, render the evidence summary in its own `box` with an "Evidence Summary" heading.
+
+##### `src/repo/templates/repo/detail.html` — modify
+
+Replace the `curation/partials/curation/detail_table.html` include with
+`repo/partials/summary.html`. Keep the superseded and copied-from notices, the buttons,
+and the evidence table. The evidence table stays as-is here; 007 decides whether its
+links change.
+
+##### `src/repo/views.py` — modify
+
+In `PublishedCurationDetail.get_object`, add
+`select_related("curation__allele", "curation__haplotype", "curation__disease")` and
+`prefetch_related("curation__haplotype__alleles")` so the linkouts don't add queries.
+
+##### `src/repo/serializers.py` — modify
+
+Add `"iri"` to the disease dict and `"car_id"` to each haplotype allele.
+
+##### Tests — modify
+
+In `src/repo/tests.py`, add to `PublishedCurationDetailViewTest`: the evidence summary
+text appears; the CAR link appears for an allele curation; the Mondo IRI link appears;
+each haplotype allele's CAR link appears; `ep_additional_notes` doesn't appear (subject
+to Open Question 2). In `JSONDownloadViewTest`, check for the disease `iri` and the
+haplotype allele `car_id`.
+
+Add `templates/repo/partials/summary.html` to `src/repo/README.md` and update the
+`detail.html` and `serializers.py` entries.
+
+#### Step 7 — Mark public fields on forms
+
+##### `src/repo/constants.py` — create
+
+Define `PUBLIC_CURATION_FIELDS` and `PUBLIC_EVIDENCE_FIELDS` as `frozenset`s of model
+field names, following the Open Question 2 decision.
+
+##### `src/repo/serializers.py` — modify
+
+Build the EP part of the `"curation"` dict from `PUBLIC_CURATION_FIELDS`, so a field
+can't be public in one place and private in another.
+
+##### `src/common/templates/common/public_badge.html` — create
+
+`<span class="icon has-text-info" title="Shown publicly in HLArepo">` with
+`bi-globe2` and an `is-sr-only` text label.
+
+##### Form field partials — modify
+
+- `src/common/templates/common/form/textarea.html`
+- `src/common/templates/common/form/input/text.html`
+- `src/common/templates/common/form/input/radio.html`
+- `src/common/templates/common/form/select/default.html`
+
+Next to the label, `{% if public %}{% include "common/public_badge.html" %}{% endif %}`.
+
+##### `src/common/templatetags/custom_filters.py` — modify
+
+Add an `is_public` filter, `{{ form.field.name|is_public:"evidence" }}`, that checks the
+constants, so templates don't hard-code the lists. Add filter tests to
+`src/common/tests.py`.
+
+##### Form templates — modify
+
+- `src/curation/templates/curation/review.html`
+- `src/curation/templates/evidence/edit.html`
+
+Pass `public=...` to each field include using the filter.
+
+##### Tests — modify
+
+In `src/repo/tests.py`, test that the serializer's curation keys and evidence keys are
+exactly the constants plus the structural keys (IDs, entity, disease). In
+`src/curation/tests/test_views.py`, test that the review page renders the badge next to
+Evidence Summary and not next to Additional Notes, and that the evidence edit page
+renders it next to P-Value and not next to `p_value_notes`.
+
+Update `src/repo/README.md` (for `constants.py`) and `src/common/README.md` (for
+`public_badge.html`, the field partials, and the filter).
+
+#### Step 8 — Bulma confirmation modal and POST-only publish
+
+##### `src/common/templates/common/confirm_modal.html` — create
+
+A single Bulma `modal` with `modal-background`, a `modal-card` holding a message
+`<p id="confirm-modal-message">`, and Cancel and Confirm buttons. Include it once in
+`src/templates/layouts/base.html`.
+
+##### `src/static/hci/js/confirm-modal.js` — create
+
+On `submit` of any `form[data-confirm]`, prevent the default action, put the message in
+the modal, and open it by adding `is-active`. Confirm calls `form.submit()`. Cancel,
+the background, and Escape close the modal. Load it from `base.html`. It's hand-written,
+so it doesn't go through `build.js`.
+
+##### `src/curation/templates/curation/partials/buttons.html` — modify
+
+Replace the `onclick="return confirm(...)"` handlers with `data-confirm="..."` on the
+form. Turn the Publish `<a>` into a `<form method="post">` with `{% csrf_token %}`.
+
+##### `src/repo/templates/repo/detail.html` — modify
+
+Do the same for the Copy and Recurate form.
+
+##### `src/curation/views.py` — modify
+
+In `curation_publish`, redirect to `curation-detail` without publishing if
+`request.method != "POST"`. This matches `curation_submit` and `curation_copy`.
+
+##### Tests — modify
+
+In `src/repo/tests.py`, update `CurationPublishViewTest` to `POST`, and add a test that
+a `GET` doesn't publish. In `src/curation/tests/test_views.py`, add a template test
+that no `confirm(` remains in the rendered detail and review pages and that
+`data-confirm` is present.
+
+Add the modal partial to `src/common/README.md`, the script to `src/static/README.md`,
+and the base template change to `src/templates/README.md`.
+
+### Sources
+
+- Notes: "HCI: Work on EP review feedback"
+  - "Change fork button to 'copy and recurate'" (already done in `cec04de`)
+  - "Should display EP notes in details page if they exist"
+  - "Show evidence summary, other important info in the repo (MONDO links, CAR links,
+    etc.)"
+  - "Need EP review date (not the date it was actually approved in our system)"
+  - "Visually show which fields will be public? Icon with tooltip?"
+  - "Separate field for when you need to override the suggested classification"
+  - "Change name of provisional to approved"
+  - "Change name of ready for review to provisional"
+- https://github.com/ClinGen/hla-curation-interface/issues/58
+- https://github.com/ClinGen/hla-curation-interface/issues/62
+- https://github.com/ClinGen/hla-curation-interface/issues/85
+- Related: https://github.com/ClinGen/hla-curation-interface/issues/87
+  (`docs/plans/007-public-repo-site.md`)

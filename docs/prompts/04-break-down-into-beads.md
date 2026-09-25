@@ -6,8 +6,8 @@ provide to you.
 1. Run `bd prime` if you haven't already this session.
 2. Read `doc`. Then read the READMEs and source files for the parts of the codebase that
    `doc` touches.
-3. Check whether beads already exist for `doc`: `bd search doc`. If they do, stop and
-   tell me instead of creating duplicates.
+3. Check whether beads already exist for `doc`: `bd list --spec doc --all`. If they do,
+   stop and tell me instead of creating duplicates.
 4. Draft a breakdown and show it to me before creating anything. The breakdown should
    have:
    - One epic for `doc`. A small ticket may be a single task with no epic.
