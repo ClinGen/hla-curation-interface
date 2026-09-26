@@ -105,8 +105,15 @@ anything in `docs/` inaccurate, update that too.
 3. `docs/prompts/05-work-beads.md` works through a single bead, or through an epic's
    beads until none are ready.
 
+Beads and tickets don't correspond one-to-one. A ticket or plan can produce one bead or
+many, and small, self-contained work can be a bead with no ticket at all. Write a ticket
+when the work needs more context than fits in a bead: a decision to record, an open
+question, or reasoning someone might question later. Otherwise, create the bead
+directly with a description that lists the files to change and acceptance criteria
+that name the tests to write.
+
 When working on a bead, follow its acceptance criteria and read the plan or ticket it
-links to. File work you discover outside a bead's scope as a new bead instead of doing
-it. After changing beads, run `bd export -o .beads/issues.jsonl` so the export in git
-stays current. Don't commit, push, or run `bd dolt push` unless a prompt or I tell you
-to.
+links to, if it has one. File work you discover outside a bead's scope as a new bead
+instead of doing it. After changing beads, run `bd export -o .beads/issues.jsonl` so
+the export in git stays current. Don't commit, push, or run `bd dolt push` unless a
+prompt or I tell you to.
