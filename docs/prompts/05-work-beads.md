@@ -26,8 +26,8 @@ permission to create a branch and make local commits. Do not `git push`, and do 
       needed.
    7. Close the bead: `bd close <id> --reason "..."`. Then run
       `bd export -o .beads/issues.jsonl`.
-   8. Commit the code, docs, and `.beads/issues.jsonl` together. Include the
-      bead ID in the body of the commit message.
+   8. Commit the code, docs, and `.beads/issues.jsonl` together. Follow the commit
+      message style in `AGENTS.md`.
 4. Stop early and tell me if a bead is ambiguous, contradicts the plan or ticket, or
    can't pass `just ci` after a reasonable effort. Leave that bead open with a note
    (`bd update <id> --notes "..."`) explaining where you got stuck.

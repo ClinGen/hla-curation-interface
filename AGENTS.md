@@ -117,3 +117,18 @@ links to, if it has one. File work you discover outside a bead's scope as a new 
 instead of doing it. After changing beads, run `bd export -o .beads/issues.jsonl` so
 the export in git stays current. Don't commit, push, or run `bd dolt push` unless a
 prompt or I tell you to.
+
+## Commit Messages
+
+The first line of a commit message is a summary. On the web it's often styled as a
+heading, and in email it's usually the subject. Capitalize it and omit trailing
+punctuation. Aim for about 50 characters, or it may be truncated in some contexts. Write
+it, and the rest of the message, in the imperative: "Fix bug," not "Fixed bug" or "Fixes
+bug." Consistent wording makes a list of commits easier to read.
+
+Often a subject by itself is enough. When it isn't, add a blank line, then one or more
+paragraphs hard-wrapped to 72 characters. Git expects the author to supply line breaks;
+without them, command-line tools show each paragraph as one long line.
+
+Don't reference bead IDs, and don't add `Co-Authored-By` trailers or other AI
+attribution lines. The same goes for pull request descriptions.
