@@ -42,10 +42,6 @@ A 512×512 pixel PNG version of the application icon. It is used by Android Chro
 
 The application icon in the format expected by Apple devices. It is displayed when a user adds the site to their iOS home screen.
 
-### `hci/img/biorxiv-logo.png`
-
-The logo for bioRxiv, a preprint server for biology. It is displayed in the interface when linking to or citing bioRxiv preprints as evidence sources.
-
 ### `hci/img/car-logo.png`
 
 The logo for the Classification, Assertion, and Reporting (CAR) system or a related entity. It is used in the interface to identify that data source or partner organization.
@@ -73,10 +69,6 @@ The HLA Curation Interface logo in a circular crop. It is used in contexts that 
 ### `hci/img/hci-logo.png`
 
 The primary HLA Curation Interface logo. It is used in the application header and other branding contexts.
-
-### `hci/img/medrxiv-logo.png`
-
-The logo for medRxiv, a preprint server for health sciences. It is displayed in the interface when linking to or citing medRxiv preprints as evidence sources.
 
 ### `hci/img/mondo-logo.png`
 

@@ -92,7 +92,6 @@ def serialize_evidence(evidence: "Evidence") -> dict[str, Any]:
                 "title": evidence.publication.title,
                 "author": evidence.publication.author,
                 "pubmed_id": evidence.publication.pubmed_id,
-                "doi": evidence.publication.doi,
             }
             if evidence.publication
             else None

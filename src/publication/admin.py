@@ -6,7 +6,6 @@ from publication.models import Publication
 
 @admin.register(Publication)
 class PublicationAdmin(SimpleHistoryAdmin):
-    list_display = ["title", "author", "publication_type", "doi"]
-    list_filter = ["publication_type"]
-    search_fields = ["title", "author", "doi"]
+    list_display = ["title", "author", "pubmed_id"]
+    search_fields = ["title", "author", "pubmed_id"]
     readonly_fields = ["added_by", "added_at"]

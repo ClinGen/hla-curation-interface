@@ -176,7 +176,7 @@ Unit tests for the `Interval` class, verifying boundary inclusion and exclusion 
 
 ### `tests/test_models.py`
 
-Integration tests for the `Curation` and `Evidence` models. Tests cover default field values, score calculation for every scoring step (including GWAS vs. non-GWAS variants and the p-value comparator edge case), suggested classification thresholds, curation copying, and validation rules for publication type inclusion, allele resolution minimums, and the significant association/p-value consistency check.
+Integration tests for the `Curation` and `Evidence` models. Tests cover default field values, score calculation for every scoring step (including GWAS vs. non-GWAS variants and the p-value comparator edge case), suggested classification thresholds, curation copying, and validation rules for publication inclusion, allele resolution minimums, and the significant association/p-value consistency check.
 
 ### `tests/test_validators.py`
 
@@ -208,7 +208,7 @@ Defines `validate_status` (blocks status transitions that would require included
 
 ### `validators/models/evidence.py`
 
-Defines field-level validation functions called from `Evidence.clean()`, including p-value string parsing with comparator extraction, numeric string-to-Decimal conversion for effect size and CI fields, preprint publication inclusion prevention, allele resolution minimum enforcement, and the `has_association`/p-value consistency check.
+Defines field-level validation functions called from `Evidence.clean()`, including p-value string parsing with comparator extraction, numeric string-to-Decimal conversion for effect size and CI fields, allele resolution minimum enforcement, and the `has_association`/p-value consistency check.
 
 ### `validators/views.py`
 

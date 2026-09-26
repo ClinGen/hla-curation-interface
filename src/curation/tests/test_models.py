@@ -55,7 +55,7 @@ class TestCuration(TestCase):
             title="T",
             author="A",
             publication_year=2020,
-            publication_type="PUB",
+            pubmed_id="999999",
         )
         evidence = Evidence.objects.create(
             curation=self.curation, publication=pub, is_included=True
@@ -75,7 +75,7 @@ class TestCuration(TestCase):
             title="T2",
             author="A",
             publication_year=2020,
-            publication_type="PUB",
+            pubmed_id="999998",
         )
         from decimal import Decimal
 
@@ -98,7 +98,7 @@ class TestCuration(TestCase):
             title="T3",
             author="A",
             publication_year=2020,
-            publication_type="PUB",
+            pubmed_id="999997",
         )
         from decimal import Decimal
 
@@ -133,7 +133,7 @@ class TestCuration(TestCase):
             title="T4",
             author="A",
             publication_year=2020,
-            publication_type="PUB",
+            pubmed_id="999996",
         )
         from decimal import Decimal
 
@@ -558,34 +558,6 @@ class TestEvidence(TestCase):
         pubmed_publication = Publication.objects.get(pk=1)
         self.evidence.publication = pubmed_publication
         self.evidence.is_included = True
-        self.evidence.clean()  # Should not raise
-
-    def test_cannot_include_biorxiv_publication(self):
-        biorxiv_publication = Publication.objects.get(pk=2)
-        self.evidence.publication = biorxiv_publication
-        self.evidence.is_included = True
-        with self.assertRaises(ValidationError) as context:
-            self.evidence.clean()
-        self.assertIn("is_included", context.exception.message_dict)
-
-    def test_cannot_include_medrxiv_publication(self):
-        medrxiv_publication = Publication.objects.get(pk=3)
-        self.evidence.publication = medrxiv_publication
-        self.evidence.is_included = True
-        with self.assertRaises(ValidationError) as context:
-            self.evidence.clean()
-        self.assertIn("is_included", context.exception.message_dict)
-
-    def test_can_add_biorxiv_publication_without_including(self):
-        biorxiv_publication = Publication.objects.get(pk=2)
-        self.evidence.publication = biorxiv_publication
-        self.evidence.is_included = False
-        self.evidence.clean()  # Should not raise
-
-    def test_can_add_medrxiv_publication_without_including(self):
-        medrxiv_publication = Publication.objects.get(pk=3)
-        self.evidence.publication = medrxiv_publication
-        self.evidence.is_included = False
         self.evidence.clean()  # Should not raise
 
     def test_gwas_p_value_at_threshold_is_not_significant(self):

@@ -45,8 +45,8 @@ CAR ID for the given allele name.
 **EBI Ontology Lookup Service (OLS)** — queried when a new disease is created to
 retrieve the Mondo disease name and IRI.
 
-**PubMed E-utilities / bioRxiv / medRxiv APIs** — queried when a new publication is
-created to retrieve the title, primary author, and year.
+**PubMed E-utilities API** — queried when a new publication is created to retrieve the
+title, primary author, and year. Every publication is a PubMed article.
 
 All external calls happen synchronously at record-creation time. If an external API is
 unavailable, the creation fails gracefully with an error; no background job queue is
@@ -130,8 +130,7 @@ The `UserProfile.can_curate` property returns `True` only when both flags are se
 The UI is fully server-rendered Django templates with no client-side routing. JavaScript
 is used narrowly:
 
-- **HTMX** — partial page updates (e.g. toggling field visibility on the Create
-  Publication form based on publication type; live search on list pages).
+- **HTMX** — partial page updates (e.g. live search on list pages).
 - **Choices.js** — searchable multi-select and single-select inputs (e.g. the allele
   picker on the haplotype creation form).
 
@@ -182,11 +181,11 @@ before/after field-level diff.
 
 ### External API Availability
 
-The HCI depends on three external APIs at record-creation time (CAR, OLS, PubMed /
-bioRxiv/medRxiv). If any of these are unavailable, the creation request fails and the
-user is shown an error. There is no retry logic or fallback; the curator can try again
-later. This is intentional — a record with missing metadata (e.g. no CAR ID on an
-allele) would be misleading.
+The HCI depends on three external APIs at record-creation time (CAR, OLS, and PubMed).
+If any of these are unavailable, the creation request fails and the user is shown an
+error. There is no retry logic or fallback; the curator can try again later. This is
+intentional — a record with missing metadata (e.g. no CAR ID on an allele) would be
+misleading.
 
 ### Error Monitoring and Uptime
 

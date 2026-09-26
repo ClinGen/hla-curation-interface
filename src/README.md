@@ -72,9 +72,8 @@ details.
 
 ### `publication/`
 
-Django app that stores the publications that curations cite. Each `Publication` is
-either a PubMed article, a bioRxiv preprint, or a medRxiv preprint, with metadata
-fetched from PubMed's E-utilities API or the bioRxiv/medRxiv API. See
+Django app that stores the publications that curations cite. Curators can only add
+PubMed articles, with metadata fetched from PubMed's E-utilities API. See
 [`publication/README.md`](publication/README.md) for details.
 
 ### `repo/`

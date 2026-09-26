@@ -16,7 +16,6 @@ class PublicationTable(tables.Table):
     author = tables.Column()
     publication_year = tables.Column(verbose_name="Year")
     pubmed_id = tables.Column(verbose_name="PMID")
-    doi = tables.Column(verbose_name="DOI")
     updated_at = tables.DateColumn(verbose_name="Updated", format="Y-m-d")
 
     class Meta:
@@ -27,7 +26,6 @@ class PublicationTable(tables.Table):
             "author",
             "publication_year",
             "pubmed_id",
-            "doi",
             "updated_at",
         )
 

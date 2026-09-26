@@ -4,13 +4,6 @@ from django.http import HttpResponseBase
 from django.urls import reverse
 from simple_history.models import HistoricalRecords
 
-from publication.constants.models import PUBLICATION_TYPE_CHOICES, PublicationTypes
-from publication.validators.models import (
-    validate_publication_type_biorxiv,
-    validate_publication_type_medrxiv,
-    validate_publication_type_pubmed,
-)
-
 
 class Publication(models.Model):
     slug = models.SlugField(
@@ -19,33 +12,11 @@ class Publication(models.Model):
         verbose_name="Human-Readable ID",
         help_text="The human-readable ID for the object.",
     )
-    publication_type = models.CharField(
-        blank=False,
-        choices=PUBLICATION_TYPE_CHOICES,
-        default=PublicationTypes.PUBMED,
-        max_length=3,
-        verbose_name="Publication Type",
-        help_text=(
-            f"One of: '{PublicationTypes.PUBMED}' (PubMed), "
-            f"'{PublicationTypes.BIORXIV}' (bioRxiv), or "
-            f"'{PublicationTypes.MEDRXIV}' (medRxiv)."
-        ),
-    )
     pubmed_id = models.CharField(
-        blank=True,
-        null=True,
         max_length=16,  # Most (all?) PubMed IDs are 8 characters long.
         unique=True,
         verbose_name="PubMed ID",
         help_text="The PubMed ID for the publication, e.g., 11910336.",
-    )
-    doi = models.CharField(
-        blank=True,
-        null=True,
-        max_length=128,
-        unique=True,
-        verbose_name="Digital Object Identifier (DOI)",
-        help_text="The DOI for the publication, e.g., 10.1000/182.",
     )
     title = models.CharField(
         blank=True,
@@ -95,8 +66,7 @@ class Publication(models.Model):
 
     def __str__(self) -> str:
         title = self.title[:-1] if self.title.endswith(".") else self.title
-        identifier = f"PMID:{self.pubmed_id}" if self.pubmed_id else self.doi
-        return f"{title} ({identifier})."
+        return f"{title} (PMID:{self.pubmed_id})."
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
@@ -106,9 +76,3 @@ class Publication(models.Model):
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         return reverse("publication-detail", kwargs={"slug": self.slug})
-
-    def clean(self) -> None:
-        super().clean()
-        validate_publication_type_pubmed(self)
-        validate_publication_type_biorxiv(self)
-        validate_publication_type_medrxiv(self)

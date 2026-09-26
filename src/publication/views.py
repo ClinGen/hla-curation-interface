@@ -14,15 +14,10 @@ from common.tables import HistoryTable
 from common.views import SearchListView
 from publication.clients import (
     fetch_pubmed_data,
-    fetch_rxiv_data,
     get_pubmed_author,
     get_pubmed_title,
     get_pubmed_year,
-    get_rxiv_author,
-    get_rxiv_title,
-    get_rxiv_year,
 )
-from publication.constants.models import PublicationTypes
 from publication.forms import PublicationForm
 from publication.models import Publication
 from publication.tables import PublicationTable
@@ -35,28 +30,14 @@ class PublicationCreate(ProtectedViewMixin, CreateView):
     success_url = reverse_lazy("publication-list")
 
     def form_valid(self, form: PublicationForm) -> HttpResponse:
-        if form.instance.publication_type == PublicationTypes.PUBMED:
-            pubmed_data = fetch_pubmed_data(form.instance.pubmed_id)
-            if pubmed_data:
-                form.instance.author = get_pubmed_author(pubmed_data)
-                form.instance.title = get_pubmed_title(pubmed_data)
-                form.instance.publication_year = get_pubmed_year(pubmed_data)
-                form.instance.added_by = self.request.user
-                messages.success(self.request, "Publication created.")
-                return super().form_valid(form)
-        elif (
-            form.instance.publication_type == PublicationTypes.BIORXIV
-            or form.instance.publication_type == PublicationTypes.MEDRXIV
-        ):
-            rxiv_data = fetch_rxiv_data(
-                form.instance.publication_type, form.instance.doi
-            )
-            if rxiv_data:
-                form.instance.author = get_rxiv_author(rxiv_data)
-                form.instance.title = get_rxiv_title(rxiv_data)
-                form.instance.publication_year = get_rxiv_year(rxiv_data)
-                form.instance.added_by = self.request.user
-                return super().form_valid(form)
+        pubmed_data = fetch_pubmed_data(form.instance.pubmed_id)
+        if pubmed_data:
+            form.instance.author = get_pubmed_author(pubmed_data)
+            form.instance.title = get_pubmed_title(pubmed_data)
+            form.instance.publication_year = get_pubmed_year(pubmed_data)
+            form.instance.added_by = self.request.user
+            messages.success(self.request, "Publication created.")
+            return super().form_valid(form)
         message = (
             "Oops, something went wrong trying to fetch data. Please try again later."
         )
@@ -105,5 +86,5 @@ class PublicationList(ProtectedViewMixin, SearchListView):  # ty: ignore[invalid
     template_name = "publication/list.html"
     ordering = ["-updated_at"]
     table_class = PublicationTable
-    search_fields = ["slug", "title", "author", "doi", "pubmed_id"]
+    search_fields = ["slug", "title", "author", "pubmed_id"]
     table_pagination = {"per_page": 25}

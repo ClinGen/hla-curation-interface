@@ -59,7 +59,6 @@ from curation.validators.models.evidence import (
     validate_num_fields,
     validate_odds_ratio_string,
     validate_p_value_string,
-    validate_preprint_not_included,
     validate_publication,
     validate_relative_risk_string,
 )
@@ -661,7 +660,6 @@ class Evidence(models.Model):
 
     def clean(self) -> None:
         validate_publication(self)
-        validate_preprint_not_included(self)
         validate_num_fields(self)
         validate_p_value_string(self)
         validate_has_association_and_p_value(self)

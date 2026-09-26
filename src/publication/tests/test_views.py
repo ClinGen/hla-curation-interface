@@ -14,12 +14,11 @@ class PublicationCreateTest(ProtectedViewTestMixin, TestCase):
     page_name = "Add Publication"
     expected_text = [
         "Add Publication",
-        "Publication Type",
-        "PubMed Article",
-        "bioRxiv Paper",
-        "medRxiv Paper",
         "PubMed ID",
-        "DOI",
+        (
+            "Do not use PubMed IDs of preprint articles, only enter PubMed IDs of "
+            "peer-reviewed publications."
+        ),
         "Submit",
     ]
 
@@ -27,12 +26,19 @@ class PublicationCreateTest(ProtectedViewTestMixin, TestCase):
         super().setUp()
         self.client.force_login(self.user4_yes_phi_yes_perms)
 
+    def test_has_no_preprint_inputs(self):
+        response = self.client.get(self.url)
+        self.assertNotContains(response, 'name="publication_type"')
+        self.assertNotContains(response, 'name="doi"')
+        self.assertNotContains(response, "bioRxiv Paper")
+        self.assertNotContains(response, "medRxiv Paper")
+
     @patch("publication.views.fetch_pubmed_data")
     def test_creates_pubmed_publication_with_valid_form_data(
         self, mock_fetch_pubmed_data: MagicMock
     ):
         initial_publication_count = Publication.objects.count()
-        data = {"publication_type": "PUB", "pubmed_id": "123"}
+        data = {"pubmed_id": "123"}
         mock_pubmed_response = """
 <PubmedArticleSet>
   <PubmedArticle>
@@ -61,70 +67,15 @@ class PublicationCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(Publication.objects.count(), initial_publication_count + 1)
         new_publication = Publication.objects.first()
         assert new_publication is not None
-        self.assertEqual(new_publication.publication_type, "PUB")
         self.assertEqual(new_publication.pubmed_id, "123")
         self.assertEqual(new_publication.added_by, self.user4_yes_phi_yes_perms)
         self.assertEqual(new_publication.author, "Oak")
         self.assertEqual(new_publication.title, "Common diseases in Pokémon")
         self.assertEqual(new_publication.publication_year, 1999)
 
-    @patch("publication.views.fetch_rxiv_data")
-    def test_creates_biorxiv_publication_with_valid_form_data(
-        self, mock_fetch_rxiv_data: MagicMock
-    ):
-        initial_publication_count = Publication.objects.count()
-        data = {"publication_type": "BIO", "doi": "10.1101/123"}
-        mock_fetch_rxiv_data.return_value = {
-            "collection": [
-                {
-                    "title": "Common diseases in Pokémon",
-                    "authors": "Oak, P.; Birch, P.",
-                    "date": "2020-05-15",
-                }
-            ]
-        }
-        response = self.client.post(self.url, data)
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(Publication.objects.count(), initial_publication_count + 1)
-        new_publication = Publication.objects.first()
-        assert new_publication is not None
-        self.assertEqual(new_publication.publication_type, "BIO")
-        self.assertEqual(new_publication.doi, "10.1101/123")
-        self.assertEqual(new_publication.added_by, self.user4_yes_phi_yes_perms)
-        self.assertEqual(new_publication.author, "Oak, P.")
-        self.assertEqual(new_publication.title, "Common diseases in Pokémon")
-        self.assertEqual(new_publication.publication_year, 2020)
-
-    @patch("publication.views.fetch_rxiv_data")
-    def test_creates_medrxiv_publication_with_valid_form_data(
-        self, mock_fetch_rxiv_data: MagicMock
-    ):
-        initial_publication_count = Publication.objects.count()
-        data = {"publication_type": "MED", "doi": "10.1101/456"}
-        mock_fetch_rxiv_data.return_value = {
-            "collection": [
-                {
-                    "title": "Diseases in Johto region Pokémon",
-                    "authors": "Elm, P.; Juniper, P.",
-                    "date": "2021-03-20",
-                }
-            ]
-        }
-        response = self.client.post(self.url, data)
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(Publication.objects.count(), initial_publication_count + 1)
-        new_publication = Publication.objects.first()
-        assert new_publication is not None
-        self.assertEqual(new_publication.publication_type, "MED")
-        self.assertEqual(new_publication.doi, "10.1101/456")
-        self.assertEqual(new_publication.added_by, self.user4_yes_phi_yes_perms)
-        self.assertEqual(new_publication.author, "Elm, P.")
-        self.assertEqual(new_publication.title, "Diseases in Johto region Pokémon")
-        self.assertEqual(new_publication.publication_year, 2021)
-
     def test_does_not_create_publication_with_invalid_form_data(self):
         initial_publication_count = Publication.objects.count()
-        data = {"publication_type": ""}  # The publication_type field is required.
+        data = {"pubmed_id": ""}  # The pubmed_id field is required.
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "publication/create.html")
@@ -134,6 +85,18 @@ class PublicationCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertIn("pubmed_id", form.errors)
         self.assertContains(response, "This field is required.")
         self.assertEqual(Publication.objects.count(), initial_publication_count)
+
+    @patch("publication.views.fetch_pubmed_data")
+    def test_does_not_create_preprint_publication(
+        self, mock_fetch_pubmed_data: MagicMock
+    ):
+        initial_publication_count = Publication.objects.count()
+        data = {"publication_type": "BIO", "doi": "10.1101/123"}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("pubmed_id", response.context["form"].errors)
+        self.assertEqual(Publication.objects.count(), initial_publication_count)
+        mock_fetch_pubmed_data.assert_not_called()
 
 
 class PublicationDetailTest(ProtectedViewTestMixin, TestCase):
@@ -145,7 +108,6 @@ class PublicationDetailTest(ProtectedViewTestMixin, TestCase):
         "Diseases in grass type Pokémon in the Kanto region",
         "Oak",
         "123",
-        "10.1000/123",
         "1990-01-01",
     ]
 
@@ -165,13 +127,11 @@ class PublicationListTest(ProtectedViewTestMixin, TestCase):
         "Author",
         "Year",
         "PMID",
-        "DOI",
         "Updated",
         "P000001",
         "Diseases in grass type Pokémon in the Kanto region",
         "Oak",
         "123",
-        "10.1000/123",
         "1990-01-01",
     ]
 

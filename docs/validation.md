@@ -30,12 +30,10 @@ name and IRI. If the lookup fails, the disease is not saved.
 
 ### Publication
 
-Each publication must be one of three types (PubMed article, bioRxiv preprint, or
-medRxiv preprint), and the system requires the appropriate identifier for that type: a
-PubMed ID for PubMed articles, or a DOI for preprints. Once the identifier is provided,
-the system fetches the title, primary author, and publication year from the relevant
-external API automatically. If the lookup fails, the publication is not saved. Duplicate
-identifiers are also rejected.
+Every publication is a PubMed article, so a PubMed ID is required. Once it is provided,
+the system fetches the title, primary author, and publication year from PubMed
+automatically. If the lookup fails, the publication is not saved. Duplicate PubMed IDs
+are also rejected.
 
 ### Curation
 
@@ -50,15 +48,14 @@ published to HLArepo, it becomes read-only and cannot be edited.
 ### Evidence
 
 Evidence records carry the most validation because they encode the detailed scoring data
-from the HLA framework. Key checks include: a preprint publication cannot be marked as
-included for scoring; the allele resolution reported in the study cannot be lower than
-the resolution of the allele or haplotype being curated; p-values must be entered in a
-recognized format and are rejected if they use unsupported comparators; a curator cannot
-mark a significant association unless a p-value is present and meets the significance
-threshold for the study type (GWAS or non-GWAS); only one effect size statistic (odds
-ratio, relative risk, or beta coefficient) may be active at a time; and demographics
-must be provided if the typing method is imputation. Evidence belonging to a published
-curation is also read-only.
+from the HLA framework. Key checks include: the allele resolution reported in the study
+cannot be lower than the resolution of the allele or haplotype being curated; p-values
+must be entered in a recognized format and are rejected if they use unsupported
+comparators; a curator cannot mark a significant association unless a p-value is present
+and meets the significance threshold for the study type (GWAS or non-GWAS); only one
+effect size statistic (odds ratio, relative risk, or beta coefficient) may be active at
+a time; and demographics must be provided if the typing method is imputation. Evidence
+belonging to a published curation is also read-only.
 
 ## Nitty-Gritty Details
 
@@ -127,25 +124,14 @@ are never user-entered.
 
 ### Publication
 
-**DB model** (`src/publication/models.py`): delegates to three model validators in
-`clean()`.
+**DB model** (`src/publication/models.py`): `pubmed_id` is required and has
+`unique=True` at the DB level. There is no custom `clean()`.
 
-**Model validators** (`src/publication/validators/models.py`):
+**Form** (`PublicationForm`): exposes only `pubmed_id`.
 
-- `validate_publication_type_pubmed`: type=PubMed requires a non-empty `pubmed_id`.
-- `validate_publication_type_biorxiv`: type=bioRxiv requires a non-empty `doi`.
-- `validate_publication_type_medrxiv`: type=medRxiv requires a non-empty `doi`.
-
-Each raises a field-specific `ValidationError`. The `pubmed_id` and `doi` fields also
-have `unique=True` at the DB level.
-
-**Form** (`PublicationForm`): exposes `publication_type`, `doi`, `pubmed_id`. The
-`publication_type` is rendered as radio buttons.
-
-**View** (`PublicationCreate.form_valid`): branches on type to call either the PubMed
-E-utilities API or the bioRxiv/medRxiv API. If the API fails, the save is aborted. The
-`title`, `author`, and `publication_year` fields are always populated from the external
-API, never from user input.
+**View** (`PublicationCreate.form_valid`): calls the PubMed E-utilities API. If the API
+fails, the save is aborted. The `title`, `author`, and `publication_year` fields are
+always populated from the external API, never from user input.
 
 ### Curation
 
@@ -182,13 +168,11 @@ API, never from user input.
 This is the most heavily validated entity, reflecting the complexity of the HLA scoring
 framework.
 
-**DB model** (`src/curation/models.py`): delegates to 11 validators in `clean()`.
+**DB model** (`src/curation/models.py`): delegates to 10 validators in `clean()`.
 
 **Model validators** (`src/curation/validators/models/evidence.py`):
 
 - `validate_publication`: publication FK must not be None.
-- `validate_preprint_not_included`: If `is_included=True` and the publication is bioRxiv
-  or medRxiv, raises a `ValidationError`. Preprints cannot be counted toward scoring.
 - `validate_num_fields`: If `num_fields` is set, it must be >= the minimum resolution
   implied by the allele/haplotype name (colon count + 1). For haplotypes, uses the
   minimum across all constituent alleles.

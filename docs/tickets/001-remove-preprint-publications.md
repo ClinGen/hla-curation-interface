@@ -50,13 +50,16 @@ It doesn't make sense until Open Question 2 is answered.
 1. Should the bioRxiv/medRxiv client code (`fetch_rxiv_data`, `get_rxiv_title`,
    `get_rxiv_author`, `get_rxiv_year`, `BIORXIV_URL`, `MEDRXIV_URL`) and its contract
    tests be deleted, or kept in case preprints come back? Recommendation: delete them,
-   since git history keeps them. This blocks Step 3.
+   since git history keeps them. This blocks Step 3. **Answer (2026-09-25): Delete
+   them.** Preprints aren't expected to come back.
 2. What should happen to preprint publications that already exist in production? The
    local dev database (`src/hci.db`) has 400 `BIO` and 400 `MED` rows, but those look
    like seed data. Production counts are unknown. Options: (a) keep them as legacy rows
    (the default in this ticket), (b) also hide them from the Add Evidence publication
    dropdown (`EvidenceCreateForm`), or (c) delete them. This blocks Step 4, which only
-   happens if the answer is (b).
+   happens if the answer is (b). **Answer (2026-09-25): (c) Delete them.** The user
+   expects none in the test or production database. Step 4 is skipped in favor of
+   Step 5.
 
 ## Detailed Implementation
 
@@ -147,6 +150,52 @@ Fixtures: `src/publication/fixtures/test_publications.json` keeps its `BIO`/`MED
 because `src/curation/tests/test_models.py`
 (`test_cannot_include_biorxiv_publication` and related tests) uses them to exercise the
 legacy-preprint validator.
+
+### Step 5 — Delete preprint publications (the answer to OQ 2)
+
+#### `src/publication/migrations/0004_delete_preprint_publications.py` — create
+
+A `RunPython` data migration that deletes `Publication` rows whose type is `BIO` or
+`MED`. `Evidence.publication` uses `on_delete=CASCADE`, so deleting a cited preprint
+would silently delete its evidence. Instead, the migration raises a `RuntimeError`
+listing the cited preprints' slugs, which rolls the migration back. The reverse is a
+no-op. The migration depends on the latest curation migration so that `Evidence` is in
+the migration state. Historical publication records are kept.
+
+#### `src/publication/tests/test_migrations.py` — create
+
+Test that the migration function deletes the `BIO`/`MED` fixture rows and keeps the
+`PUB` row, and that it raises and deletes nothing when evidence cites a preprint.
+
+The model's `BIO`/`MED` choices, their validators, and `validate_preprint_not_included`
+stay for now, so the fixtures and curation tests are unchanged.
+
+### Step 6 — Remove `publication_type`, `doi`, and the preprint validators
+
+After Step 5, the user decided (2026-09-25) to remove the preprint leftovers too. No
+evidence cites a preprint on the test or production site.
+
+#### `src/publication/migrations/0005_remove_publication_type_and_doi.py` — create
+
+Removes `publication_type` and `doi` from `Publication` and `HistoricalPublication` and
+makes `pubmed_id` non-null and required. Before altering `pubmed_id`, a `RunPython`
+step deletes historical records with no PubMed ID (the history of the preprints
+deleted in Step 5), since they would block the `NOT NULL` change.
+
+#### Code — modify or delete
+
+Delete `src/publication/constants/` (`PublicationTypes`, `PUBLICATION_TYPE_CHOICES`),
+`src/publication/validators/` (the per-type validators), and curation's
+`validate_preprint_not_included`. Remove `doi` from the admin, the list table, the list
+search fields, the detail template, and the repo serializer's evidence publication.
+`PublicationForm` no longer needs to override `required`. The fixture keeps only the
+`PUB` row, and the preprint tests in `src/curation/tests/test_models.py` are deleted.
+
+#### Tests
+
+`src/publication/tests/test_migrations.py` now runs 0004 against the migration state
+before it, since the current model has no `publication_type`. New
+`src/publication/tests/test_models.py` checks that `pubmed_id` is required.
 
 ## Sources
 

@@ -25,56 +25,13 @@
 
         <form method="post">{% csrf_token %}
             {{ form.non_field_errors }}
-            {% with field=form.publication_type %}
-                {% include "common/form/input/radio.html" %}
+            {% with field=form.pubmed_id %}
+                {% include "common/form/input/text.html" with show_help=True %}
             {% endwith %}
-            <div id="pubmed-div">
-                {% with field=form.pubmed_id %}
-                    {% include "common/form/input/text.html" with show_help=True %}
-                {% endwith %}
-            </div>
-            <div id="doi-div">
-                {% with field=form.doi %}
-                    {% include "publication/partials/rxiv_warning.html" %}
-                    {% include "common/form/input/text.html" with show_help=True %}
-                {% endwith %}
-            </div>
             <button type="submit" class="button is-link mt-3">
                 Submit
             </button>
         </form>
 
     </div>
-    <script>
-        document.addEventListener("htmx:load", () => {
-            const pubmedDiv = document.getElementById("pubmed-div");
-            function togglePubmedDivVisibility() {
-                const selectedValue = document.querySelector("input[name='publication_type']:checked")?.value;
-                if (selectedValue === "BIO" || selectedValue === "MED") {
-                    pubmedDiv.style.display = "none";
-                } else {
-                    pubmedDiv.style.display = "block";
-                }
-            }
-
-            const doiDiv = document.getElementById("doi-div");
-            function toggleDoiDivVisibility() {
-                const selectedValue = document.querySelector("input[name='publication_type']:checked")?.value;
-                if (selectedValue === "PUB") {
-                    doiDiv.style.display = "none";
-                } else {
-                    doiDiv.style.display = "block";
-                }
-            }
-
-            const publicationTypeRadios = document.querySelectorAll("input[name='publication_type']");
-            for(const radio of publicationTypeRadios) {
-                radio.addEventListener("change", togglePubmedDivVisibility);
-                radio.addEventListener("change", toggleDoiDivVisibility);
-            }
-
-            togglePubmedDivVisibility();
-            toggleDoiDivVisibility();
-        });
-    </script>
 {% endblock %}
