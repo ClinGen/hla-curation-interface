@@ -1,5 +1,47 @@
 # Stable IDs Instead of HCI IDs
 
+> **Needs rethinking (2026-09-25).** This plan was written before preprints were
+> removed (`docs/tickets/001-remove-preprint-publications.md`). Every publication now
+> has a required, unique `pubmed_id` and no `doi`, so the "PMID or DOI" handling below
+> is out of date. The user also wants to rethink URLs and IDs for every entity, not
+> just diseases and publications, including whether curation IDs should change. Settle
+> the questions in "Rethinking the ID Scheme" before breaking this down further. The
+> Detailed Implementation section still reflects the original, narrower scope.
+
+## Rethinking the ID Scheme
+
+Ideas from the user, not yet decided:
+
+- **Publications:** use the PMID as the primary ID, in the URL and in the display.
+- **Diseases:** use the Mondo ID.
+- **Alleles and haplotypes:** use something similar, such as the CAR ID or the allele
+  name for alleles, and a key derived from the member alleles for haplotypes.
+- **Curations:** build the ID from the pair being curated, allele and disease or
+  haplotype and disease, so the ID says what the curation is about. Because the same
+  pair can be curated more than once (for example, a copy made to recurate), append a
+  UUID or other suffix to keep IDs unique.
+
+Questions to settle:
+
+1. **Allele key.** CAR ID (nullable today, so it would need to become required) or the
+   allele name (contains `*` and `:`)? See Open Question 3.
+2. **Haplotype key.** Haplotypes have no external ID. Is a key built from the member
+   alleles' keys acceptable, and how long can it get?
+3. **Curation ID format.** What does a combined ID look like in a URL, for example
+   `<allele key>-<Mondo ID>-<suffix>`? Is the suffix a full UUID, a short random string,
+   or a counter per pair? Is it still readable enough to say out loud or type into an
+   issue, which curators do with C numbers today (#77)?
+4. **Changing keys.** If a curation's ID includes its allele and disease, what happens
+   when a curator changes either one before publishing? Is the ID fixed at creation?
+5. **Evidence IDs.** Do evidence records keep `E` numbers, or get a key scoped to their
+   curation?
+6. **Published curations.** Published curations are already public by C number. Do
+   they keep their C numbers, with the new scheme only for new curations, or get new
+   IDs with permanent redirects from the old URLs and a JSON version bump?
+7. **Primary keys.** This plan keeps integer primary keys and changes only URLs and
+   display. Is that still the approach, or should any external ID become the database
+   key?
+
 ## The Problem
 
 Every major model in the HCI has an "HCI ID": a `slug` field (verbose name
