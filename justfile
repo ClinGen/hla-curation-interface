@@ -307,13 +307,13 @@ alias anfc := ansible-format-check
 # Check the Ansible YAML for lint errors. ----------------------------
 [group('ansible')]
 ansible-lint:
-    cd infra/ansible && ansible-lint
+    cd infra/ansible && uv run ansible-lint
 alias anlt := ansible-lint
 
 # Try to fix lint errors in the Ansible YAML. ------------------------
 [group('ansible')]
 ansible-lint-fix:
-    cd infra/ansible && ansible-lint --fix
+    cd infra/ansible && uv run ansible-lint --fix
 alias anlf := ansible-lint-fix
 
 #=====================================================================
