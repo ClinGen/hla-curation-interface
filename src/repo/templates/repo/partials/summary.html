@@ -47,11 +47,7 @@
         <tr>
             <td>Classification</td>
             <td>
-                {% if curation.ep_classification %}
-                    <span class="tag">{{ curation.get_ep_classification_display }}</span>
-                {% else %}
-                    ------
-                {% endif %}
+                {{ curation.get_ep_classification_display|default:"------" }}
             </td>
         </tr>
         <tr>
@@ -66,7 +62,8 @@
     </table>
 </div>
 
-<div class="box">
-    <h2 class="title is-5">Evidence Summary</h2>
-    <p>{{ curation.ep_evidence_summary|default:"------"|linebreaksbr }}</p>
-</div>
+<h2 class="title is-4">Evidence Summary</h2>
+<p class="block">{{ curation.ep_evidence_summary|default:"------"|linebreaksbr }}</p>
+
+<h3 class="title is-5">Additional Notes</h3>
+<p class="block">{{ curation.ep_additional_notes|default:"------"|linebreaksbr }}</p>

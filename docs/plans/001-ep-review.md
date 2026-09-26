@@ -809,7 +809,9 @@ in `custom.css` later if the panel finds `title` too subtle.
    stay internal? This plan assumes the evidence summary, classification, panel, and
    review date are public, and the other two are internal. It also assumes
    `needs_review` and the evidence `*_notes` fields stay internal. *Blocks Step 7, and
-   the public/private split in Steps 3 and 6.*
+   the public/private split in Step 3.* **Partly answered:** `ep_additional_notes` is
+   public. The repo page shows it under an "Additional Notes" heading, and the JSON
+   export keeps it. `ep_override_reason` is still open.
 3. **Does "standardized" in #85 mean templated text?** The issue title is "Standardized
    Evidence Summary Text." This plan treats that as free text entered by the reviewer.
    If the panel wants a generated starting template (for example, "HLA-X has a {class}
@@ -1071,7 +1073,8 @@ A table showing: HCI Curation ID; allele (with CAR linkout via `common/linkout.h
 member allele and its CAR linkout); disease (with Mondo linkout via `Disease.iri`,
 falling back to plain `mondo_id` text); classification (from the Step 4 partial);
 expert panel; EP review date; and published date (`published.published_at`). Below the
-table, render the evidence summary in its own `box` with an "Evidence Summary" heading.
+table, render an "Evidence Summary" heading with the evidence summary in a `<p>`, then
+a smaller "Additional Notes" heading with `ep_additional_notes` in a `<p>`.
 
 ##### `src/repo/templates/repo/detail.html` — modify
 
@@ -1094,8 +1097,7 @@ Add `"iri"` to the disease dict and `"car_id"` to each haplotype allele.
 
 In `src/repo/tests.py`, add to `PublishedCurationDetailViewTest`: the evidence summary
 text appears; the CAR link appears for an allele curation; the Mondo IRI link appears;
-each haplotype allele's CAR link appears; `ep_additional_notes` doesn't appear (subject
-to Open Question 2). In `JSONDownloadViewTest`, check for the disease `iri` and the
+each haplotype allele's CAR link appears; `ep_additional_notes` appears. In `JSONDownloadViewTest`, check for the disease `iri` and the
 haplotype allele `car_id`.
 
 Add `templates/repo/partials/summary.html` to `src/repo/README.md` and update the

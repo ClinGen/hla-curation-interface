@@ -260,12 +260,21 @@ class PublishedCurationDetailViewTest(TestCase):
                 f'href="https://reg.clinicalgenome.org/allele/ui/hla/id/{car_id}"',
             )
 
-    def test_does_not_display_additional_notes(self):
-        self.curation.ep_additional_notes = "Private panel note."
+    def test_displays_additional_notes(self):
+        self.curation.ep_additional_notes = "Panel note."
         self.curation.save()
         url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
         response = self.client.get(url)
-        self.assertNotContains(response, "Private panel note.")
+        self.assertContains(response, "Additional Notes")
+        self.assertContains(response, "Panel note.")
+
+    def test_linkout_has_no_space_inside_parentheses(self):
+        url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
+        response = self.client.get(url)
+        self.assertContains(
+            response, '(<a href="http://purl.obolibrary.org/obo/MONDO_123"'
+        )
+        self.assertContains(response, "</a>)")
 
 
 class JSONDownloadViewTest(TestCase):

@@ -36,7 +36,7 @@ Renders the detail page for a published curation, including supersession and cop
 
 ### `templates/repo/partials/summary.html`
 
-Renders the public summary of a published curation: the curation ID, the allele (or haplotype and each member allele) with ClinGen Allele Registry linkouts, the disease with a Mondo linkout, the EP classification, the expert panel, the published date, and an "Evidence Summary" box. It deliberately omits the EP additional notes.
+Renders the public summary of a published curation: the curation ID, the allele (or haplotype and each member allele) with ClinGen Allele Registry linkouts, the disease with a Mondo linkout, the EP classification, the expert panel, the published date, the "Evidence Summary" heading and text, and the EP additional notes under a smaller heading.
 
 ### `templates/repo/history.html`
 
