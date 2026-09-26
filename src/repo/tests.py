@@ -13,6 +13,7 @@ from curation.constants.models.common import Status
 from curation.constants.models.curation import CurationTypes
 from curation.models import Curation
 from disease.models import Disease
+from haplotype.models import Haplotype
 from repo.models import PublishedCuration
 
 
@@ -189,7 +190,7 @@ class RepoSearchViewTest(TestCase):
 
 
 class PublishedCurationDetailViewTest(TestCase):
-    fixtures = ["test_alleles.json", "test_diseases.json"]
+    fixtures = ["test_alleles.json", "test_diseases.json", "test_haplotypes.json"]
 
     def setUp(self):
         self.client = Client()
@@ -220,9 +221,55 @@ class PublishedCurationDetailViewTest(TestCase):
         self.assertContains(response, self.curation.slug)
         self.assertContains(response, "Download as JSON")
 
+    def test_displays_evidence_summary(self):
+        self.curation.ep_evidence_summary = "The panel found strong evidence."
+        self.curation.save()
+        url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
+        response = self.client.get(url)
+        self.assertContains(response, "Evidence Summary")
+        self.assertContains(response, "The panel found strong evidence.")
+
+    def test_displays_car_linkout_for_allele(self):
+        url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
+        response = self.client.get(url)
+        self.assertContains(
+            response, 'href="https://reg.clinicalgenome.org/allele/ui/hla/id/XAHLA123"'
+        )
+
+    def test_displays_mondo_linkout(self):
+        url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
+        response = self.client.get(url)
+        self.assertContains(response, 'href="http://purl.obolibrary.org/obo/MONDO_123"')
+        self.assertContains(response, "MONDO:123")
+
+    def test_displays_car_linkout_for_each_haplotype_allele(self):
+        haplotype = Haplotype.objects.get(pk=1)
+        curation = Curation.objects.create(
+            curation_type=CurationTypes.HAPLOTYPE,
+            haplotype=haplotype,
+            disease=Disease.objects.get(pk=1),
+            status=Status.PUBLISHED,
+        )
+        PublishedCuration.objects.create(curation=curation)
+        url = reverse("repo-detail", kwargs={"curation_slug": curation.slug})
+        response = self.client.get(url)
+        self.assertContains(response, haplotype.display_name)
+        for car_id in ("XAHLA123", "XAHLA456"):
+            self.assertContains(
+                response,
+                f'href="https://reg.clinicalgenome.org/allele/ui/hla/id/{car_id}"',
+            )
+
+    def test_does_not_display_additional_notes(self):
+        self.curation.ep_additional_notes = "Private panel note."
+        self.curation.save()
+        url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
+        response = self.client.get(url)
+        self.assertNotContains(response, "Private panel note.")
+
 
 class JSONDownloadViewTest(TestCase):
-    fixtures = ["test_alleles.json", "test_diseases.json"]
+    fixtures = ["test_alleles.json", "test_diseases.json", "test_haplotypes.json"]
 
     def setUp(self):
         self.client = Client()
@@ -269,6 +316,29 @@ class JSONDownloadViewTest(TestCase):
         self.assertEqual(
             data["published_curations"][0]["curation_id"], self.curation.slug
         )
+
+    def test_json_includes_disease_iri(self):
+        url = reverse(
+            "repo-download-single", kwargs={"curation_slug": self.curation.slug}
+        )
+        data = json.loads(self.client.get(url).content)
+        self.assertEqual(
+            data["curation"]["curation"]["disease"]["iri"],
+            "http://purl.obolibrary.org/obo/MONDO_123",
+        )
+
+    def test_json_includes_haplotype_allele_car_id(self):
+        curation = Curation.objects.create(
+            curation_type=CurationTypes.HAPLOTYPE,
+            haplotype=Haplotype.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+            status=Status.PUBLISHED,
+        )
+        PublishedCuration.objects.create(curation=curation)
+        url = reverse("repo-download-single", kwargs={"curation_slug": curation.slug})
+        data = json.loads(self.client.get(url).content)
+        alleles = data["curation"]["curation"]["haplotype"]["alleles"]
+        self.assertEqual(sorted(a["car_id"] for a in alleles), ["XAHLA123", "XAHLA456"])
 
 
 class ReadOnlyEnforcementTest(TestCase):

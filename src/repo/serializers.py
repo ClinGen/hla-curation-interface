@@ -34,7 +34,7 @@ def serialize_published_curation(published: "PublishedCuration") -> dict[str, An
                 "name": curation.haplotype.name,
                 "slug": curation.haplotype.slug,
                 "alleles": [
-                    {"name": a.name, "slug": a.slug}
+                    {"name": a.name, "slug": a.slug, "car_id": a.car_id}
                     for a in curation.haplotype.alleles.all()
                 ],
             },
@@ -60,6 +60,7 @@ def serialize_published_curation(published: "PublishedCuration") -> dict[str, An
                 {
                     "name": curation.disease.name,
                     "mondo_id": curation.disease.mondo_id,
+                    "iri": curation.disease.iri,
                     "slug": curation.disease.slug,
                 }
                 if curation.disease

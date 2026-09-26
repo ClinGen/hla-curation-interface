@@ -1,0 +1,72 @@
+<div class="block table-container mt-4">
+    <table class="table">
+        <tbody>
+        <tr>
+            <td>HCI Curation ID</td>
+            <td>{{ curation.slug }}</td>
+        </tr>
+        {% if curation.curation_type == "ALL" %}
+            <tr>
+                <td>Allele</td>
+                <td>
+                    {{ curation.allele }}
+                    {% if curation.allele.car_id %}
+                        ({% with url="https://reg.clinicalgenome.org/allele/ui/hla/id/"|add:curation.allele.car_id text=curation.allele.car_id %}{% include "common/linkout.html" %}{% endwith %})
+                    {% endif %}
+                </td>
+            </tr>
+        {% elif curation.curation_type == "HAP" %}
+            <tr>
+                <td>Haplotype</td>
+                <td>
+                    {{ curation.haplotype }}
+                    <ul>
+                        {% for allele in curation.haplotype.alleles.all %}
+                            <li>
+                                {{ allele }}
+                                {% if allele.car_id %}
+                                    ({% with url="https://reg.clinicalgenome.org/allele/ui/hla/id/"|add:allele.car_id text=allele.car_id %}{% include "common/linkout.html" %}{% endwith %})
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+        {% endif %}
+        <tr>
+            <td>Disease</td>
+            <td>
+                {{ curation.disease }}
+                {% if curation.disease.iri %}
+                    ({% with url=curation.disease.iri text=curation.disease.mondo_id %}{% include "common/linkout.html" %}{% endwith %})
+                {% elif curation.disease.mondo_id %}
+                    ({{ curation.disease.mondo_id }})
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>Classification</td>
+            <td>
+                {% if curation.ep_classification %}
+                    <span class="tag">{{ curation.get_ep_classification_display }}</span>
+                {% else %}
+                    ------
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>Expert Panel</td>
+            <td>{{ curation.ep|default:"------" }}</td>
+        </tr>
+        <tr>
+            <td>Published</td>
+            <td>{{ published.published_at|date:"Y-m-d" }}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="box">
+    <h2 class="title is-5">Evidence Summary</h2>
+    <p>{{ curation.ep_evidence_summary|default:"------"|linebreaksbr }}</p>
+</div>

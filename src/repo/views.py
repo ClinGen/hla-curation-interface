@@ -79,7 +79,9 @@ class PublishedCurationDetail(DetailView):
         """
         curation_slug = self.kwargs.get("curation_slug")
         return get_object_or_404(
-            PublishedCuration,
+            PublishedCuration.objects.select_related(
+                "curation__allele", "curation__haplotype", "curation__disease"
+            ).prefetch_related("curation__haplotype__alleles"),
             curation__slug=curation_slug,
         )
 

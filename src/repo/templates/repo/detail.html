@@ -47,7 +47,7 @@
             </div>
         {% endif %}
 
-        {% include "curation/partials/curation/detail_table.html" with object=curation %}
+        {% include "repo/partials/summary.html" with published=object %}
 
         <div class="buttons">
             <a href="{% url 'repo-download-single' curation.slug %}"
