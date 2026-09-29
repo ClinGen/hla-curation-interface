@@ -126,6 +126,17 @@ class CurationDetailTest(ProtectedViewTestMixin, TestCase):
         self.assertContains(response, "Review Date")
         self.assertContains(response, "2026-09-01")
 
+    def test_status_tags_use_the_common_tag_templates(self):
+        curation = Curation.objects.get(slug="C000001")
+        for status, icon in [
+            (Status.PROVISIONAL, "bi bi-hourglass-split mr-2"),
+            (Status.APPROVED, "bi bi-check-circle mr-2"),
+        ]:
+            with self.subTest(status=status):
+                curation.status = status
+                curation.save()
+                self.assertContains(self.client.get(self.url), icon)
+
     def test_shows_feedback_after_send_back_without_classification(self):
         curation = Curation.objects.get(slug="C000001")
         curation.ep_additional_notes = "Please add the replication cohort."
@@ -202,7 +213,7 @@ class CurationListTest(ProtectedViewTestMixin, TestCase):
         "A*01:02:03",
         "acute oran berry intoxication",
         "In Progress",
-        "bi-cone-striped",
+        "bi bi-cone-striped mr-2",
         "No Classification Set",
         "1970-01-01",
     ]

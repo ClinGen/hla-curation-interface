@@ -1,16 +1,16 @@
 import django_tables2 as tables
-from django.utils.html import format_html
+from django.template.loader import render_to_string
 from django_tables2 import A
 
 from curation.constants.models.common import Status
 from curation.models import Curation
 
-# The tag color, Bootstrap icon, and label for each curation status.
+# The common tag template for each curation status.
 STATUS_TAGS = {
-    Status.IN_PROGRESS: ("is-warning", "bi-cone-striped", "In Progress"),
-    Status.PROVISIONAL: ("is-danger", "bi-hourglass-split", "Provisional"),
-    Status.APPROVED: ("is-info", "bi-check-circle", "Approved"),
-    Status.PUBLISHED: ("is-info is-light", "bi-book", "Published"),
+    Status.IN_PROGRESS: "common/tags/in_progress.html",
+    Status.PROVISIONAL: "common/tags/provisional.html",
+    Status.APPROVED: "common/tags/approved.html",
+    Status.PUBLISHED: "common/tags/published.html",
 }
 
 
@@ -54,10 +54,7 @@ class CurationTable(tables.Table):
         # django-tables2 passes the choice label as value, so key on the code.
         if record.status not in STATUS_TAGS:
             return value
-        color, icon, label = STATUS_TAGS[record.status]
-        return format_html(
-            '<span class="tag {}"><i class="bi {}"></i> {}</span>', color, icon, label
-        )
+        return render_to_string(STATUS_TAGS[record.status])
 
     def render_classification(self, record: Curation) -> str:
         return record.classification_display

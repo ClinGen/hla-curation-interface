@@ -26,9 +26,9 @@
                 {% if object.status == "INP" %}
                     {% include "common/tags/in_progress.html" %}
                 {% elif object.status == "PRV" %}
-                    <span class="tag is-warning">Provisional</span>
+                    {% include "common/tags/provisional.html" %}
                 {% elif object.status == "APR" %}
-                    <span class="tag is-success">Approved</span>
+                    {% include "common/tags/approved.html" %}
                 {% elif object.status == "PUB" %}
                     {% include "common/tags/published.html" %}
                 {% endif %}

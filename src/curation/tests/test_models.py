@@ -321,10 +321,12 @@ class TestCurationTableRenderStatus(TestCase):
         )
         self.assertIn("Provisional", html)
         self.assertNotIn("Needs Review", html)
+        self.assertIn("bi bi-hourglass-split mr-2", html)
 
     def test_approved_label(self):
         html = self.table.render_status("Approved", Curation(status=Status.APPROVED))
         self.assertIn("Approved", html)
+        self.assertIn("bi bi-check-circle mr-2", html)
 
 
 class TestEvidence(TestCase):
