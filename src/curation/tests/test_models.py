@@ -226,6 +226,39 @@ class TestCurationClassificationDisplay(TestCase):
             self.assertFalse(self.curation.is_classification_suggested)
 
 
+class TestCurationIsClassificationOverridden(TestCase):
+    fixtures = ["test_alleles.json", "test_diseases.json"]
+
+    def setUp(self):
+        self.curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+        )
+
+    def _overridden(self, ep_classification: str | None, score: float) -> bool:
+        self.curation.ep_classification = ep_classification
+        with patch.object(
+            Curation, "score", new_callable=PropertyMock, return_value=score
+        ):
+            return self.curation.is_classification_overridden
+
+    def test_no_ep_classification_is_not_an_override(self):
+        self.assertFalse(self._overridden(None, 10))
+
+    def test_matching_the_suggestion_is_not_an_override(self):
+        self.assertFalse(self._overridden(Classification.LIMITED, 10))
+
+    def test_differing_from_the_suggestion_is_an_override(self):
+        self.assertTrue(self._overridden(Classification.MODERATE, 10))
+
+    def test_definitive_is_always_an_override(self):
+        self.assertTrue(self._overridden(Classification.DEFINITIVE, 100))
+
+    def test_any_classification_with_a_score_of_zero_is_an_override(self):
+        self.assertTrue(self._overridden(Classification.LIMITED, 0))
+
+
 class TestCurationStatusTransitions(TestCase):
     fixtures = ["test_alleles.json", "test_diseases.json"]
 

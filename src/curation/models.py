@@ -105,6 +105,12 @@ class Curation(models.Model):
         verbose_name="EP Classification",
         help_text="The classification set by the expert panel at review time.",
     )
+    ep_override_reason = models.TextField(  # ruff: ignore[django-nullable-model-string-field]
+        null=True,
+        blank=True,
+        verbose_name="EP Override Reason",
+        help_text="Why the panel chose a classification other than the suggested one.",
+    )
     ep_evidence_summary = models.TextField(  # ruff: ignore[django-nullable-model-string-field]
         null=True,
         blank=True,
@@ -267,6 +273,13 @@ class Curation(models.Model):
     def is_classification_suggested(self) -> bool:
         """Whether the displayed classification is the suggested one, not the EP's."""
         return not self.ep_classification and self.suggested_classification is not None
+
+    @property
+    def is_classification_overridden(self) -> bool:
+        """Whether the EP chose a classification other than the suggested one."""
+        return bool(self.ep_classification) and (
+            self.ep_classification != self.suggested_classification
+        )
 
     @property
     def classification_display(self) -> str:

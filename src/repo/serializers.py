@@ -52,6 +52,7 @@ def serialize_published_curation(published: "PublishedCuration") -> dict[str, An
             "classification": curation.ep_classification,
             "ep_evidence_summary": curation.ep_evidence_summary,
             "ep_additional_notes": curation.ep_additional_notes,
+            "ep_override_reason": curation.ep_override_reason,
             "ep": curation.ep,
             "ep_review_date": (
                 curation.ep_review_date.isoformat() if curation.ep_review_date else None

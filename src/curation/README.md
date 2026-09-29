@@ -56,7 +56,7 @@ A Django fixture with a single minimal in-progress evidence item (`E000001`) lin
 
 ### `forms.py`
 
-Defines the Django forms used by curation and evidence views: `CurationCreateForm` (create a curation), `EPReviewForm` (expert panel review with decision, classification, notes, and review date; the review date is required when approving and can't be in the future), `EvidenceCreateForm` (attach a publication), `EvidenceTopLevelEditForm` / `EvidenceTopLevelEditFormSet` (inline status/inclusion editing from the curation detail page), and `EvidenceEditForm` (the full step-by-step evidence data entry form with cross-field validation).
+Defines the Django forms used by curation and evidence views: `CurationCreateForm` (create a curation), `EPReviewForm` (expert panel review with decision, classification, notes, and review date; the review date is required when approving and can't be in the future; it takes a `suggested_classification` argument, labels the classification select with it, and requires an override reason when approving with any other classification), `EvidenceCreateForm` (attach a publication), `EvidenceTopLevelEditForm` / `EvidenceTopLevelEditFormSet` (inline status/inclusion editing from the curation detail page), and `EvidenceEditForm` (the full step-by-step evidence data entry form with cross-field validation).
 
 ### `interval.py`
 
@@ -64,7 +64,7 @@ Defines the `Interval` class, a small utility that represents a numeric interval
 
 ### `models.py`
 
-Defines the three core database models for the app. `Curation` tracks an allele or haplotype paired with a disease, manages lifecycle status transitions, stores expert panel review fields, and computes an aggregate score from its included evidence. Its `classification_display` property gives the EP classification's label, else the suggested classification's, else "No Classification Set", and `is_classification_suggested` says whether that label is only a suggestion. `Demographic` holds the biogeographic population groups. `Evidence` stores all study-level data fields (typing method, p-value, effect size, cohort size, etc.) and exposes per-step score properties that feed into the HLA scoring framework; all three models use `simple_history` for change tracking.
+Defines the three core database models for the app. `Curation` tracks an allele or haplotype paired with a disease, manages lifecycle status transitions, stores expert panel review fields, and computes an aggregate score from its included evidence. Its `classification_display` property gives the EP classification's label, else the suggested classification's, else "No Classification Set", and `is_classification_suggested` says whether that label is only a suggestion. `is_classification_overridden` is true when the EP classification is set and differs from the suggestion, in which case `ep_override_reason` holds the panel's reason. `Demographic` holds the biogeographic population groups. `Evidence` stores all study-level data fields (typing method, p-value, effect size, cohort size, etc.) and exposes per-step score properties that feed into the HLA scoring framework; all three models use `simple_history` for change tracking.
 
 ### `score.py`
 
@@ -120,7 +120,7 @@ Partial that renders a read-only summary table listing all evidence items belong
 
 ### `templates/curation/review.html`
 
-Full-page template for the expert panel review form. Displays the curation summary and evidence table, then renders the `EPReviewForm` fields (classification, evidence summary, notes, expert panel selector, review date, and approve/needs-revision decision). Includes JavaScript that warns the reviewer if the selected classification differs from the system-suggested one.
+Full-page template for the expert panel review form. Displays the curation summary and evidence table, then renders the `EPReviewForm` fields (classification, override reason, evidence summary, notes, expert panel selector, review date, and approve/needs-revision decision). A short inline script shows the override reason only when the selected classification differs from the suggestion.
 
 ### `templates/evidence/change.html`
 
