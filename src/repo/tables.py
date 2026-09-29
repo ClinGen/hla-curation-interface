@@ -3,7 +3,6 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django_tables2 import A
 
-from curation.constants.models.curation import CLASSIFICATION_CHOICES
 from repo.models import PublishedCuration
 
 
@@ -26,6 +25,7 @@ class PublishedCurationTable(tables.Table):
         accessor="curation__ep_classification",
         verbose_name="Classification",
         orderable=False,
+        empty_values=(),
     )
     updated_at = tables.DateColumn(
         accessor="curation__updated_at",
@@ -47,15 +47,8 @@ class PublishedCurationTable(tables.Table):
             "actions",
         )
 
-    def render_classification(
-        self, value: str | None, record: PublishedCuration
-    ) -> str:
-        if value:
-            return record.curation.get_ep_classification_display()
-        sc = record.curation.suggested_classification
-        if sc:
-            return CLASSIFICATION_CHOICES.get(sc, "------")
-        return "------"
+    def render_classification(self, record: PublishedCuration) -> str:
+        return record.curation.classification_display
 
     def render_actions(self, record: PublishedCuration) -> str:
         url = reverse("repo-download-single", args=[record.curation.slug])

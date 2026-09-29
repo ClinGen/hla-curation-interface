@@ -28,7 +28,7 @@ Defines the `Status` class with lifecycle status codes shared by `Curation` and 
 
 ### `constants/models/curation.py`
 
-Defines the `CurationTypes` class (`ALLELE`, `HAPLOTYPE`) and the `Classification` class (e.g., `DEFINITIVE`, `STRONG`, `MODERATE`, `LIMITED`), along with their corresponding human-readable choice dicts used by the `Curation` model.
+Defines the `CurationTypes` class (`ALLELE`, `HAPLOTYPE`) and the `Classification` class (e.g., `DEFINITIVE`, `STRONG`, `MODERATE`, `LIMITED`), along with their corresponding human-readable choice dicts used by the `Curation` model, and `NO_CLASSIFICATION_LABEL`, the text shown when a curation has no classification.
 
 ### `constants/models/evidence.py`
 
@@ -64,7 +64,7 @@ Defines the `Interval` class, a small utility that represents a numeric interval
 
 ### `models.py`
 
-Defines the three core database models for the app. `Curation` tracks an allele or haplotype paired with a disease, manages lifecycle status transitions, stores expert panel review fields, and computes an aggregate score from its included evidence. `Demographic` holds the biogeographic population groups. `Evidence` stores all study-level data fields (typing method, p-value, effect size, cohort size, etc.) and exposes per-step score properties that feed into the HLA scoring framework; all three models use `simple_history` for change tracking.
+Defines the three core database models for the app. `Curation` tracks an allele or haplotype paired with a disease, manages lifecycle status transitions, stores expert panel review fields, and computes an aggregate score from its included evidence. Its `classification_display` property gives the EP classification's label, else the suggested classification's, else "No Classification Set", and `is_classification_suggested` says whether that label is only a suggestion. `Demographic` holds the biogeographic population groups. `Evidence` stores all study-level data fields (typing method, p-value, effect size, cohort size, etc.) and exposes per-step score properties that feed into the HLA scoring framework; all three models use `simple_history` for change tracking.
 
 ### `score.py`
 
@@ -72,7 +72,7 @@ Implements the per-step point-calculation functions (`get_step_1a_points` throug
 
 ### `tables.py`
 
-Defines the `CurationTable` class (using `django-tables2`) that renders the curation list view, including a linked slug column, type, allele/haplotype, disease, a status column rendered as a tag from `STATUS_TAGS`, and a classification column that shows the EP classification if set or the computed suggested classification otherwise.
+Defines the `CurationTable` class (using `django-tables2`) that renders the curation list view, including a linked slug column, type, allele/haplotype, disease, a status column rendered as a tag from `STATUS_TAGS`, and a classification column that shows `Curation.classification_display`.
 
 ### `templates/curation/change.html`
 
@@ -106,9 +106,13 @@ Full-page template for the curation search/list page. Renders a search input, a 
 
 Partial that renders the context-sensitive action buttons on the curation detail page: "Add Evidence" and "Submit for Review" when in progress, "Review" (for reviewers) when provisional, and "Publish to Repository" when approved.
 
+### `templates/curation/partials/classification.html`
+
+Partial that renders a curation's `classification_display`, followed by a light "Suggested" tag when the label is the suggested classification rather than the EP's. Expects `curation` in the context. Used by the curation detail table, the HLArepo summary, and the publication detail page.
+
 ### `templates/curation/partials/curation/detail_table.html`
 
-Partial that renders a summary table for a `Curation` object, showing its ID, allele or haplotype, disease, status badge, EP or suggested classification, aggregate score, and timestamps, plus a "View History" button.
+Partial that renders a summary table for a `Curation` object, showing its ID, allele or haplotype, disease, status badge, classification (via `partials/classification.html`), aggregate score, and timestamps, plus a "View History" button.
 
 ### `templates/curation/partials/evidence/detail_table.html`
 

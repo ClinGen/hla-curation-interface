@@ -3,7 +3,6 @@ from django.utils.html import format_html
 from django_tables2 import A
 
 from curation.constants.models.common import Status
-from curation.constants.models.curation import CLASSIFICATION_CHOICES
 from curation.models import Curation
 
 # The tag color, Bootstrap icon, and label for each curation status.
@@ -34,6 +33,7 @@ class CurationTable(tables.Table):
         accessor="ep_classification",
         verbose_name="Classification",
         orderable=False,
+        empty_values=(),
     )
     updated_at = tables.DateColumn(verbose_name="Updated", format="Y-m-d")
 
@@ -59,10 +59,5 @@ class CurationTable(tables.Table):
             '<span class="tag {}"><i class="bi {}"></i> {}</span>', color, icon, label
         )
 
-    def render_classification(self, value: str | None, record: Curation) -> str:
-        if value:
-            return record.get_ep_classification_display()  # type: ignore
-        sc = record.suggested_classification
-        if sc:
-            return CLASSIFICATION_CHOICES.get(sc, "------")
-        return "------"
+    def render_classification(self, record: Curation) -> str:
+        return record.classification_display
