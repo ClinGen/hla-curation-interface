@@ -260,6 +260,15 @@ class PublishedCurationDetailViewTest(TestCase):
         self.assertContains(response, "Review Date")
         self.assertContains(response, "2026-09-01")
 
+    def test_displays_override_reason_when_set(self):
+        url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
+        self.assertNotContains(self.client.get(url), "Override Reason")
+        self.curation.ep_override_reason = "Replicated in two cohorts."
+        self.curation.save()
+        response = self.client.get(url)
+        self.assertContains(response, "Override Reason")
+        self.assertContains(response, "Replicated in two cohorts.")
+
     def test_displays_car_linkout_for_allele(self):
         url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
         response = self.client.get(url)
@@ -353,6 +362,18 @@ class JSONDownloadViewTest(TestCase):
         self.curation.save()
         data = json.loads(self.client.get(url).content)
         self.assertEqual(data["curation"]["curation"]["ep_review_date"], "2026-09-01")
+
+    def test_json_includes_override_reason(self):
+        self.curation.ep_override_reason = "Replicated in two cohorts."
+        self.curation.save()
+        url = reverse(
+            "repo-download-single", kwargs={"curation_slug": self.curation.slug}
+        )
+        data = json.loads(self.client.get(url).content)
+        self.assertEqual(
+            data["curation"]["curation"]["ep_override_reason"],
+            "Replicated in two cohorts.",
+        )
 
     def test_download_all_json(self):
         url = reverse("repo-download-all")
