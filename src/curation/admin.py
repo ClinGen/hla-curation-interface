@@ -12,6 +12,7 @@ class CurationAdmin(SimpleHistoryAdmin):
         "status",
         "ep_classification",
         "ep",
+        "ep_review_date",
         "allele",
         "haplotype",
         "added_by",

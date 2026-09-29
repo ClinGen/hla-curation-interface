@@ -53,6 +53,10 @@
             <td>{{ curation.ep|default:"------" }}</td>
         </tr>
         <tr>
+            <td>Review Date</td>
+            <td>{{ curation.ep_review_date|date:"Y-m-d"|default:"------" }}</td>
+        </tr>
+        <tr>
             <td>Published</td>
             <td>{{ published.published_at|date:"Y-m-d" }}</td>
         </tr>

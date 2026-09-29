@@ -1,4 +1,5 @@
 import json
+from datetime import date
 from typing import override
 
 from django.contrib.auth.models import User
@@ -251,6 +252,14 @@ class PublishedCurationDetailViewTest(TestCase):
         self.assertContains(response, "data-confirm=")
         self.assertNotContains(response, "confirm(")
 
+    def test_displays_ep_review_date(self):
+        self.curation.ep_review_date = date(2026, 9, 1)
+        self.curation.save()
+        url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
+        response = self.client.get(url)
+        self.assertContains(response, "Review Date")
+        self.assertContains(response, "2026-09-01")
+
     def test_displays_car_linkout_for_allele(self):
         url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
         response = self.client.get(url)
@@ -332,6 +341,18 @@ class JSONDownloadViewTest(TestCase):
 
         data = json.loads(response.content)
         self.assertEqual(data["curation"]["curation_id"], self.curation.slug)
+
+    def test_json_includes_ep_review_date(self):
+        url = reverse(
+            "repo-download-single", kwargs={"curation_slug": self.curation.slug}
+        )
+        data = json.loads(self.client.get(url).content)
+        self.assertIsNone(data["curation"]["curation"]["ep_review_date"])
+
+        self.curation.ep_review_date = date(2026, 9, 1)
+        self.curation.save()
+        data = json.loads(self.client.get(url).content)
+        self.assertEqual(data["curation"]["curation"]["ep_review_date"], "2026-09-01")
 
     def test_download_all_json(self):
         url = reverse("repo-download-all")
