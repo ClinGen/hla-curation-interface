@@ -1,8 +1,11 @@
 """Houses tests for the curation app's views."""
 
+from datetime import date, timedelta
+
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from allele.models import Allele
 from auth_.models import UserProfile
@@ -108,6 +111,14 @@ class CurationDetailTest(ProtectedViewTestMixin, TestCase):
             response, "Diseases in grass type Pokémon in the Kanto region"
         )
         self.assertContains(response, "0.0")  # Should default to a score of 0.0.
+
+    def test_shows_ep_review_date_when_set(self):
+        curation = Curation.objects.get(slug="C000001")
+        curation.ep_review_date = date(2026, 9, 1)
+        curation.save()
+        response = self.client.get(self.url)
+        self.assertContains(response, "EP Review Date")
+        self.assertContains(response, "2026-09-01")
 
     def test_shows_no_classification_set_when_score_is_zero(self):
         response = self.client.get(self.url)
@@ -536,6 +547,7 @@ class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
             "ep_evidence_summary": "Panel consensus.",
             "ep_additional_notes": "",
             "ep": "40033",
+            "ep_review_date": timezone.now().date().isoformat(),
         }
 
     def test_approval_sets_status_to_approved(self):
@@ -563,6 +575,44 @@ class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
         self.assertEqual(
             self.curation.ep_additional_notes, "Please address the power calculation."
         )
+        self.assertIsNone(self.curation.ep_review_date)
+
+    def test_approval_saves_review_date(self):
+        self.client.force_login(self.reviewer)
+        self.client.post(self._url(), self._approval_data())
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.ep_review_date, timezone.now().date())
+
+    def test_approval_without_review_date_fails(self):
+        self.client.force_login(self.reviewer)
+        data = {**self._approval_data(), "ep_review_date": ""}
+        response = self.client.post(self._url(), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Required when approving.")
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.status, Status.PROVISIONAL)
+
+    def test_future_review_date_fails(self):
+        self.client.force_login(self.reviewer)
+        tomorrow = (timezone.now().date() + timedelta(days=1)).isoformat()
+        for decision in ("approved", "needs_revision"):
+            data = {
+                **self._approval_data(),
+                "decision": decision,
+                "ep_review_date": tomorrow,
+            }
+            response = self.client.post(self._url(), data)
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, "can&#x27;t be in the future")
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.status, Status.PROVISIONAL)
+
+    def test_review_form_prefills_review_date(self):
+        self.curation.ep_review_date = date(2026, 9, 1)
+        self.curation.save()
+        self.client.force_login(self.reviewer)
+        response = self.client.get(self._url())
+        self.assertContains(response, 'value="2026-09-01"')
 
     def test_non_ep_user_gets_403(self):
         self.client.force_login(self.curator)

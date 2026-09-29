@@ -261,6 +261,7 @@ def curation_review(request: HttpRequest, curation_slug: str) -> HttpResponse:
                 form.cleaned_data["ep_additional_notes"] or None
             )
             curation.ep = form.cleaned_data["ep"] or None
+            curation.ep_review_date = form.cleaned_data["ep_review_date"]
             if decision == "needs_revision":
                 curation.transition_to(Status.IN_PROGRESS)
                 messages.info(
@@ -280,6 +281,12 @@ def curation_review(request: HttpRequest, curation_slug: str) -> HttpResponse:
                 "ep_evidence_summary": curation.ep_evidence_summary,
                 "ep_additional_notes": curation.ep_additional_notes,
                 "ep": curation.ep,
+                # The date input needs ISO format, not the localized default.
+                "ep_review_date": (
+                    curation.ep_review_date.isoformat()
+                    if curation.ep_review_date
+                    else None
+                ),
             }
         )
 
