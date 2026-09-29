@@ -38,12 +38,6 @@
             <td>Classification</td>
             <td>{% include "curation/partials/classification.html" with curation=object %}</td>
         </tr>
-        {% if object.ep_review_date %}
-            <tr>
-                <td>EP Review Date</td>
-                <td>{{ object.ep_review_date|date:"Y-m-d" }}</td>
-            </tr>
-        {% endif %}
         <tr>
             <td>Score</td>
             <td>{{ object.score }}</td>

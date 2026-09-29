@@ -41,6 +41,10 @@
 
         {% include "curation/partials/evidence/detail_table.html" %}
 
+        {% if object.has_ep_feedback %}
+            {% include "curation/partials/ep_review.html" with curation=object heading="Earlier Expert Panel Feedback" %}
+        {% endif %}
+
         <hr>
 
         <h2 class="title is-4 mt-4">Expert Panel Review</h2>
