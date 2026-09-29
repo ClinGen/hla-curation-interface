@@ -202,8 +202,8 @@ class Curation(models.Model):
     @property
     def is_locked(self) -> bool:
         return self.status in (
-            Status.READY_FOR_REVIEW,
             Status.PROVISIONAL,
+            Status.APPROVED,
             Status.PUBLISHED,
         )
 

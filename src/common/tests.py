@@ -2,9 +2,11 @@
 
 import logging
 from contextlib import contextmanager
+from io import StringIO
 from typing import Any
 
 from django.contrib.auth.models import User
+from django.core.management import call_command
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -140,6 +142,16 @@ class ProtectedViewTestMixin(SuppressRequestLoggingMixin, BaseViewTestMixin):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
+
+
+class MigrationsUpToDateTest(TestCase):
+    """Fails when a model change has no migration."""
+
+    def test_no_missing_migrations(self):
+        try:
+            call_command("makemigrations", "--check", "--dry-run", stdout=StringIO())
+        except SystemExit:
+            self.fail("Model changes are missing a migration. Run makemigrations.")
 
 
 class SearchListViewTest(ProtectedViewTestMixin, TestCase):

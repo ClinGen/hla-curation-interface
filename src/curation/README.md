@@ -24,7 +24,7 @@ Empty file that marks the `constants/models` directory as a Python package.
 
 ### `constants/models/common.py`
 
-Defines the `Status` class with lifecycle status codes shared by `Curation` and `Evidence` (`IN_PROGRESS`, `DONE`, `READY_FOR_REVIEW`, `PROVISIONAL`, `PUBLISHED`), along with the allowed status choice dicts and the `CURATION_STATUS_TRANSITIONS` mapping that enforces valid status progressions.
+Defines the `Status` class with lifecycle status codes shared by `Curation` and `Evidence` (`IN_PROGRESS`, `DONE`, `PROVISIONAL`, `APPROVED`, `PUBLISHED`), along with the allowed status choice dicts and the `CURATION_STATUS_TRANSITIONS` mapping that enforces valid status progressions.
 
 ### `constants/models/curation.py`
 
@@ -72,7 +72,7 @@ Implements the per-step point-calculation functions (`get_step_1a_points` throug
 
 ### `tables.py`
 
-Defines the `CurationTable` class (using `django-tables2`) that renders the curation list view, including a linked slug column, type, allele/haplotype, disease, a badge-rendered status column, and a classification column that shows the EP classification if set or the computed suggested classification otherwise.
+Defines the `CurationTable` class (using `django-tables2`) that renders the curation list view, including a linked slug column, type, allele/haplotype, disease, a status column rendered as a tag from `STATUS_TAGS`, and a classification column that shows the EP classification if set or the computed suggested classification otherwise.
 
 ### `templates/curation/change.html`
 
@@ -84,7 +84,7 @@ Full-page template for the "Add Curation" form. Renders radio inputs for curatio
 
 ### `templates/curation/detail.html`
 
-Full-page template for viewing a curation's details. Displays status banners (locked, ready for review, provisional, published), EP classification notes when present, the curation detail table partial, the action buttons partial, and the evidence list partial.
+Full-page template for viewing a curation's details. Displays status banners (locked, provisional, approved, published), EP classification notes when present, the curation detail table partial, the action buttons partial, and the evidence list partial.
 
 ### `templates/curation/edit/evidence.html`
 
@@ -104,7 +104,7 @@ Full-page template for the curation search/list page. Renders a search input, a 
 
 ### `templates/curation/partials/buttons.html`
 
-Partial that renders the context-sensitive action buttons on the curation detail page: "Add Evidence" and "Submit for Review" when in progress, "Review" (for reviewers) when ready for review, and "Publish to Repository" when provisional.
+Partial that renders the context-sensitive action buttons on the curation detail page: "Add Evidence" and "Submit for Review" when in progress, "Review" (for reviewers) when provisional, and "Publish to Repository" when approved.
 
 ### `templates/curation/partials/curation/detail_table.html`
 
@@ -174,9 +174,13 @@ Empty file that marks the `tests` directory as a Python package.
 
 Unit tests for the `Interval` class, verifying boundary inclusion and exclusion behavior for all four combinations of inclusive/exclusive lower and upper bounds using the standard `unittest.TestCase`.
 
+### `tests/test_migrations.py`
+
+Tests for the `0021_rename_status_codes` data migration. They use `MigrationExecutor` to migrate between `0020` and `0021` and check that `RFR`/`PRO` map to `PRV`/`APR` on `Curation` and `HistoricalCuration`, and back.
+
 ### `tests/test_models.py`
 
-Integration tests for the `Curation` and `Evidence` models. Tests cover default field values, score calculation for every scoring step (including GWAS vs. non-GWAS variants and the p-value comparator edge case), suggested classification thresholds, curation copying, and validation rules for publication inclusion, allele resolution minimums, and the significant association/p-value consistency check.
+Integration tests for the `Curation` and `Evidence` models. Tests cover default field values, curation status transitions, `CurationTable` status tags, score calculation for every scoring step (including GWAS vs. non-GWAS variants and the p-value comparator edge case), suggested classification thresholds, curation copying, and validation rules for publication inclusion, allele resolution minimums, and the significant association/p-value consistency check.
 
 ### `tests/test_validators.py`
 

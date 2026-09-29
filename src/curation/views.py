@@ -190,7 +190,7 @@ class EvidenceEdit(ProtectedViewMixin, UpdateView):
 
 @protected_view
 def curation_publish(request: HttpRequest, curation_slug: str) -> HttpResponse:
-    """Publishes a provisional curation to the repository.
+    """Publishes an approved curation to the repository.
 
     Returns:
         Redirect to the repo detail page on success, or curation detail on error.
@@ -233,7 +233,7 @@ def curation_submit(request: HttpRequest, curation_slug: str) -> HttpResponse:
             messages.error(request, err)
         return redirect("curation-detail", curation_slug=curation.slug)
 
-    curation.transition_to(Status.READY_FOR_REVIEW)
+    curation.transition_to(Status.PROVISIONAL)
     messages.success(
         request, f"Curation {curation.slug} has been submitted for review."
     )
@@ -268,7 +268,7 @@ def curation_review(request: HttpRequest, curation_slug: str) -> HttpResponse:
                     f"Curation {curation.slug} has been sent back for revision.",
                 )
             else:
-                curation.transition_to(Status.PROVISIONAL)
+                curation.transition_to(Status.APPROVED)
                 messages.success(
                     request, f"Curation {curation.slug} has been approved."
                 )

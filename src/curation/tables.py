@@ -6,6 +6,14 @@ from curation.constants.models.common import Status
 from curation.constants.models.curation import CLASSIFICATION_CHOICES
 from curation.models import Curation
 
+# The tag color, Bootstrap icon, and label for each curation status.
+STATUS_TAGS = {
+    Status.IN_PROGRESS: ("is-warning", "bi-cone-striped", "In Progress"),
+    Status.PROVISIONAL: ("is-danger", "bi-hourglass-split", "Provisional"),
+    Status.APPROVED: ("is-info", "bi-check-circle", "Approved"),
+    Status.PUBLISHED: ("is-info is-light", "bi-book", "Published"),
+}
+
 
 class CurationTable(tables.Table):
     slug = tables.LinkColumn(
@@ -42,32 +50,14 @@ class CurationTable(tables.Table):
             "updated_at",
         )
 
-    def render_status(self, value: str, record: Curation) -> str:  # ruff: ignore[unused-method-argument]
-        if value == Status.IN_PROGRESS:
-            return format_html(
-                '<span class="tag is-warning">'
-                '<i class="bi bi-cone-striped"></i> In Progress'
-                "</span>"
-            )
-        if value == Status.READY_FOR_REVIEW:
-            return format_html(
-                '<span class="tag is-danger">'
-                '<i class="bi bi-flag-fill"></i> Needs Review'
-                "</span>"
-            )
-        if value == Status.PROVISIONAL:
-            return format_html(
-                '<span class="tag is-info">'
-                '<i class="bi bi-hourglass-split"></i> Provisional'
-                "</span>"
-            )
-        if value == Status.PUBLISHED:
-            return format_html(
-                '<span class="tag is-info is-light">'
-                '<i class="bi bi-book"></i> Published'
-                "</span>"
-            )
-        return value
+    def render_status(self, value: str, record: Curation) -> str:
+        # django-tables2 passes the choice label as value, so key on the code.
+        if record.status not in STATUS_TAGS:
+            return value
+        color, icon, label = STATUS_TAGS[record.status]
+        return format_html(
+            '<span class="tag {}"><i class="bi {}"></i> {}</span>', color, icon, label
+        )
 
     def render_classification(self, value: str | None, record: Curation) -> str:
         if value:

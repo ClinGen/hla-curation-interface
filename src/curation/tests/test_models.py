@@ -25,6 +25,7 @@ from curation.models import (
     Demographic,
     Evidence,
 )
+from curation.tables import CurationTable
 from disease.models import Disease
 from haplotype.models import Haplotype
 from publication.models import Publication
@@ -191,6 +192,54 @@ class TestCuration(TestCase):
                 disease=self.disease,
             )
             curation.clean()
+
+
+class TestCurationStatusTransitions(TestCase):
+    fixtures = ["test_alleles.json", "test_diseases.json"]
+
+    def setUp(self):
+        self.curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+        )
+
+    def test_status_codes(self):
+        self.assertEqual(Status.PROVISIONAL, "PRV")
+        self.assertEqual(Status.APPROVED, "APR")
+
+    def test_lifecycle_moves_through_provisional_and_approved(self):
+        self.curation.transition_to(Status.PROVISIONAL)
+        self.curation.transition_to(Status.APPROVED)
+        self.curation.transition_to(Status.PUBLISHED)
+        self.assertEqual(self.curation.status, Status.PUBLISHED)
+
+    def test_provisional_can_be_sent_back(self):
+        self.curation.transition_to(Status.PROVISIONAL)
+        self.curation.transition_to(Status.IN_PROGRESS)
+        self.assertEqual(self.curation.status, Status.IN_PROGRESS)
+
+    def test_approved_cannot_go_back_to_provisional(self):
+        self.curation.transition_to(Status.PROVISIONAL)
+        self.curation.transition_to(Status.APPROVED)
+        with self.assertRaises(ValueError):
+            self.curation.transition_to(Status.PROVISIONAL)
+
+
+class TestCurationTableRenderStatus(TestCase):
+    def setUp(self):
+        self.table = CurationTable([])
+
+    def test_provisional_label(self):
+        html = self.table.render_status(
+            "Provisional", Curation(status=Status.PROVISIONAL)
+        )
+        self.assertIn("Provisional", html)
+        self.assertNotIn("Needs Review", html)
+
+    def test_approved_label(self):
+        html = self.table.render_status("Approved", Curation(status=Status.APPROVED))
+        self.assertIn("Approved", html)
 
 
 class TestEvidence(TestCase):
