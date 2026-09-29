@@ -119,8 +119,36 @@ class CurationDetailTest(ProtectedViewTestMixin, TestCase):
         curation.ep_review_date = date(2026, 9, 1)
         curation.save()
         response = self.client.get(self.url)
-        self.assertContains(response, "EP Review Date")
+        self.assertContains(response, "Review Date")
         self.assertContains(response, "2026-09-01")
+
+    def test_shows_feedback_after_send_back_without_classification(self):
+        curation = Curation.objects.get(slug="C000001")
+        curation.ep_additional_notes = "Please add the replication cohort."
+        curation.ep = "40033"
+        curation.save()
+        response = self.client.get(self.url)
+        self.assertContains(response, "Sent Back for Revision")
+        self.assertContains(response, "Please add the replication cohort.")
+        self.assertContains(response, "HLA Curation Taskforce")
+
+    def test_shows_evidence_summary_after_approval(self):
+        curation = Curation.objects.get(slug="C000001")
+        curation.status = Status.APPROVED
+        curation.ep_classification = Classification.MODERATE
+        curation.ep_evidence_summary = "Consistent association."
+        curation.save()
+        response = self.client.get(self.url)
+        self.assertContains(response, "Expert Panel Review")
+        self.assertContains(response, "Evidence Summary")
+        self.assertContains(response, "Consistent association.")
+        self.assertNotContains(response, "Classification Notes")
+        self.assertNotContains(response, "Sent Back for Revision")
+
+    def test_shows_no_feedback_panel_without_feedback(self):
+        response = self.client.get(self.url)
+        self.assertNotContains(response, "Expert Panel Review")
+        self.assertNotContains(response, "Sent Back for Revision")
 
     def test_shows_no_classification_set_when_score_is_zero(self):
         response = self.client.get(self.url)
@@ -610,6 +638,14 @@ class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
             self.assertContains(response, "can&#x27;t be in the future")
         self.curation.refresh_from_db()
         self.assertEqual(self.curation.status, Status.PROVISIONAL)
+
+    def test_review_page_shows_earlier_feedback(self):
+        self.curation.ep_additional_notes = "Check the cohort sizes."
+        self.curation.save()
+        self.client.force_login(self.reviewer)
+        response = self.client.get(self._url())
+        self.assertContains(response, "Check the cohort sizes.")
+        self.assertContains(response, "Earlier Expert Panel Feedback")
 
     def test_review_form_prefills_review_date(self):
         self.curation.ep_review_date = date(2026, 9, 1)

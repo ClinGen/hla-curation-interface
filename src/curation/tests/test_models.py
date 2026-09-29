@@ -1,5 +1,6 @@
 """Houses tests for the curation app's models."""
 
+from datetime import date
 from decimal import Decimal
 from unittest.mock import PropertyMock, patch
 
@@ -223,6 +224,26 @@ class TestCurationClassificationDisplay(TestCase):
         ):
             self.assertEqual(self.curation.classification_display, "Definitive")
             self.assertFalse(self.curation.is_classification_suggested)
+
+
+class TestCurationHasEpFeedback(TestCase):
+    def test_no_ep_fields_means_no_feedback(self):
+        self.assertFalse(Curation().has_ep_feedback)
+
+    def test_any_ep_field_counts_as_feedback(self):
+        for field, value in [
+            ("ep_classification", Classification.LIMITED),
+            ("ep_evidence_summary", "Summary."),
+            ("ep_additional_notes", "Notes."),
+            ("ep_override_reason", "Reason."),
+            ("ep_review_date", date(2026, 9, 1)),
+        ]:
+            with self.subTest(field=field):
+                self.assertTrue(Curation(**{field: value}).has_ep_feedback)
+
+    def test_ep_display_uses_the_panel_name(self):
+        self.assertEqual(Curation(ep="40033").ep_display, "HLA Curation Taskforce")
+        self.assertIsNone(Curation().ep_display)
 
 
 class TestCurationIsClassificationOverridden(TestCase):

@@ -3,12 +3,8 @@ from django.forms import ModelForm, modelformset_factory
 from django.http import QueryDict
 from django.utils import timezone
 
-from curation.constants.models.curation import CLASSIFICATION_CHOICES
+from curation.constants.models.curation import CLASSIFICATION_CHOICES, EP_CHOICES
 from curation.models import Curation, Evidence
-
-HLA_CURATION_TASKFORCE_ID = "40033"
-
-EP_CHOICES = [(HLA_CURATION_TASKFORCE_ID, "HLA Curation Taskforce")]
 
 
 class CurationCreateForm(ModelForm):

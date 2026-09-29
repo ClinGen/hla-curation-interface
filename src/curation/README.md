@@ -28,7 +28,7 @@ Defines the `Status` class with lifecycle status codes shared by `Curation` and 
 
 ### `constants/models/curation.py`
 
-Defines the `CurationTypes` class (`ALLELE`, `HAPLOTYPE`) and the `Classification` class (e.g., `DEFINITIVE`, `STRONG`, `MODERATE`, `LIMITED`), along with their corresponding human-readable choice dicts used by the `Curation` model, and `NO_CLASSIFICATION_LABEL`, the text shown when a curation has no classification.
+Defines the `CurationTypes` class (`ALLELE`, `HAPLOTYPE`) and the `Classification` class (e.g., `DEFINITIVE`, `STRONG`, `MODERATE`, `LIMITED`), along with their corresponding human-readable choice dicts used by the `Curation` model, `EP_CHOICES`, the expert panels that can review curations, and `NO_CLASSIFICATION_LABEL`, the text shown when a curation has no classification.
 
 ### `constants/models/evidence.py`
 
@@ -64,7 +64,7 @@ Defines the `Interval` class, a small utility that represents a numeric interval
 
 ### `models.py`
 
-Defines the three core database models for the app. `Curation` tracks an allele or haplotype paired with a disease, manages lifecycle status transitions, stores expert panel review fields, and computes an aggregate score from its included evidence. Its `classification_display` property gives the EP classification's label, else the suggested classification's, else "No Classification Set", and `is_classification_suggested` says whether that label is only a suggestion. `is_classification_overridden` is true when the EP classification is set and differs from the suggestion, in which case `ep_override_reason` holds the panel's reason. `Demographic` holds the biogeographic population groups. `Evidence` stores all study-level data fields (typing method, p-value, effect size, cohort size, etc.) and exposes per-step score properties that feed into the HLA scoring framework; all three models use `simple_history` for change tracking.
+Defines the three core database models for the app. `Curation` tracks an allele or haplotype paired with a disease, manages lifecycle status transitions, stores expert panel review fields, and computes an aggregate score from its included evidence. Its `classification_display` property gives the EP classification's label, else the suggested classification's, else "No Classification Set", and `is_classification_suggested` says whether that label is only a suggestion. `is_classification_overridden` is true when the EP classification is set and differs from the suggestion, in which case `ep_override_reason` holds the panel's reason. `has_ep_feedback` is true when any EP review field is set, and `ep_display` gives the expert panel's name. `Demographic` holds the biogeographic population groups. `Evidence` stores all study-level data fields (typing method, p-value, effect size, cohort size, etc.) and exposes per-step score properties that feed into the HLA scoring framework; all three models use `simple_history` for change tracking.
 
 ### `score.py`
 
@@ -84,7 +84,7 @@ Full-page template for the "Add Curation" form. Renders radio inputs for curatio
 
 ### `templates/curation/detail.html`
 
-Full-page template for viewing a curation's details. Displays status banners (locked, provisional, approved, published), EP classification notes when present, the curation detail table partial, the action buttons partial, and the evidence list partial.
+Full-page template for viewing a curation's details. Displays status banners (locked, provisional, approved, published), the EP feedback panel (`partials/ep_review.html`) when the expert panel has left any feedback, the curation detail table partial, the action buttons partial, and the evidence list partial.
 
 ### `templates/curation/edit/evidence.html`
 
@@ -110,9 +110,13 @@ Partial that renders the context-sensitive action buttons on the curation detail
 
 Partial that renders a curation's `classification_display`, followed by a light "Suggested" tag when the label is the suggested classification rather than the EP's. Expects `curation` in the context. Used by the curation detail table, the HLArepo summary, and the publication detail page.
 
+### `templates/curation/partials/ep_review.html`
+
+Partial that renders the expert panel's feedback on a curation as a Bulma message: "Sent Back for Revision" (warning) when the curation is in progress, otherwise "Expert Panel Review" (info), or a `heading` passed by the caller. Shows labeled rows for the panel, review date, classification, override reason, evidence summary, and additional notes, skipping empty ones. Expects `curation` in the context.
+
 ### `templates/curation/partials/curation/detail_table.html`
 
-Partial that renders a summary table for a `Curation` object, showing its ID, allele or haplotype, disease, status badge, classification (via `partials/classification.html`), EP review date when set, aggregate score, and timestamps, plus a "View History" button.
+Partial that renders a summary table for a `Curation` object, showing its ID, allele or haplotype, disease, status badge, classification (via `partials/classification.html`), aggregate score, and timestamps, plus a "View History" button.
 
 ### `templates/curation/partials/evidence/detail_table.html`
 
@@ -120,7 +124,7 @@ Partial that renders a read-only summary table listing all evidence items belong
 
 ### `templates/curation/review.html`
 
-Full-page template for the expert panel review form. Displays the curation summary and evidence table, then renders the `EPReviewForm` fields (classification, override reason, evidence summary, notes, expert panel selector, review date, and approve/needs-revision decision). A short inline script shows the override reason only when the selected classification differs from the suggestion.
+Full-page template for the expert panel review form. Displays the curation summary, the evidence table, and any earlier expert panel feedback, then renders the `EPReviewForm` fields (classification, override reason, evidence summary, notes, expert panel selector, review date, and approve/needs-revision decision). A short inline script shows the override reason only when the selected classification differs from the suggestion.
 
 ### `templates/evidence/change.html`
 

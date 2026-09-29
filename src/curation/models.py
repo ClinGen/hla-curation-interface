@@ -18,6 +18,7 @@ from curation.constants.models.common import (
 from curation.constants.models.curation import (
     CLASSIFICATION_CHOICES,
     CURATION_TYPE_CHOICES,
+    EP_CHOICES,
     NO_CLASSIFICATION_LABEL,
     Classification,
     CurationTypes,
@@ -273,6 +274,26 @@ class Curation(models.Model):
     def is_classification_suggested(self) -> bool:
         """Whether the displayed classification is the suggested one, not the EP's."""
         return not self.ep_classification and self.suggested_classification is not None
+
+    @property
+    def has_ep_feedback(self) -> bool:
+        """Whether the expert panel has recorded any review feedback."""
+        return any(
+            [
+                self.ep_classification,
+                self.ep_evidence_summary,
+                self.ep_additional_notes,
+                self.ep_override_reason,
+                self.ep_review_date,
+            ]
+        )
+
+    @property
+    def ep_display(self) -> str | None:
+        """The expert panel's name, or its ID if the name is unknown."""
+        if not self.ep:
+            return None
+        return dict(EP_CHOICES).get(self.ep, self.ep)
 
     @property
     def is_classification_overridden(self) -> bool:
