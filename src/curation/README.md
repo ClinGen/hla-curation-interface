@@ -72,7 +72,7 @@ Implements the per-step point-calculation functions (`get_step_1a_points` throug
 
 ### `tables.py`
 
-Defines the `CurationTable` class (using `django-tables2`) that renders the curation list view, including a linked slug column, type, allele/haplotype, disease, a status column rendered as a tag from `STATUS_TAGS`, and a classification column that shows `Curation.classification_display`.
+Defines the `CurationTable` class (using `django-tables2`) that renders the curation list view, including a linked slug column, type, allele/haplotype, disease, a status column rendered with the common tag template for each status (`STATUS_TAGS`), and a classification column that shows `Curation.classification_display`.
 
 ### `templates/curation/change.html`
 
@@ -112,7 +112,7 @@ Partial that renders a curation's `classification_display`, followed by a light 
 
 ### `templates/curation/partials/ep_review.html`
 
-Partial that renders the expert panel's feedback on a curation as a Bulma message: "Sent Back for Revision" (warning) when the curation is in progress, otherwise "Expert Panel Review" (info), or a `heading` passed by the caller. Shows labeled rows for the panel, review date, classification, override reason, evidence summary, and additional notes, skipping empty ones. Expects `curation` in the context.
+Partial that renders the expert panel's feedback on a curation as a Bulma message: "Sent Back for Revision" (warning) when the curation is in progress, otherwise "Expert Panel Review" (neutral), or a `heading` passed by the caller. Shows a bulleted list of the panel, review date, classification, override reason, evidence summary, and additional notes, skipping empty ones. Expects `curation` in the context.
 
 ### `templates/curation/partials/curation/detail_table.html`
 

@@ -159,6 +159,8 @@ class CurationDetailTest(ProtectedViewTestMixin, TestCase):
         self.assertContains(response, "Consistent association.")
         self.assertNotContains(response, "Classification Notes")
         self.assertNotContains(response, "Sent Back for Revision")
+        self.assertContains(response, 'class="message mt-2"')
+        self.assertContains(response, "<li><strong>Evidence Summary:</strong>")
 
     def test_shows_no_feedback_panel_without_feedback(self):
         response = self.client.get(self.url)
