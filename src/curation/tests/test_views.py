@@ -152,6 +152,7 @@ class CurationListTest(ProtectedViewTestMixin, TestCase):
         "A*01:02:03",
         "acute oran berry intoxication",
         "In Progress",
+        "bi-cone-striped",
         "1970-01-01",
     ]
 
@@ -436,7 +437,7 @@ class CurationSubmitTest(SuppressRequestLoggingMixin, TestCase):
     def _url(self) -> str:
         return reverse("curation-submit", kwargs={"curation_slug": self.curation.slug})
 
-    def test_submit_moves_status_to_ready_for_review(self):
+    def test_submit_moves_status_to_provisional(self):
         pub = Publication.objects.get(pk=1)
         Evidence.objects.create(
             curation=self.curation,
@@ -448,7 +449,7 @@ class CurationSubmitTest(SuppressRequestLoggingMixin, TestCase):
         response = self.client.post(self._url())
         self.assertEqual(response.status_code, 302)
         self.curation.refresh_from_db()
-        self.assertEqual(self.curation.status, Status.READY_FOR_REVIEW)
+        self.assertEqual(self.curation.status, Status.PROVISIONAL)
 
     def test_submit_fails_when_no_included_evidence(self):
         pub = Publication.objects.get(pk=1)
@@ -491,12 +492,12 @@ class CurationSubmitTest(SuppressRequestLoggingMixin, TestCase):
         self.assertEqual(self.curation.status, Status.IN_PROGRESS)
 
     def test_submit_fails_when_not_in_progress(self):
-        self.curation.status = Status.READY_FOR_REVIEW
+        self.curation.status = Status.PROVISIONAL
         self.curation.save()
         response = self.client.post(self._url())
         self.assertEqual(response.status_code, 302)
         self.curation.refresh_from_db()
-        self.assertEqual(self.curation.status, Status.READY_FOR_REVIEW)
+        self.assertEqual(self.curation.status, Status.PROVISIONAL)
 
     def test_non_curator_gets_403(self):
         anon = User.objects.create_user(username="anon_s", password="pw")  # ruff: ignore[hardcoded-password-func-arg]
@@ -515,7 +516,7 @@ class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
         self.reviewer = _make_user_with_profile(username="reviewer_r", review=True)
         self.curator = _make_user_with_profile(username="curator_r")
         self.curation = _make_curation(
-            self.allele, self.disease, status=Status.READY_FOR_REVIEW
+            self.allele, self.disease, status=Status.PROVISIONAL
         )
 
     def _url(self) -> str:
@@ -531,12 +532,12 @@ class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
             "ep": "40033",
         }
 
-    def test_approval_sets_status_to_provisional(self):
+    def test_approval_sets_status_to_approved(self):
         self.client.force_login(self.reviewer)
         response = self.client.post(self._url(), self._approval_data())
         self.assertEqual(response.status_code, 302)
         self.curation.refresh_from_db()
-        self.assertEqual(self.curation.status, Status.PROVISIONAL)
+        self.assertEqual(self.curation.status, Status.APPROVED)
         self.assertEqual(self.curation.ep_classification, Classification.MODERATE)
 
     def test_needs_revision_saves_reviewer_notes(self):
@@ -637,15 +638,6 @@ class LockingTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, expected_redirect)
 
-    def test_ready_for_review_locks_evidence_edit(self):
-        curation = _make_curation(
-            self.allele, self.disease, status=Status.READY_FOR_REVIEW
-        )
-        self._assert_locked(
-            curation,
-            reverse("curation-detail", kwargs={"curation_slug": curation.slug}),
-        )
-
     def test_provisional_locks_evidence_edit(self):
         curation = _make_curation(self.allele, self.disease, status=Status.PROVISIONAL)
         self._assert_locked(
@@ -653,10 +645,15 @@ class LockingTest(TestCase):
             reverse("curation-detail", kwargs={"curation_slug": curation.slug}),
         )
 
-    def test_ready_for_review_locks_evidence_create(self):
-        curation = _make_curation(
-            self.allele, self.disease, status=Status.READY_FOR_REVIEW
+    def test_approved_locks_evidence_edit(self):
+        curation = _make_curation(self.allele, self.disease, status=Status.APPROVED)
+        self._assert_locked(
+            curation,
+            reverse("curation-detail", kwargs={"curation_slug": curation.slug}),
         )
+
+    def test_provisional_locks_evidence_create(self):
+        curation = _make_curation(self.allele, self.disease, status=Status.PROVISIONAL)
         url = reverse("evidence-create", kwargs={"curation_slug": curation.slug})
         response = self.client.post(url, {"publication": "1"})
         self.assertEqual(response.status_code, 302)
@@ -671,7 +668,7 @@ class LockingTest(TestCase):
 
 
 class CurationPublishUpdatedTest(TestCase):
-    """Verify publish now requires PROVISIONAL status, not DONE."""
+    """Verify publish now requires APPROVED status, not DONE."""
 
     fixtures = ["test_alleles.json", "test_diseases.json"]
 
@@ -681,15 +678,15 @@ class CurationPublishUpdatedTest(TestCase):
         self.user = _make_user_with_profile(username="curator_p")
         self.client.force_login(self.user)
 
-    def test_publish_requires_provisional_status(self):
+    def test_publish_requires_approved_status(self):
         curation = _make_curation(self.allele, self.disease, status=Status.IN_PROGRESS)
         url = reverse("curation-publish", kwargs={"curation_slug": curation.slug})
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(PublishedCuration.objects.count(), 0)
 
-    def test_publish_succeeds_with_provisional_status(self):
-        curation = _make_curation(self.allele, self.disease, status=Status.PROVISIONAL)
+    def test_publish_succeeds_with_approved_status(self):
+        curation = _make_curation(self.allele, self.disease, status=Status.APPROVED)
         url = reverse("curation-publish", kwargs={"curation_slug": curation.slug})
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
@@ -698,7 +695,7 @@ class CurationPublishUpdatedTest(TestCase):
         self.assertEqual(curation.status, Status.PUBLISHED)
 
     def test_get_does_not_publish(self):
-        curation = _make_curation(self.allele, self.disease, status=Status.PROVISIONAL)
+        curation = _make_curation(self.allele, self.disease, status=Status.APPROVED)
         url = reverse("curation-publish", kwargs={"curation_slug": curation.slug})
         response = self.client.get(url)
         self.assertRedirects(
@@ -707,10 +704,10 @@ class CurationPublishUpdatedTest(TestCase):
         )
         self.assertEqual(PublishedCuration.objects.count(), 0)
         curation.refresh_from_db()
-        self.assertEqual(curation.status, Status.PROVISIONAL)
+        self.assertEqual(curation.status, Status.APPROVED)
 
     def test_detail_buttons_use_the_confirm_modal(self):
-        for status in (Status.IN_PROGRESS, Status.PROVISIONAL):
+        for status in (Status.IN_PROGRESS, Status.APPROVED):
             with self.subTest(status=status):
                 curation = _make_curation(self.allele, self.disease, status=status)
                 url = reverse(

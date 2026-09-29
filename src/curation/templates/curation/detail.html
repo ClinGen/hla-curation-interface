@@ -38,11 +38,11 @@
                     <a href="{% url 'repo-detail' object.slug %}">View in HLArepo</a>
                 </p>
             </div>
-        {% elif object.status == "RFR" %} {# Ready for Review #}
+        {% elif object.status == "PRV" %} {# Provisional #}
             <div class="notification is-warning is-light">
                 <strong>This curation is awaiting expert panel review and is locked.</strong>
             </div>
-        {% elif object.status == "PRO" %} {# Provisional #}
+        {% elif object.status == "APR" %} {# Approved #}
             <div class="notification is-success is-light">
                 <strong>This curation has been approved by the expert panel and is ready to publish.</strong>
             </div>

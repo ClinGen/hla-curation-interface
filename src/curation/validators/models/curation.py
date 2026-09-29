@@ -13,7 +13,7 @@ def validate_status(curation) -> None:
         ValidationError: If curation is being submitted for review but has
                          included evidence that is still in progress.
     """
-    if curation.status == Status.READY_FOR_REVIEW:
+    if curation.status == Status.PROVISIONAL:
         for evidence in curation.evidence.all():
             if evidence.status == Status.IN_PROGRESS and evidence.is_included:
                 raise ValidationError(

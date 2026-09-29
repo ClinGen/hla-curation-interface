@@ -104,7 +104,7 @@ Registers three custom Django template filters: `get_val` (retrieves a named att
 
 ### `tests.py`
 
-Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `SuppressRequestLoggingMixin`) that enforce standard view-test contracts across the project, along with `SearchListViewTest`, which exercises the search and HTMX partial-response behaviour of `SearchListView`.
+Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `SuppressRequestLoggingMixin`) that enforce standard view-test contracts across the project, along with `MigrationsUpToDateTest`, which fails when a model change has no migration, and `SearchListViewTest`, which exercises the search and HTMX partial-response behaviour of `SearchListView`.
 
 ### `views.py`
 
