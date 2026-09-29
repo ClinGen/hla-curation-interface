@@ -1,7 +1,7 @@
 """Deletes bioRxiv and medRxiv publications.
 
-Curators can only add PubMed articles, so preprint publications are legacy data. See
-docs/tickets/001-remove-preprint-publications.md.
+Curators can only add PubMed articles, so preprint publications are legacy data. None
+were expected in the test or production databases when this was written.
 """
 
 from django.db import migrations
