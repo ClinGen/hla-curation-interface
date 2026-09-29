@@ -8,6 +8,7 @@
   "files": {
     "ignoreUnknown": false,
     "ignore": [
+      "./.beads/*",
       "./.venv/*",
       "./coverage/*",
       "./docs/*",
