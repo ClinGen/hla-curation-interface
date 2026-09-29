@@ -48,13 +48,8 @@
             </div>
         {% endif %}
 
-        {% if object.ep_classification %}
-            <div class="notification is-info is-light mt-2">
-                <p class="mt-2"><strong>Classification Notes:</strong> {{ object.ep_evidence_summary }}</p>
-                {% if object.ep_additional_notes %}
-                    <p class="mt-2"><strong>Additional Notes:</strong> {{ object.ep_additional_notes }}</p>
-                {% endif %}
-            </div>
+        {% if object.has_ep_feedback %}
+            {% include "curation/partials/ep_review.html" with curation=object %}
         {% endif %}
 
         {% include "curation/partials/curation/detail_table.html" %}
