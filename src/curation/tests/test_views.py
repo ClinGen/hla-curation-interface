@@ -11,7 +11,11 @@ from django.utils import timezone
 
 from allele.models import Allele
 from auth_.models import UserProfile
-from common.tests import ProtectedViewTestMixin, SuppressRequestLoggingMixin
+from common.tests import (
+    ProtectedViewTestMixin,
+    SuppressRequestLoggingMixin,
+    field_block,
+)
 from curation.constants.models.common import Status
 from curation.constants.models.curation import Classification, CurationTypes
 from curation.constants.models.evidence import (
@@ -307,6 +311,12 @@ class EvidenceEditTest(ProtectedViewTestMixin, TestCase):
     # We skip this because we test it in other test methods.
     def test_expected_text_in_response(self):
         pass
+
+    def test_marks_public_fields(self):
+        html = self.client.get(self.url).content.decode()
+        self.assertIn("public-badge", field_block(html, "id_p_value_string"))
+        self.assertNotIn("public-badge", field_block(html, "id_p_value_notes"))
+        self.assertNotIn("public-badge", field_block(html, "id_needs_review"))
 
     def test_shows_menu(self):
         response = self.client.get(self.url)
@@ -638,6 +648,13 @@ class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
             self.assertContains(response, "can&#x27;t be in the future")
         self.curation.refresh_from_db()
         self.assertEqual(self.curation.status, Status.PROVISIONAL)
+
+    def test_review_page_marks_public_fields(self):
+        self.client.force_login(self.reviewer)
+        html = self.client.get(self._url()).content.decode()
+        self.assertIn("public-badge", field_block(html, "id_ep_evidence_summary"))
+        self.assertIn("public-badge", field_block(html, "id_ep_additional_notes"))
+        self.assertNotIn("public-badge", field_block(html, "id_decision"))
 
     def test_review_page_shows_earlier_feedback(self):
         self.curation.ep_additional_notes = "Check the cohort sizes."

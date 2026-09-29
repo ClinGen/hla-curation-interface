@@ -22,25 +22,29 @@ Defines `HistoryTable`, a django-tables2 `Table` subclass for rendering an objec
 
 The Bulma modal card that `hci/js/confirm-modal.js` shows before submitting a form with a `data-confirm` attribute. `layouts/base.html` includes it once on every page.
 
+### `templates/common/form/public_note.html`
+
+The public badge with visible "Shown publicly in HLArepo" text, used by the field partials when a public field's label is hidden.
+
 ### `templates/common/form/input/radio.html`
 
-Reusable partial for rendering a radio-button form field using Bulma CSS. Supports optional label hiding and help-text display.
+Reusable partial for rendering a radio-button form field using Bulma CSS. Supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label, or in a visible note when the label is hidden.
 
 ### `templates/common/form/input/text.html`
 
-Reusable partial for rendering a text `<input>` form field using Bulma CSS. Accepts context variables for `type`, `autocomplete`, and `placeholder`, and supports optional label hiding and help-text display.
+Reusable partial for rendering a text `<input>` form field using Bulma CSS. Accepts context variables for `type`, `autocomplete`, and `placeholder`, and supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label, or in a visible note when the label is hidden.
 
 ### `templates/common/form/select/default.html`
 
-Reusable partial for rendering a standard `<select>` form field using Bulma CSS. Supports optional label visibility, help text, and an extra CSS class on the select wrapper.
+Reusable partial for rendering a standard `<select>` form field using Bulma CSS. Supports optional label visibility, help text, and an extra CSS class on the select wrapper. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label, or in a visible note when the label is hidden.
 
 ### `templates/common/form/select/search.html`
 
-Reusable partial for rendering a `<select>` field enhanced with the Choices.js library for fuzzy search. Initialises the Choices widget on HTMX load with configurable fuse search options and a remove-item button.
+Reusable partial for rendering a `<select>` field enhanced with the Choices.js library for fuzzy search. Initialises the Choices widget on HTMX load with configurable fuse search options and a remove-item button. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label, or in a visible note when the label is hidden.
 
 ### `templates/common/form/textarea.html`
 
-Reusable partial for rendering a `<textarea>` form field using Bulma CSS, with a visible label, inline validation errors, and optional help text.
+Reusable partial for rendering a `<textarea>` form field using Bulma CSS, with a visible label, inline validation errors, and optional help text. Pass `public=True` to put the public badge in the label.
 
 ### `templates/common/history/change_body.html`
 
@@ -65,6 +69,10 @@ Renders the live-search text input used on list pages. Uses HTMX to fire a GET r
 ### `templates/common/partials/search_results.html`
 
 Renders the result count and, when results exist, the django-tables2 table inside an HTMX-boosted container targeting `#search-results`. Used as the HTMX partial response for search queries.
+
+### `templates/common/public_badge.html`
+
+A globe icon marking a form field that's shown publicly in HLArepo. It has a `title` tooltip and screen-reader text, since Bulma has no tooltip component.
 
 ### `templates/common/tags/_generic.html`
 
@@ -100,11 +108,11 @@ Empty file that marks `templatetags` as a Python package, enabling Django to dis
 
 ### `templatetags/custom_filters.py`
 
-Registers three custom Django template filters: `get_val` (retrieves a named attribute from a model instance), `get_item` (retrieves a key from a dictionary), and `in_get` (checks whether a string is present in `request.GET`).
+Registers four custom Django template filters: `get_val` (retrieves a named attribute from a model instance), `get_item` (retrieves a key from a dictionary), `in_get` (checks whether a string is present in `request.GET`), and `is_public` (checks a curation or evidence field name against the lists in `repo/constants.py`, dropping the `_string` suffix that some evidence form fields use).
 
 ### `tests.py`
 
-Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `SuppressRequestLoggingMixin`) that enforce standard view-test contracts across the project, along with `MigrationsUpToDateTest`, which fails when a model change has no migration, and `SearchListViewTest`, which exercises the search and HTMX partial-response behaviour of `SearchListView`.
+Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `SuppressRequestLoggingMixin`) that enforce standard view-test contracts across the project, along with `IsPublicFilterTest`, the `field_block` helper for checking a field's public badge, `MigrationsUpToDateTest`, which fails when a model change has no migration, and `SearchListViewTest`, which exercises the search and HTMX partial-response behaviour of `SearchListView`.
 
 ### `views.py`
 

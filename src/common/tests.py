@@ -11,6 +11,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from auth_.models import UserProfile
+from common.templatetags.custom_filters import is_public
 
 
 class SuppressRequestLoggingMixin:
@@ -142,6 +143,39 @@ class ProtectedViewTestMixin(SuppressRequestLoggingMixin, BaseViewTestMixin):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
+
+
+def field_block(html: str, field_id: str) -> str:
+    """Returns the rendered HTML from a field's label up to its control.
+
+    The public badge sits between the two, so tests use this to check whether a
+    given field has one.
+    """
+    start = html.index(f'for="{field_id}"') if f'for="{field_id}"' in html else None
+    if start is None:
+        start = html.index(f'data-field="{field_id}"')
+    return html[start : html.index('class="control"', start)]
+
+
+class IsPublicFilterTest(TestCase):
+    def test_public_curation_fields(self):
+        for name in ("ep_evidence_summary", "ep_additional_notes", "ep_review_date"):
+            with self.subTest(name=name):
+                self.assertTrue(is_public(name, "curation"))
+
+    def test_internal_curation_fields(self):
+        for name in ("decision", "status"):
+            with self.subTest(name=name):
+                self.assertFalse(is_public(name, "curation"))
+
+    def test_evidence_form_fields_map_to_model_fields(self):
+        self.assertTrue(is_public("p_value_string", "evidence"))
+        self.assertTrue(is_public("cohort_size", "evidence"))
+
+    def test_internal_evidence_fields(self):
+        for name in ("p_value_notes", "needs_review", "needs_review_notes"):
+            with self.subTest(name=name):
+                self.assertFalse(is_public(name, "evidence"))
 
 
 class MigrationsUpToDateTest(TestCase):

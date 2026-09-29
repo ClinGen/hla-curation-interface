@@ -1,5 +1,5 @@
 <div class="field">
-    <label for="{{ field.id_for_label }}" class="label">{{ field.label }}</label>
+    <label for="{{ field.id_for_label }}" class="label">{{ field.label }}{% if public %} {% include "common/public_badge.html" %}{% endif %}</label>
     <div class="has-text-danger">{{ field.errors }}</div>
     {% if show_help and field.help_text %}
         <p class="help">{{ field.help_text }}</p>

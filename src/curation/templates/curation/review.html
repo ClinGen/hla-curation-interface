@@ -51,15 +51,15 @@
 
         <form method="post" id="review-form">
             {% csrf_token %}
-            {% include "common/form/select/default.html" with field=form.ep_classification show_label=True %}
+            {% include "common/form/select/default.html" with field=form.ep_classification public=form.ep_classification.name|is_public:"curation" show_label=True %}
             <div id="override-reason">
-                {% include "common/form/textarea.html" with field=form.ep_override_reason show_help=True %}
+                {% include "common/form/textarea.html" with field=form.ep_override_reason public=form.ep_override_reason.name|is_public:"curation" show_help=True %}
             </div>
-            {% include "common/form/textarea.html" with field=form.ep_evidence_summary %}
-            {% include "common/form/textarea.html" with field=form.ep_additional_notes %}
-            {% include "common/form/select/default.html" with field=form.ep show_label=True %}
-            {% include "common/form/input/text.html" with field=form.ep_review_date type="date" show_help=True %}
-            {% include "common/form/input/radio.html" with field=form.decision %}
+            {% include "common/form/textarea.html" with field=form.ep_evidence_summary public=form.ep_evidence_summary.name|is_public:"curation" %}
+            {% include "common/form/textarea.html" with field=form.ep_additional_notes public=form.ep_additional_notes.name|is_public:"curation" %}
+            {% include "common/form/select/default.html" with field=form.ep public=form.ep.name|is_public:"curation" show_label=True %}
+            {% include "common/form/input/text.html" with field=form.ep_review_date public=form.ep_review_date.name|is_public:"curation" type="date" show_help=True %}
+            {% include "common/form/input/radio.html" with field=form.decision public=form.decision.name|is_public:"curation" %}
             <div class="field is-grouped mt-4">
                 <div class="control">
                     <button type="submit" class="button is-link">Submit</button>
