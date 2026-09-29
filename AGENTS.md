@@ -97,26 +97,28 @@ anything in `docs/` inaccurate, update that too.
 
 ## Our Beads Workflow
 
-1. Large work is described in a plan in `docs/plans`. Small work is described in a
-   ticket in `docs/tickets`. Both use the naming scheme `NNN-short-name.md`. If you
-   write a plan in plan mode, save the approved plan to `docs/plans`.
-2. `docs/prompts/04-break-down-into-beads.md` turns a plan or ticket into an epic with
-   child beads. Each bead links back to its plan or ticket with `--spec-id`.
-3. `docs/prompts/05-work-beads.md` works through a single bead, or through an epic's
+Beads are the only place we plan and track work. Don't write plan or ticket files in
+`docs/`, and don't use `--spec-id`.
+
+1. `docs/prompts/04-break-down-into-beads.md` turns a description of work (a GitHub
+   issue, notes, or a plan approved in plan mode) into an epic with child beads, or a
+   single bead for small work.
+2. `docs/prompts/05-work-beads.md` works through a single bead, or through an epic's
    beads until none are ready.
 
-Beads and tickets don't correspond one-to-one. A ticket or plan can produce one bead or
-many, and small, self-contained work can be a bead with no ticket at all. Write a ticket
-when the work needs more context than fits in a bead: a decision to record, an open
-question, or reasoning someone might question later. Otherwise, create the bead
-directly with a description that lists the files to change and acceptance criteria
-that name the tests to write.
+A bead has to stand on its own. Its description says what to change and why, and its
+acceptance criteria name the tests to write. Put rationale shared by an epic's children
+in the epic's `--design` field instead of repeating it. Record a decision in the bead it
+affects, as a note or a close reason. For an open question, create a `decision` bead
+labeled `needs-input` that blocks the work waiting on it, and write the question out in
+full. Don't restate what the code already says; beads describe intent, not the code to
+type.
 
-When working on a bead, follow its acceptance criteria and read the plan or ticket it
-links to, if it has one. File work you discover outside a bead's scope as a new bead
-instead of doing it. After changing beads, run `bd export -o .beads/issues.jsonl` so
-the export in git stays current. Don't commit, push, or run `bd dolt push` unless a
-prompt or I tell you to.
+When working on a bead, follow its acceptance criteria and read its epic's design, if it
+has one. File work you discover outside a bead's scope as a new bead instead of doing
+it. After changing beads, run `bd export -o .beads/issues.jsonl` so the export in git
+stays current. Don't commit, push, or run `bd dolt push` unless a prompt or I tell you
+to.
 
 ## Commit Messages
 
