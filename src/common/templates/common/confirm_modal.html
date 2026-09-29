@@ -1,0 +1,19 @@
+{# The modal that confirm-modal.js shows for forms with a data-confirm attribute. #}
+<div class="modal" id="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+    <div class="modal-background" data-confirm-cancel></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title" id="confirm-modal-title">Are you sure?</p>
+            <button type="button" class="delete" aria-label="Close" data-confirm-cancel></button>
+        </header>
+        <section class="modal-card-body">
+            <p id="confirm-modal-message"></p>
+        </section>
+        <footer class="modal-card-foot">
+            <div class="buttons">
+                <button type="button" class="button is-link" id="confirm-modal-ok">Confirm</button>
+                <button type="button" class="button" data-confirm-cancel>Cancel</button>
+            </div>
+        </footer>
+    </div>
+</div>

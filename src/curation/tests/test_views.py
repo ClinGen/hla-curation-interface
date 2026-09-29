@@ -829,15 +829,39 @@ class CurationPublishUpdatedTest(TestCase):
     def test_publish_requires_approved_status(self):
         curation = _make_curation(self.allele, self.disease, status=Status.IN_PROGRESS)
         url = reverse("curation-publish", kwargs={"curation_slug": curation.slug})
-        response = self.client.get(url)
+        response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(PublishedCuration.objects.count(), 0)
 
     def test_publish_succeeds_with_approved_status(self):
         curation = _make_curation(self.allele, self.disease, status=Status.APPROVED)
         url = reverse("curation-publish", kwargs={"curation_slug": curation.slug})
-        response = self.client.get(url)
+        response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(PublishedCuration.objects.count(), 1)
         curation.refresh_from_db()
         self.assertEqual(curation.status, Status.PUBLISHED)
+
+    def test_get_does_not_publish(self):
+        curation = _make_curation(self.allele, self.disease, status=Status.APPROVED)
+        url = reverse("curation-publish", kwargs={"curation_slug": curation.slug})
+        response = self.client.get(url)
+        self.assertRedirects(
+            response,
+            reverse("curation-detail", kwargs={"curation_slug": curation.slug}),
+        )
+        self.assertEqual(PublishedCuration.objects.count(), 0)
+        curation.refresh_from_db()
+        self.assertEqual(curation.status, Status.APPROVED)
+
+    def test_detail_buttons_use_the_confirm_modal(self):
+        for status in (Status.IN_PROGRESS, Status.APPROVED):
+            with self.subTest(status=status):
+                curation = _make_curation(self.allele, self.disease, status=status)
+                url = reverse(
+                    "curation-detail", kwargs={"curation_slug": curation.slug}
+                )
+                response = self.client.get(url)
+                self.assertContains(response, "data-confirm=")
+                self.assertContains(response, 'id="confirm-modal"')
+                self.assertNotContains(response, "confirm(")
