@@ -18,6 +18,7 @@ from curation.constants.models.common import (
 from curation.constants.models.curation import (
     CLASSIFICATION_CHOICES,
     CURATION_TYPE_CHOICES,
+    NO_CLASSIFICATION_LABEL,
     Classification,
     CurationTypes,
 )
@@ -255,6 +256,19 @@ class Curation(models.Model):
         if s <= 50:
             return Classification.MODERATE
         return Classification.STRONG
+
+    @property
+    def is_classification_suggested(self) -> bool:
+        """Whether the displayed classification is the suggested one, not the EP's."""
+        return not self.ep_classification and self.suggested_classification is not None
+
+    @property
+    def classification_display(self) -> str:
+        """The EP classification label, else the suggested one, else a placeholder."""
+        code = self.ep_classification or self.suggested_classification
+        if code is None:
+            return NO_CLASSIFICATION_LABEL
+        return CLASSIFICATION_CHOICES[code]
 
     @property
     def score(self) -> float:

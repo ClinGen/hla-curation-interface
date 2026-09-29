@@ -196,6 +196,7 @@ class RepoSearchViewTest(TestCase):
 
         response = self.client.get(self.url)
         self.assertContains(response, curation.slug)
+        self.assertContains(response, "No Classification Set")
 
 
 class PublishedCurationDetailViewTest(TestCase):

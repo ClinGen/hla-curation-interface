@@ -1,6 +1,7 @@
 """Houses tests for the curation app's models."""
 
 from decimal import Decimal
+from unittest.mock import PropertyMock, patch
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -192,6 +193,36 @@ class TestCuration(TestCase):
                 disease=self.disease,
             )
             curation.clean()
+
+
+class TestCurationClassificationDisplay(TestCase):
+    fixtures = ["test_alleles.json", "test_diseases.json"]
+
+    def setUp(self):
+        self.curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+        )
+
+    def test_score_of_zero_shows_no_classification_set(self):
+        self.assertEqual(self.curation.classification_display, "No Classification Set")
+        self.assertFalse(self.curation.is_classification_suggested)
+
+    def test_positive_score_shows_suggested_classification(self):
+        with patch.object(
+            Curation, "score", new_callable=PropertyMock, return_value=10
+        ):
+            self.assertEqual(self.curation.classification_display, "Limited")
+            self.assertTrue(self.curation.is_classification_suggested)
+
+    def test_ep_classification_wins_over_suggestion(self):
+        self.curation.ep_classification = Classification.DEFINITIVE
+        with patch.object(
+            Curation, "score", new_callable=PropertyMock, return_value=10
+        ):
+            self.assertEqual(self.curation.classification_display, "Definitive")
+            self.assertFalse(self.curation.is_classification_suggested)
 
 
 class TestCurationStatusTransitions(TestCase):

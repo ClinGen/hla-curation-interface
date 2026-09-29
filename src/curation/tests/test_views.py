@@ -109,6 +109,11 @@ class CurationDetailTest(ProtectedViewTestMixin, TestCase):
         )
         self.assertContains(response, "0.0")  # Should default to a score of 0.0.
 
+    def test_shows_no_classification_set_when_score_is_zero(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, "No Classification Set")
+        self.assertNotContains(response, "Suggested Classification")
+
 
 class CurationEditEvidenceTest(ProtectedViewTestMixin, TestCase):
     fixtures = [
@@ -153,6 +158,7 @@ class CurationListTest(ProtectedViewTestMixin, TestCase):
         "acute oran berry intoxication",
         "In Progress",
         "bi-cone-striped",
+        "No Classification Set",
         "1970-01-01",
     ]
 
