@@ -1,5 +1,6 @@
 from django import forms
 from django.forms import ModelForm, modelformset_factory
+from django.utils import timezone
 
 from curation.constants.models.curation import CLASSIFICATION_CHOICES
 from curation.models import Curation, Evidence
@@ -45,12 +46,21 @@ class EPReviewForm(forms.Form):
         choices=EP_CHOICES,
         required=False,
     )
+    ep_review_date = forms.DateField(
+        label="Review Date",
+        help_text="The date the expert panel reviewed the curation.",
+        required=False,
+    )
 
     def clean(self) -> dict | None:
         cleaned_data = super().clean()
         if not cleaned_data:
             return cleaned_data
         decision = cleaned_data.get("decision")
+        review_date = cleaned_data.get("ep_review_date")
+        # TIME_ZONE is UTC, so this is today's date with or without USE_TZ.
+        if review_date and review_date > timezone.now().date():
+            self.add_error("ep_review_date", "The review date can't be in the future.")
         if decision == "approved":
             if not cleaned_data.get("ep_classification"):
                 self.add_error("ep_classification", "Required when approving.")
@@ -58,6 +68,8 @@ class EPReviewForm(forms.Form):
                 self.add_error("ep_evidence_summary", "Required when approving.")
             if not cleaned_data.get("ep"):
                 self.add_error("ep", "Required when approving.")
+            if not review_date:
+                self.add_error("ep_review_date", "Required when approving.")
         return cleaned_data
 
 

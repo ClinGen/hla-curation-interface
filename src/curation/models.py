@@ -117,6 +117,12 @@ class Curation(models.Model):
         verbose_name="EP Additional Notes",
         help_text="Additional notes from the expert panel.",
     )
+    ep_review_date = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="EP Review Date",
+        help_text="The date the expert panel reviewed the curation.",
+    )
     ep = models.CharField(  # ruff: ignore[django-nullable-model-string-field]
         max_length=5,
         null=True,

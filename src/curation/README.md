@@ -56,7 +56,7 @@ A Django fixture with a single minimal in-progress evidence item (`E000001`) lin
 
 ### `forms.py`
 
-Defines the Django forms used by curation and evidence views: `CurationCreateForm` (create a curation), `EPReviewForm` (expert panel review with decision, classification, and notes), `EvidenceCreateForm` (attach a publication), `EvidenceTopLevelEditForm` / `EvidenceTopLevelEditFormSet` (inline status/inclusion editing from the curation detail page), and `EvidenceEditForm` (the full step-by-step evidence data entry form with cross-field validation).
+Defines the Django forms used by curation and evidence views: `CurationCreateForm` (create a curation), `EPReviewForm` (expert panel review with decision, classification, notes, and review date; the review date is required when approving and can't be in the future), `EvidenceCreateForm` (attach a publication), `EvidenceTopLevelEditForm` / `EvidenceTopLevelEditFormSet` (inline status/inclusion editing from the curation detail page), and `EvidenceEditForm` (the full step-by-step evidence data entry form with cross-field validation).
 
 ### `interval.py`
 
@@ -112,7 +112,7 @@ Partial that renders a curation's `classification_display`, followed by a light 
 
 ### `templates/curation/partials/curation/detail_table.html`
 
-Partial that renders a summary table for a `Curation` object, showing its ID, allele or haplotype, disease, status badge, classification (via `partials/classification.html`), aggregate score, and timestamps, plus a "View History" button.
+Partial that renders a summary table for a `Curation` object, showing its ID, allele or haplotype, disease, status badge, classification (via `partials/classification.html`), EP review date when set, aggregate score, and timestamps, plus a "View History" button.
 
 ### `templates/curation/partials/evidence/detail_table.html`
 
@@ -120,7 +120,7 @@ Partial that renders a read-only summary table listing all evidence items belong
 
 ### `templates/curation/review.html`
 
-Full-page template for the expert panel review form. Displays the curation summary and evidence table, then renders the `EPReviewForm` fields (classification, evidence summary, notes, expert panel selector, and approve/needs-revision decision). Includes JavaScript that warns the reviewer if the selected classification differs from the system-suggested one.
+Full-page template for the expert panel review form. Displays the curation summary and evidence table, then renders the `EPReviewForm` fields (classification, evidence summary, notes, expert panel selector, review date, and approve/needs-revision decision). Includes JavaScript that warns the reviewer if the selected classification differs from the system-suggested one.
 
 ### `templates/evidence/change.html`
 

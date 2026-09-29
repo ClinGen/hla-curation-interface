@@ -51,6 +51,7 @@
             {% include "common/form/textarea.html" with field=form.ep_evidence_summary %}
             {% include "common/form/textarea.html" with field=form.ep_additional_notes %}
             {% include "common/form/select/default.html" with field=form.ep show_label=True %}
+            {% include "common/form/input/text.html" with field=form.ep_review_date type="date" show_help=True %}
             {% include "common/form/input/radio.html" with field=form.decision %}
             <div class="field is-grouped mt-4">
                 <div class="control">
