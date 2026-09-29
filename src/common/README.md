@@ -18,6 +18,10 @@ Provides `resolve_changes`, which computes a human-readable diff between two dja
 
 Defines `HistoryTable`, a django-tables2 `Table` subclass for rendering an object's audit history. It renders the change type as a labelled icon link pointing to the corresponding change-detail view.
 
+### `templates/common/confirm_modal.html`
+
+The Bulma modal card that `hci/js/confirm-modal.js` shows before submitting a form with a `data-confirm` attribute. `layouts/base.html` includes it once on every page.
+
 ### `templates/common/form/input/radio.html`
 
 Reusable partial for rendering a radio-button form field using Bulma CSS. Supports optional label hiding and help-text display.

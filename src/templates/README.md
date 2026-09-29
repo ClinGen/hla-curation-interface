@@ -20,7 +20,7 @@ Renders a 500 Internal Server Error page when an unhandled server-side exception
 
 ### `layouts/base.html`
 
-The root layout template that all other page templates extend. It loads static assets (Bulma CSS, Bootstrap Icons, Choices.js, HTMX), sets up the `<head>` with favicon and meta blocks, and composes the page structure by including the environment banner, navbar, account activation notice, flash messages, and footer partials around a `{% block main %}` content slot.
+The root layout template that all other page templates extend. It loads static assets (Bulma CSS, Bootstrap Icons, Choices.js, HTMX, and the confirm modal script), sets up the `<head>` with favicon and meta blocks, and composes the page structure by including the environment banner, navbar, account activation notice, flash messages, and footer partials around a `{% block main %}` content slot, followed by the shared confirm modal (`common/confirm_modal.html`).
 
 ### `partials/account_activation.html`
 
