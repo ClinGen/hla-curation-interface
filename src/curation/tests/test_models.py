@@ -4,6 +4,7 @@ from decimal import Decimal
 from unittest.mock import PropertyMock, patch
 
 from django.core.exceptions import ValidationError
+from django.template.loader import render_to_string
 from django.test import TestCase
 
 from allele.models import Allele
@@ -265,12 +266,11 @@ class TestCurationTableRenderStatus(TestCase):
         html = self.table.render_status(
             "Provisional", Curation(status=Status.PROVISIONAL)
         )
-        self.assertIn("Provisional", html)
-        self.assertNotIn("Needs Review", html)
+        self.assertHTMLEqual(html, render_to_string("common/tags/provisional.html"))
 
     def test_approved_label(self):
         html = self.table.render_status("Approved", Curation(status=Status.APPROVED))
-        self.assertIn("Approved", html)
+        self.assertHTMLEqual(html, render_to_string("common/tags/approved.html"))
 
 
 class TestEvidence(TestCase):

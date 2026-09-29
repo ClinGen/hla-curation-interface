@@ -166,6 +166,10 @@ class CurationListTest(ProtectedViewTestMixin, TestCase):
         super().setUp()
         self.client.force_login(self.user4_yes_phi_yes_perms)
 
+    def test_status_uses_the_common_tag_template(self):
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, "common/tags/in_progress.html")
+
 
 class EvidenceCreateTest(ProtectedViewTestMixin, TestCase):
     fixtures = [

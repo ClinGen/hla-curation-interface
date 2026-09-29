@@ -70,6 +70,10 @@ Renders the result count and, when results exist, the django-tables2 table insid
 
 Base tag partial that renders a Bulma `<span class="tag">` with a given `color`, `icon_name`, and `text`. All concrete tag templates include this partial via `{% include %}` with specific values.
 
+### `templates/common/tags/approved.html`
+
+Renders a green "Approved" curation status tag using `_generic.html` with a check-circle icon.
+
 ### `templates/common/tags/done.html`
 
 Renders a green "Done" status tag using `_generic.html` with a filled check-circle icon.
@@ -89,6 +93,10 @@ Renders a yellow "Not Provided" status tag using `_generic.html` with an outline
 ### `templates/common/tags/provided.html`
 
 Renders a green "Provided" status tag using `_generic.html` with a filled check-circle icon.
+
+### `templates/common/tags/provisional.html`
+
+Renders a red "Provisional" curation status tag using `_generic.html` with an hourglass icon. Provisional curations are waiting on the expert panel.
 
 ### `templates/common/tags/published.html`
 
