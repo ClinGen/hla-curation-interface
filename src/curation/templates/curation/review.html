@@ -48,6 +48,9 @@
         <form method="post" id="review-form">
             {% csrf_token %}
             {% include "common/form/select/default.html" with field=form.ep_classification show_label=True %}
+            <div id="override-reason">
+                {% include "common/form/textarea.html" with field=form.ep_override_reason show_help=True %}
+            </div>
             {% include "common/form/textarea.html" with field=form.ep_evidence_summary %}
             {% include "common/form/textarea.html" with field=form.ep_additional_notes %}
             {% include "common/form/select/default.html" with field=form.ep show_label=True %}
@@ -64,17 +67,19 @@
         </form>
 
         <script>
-            const suggestedClassification = "{{ object.suggested_classification|default:'' }}";
-            document.getElementById("review-form").addEventListener("submit", function (e) {
-                const decision = document.querySelector("input[name='decision']:checked");
-                if (!decision || decision.value !== "approved") return;
-                const selected = document.getElementById("id_ep_classification").value;
-                if (selected && selected !== suggestedClassification) {
-                    if (!confirm("The selected classification differs from the suggested classification. Proceed?")) {
-                        e.preventDefault();
-                    }
-                }
-            });
+            // Shows the override reason only when the selection differs from the
+            // suggestion. EPReviewForm.clean() is the real check.
+            (() => {
+                const suggested = "{{ form.suggested_classification|default:'' }}";
+                const select = document.getElementById("id_ep_classification");
+                const reason = document.getElementById("override-reason");
+                const toggle = () => {
+                    const isOverride = select.value !== "" && select.value !== suggested;
+                    reason.classList.toggle("is-hidden", !isOverride);
+                };
+                select.addEventListener("change", toggle);
+                toggle();
+            })();
         </script>
 
     </div>

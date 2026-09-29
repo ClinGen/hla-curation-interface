@@ -1,8 +1,10 @@
 """Houses tests for the curation app's views."""
 
 from datetime import date, timedelta
+from unittest.mock import PropertyMock, patch
 
 from django.contrib.auth.models import User
+from django.http.response import HttpResponseBase
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -548,6 +550,8 @@ class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
             "ep_additional_notes": "",
             "ep": "40033",
             "ep_review_date": timezone.now().date().isoformat(),
+            # The score is 0, so no classification is suggested and any is an override.
+            "ep_override_reason": "Panel judgment.",
         }
 
     def test_approval_sets_status_to_approved(self):
@@ -619,6 +623,58 @@ class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
         with self.suppress_request_logging():
             response = self.client.post(self._url(), self._approval_data())
         self.assertEqual(response.status_code, 403)
+
+    def _post_with_score(self, data: dict[str, str], score: float) -> HttpResponseBase:
+        self.client.force_login(self.reviewer)
+        with patch.object(
+            Curation, "score", new_callable=PropertyMock, return_value=score
+        ):
+            return self.client.post(self._url(), data)
+
+    def test_matching_suggestion_needs_no_override_reason(self):
+        data = {**self._approval_data(), "ep_classification": Classification.LIMITED}
+        response = self._post_with_score(data, 10)
+        self.assertEqual(response.status_code, 302)
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.status, Status.APPROVED)
+
+    def test_override_without_reason_fails(self):
+        data = {**self._approval_data(), "ep_override_reason": ""}
+        response = self._post_with_score(data, 10)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Explain why the panel chose")
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.status, Status.PROVISIONAL)
+
+    def test_override_with_reason_saves_both(self):
+        data = {**self._approval_data(), "ep_override_reason": "Replicated twice."}
+        response = self._post_with_score(data, 10)
+        self.assertEqual(response.status_code, 302)
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.ep_classification, Classification.MODERATE)
+        self.assertEqual(self.curation.ep_override_reason, "Replicated twice.")
+
+    def test_approving_without_override_clears_old_reason(self):
+        self.curation.ep_override_reason = "From an earlier review."
+        self.curation.save()
+        data = {
+            **self._approval_data(),
+            "ep_classification": Classification.LIMITED,
+            "ep_override_reason": "From an earlier review.",
+        }
+        self._post_with_score(data, 10)
+        self.curation.refresh_from_db()
+        self.assertIsNone(self.curation.ep_override_reason)
+
+    def test_review_form_preselects_suggestion_and_labels_it(self):
+        self.client.force_login(self.reviewer)
+        with patch.object(
+            Curation, "score", new_callable=PropertyMock, return_value=10
+        ):
+            response = self.client.get(self._url())
+        self.assertContains(response, "Classification (suggested: Limited)")
+        self.assertContains(response, '<option value="LIM" selected>')
+        self.assertNotContains(response, "confirm(")
 
 
 class CurationCopyTest(SuppressRequestLoggingMixin, TestCase):

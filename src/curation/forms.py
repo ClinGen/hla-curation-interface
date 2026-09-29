@@ -1,5 +1,6 @@
 from django import forms
 from django.forms import ModelForm, modelformset_factory
+from django.http import QueryDict
 from django.utils import timezone
 
 from curation.constants.models.curation import CLASSIFICATION_CHOICES
@@ -31,6 +32,14 @@ class EPReviewForm(forms.Form):
         choices=[("", "---------"), *CLASSIFICATION_CHOICES.items()],
         required=False,
     )
+    ep_override_reason = forms.CharField(
+        label="Override Reason",
+        help_text=(
+            "Explain why the panel chose a classification other than the suggested one."
+        ),
+        widget=forms.Textarea(attrs={"class": "textarea", "rows": 3}),
+        required=False,
+    )
     ep_evidence_summary = forms.CharField(
         label="Evidence Summary",
         widget=forms.Textarea(attrs={"class": "textarea", "rows": 3}),
@@ -52,6 +61,30 @@ class EPReviewForm(forms.Form):
         required=False,
     )
 
+    def __init__(
+        self,
+        data: QueryDict | None = None,
+        *,
+        suggested_classification: str | None = None,
+        initial: dict[str, object] | None = None,
+    ) -> None:
+        """Labels the classification select with the suggested classification.
+
+        Args:
+            data: The submitted form data, if any.
+            suggested_classification: The curation's suggested classification code.
+            initial: Initial values for an unbound form.
+        """
+        super().__init__(data, initial=initial)
+        self.suggested_classification = suggested_classification
+        if suggested_classification:
+            label = CLASSIFICATION_CHOICES[suggested_classification]
+            self.fields[
+                "ep_classification"
+            ].label = f"Classification (suggested: {label})"
+        else:
+            self.fields["ep_classification"].label = "Classification (no suggestion)"
+
     def clean(self) -> dict | None:
         cleaned_data = super().clean()
         if not cleaned_data:
@@ -70,6 +103,16 @@ class EPReviewForm(forms.Form):
                 self.add_error("ep", "Required when approving.")
             if not review_date:
                 self.add_error("ep_review_date", "Required when approving.")
+            classification = cleaned_data.get("ep_classification") or None
+            if classification == self.suggested_classification:
+                # Don't keep a stale reason from an earlier review.
+                cleaned_data["ep_override_reason"] = ""
+            elif classification and not cleaned_data.get("ep_override_reason"):
+                self.add_error(
+                    "ep_override_reason",
+                    "Explain why the panel chose a classification other than the "
+                    "suggested one.",
+                )
         return cleaned_data
 
 
