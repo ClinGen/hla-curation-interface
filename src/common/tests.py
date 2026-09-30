@@ -1,12 +1,17 @@
 """Houses code used commonly in tests."""
 
 import logging
+import re
 from contextlib import contextmanager
 from io import StringIO
+from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management import call_command
+from django.template.loader import render_to_string
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -176,6 +181,70 @@ class IsPublicFilterTest(TestCase):
         for name in ("p_value_notes", "needs_review", "needs_review_notes"):
             with self.subTest(name=name):
                 self.assertFalse(is_public(name, "evidence"))
+
+
+class ColorKeyTest(TestCase):
+    """Checks templates against the color key in docs/design.md."""
+
+    TAG_COLORS = {
+        "in_progress": "",
+        "not_provided": "",
+        "provisional": "is-warning",
+        "needs_review": "is-danger",
+        "done": "is-success",
+        "provided": "is-success",
+        "approved": "is-success",
+        "published": "is-info",
+    }
+    COLOR_MODIFIERS = {"is-warning", "is-danger", "is-success", "is-info"}
+
+    @staticmethod
+    def _tag_classes(name: str) -> set[str]:
+        html = render_to_string(f"common/tags/{name}.html")
+        match = re.search(r'class="([^"]*)"', html)
+        assert match is not None
+        return set(match.group(1).split())
+
+    @staticmethod
+    def _templates() -> list[Path]:
+        return sorted(Path(settings.BASE_DIR).glob("**/templates/**/*.html"))
+
+    def test_status_tag_colors(self):
+        for name, color in self.TAG_COLORS.items():
+            with self.subTest(name=name):
+                classes = self._tag_classes(name)
+                self.assertEqual(classes & self.COLOR_MODIFIERS, {color} - {""})
+                self.assertIn("is-light", classes)
+
+    def test_every_tag_template_is_in_the_key(self):
+        tags_dir = Path(settings.BASE_DIR) / "common/templates/common/tags"
+        names = {p.stem for p in tags_dir.glob("*.html")} - {"_generic"}
+        self.assertEqual(names, set(self.TAG_COLORS))
+
+    def test_buttons_are_link_blue(self):
+        pattern = re.compile(r'class="button\b[^"]*"')
+        for path in self._templates():
+            for match in pattern.finditer(path.read_text()):
+                with self.subTest(path=path.name, classes=match.group(0)):
+                    self.assertIn("is-link", match.group(0))
+
+    def test_no_primary_color(self):
+        for path in self._templates():
+            with self.subTest(path=path.name):
+                self.assertNotIn("is-primary", path.read_text())
+
+    def _ep_review(self, status: str) -> str:
+        curation = SimpleNamespace(status=status, ep_display="HLA EP")
+        return render_to_string(
+            "curation/partials/ep_review.html", {"curation": curation}
+        )
+
+    def test_sent_back_feedback_is_red(self):
+        self.assertIn('class="message is-danger', self._ep_review("INP"))
+
+    def test_other_feedback_is_neutral(self):
+        html = self._ep_review("APR")
+        self.assertIn('class="message mt-2"', html)
 
 
 class MigrationsUpToDateTest(TestCase):
