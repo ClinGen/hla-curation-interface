@@ -17,6 +17,7 @@
     <link rel="manifest" href="{% static 'hci/site.webmanifest' %}">
     <script src="{% static 'hci/js/htmx.js' %}"></script>
     <script src="{% static 'hci/js/choices.min.js' %}"></script>
+    <script src="{% static 'hci/js/confirm-modal.js' %}" defer></script>
 </head>
 <body>
 <header>
@@ -43,5 +44,6 @@
         {% include "partials/footer.html" %}
     </div>
 </footer>
+{% include "common/confirm_modal.html" %}
 </body>
 </html>

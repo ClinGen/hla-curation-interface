@@ -197,6 +197,9 @@ def curation_publish(request: HttpRequest, curation_slug: str) -> HttpResponse:
     """
     from repo.models import PublishedCuration
 
+    if request.method != "POST":
+        return redirect("curation-detail", curation_slug=curation_slug)
+
     curation = get_object_or_404(Curation, slug=curation_slug)
     try:
         with transaction.atomic():

@@ -98,6 +98,10 @@ The full, unminified source of the Choices.js library (v11.2.3). It provides a c
 
 The minified production build of the Choices.js library. It is the version loaded in production to reduce page load time.
 
+### `hci/js/confirm-modal.js`
+
+A small hand-written script, not produced by `build.js`, that asks for confirmation before any form with a `data-confirm` attribute is submitted. It shows the attribute's text in the modal from `common/confirm_modal.html` and submits the form only on Confirm; Cancel, the background, and Escape close the modal. Its listeners are on the document, so they keep working after HTMX swaps.
+
 ### `hci/js/htmx.js`
 
 The htmx library (v2.0.10). It enables HTML-first, AJAX-driven interactivity by allowing Django template elements to issue HTTP requests and swap content without a full page reload.

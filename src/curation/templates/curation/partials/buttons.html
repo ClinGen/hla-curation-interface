@@ -4,11 +4,12 @@
             {% include "common/icon.html" with icon_name="plus-circle" %}
             Add Evidence
         </a>
-        <form method="post" action="{% url 'curation-submit' object.slug %}" style="display:inline;">
+        <form method="post"
+              action="{% url 'curation-submit' object.slug %}"
+              style="display:inline;"
+              data-confirm="Submit this curation for expert panel review? It will be locked until the panel acts.">
             {% csrf_token %}
-            <button type="submit"
-                    class="button is-link"
-                    onclick="return confirm('Submit this curation for expert panel review? It will be locked until the panel acts.');">
+            <button type="submit" class="button is-link">
                 {% include "common/icon.html" with icon_name="send" %}
                 Submit for Review
             </button>
@@ -25,11 +26,15 @@
     {% endif %}
 {% elif object.status == "PRO" %} {# Provisional #}
     <div class="buttons">
-        <a href="{% url 'curation-publish' object.slug %}"
-           class="button is-success"
-           onclick="return confirm('Publish this curation to the repository? It will become permanently read-only.');">
-            {% include "common/icon.html" with icon_name="upload" %}
-            Publish to Repository
-        </a>
+        <form method="post"
+              action="{% url 'curation-publish' object.slug %}"
+              style="display:inline;"
+              data-confirm="Publish this curation to the repository? It will become permanently read-only.">
+            {% csrf_token %}
+            <button type="submit" class="button is-success">
+                {% include "common/icon.html" with icon_name="upload" %}
+                Publish to Repository
+            </button>
+        </form>
     </div>
 {% endif %}

@@ -121,7 +121,7 @@ class CurationPublishViewTest(ProtectedViewTestMixin, TestCase):
 
     def test_publish_provisional_curation(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
+        response = self.client.post(self.url)
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(PublishedCuration.objects.count(), 1)
@@ -138,7 +138,7 @@ class CurationPublishViewTest(ProtectedViewTestMixin, TestCase):
         curation.save()  # Ensure slug is generated.
         url = reverse("curation-publish", kwargs={"curation_slug": curation.slug})
         self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(url)
+        response = self.client.post(url)
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(PublishedCuration.objects.count(), 0)
@@ -151,10 +151,19 @@ class CurationPublishViewTest(ProtectedViewTestMixin, TestCase):
             published_by=self.user4_yes_phi_yes_perms,
         )
         self.client.force_login(self.user4_yes_phi_yes_perms)
-        response = self.client.get(self.url)
+        response = self.client.post(self.url)
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(PublishedCuration.objects.count(), 1)
+
+    def test_get_does_not_publish(self):
+        self.client.force_login(self.user4_yes_phi_yes_perms)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(PublishedCuration.objects.count(), 0)
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.status, Status.PROVISIONAL)
 
 
 class RepoSearchViewTest(TestCase):
@@ -228,6 +237,18 @@ class PublishedCurationDetailViewTest(TestCase):
         response = self.client.get(url)
         self.assertContains(response, "Evidence Summary")
         self.assertContains(response, "The panel found strong evidence.")
+
+    def test_copy_button_uses_the_confirm_modal(self):
+        curator = User.objects.create_user(username="curator", password="pw")  # ruff: ignore[hardcoded-password-func-arg]
+        UserProfile.objects.create(
+            user=curator, has_signed_phi_agreement=True, has_curation_permissions=True
+        )
+        self.client.force_login(curator)
+        url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
+        response = self.client.get(url)
+        self.assertContains(response, "Copy and Recurate")
+        self.assertContains(response, "data-confirm=")
+        self.assertNotContains(response, "confirm(")
 
     def test_displays_car_linkout_for_allele(self):
         url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
