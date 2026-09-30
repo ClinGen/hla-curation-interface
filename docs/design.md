@@ -78,6 +78,7 @@ research communities.
 - **Frontend CSS** — Bulma
 - **Partial page updates** — HTMX
 - **Enhanced selects** — Choices.js
+- **Tooltips** — Tippy.js (with Popper)
 - **Sortable, searchable tables** — django-tables2 + HTMX
 
 ### Data Model
