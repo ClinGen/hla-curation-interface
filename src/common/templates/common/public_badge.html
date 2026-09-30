@@ -1,5 +1,2 @@
 {# Marks a form field whose value is shown publicly in HLArepo. #}
-<span class="icon has-text-info public-badge" title="Shown publicly in HLArepo">
-    <i class="bi bi-globe2" aria-hidden="true"></i>
-    <span class="is-sr-only">Shown publicly in HLArepo</span>
-</span>
+{% include "common/tooltip.html" with icon_name="globe2" text="This will be visible in the public-facing HLArepo once published." classes="has-text-info public-badge" %}

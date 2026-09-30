@@ -24,7 +24,7 @@ The Bulma modal card that `hci/js/confirm-modal.js` shows before submitting a fo
 
 ### `templates/common/form/public_note.html`
 
-The public badge with visible "Shown publicly in HLArepo" text, used by the field partials when a public field's label is hidden.
+The public badge on its own line, with no visible text, used by the field partials when a public field's label is hidden.
 
 ### `templates/common/form/input/radio.html`
 
@@ -72,7 +72,11 @@ Renders the result count and, when results exist, the django-tables2 table insid
 
 ### `templates/common/public_badge.html`
 
-A globe icon marking a form field that's shown publicly in HLArepo. It has a `title` tooltip and screen-reader text, since Bulma has no tooltip component.
+A globe icon marking a form field that's shown publicly in HLArepo. It uses `common/tooltip.html` with the text "This will be visible in the public-facing HLArepo once published."
+
+### `templates/common/tooltip.html`
+
+An icon with a Tippy.js tooltip and no visible text. Callers pass `icon_name`, `text`, and optional `classes`. The icon is keyboard-focusable, and the text is also in an `is-sr-only` span for screen readers. `hci/js/tooltips.js` attaches the tooltip.
 
 ### `templates/common/tags/_generic.html`
 
@@ -120,7 +124,7 @@ Registers four custom Django template filters: `get_val` (retrieves a named attr
 
 ### `tests.py`
 
-Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `SuppressRequestLoggingMixin`) that enforce standard view-test contracts across the project, along with `IsPublicFilterTest`, `ColorKeyTest`, which checks tags, buttons (in templates and `tables.py` files), and the EP feedback panel against the color key in `docs/design.md`, the `field_block` helper for checking a field's public badge, `MigrationsUpToDateTest`, which fails when a model change has no migration, and `SearchListViewTest`, which exercises the search and HTMX partial-response behaviour of `SearchListView`.
+Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `SuppressRequestLoggingMixin`) that enforce standard view-test contracts across the project, along with `IsPublicFilterTest`, `PublicBadgeTooltipTest`, which checks the globe badge's tooltip and that no text sits beside it, `ColorKeyTest`, which checks tags, buttons (in templates and `tables.py` files), and the EP feedback panel against the color key in `docs/design.md`, the `field_block` helper for checking a field's public badge, `MigrationsUpToDateTest`, which fails when a model change has no migration, and `SearchListViewTest`, which exercises the search and HTMX partial-response behaviour of `SearchListView`.
 
 ### `views.py`
 

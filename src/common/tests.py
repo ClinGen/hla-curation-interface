@@ -12,6 +12,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.template.loader import render_to_string
+from django.templatetags.static import static
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -181,6 +182,38 @@ class IsPublicFilterTest(TestCase):
         for name in ("p_value_notes", "needs_review", "needs_review_notes"):
             with self.subTest(name=name):
                 self.assertFalse(is_public(name, "evidence"))
+
+
+class PublicBadgeTooltipTest(TestCase):
+    """The globe badge shows its meaning in a Tippy tooltip, never beside it."""
+
+    TOOLTIP = "This will be visible in the public-facing HLArepo once published."
+
+    def test_badge_has_tooltip_and_no_title(self):
+        html = render_to_string("common/public_badge.html")
+        self.assertIn(f'data-tippy-content="{self.TOOLTIP}"', html)
+        self.assertIn("bi-globe2", html)
+        self.assertNotIn("title=", html)
+
+    def test_badge_is_keyboard_focusable(self):
+        html = render_to_string("common/public_badge.html")
+        self.assertIn('tabindex="0"', html)
+
+    def test_public_note_has_no_visible_text(self):
+        html = render_to_string("common/form/public_note.html")
+        visible = re.sub(r'<span class="is-sr-only">[^<]*</span>', "", html)
+        self.assertEqual(re.sub(r"<[^>]*>|\{#.*?#\}", "", visible).strip(), "")
+
+    def test_base_layout_loads_tippy(self):
+        html = self.client.get(reverse("home")).content.decode()
+        for asset in (
+            "hci/css/tippy.css",
+            "hci/js/popper.min.js",
+            "hci/js/tippy.umd.min.js",
+            "hci/js/tooltips.js",
+        ):
+            with self.subTest(asset=asset):
+                self.assertIn(static(asset), html)
 
 
 class ColorKeyTest(TestCase):

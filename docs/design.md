@@ -78,6 +78,7 @@ research communities.
 - **Frontend CSS** — Bulma
 - **Partial page updates** — HTMX
 - **Enhanced selects** — Choices.js
+- **Tooltips** — Tippy.js (with Popper)
 - **Sortable, searchable tables** — django-tables2 + HTMX
 
 ### Data Model
@@ -133,6 +134,8 @@ is used narrowly:
 - **HTMX** — partial page updates (e.g. live search on list pages).
 - **Choices.js** — searchable multi-select and single-select inputs (e.g. the allele
   picker on the haplotype creation form).
+- **Tippy.js** — tooltips on icons, such as the globe badge on fields that are public
+  in HLArepo. `common/tooltip.html` renders an icon with a tooltip and no visible text.
 
 List pages use server-side search powered by `SearchListView` (in `common/views.py`) and
 django-tables2, replacing the former client-side DataTables + jQuery setup. HTMX wires
