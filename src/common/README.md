@@ -22,6 +22,7 @@ Defines `HistoryTable`, a django-tables2 `Table` subclass for rendering an objec
 
 The Bulma modal card that `hci/js/confirm-modal.js` shows before submitting a form with a `data-confirm` attribute. `layouts/base.html` includes it once on every page.
 
+
 ### `templates/common/form/input/radio.html`
 
 Reusable partial for rendering a radio-button form field using Bulma CSS. Supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead.
@@ -80,7 +81,7 @@ An icon with a Tippy.js tooltip and no visible text. Callers pass `icon_name`, `
 
 ### `templates/common/tags/_generic.html`
 
-Base tag partial that renders a Bulma `<span class="tag">` with a given `color`, `icon_name`, and `text`. All concrete tag templates include this partial via `{% include %}` with specific values.
+Base tag partial that renders a light Bulma `<span class="tag">` with a given `color`, `icon_name`, and `text`. All concrete tag templates include this partial via `{% include %}` with specific values.
 
 ### `templates/common/tags/approved.html`
 
@@ -92,7 +93,7 @@ Renders a green "Done" status tag using `_generic.html` with a filled check-circ
 
 ### `templates/common/tags/in_progress.html`
 
-Renders a yellow "In Progress" status tag using `_generic.html` with a cone-striped icon.
+Renders a grey "In Progress" status tag using `_generic.html` with a cone-striped icon.
 
 ### `templates/common/tags/needs_review.html`
 
@@ -100,7 +101,7 @@ Renders a red "Needs Review" status tag using `_generic.html` with a filled flag
 
 ### `templates/common/tags/not_provided.html`
 
-Renders a yellow "Not Provided" status tag using `_generic.html` with an outline check-circle icon.
+Renders a grey "Not Provided" status tag using `_generic.html` with an outline check-circle icon.
 
 ### `templates/common/tags/provided.html`
 
@@ -108,11 +109,11 @@ Renders a green "Provided" status tag using `_generic.html` with a filled check-
 
 ### `templates/common/tags/provisional.html`
 
-Renders a red "Provisional" curation status tag using `_generic.html` with an hourglass icon. Provisional curations are waiting on the expert panel.
+Renders a yellow "Provisional" curation status tag using `_generic.html` with an hourglass icon. Provisional curations are waiting on the expert panel.
 
 ### `templates/common/tags/published.html`
 
-Renders a light-blue "Published" status tag using `_generic.html` with a book icon.
+Renders a blue "Published" status tag using `_generic.html` with a book icon.
 
 ### `templatetags/__init__.py`
 
@@ -124,7 +125,7 @@ Registers four custom Django template filters: `get_val` (retrieves a named attr
 
 ### `tests.py`
 
-Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `SuppressRequestLoggingMixin`) that enforce standard view-test contracts across the project, along with `IsPublicFilterTest`, `PublicBadgeTooltipTest`, which checks the globe badge's tooltip and that no text sits beside it, the `field_block` helper for checking a field's public badge, `MigrationsUpToDateTest`, which fails when a model change has no migration, and `SearchListViewTest`, which exercises the search and HTMX partial-response behaviour of `SearchListView`.
+Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `SuppressRequestLoggingMixin`) that enforce standard view-test contracts across the project, along with `IsPublicFilterTest`, `PublicBadgeTooltipTest`, which checks the globe badge's tooltip and that no text sits beside it, `ColorKeyTest`, which checks tags, buttons, and the EP feedback panel against the color key in `docs/design.md`, the `field_block` helper for checking a field's public badge, `MigrationsUpToDateTest`, which fails when a model change has no migration, and `SearchListViewTest`, which exercises the search and HTMX partial-response behaviour of `SearchListView`.
 
 ### `views.py`
 
