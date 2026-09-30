@@ -223,7 +223,8 @@ class ColorKeyTest(TestCase):
 
     def test_buttons_are_link_blue(self):
         pattern = re.compile(r'class="button\b[^"]*"')
-        for path in self._templates():
+        tables = sorted(Path(settings.BASE_DIR).glob("*/tables.py"))
+        for path in self._templates() + tables:
             for match in pattern.finditer(path.read_text()):
                 with self.subTest(path=path.name, classes=match.group(0)):
                     self.assertIn("is-link", match.group(0))

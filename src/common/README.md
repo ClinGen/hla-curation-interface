@@ -120,7 +120,7 @@ Registers four custom Django template filters: `get_val` (retrieves a named attr
 
 ### `tests.py`
 
-Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `SuppressRequestLoggingMixin`) that enforce standard view-test contracts across the project, along with `IsPublicFilterTest`, `ColorKeyTest`, which checks tags, buttons, and the EP feedback panel against the color key in `docs/design.md`, the `field_block` helper for checking a field's public badge, `MigrationsUpToDateTest`, which fails when a model change has no migration, and `SearchListViewTest`, which exercises the search and HTMX partial-response behaviour of `SearchListView`.
+Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `SuppressRequestLoggingMixin`) that enforce standard view-test contracts across the project, along with `IsPublicFilterTest`, `ColorKeyTest`, which checks tags, buttons (in templates and `tables.py` files), and the EP feedback panel against the color key in `docs/design.md`, the `field_block` helper for checking a field's public badge, `MigrationsUpToDateTest`, which fails when a model change has no migration, and `SearchListViewTest`, which exercises the search and HTMX partial-response behaviour of `SearchListView`.
 
 ### `views.py`
 
