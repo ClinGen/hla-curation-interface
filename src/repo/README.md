@@ -16,7 +16,7 @@ Defines the `RepoConfig` app configuration, setting the app name to `repo` and t
 
 ### `constants.py`
 
-Defines `PUBLIC_CURATION_FIELDS` and `PUBLIC_EVIDENCE_FIELDS`, the model fields shown in HLArepo and the JSON export. They're the single source of truth: the serializers build the export from them. `needs_review` and every `*_notes` field on `Evidence` stay internal.
+Defines `PUBLIC_CURATION_FIELDS` and `PUBLIC_EVIDENCE_FIELDS`, the model fields shown in HLArepo and the JSON export. They're the single source of truth: the serializers build the export from them, and the forms mark these fields with a public badge. `needs_review` and every `*_notes` field on `Evidence` stay internal.
 
 ### `models.py`
 

@@ -24,23 +24,27 @@ The Bulma modal card that `hci/js/confirm-modal.js` shows before submitting a fo
 
 ### `templates/common/form/input/radio.html`
 
-Reusable partial for rendering a radio-button form field using Bulma CSS. Supports optional label hiding and help-text display.
+Reusable partial for rendering a radio-button form field using Bulma CSS. Supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead.
 
 ### `templates/common/form/input/text.html`
 
-Reusable partial for rendering a text `<input>` form field using Bulma CSS. Accepts context variables for `type`, `autocomplete`, and `placeholder`, and supports optional label hiding and help-text display.
+Reusable partial for rendering a text `<input>` form field using Bulma CSS. Accepts context variables for `type`, `autocomplete`, and `placeholder`, and supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead.
+
+### `templates/common/form/section_heading.html`
+
+A form section's `<h2>` heading. Callers pass `id`, `text`, and `public`; when `public` is true, the public badge sits next to the heading text. The evidence edit form uses it because its field labels are hidden, so the badge can't go next to them.
 
 ### `templates/common/form/select/default.html`
 
-Reusable partial for rendering a standard `<select>` form field using Bulma CSS. Supports optional label visibility, help text, and an extra CSS class on the select wrapper.
+Reusable partial for rendering a standard `<select>` form field using Bulma CSS. Supports optional label visibility, help text, and an extra CSS class on the select wrapper. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead.
 
 ### `templates/common/form/select/search.html`
 
-Reusable partial for rendering a `<select>` field enhanced with the Choices.js library for fuzzy search. Initialises the Choices widget on HTMX load with configurable fuse search options and a remove-item button.
+Reusable partial for rendering a `<select>` field enhanced with the Choices.js library for fuzzy search. Initialises the Choices widget on HTMX load with configurable fuse search options and a remove-item button. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead.
 
 ### `templates/common/form/textarea.html`
 
-Reusable partial for rendering a `<textarea>` form field using Bulma CSS, with a visible label, inline validation errors, and optional help text.
+Reusable partial for rendering a `<textarea>` form field using Bulma CSS, with a visible label, inline validation errors, and optional help text. Pass `public=True` to put the public badge in the label.
 
 ### `templates/common/history/change_body.html`
 
@@ -65,6 +69,14 @@ Renders the live-search text input used on list pages. Uses HTMX to fire a GET r
 ### `templates/common/partials/search_results.html`
 
 Renders the result count and, when results exist, the django-tables2 table inside an HTMX-boosted container targeting `#search-results`. Used as the HTMX partial response for search queries.
+
+### `templates/common/public_badge.html`
+
+A globe icon marking a form field that's shown publicly in HLArepo. It uses `common/tooltip.html` with the text "This will be visible in the public-facing HLArepo once published."
+
+### `templates/common/tooltip.html`
+
+An icon with a Tippy.js tooltip and no visible text. Callers pass `icon_name`, `text`, and optional `classes`. The icon is keyboard-focusable, and the text is also in an `is-sr-only` span for screen readers. `hci/js/tooltips.js` attaches the tooltip.
 
 ### `templates/common/tags/_generic.html`
 
@@ -108,11 +120,11 @@ Empty file that marks `templatetags` as a Python package, enabling Django to dis
 
 ### `templatetags/custom_filters.py`
 
-Registers three custom Django template filters: `get_val` (retrieves a named attribute from a model instance), `get_item` (retrieves a key from a dictionary), and `in_get` (checks whether a string is present in `request.GET`).
+Registers four custom Django template filters: `get_val` (retrieves a named attribute from a model instance), `get_item` (retrieves a key from a dictionary), `in_get` (checks whether a string is present in `request.GET`), and `is_public` (checks a curation or evidence field name against the lists in `repo/constants.py`, dropping the `_string` suffix that some evidence form fields use).
 
 ### `tests.py`
 
-Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `SuppressRequestLoggingMixin`) that enforce standard view-test contracts across the project, along with `MigrationsUpToDateTest`, which fails when a model change has no migration, and `SearchListViewTest`, which exercises the search and HTMX partial-response behaviour of `SearchListView`.
+Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `SuppressRequestLoggingMixin`) that enforce standard view-test contracts across the project, along with `IsPublicFilterTest`, `PublicBadgeTooltipTest`, which checks the globe badge's tooltip and that no text sits beside it, the `field_block` helper for checking a field's public badge, `MigrationsUpToDateTest`, which fails when a model change has no migration, and `SearchListViewTest`, which exercises the search and HTMX partial-response behaviour of `SearchListView`.
 
 ### `views.py`
 
