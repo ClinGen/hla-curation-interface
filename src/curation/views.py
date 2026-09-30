@@ -57,7 +57,6 @@ class CurationCreate(ProtectedViewMixin, CreateView):
 
     def form_valid(self, form: CurationCreateForm) -> HttpResponse:
         form.instance.added_by = self.request.user
-        messages.success(self.request, "Curation added.")
         return super().form_valid(form)
 
 
@@ -87,7 +86,6 @@ def curation_edit_evidence(request: HttpRequest, curation_slug: str) -> HttpResp
         evidence_formset = EvidenceTopLevelEditFormSet(request.POST, queryset=evidence)
         if evidence_formset.is_valid():
             evidence_formset.save()
-            messages.success(request, "Changes saved successfully.")
             return redirect("curation-detail", curation_slug=curation.slug)
     else:
         evidence_formset = EvidenceTopLevelEditFormSet(queryset=evidence)
@@ -212,10 +210,6 @@ def curation_publish(request: HttpRequest, curation_slug: str) -> HttpResponse:
         messages.error(request, str(e))
         return redirect("curation-detail", curation_slug=curation.slug)
 
-    messages.success(
-        request,
-        f"Curation {curation.slug} has been published to the repository.",
-    )
     return redirect("repo-detail", curation_slug=curation.slug)
 
 
@@ -224,7 +218,7 @@ def curation_submit(request: HttpRequest, curation_slug: str) -> HttpResponse:
     """Submits a curation for EP review.
 
     Returns:
-        Redirect to curation detail, with success or error messages set.
+        Redirect to curation detail, with error messages set on failure.
     """
     if request.method != "POST":
         return redirect("curation-detail", curation_slug=curation_slug)
@@ -237,9 +231,6 @@ def curation_submit(request: HttpRequest, curation_slug: str) -> HttpResponse:
         return redirect("curation-detail", curation_slug=curation.slug)
 
     curation.transition_to(Status.PROVISIONAL)
-    messages.success(
-        request, f"Curation {curation.slug} has been submitted for review."
-    )
     return redirect("curation-detail", curation_slug=curation.slug)
 
 
@@ -272,15 +263,8 @@ def curation_review(request: HttpRequest, curation_slug: str) -> HttpResponse:
             curation.ep_review_date = form.cleaned_data["ep_review_date"]
             if decision == "needs_revision":
                 curation.transition_to(Status.IN_PROGRESS)
-                messages.info(
-                    request,
-                    f"Curation {curation.slug} has been sent back for revision.",
-                )
             else:
                 curation.transition_to(Status.APPROVED)
-                messages.success(
-                    request, f"Curation {curation.slug} has been approved."
-                )
             return redirect("curation-detail", curation_slug=curation.slug)
     else:
         form = EPReviewForm(
@@ -336,7 +320,6 @@ def curation_copy(request: HttpRequest, curation_slug: str) -> HttpResponse:
         for evidence in source.evidence.prefetch_related("demographics").all():  # type: ignore
             evidence.copy_to(new_curation, added_by=cast(User, request.user))
 
-    messages.success(request, f"Copy created as {new_curation.slug}.")
     return redirect("curation-detail", curation_slug=new_curation.slug)
 
 

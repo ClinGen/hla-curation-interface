@@ -36,7 +36,6 @@ class PublicationCreate(ProtectedViewMixin, CreateView):
             form.instance.title = get_pubmed_title(pubmed_data)
             form.instance.publication_year = get_pubmed_year(pubmed_data)
             form.instance.added_by = self.request.user
-            messages.success(self.request, "Publication created.")
             return super().form_valid(form)
         message = (
             "Oops, something went wrong trying to fetch data. Please try again later."

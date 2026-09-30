@@ -5,7 +5,6 @@ import logging
 from clerk_backend_api import Clerk
 from clerk_backend_api.security import VerifyTokenOptions, verify_token
 from django.conf import settings
-from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
@@ -28,7 +27,6 @@ def login_(request: HttpRequest) -> HttpResponseRedirect | HttpResponse:
         The login page, or a redirect to home if already logged in.
     """
     if request.user.is_authenticated:
-        messages.info(request, "Already logged in.")
         return redirect("home")
     logger.info("Login: rendering sign-in page")
     return render(
@@ -182,14 +180,12 @@ def profile(request: HttpRequest) -> HttpResponse:
         p, _ = UserProfile.objects.get_or_create(user=request.user)
         context = {"user_profile": p}
         return render(request, "auth_/profile.html", context)
-    messages.info(request, "Not logged in.")
     return redirect("login")
 
 
 def profile_history(request: HttpRequest) -> HttpResponse:
     """Returns the history page for the current user's profile."""
     if not request.user.is_authenticated:
-        messages.info(request, "Not logged in.")
         return redirect("login")
     p = get_object_or_404(UserProfile, user=request.user)
     history_table = HistoryTable(
@@ -207,7 +203,6 @@ def profile_history(request: HttpRequest) -> HttpResponse:
 def profile_change(request: HttpRequest, history_id: int) -> HttpResponse:
     """Returns the change detail page for a single history record."""
     if not request.user.is_authenticated:
-        messages.info(request, "Not logged in.")
         return redirect("login")
     p = get_object_or_404(UserProfile, user=request.user)
     record = p.history.get(history_id=history_id)  # type: ignore
@@ -228,7 +223,6 @@ def phi(request: HttpRequest) -> HttpResponse:
             p = UserProfile.objects.get(user=request.user)
             p.has_signed_phi_agreement = True
             p.save()
-            messages.success(request, "PHI agreement signed.")
             return redirect("profile")
     else:
         form = PHIForm()

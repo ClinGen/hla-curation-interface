@@ -148,7 +148,7 @@ tags, buttons, and EP feedback panel against this key.
 
 | Color | Bulma modifier | Meaning | Examples |
 | --- | --- | --- | --- |
-| Grey | none | Not finished, or neutral | In Progress, Not Provided, Suggested, EP feedback, info messages |
+| Grey | none | Not finished, or neutral | In Progress, Not Provided, Suggested, EP feedback |
 | Yellow | `is-warning` | Waiting on someone else, or caution | Provisional tag and banner, superseded note, account activation, demo banner, 4xx pages |
 | Red | `is-danger` | Something needs fixing | Needs Review, form errors, EP feedback on a sent-back curation, error messages, 500 page |
 | Green | `is-success` | Done or approved | Done, Provided, Approved tag and banner, awarded points |
@@ -158,6 +158,12 @@ tags, buttons, and EP feedback panel against this key.
 Status tags come only from `src/common/templates/common/tags`, which always render
 `is-light`. Don't use `is-primary`. Base templates set `data-theme="light"`, so there is
 no dark theme to check.
+
+#### Flash Messages
+
+Views queue flash messages only for warnings and errors. A successful action already
+lands on a page that shows its result, so there are no success or info messages unless
+someone explicitly asks for one.
 
 ## Alternatives Considered
 
