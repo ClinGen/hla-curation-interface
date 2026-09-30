@@ -52,7 +52,7 @@
         <form method="post" id="review-form">
             {% csrf_token %}
             {% include "common/form/select/default.html" with field=form.ep_classification public=form.ep_classification.name|is_public:"curation" show_label=True %}
-            <div id="override-reason">
+            <div id="override-reason" class="field">
                 {% include "common/form/textarea.html" with field=form.ep_override_reason public=form.ep_override_reason.name|is_public:"curation" show_help=True %}
             </div>
             {% include "common/form/textarea.html" with field=form.ep_evidence_summary public=form.ep_evidence_summary.name|is_public:"curation" %}
