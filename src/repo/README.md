@@ -14,13 +14,17 @@ Registers `PublishedCuration` with the Django admin site using `SimpleHistoryAdm
 
 Defines the `RepoConfig` app configuration, setting the app name to `repo` and the default auto field to `BigAutoField`.
 
+### `constants.py`
+
+Defines `PUBLIC_CURATION_FIELDS` and `PUBLIC_EVIDENCE_FIELDS`, the model fields shown in HLArepo and the JSON export. They're the single source of truth: the serializers build the export from them. `needs_review` and every `*_notes` field on `Evidence` stay internal.
+
 ### `models.py`
 
 Defines the `PublishedCuration` model, which links one-to-one to a `Curation` and records who published it, when, and at what version. Change history is tracked automatically via `HistoricalRecords`.
 
 ### `serializers.py`
 
-Provides `serialize_published_curation` and `serialize_evidence`, plain functions that convert `PublishedCuration` and `Evidence` instances to plain Python dictionaries suitable for JSON export, including all related entity, disease, and evidence fields. The export includes each allele's CAR ID (including haplotype member alleles), the disease IRI, the EP override reason, and the EP review date as an ISO date or `null`.
+Provides `serialize_published_curation` and `serialize_evidence`, plain functions that convert `PublishedCuration` and `Evidence` instances to plain Python dictionaries suitable for JSON export. The EP and evidence data fields come from the public field lists in `constants.py`; `EXPORT_NAMES` keeps the `classification` key for `ep_classification`. The export includes each allele's CAR ID (including haplotype member alleles), the disease IRI, the EP override reason, and the EP review date as an ISO date or `null`.
 
 ### `tables.py`
 

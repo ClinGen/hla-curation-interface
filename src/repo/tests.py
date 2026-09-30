@@ -12,10 +12,17 @@ from auth_.models import UserProfile
 from common.tests import ProtectedViewTestMixin
 from curation.constants.models.common import Status
 from curation.constants.models.curation import CurationTypes
-from curation.models import Curation
+from curation.models import Curation, Evidence
 from disease.models import Disease
 from haplotype.models import Haplotype
+from publication.models import Publication
+from repo.constants import PUBLIC_CURATION_FIELDS, PUBLIC_EVIDENCE_FIELDS
 from repo.models import PublishedCuration
+from repo.serializers import (
+    EXPORT_NAMES,
+    serialize_evidence,
+    serialize_published_curation,
+)
 
 
 class PublishedCurationModelTest(TestCase):
@@ -373,6 +380,31 @@ class JSONDownloadViewTest(TestCase):
         self.assertEqual(
             data["curation"]["curation"]["ep_override_reason"],
             "Replicated in two cohorts.",
+        )
+
+    def test_curation_keys_are_the_public_fields_plus_structure(self):
+        data = serialize_published_curation(self.published)["curation"]
+        public = {EXPORT_NAMES.get(name, name) for name in PUBLIC_CURATION_FIELDS}
+        structural = {"status", "copied_from", "score", "type", "allele", "disease"}
+        self.assertEqual(set(data) - {"added_at"}, public | structural)
+
+    def test_evidence_keys_are_the_public_fields_plus_structure(self):
+        publication = Publication.objects.create(
+            slug="P999999", title="T", author="A", publication_year=2020, pubmed_id="1"
+        )
+        evidence = Evidence.objects.create(
+            curation=self.curation, publication=publication
+        )
+        structural = {
+            "evidence_id",
+            "status",
+            "is_included",
+            "publication",
+            "score",
+            "added_at",
+        }
+        self.assertEqual(
+            set(serialize_evidence(evidence)), PUBLIC_EVIDENCE_FIELDS | structural
         )
 
     def test_download_all_json(self):
