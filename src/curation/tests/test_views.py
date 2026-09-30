@@ -327,9 +327,25 @@ class EvidenceEditTest(ProtectedViewTestMixin, TestCase):
 
     def test_marks_public_fields(self):
         html = self.client.get(self.url).content.decode()
-        self.assertIn("public-badge", field_block(html, "id_p_value_string"))
         self.assertNotIn("public-badge", field_block(html, "id_p_value_notes"))
-        self.assertNotIn("public-badge", field_block(html, "id_needs_review"))
+        self.assertIn("public-badge", field_block(html, "id_odds_ratio_string"))
+
+    def test_badges_public_sections_in_their_headings(self):
+        html = self.client.get(self.url).content.decode()
+
+        def heading(section_id: str) -> str:
+            start = html.index(f'id="{section_id}"')
+            return html[start : html.index("</h2>", start)]
+
+        self.assertIn("public-badge", heading("p-value"))
+        self.assertIn("public-badge", heading("gwas"))
+        self.assertIn("public-badge", heading("effect-size"))
+        self.assertNotIn("public-badge", heading("needs-review"))
+
+    def test_hidden_label_fields_have_no_badge_of_their_own(self):
+        html = self.client.get(self.url).content.decode()
+        self.assertNotIn("public-badge", field_block(html, "id_p_value_string"))
+        self.assertNotIn("public-badge", field_block(html, "id_is_gwas"))
 
     def test_shows_menu(self):
         response = self.client.get(self.url)

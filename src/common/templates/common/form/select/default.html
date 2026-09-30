@@ -4,7 +4,6 @@
         <label class="label" for="{{ field.id_for_label }}">{{ field.label }}{% if public %} {% include "common/public_badge.html" %}{% endif %}</label>
     {% else %}
         <label class="label is-hidden" for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {% if public %}{% include "common/form/public_note.html" %}{% endif %}
     {% endif %}
     {% if show_help and field.help_text %}
         <p class="help">{{ field.help_text }}</p>

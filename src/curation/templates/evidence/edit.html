@@ -71,48 +71,48 @@
         <div class="column">
             <form method="post">{% csrf_token %}
                 <div class="box">
-                    <h2 id="gwas" class="title is-4">GWAS</h2>
+                    {% include "common/form/section_heading.html" with id="gwas" text="GWAS" public=form.is_gwas.name|is_public:"evidence" %}
                     {% include "common/form/input/radio.html" with field=form.is_gwas public=form.is_gwas.name|is_public:"evidence" hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.is_gwas_notes public=form.is_gwas_notes.name|is_public:"evidence" %}
                 </div>
                 <div class="box">
-                    <h2 id="allele-resolution" class="title is-4">Allele Resolution</h2>
+                    {% include "common/form/section_heading.html" with id="allele-resolution" text="Allele Resolution" public=form.num_fields.name|is_public:"evidence" %}
                     {% include "common/form/select/default.html" with field=form.num_fields public=form.num_fields.name|is_public:"evidence" hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.num_fields_notes public=form.num_fields_notes.name|is_public:"evidence" %}
                 </div>
                 <div class="box">
-                    <h2 id="zygosity" class="title is-4">Zygosity</h2>
+                    {% include "common/form/section_heading.html" with id="zygosity" text="Zygosity" public=form.zygosity.name|is_public:"evidence" %}
                     {% include "common/form/input/radio.html" with field=form.zygosity public=form.zygosity.name|is_public:"evidence" hide_label=True %}
                     {% include "common/form/textarea.html" with field=form.zygosity_notes public=form.zygosity_notes.name|is_public:"evidence" %}
                 </div>
                 <div class="box">
-                    <h2 id="phase" class="title is-4">Phase</h2>
+                    {% include "common/form/section_heading.html" with id="phase" text="Phase" public=form.phase_confirmed.name|is_public:"evidence" %}
                     {% include "common/form/input/radio.html" with field=form.phase_confirmed public=form.phase_confirmed.name|is_public:"evidence" hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.phase_confirmed_notes public=form.phase_confirmed_notes.name|is_public:"evidence" %}
                 </div>
                 <div class="box">
-                    <h2 id="typing-method" class="title is-4">Typing Method</h2>
+                    {% include "common/form/section_heading.html" with id="typing-method" text="Typing Method" public=form.typing_method.name|is_public:"evidence" %}
                     {% include "common/form/select/default.html" with field=form.typing_method public=form.typing_method.name|is_public:"evidence" hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.typing_method_notes public=form.typing_method_notes.name|is_public:"evidence" %}
                 </div>
                 <div class="box">
-                    <h2 id="demographics" class="title is-4">Demographics</h2>
+                    {% include "common/form/section_heading.html" with id="demographics" text="Demographics" public=form.demographics.name|is_public:"evidence" %}
                     {% include "common/form/select/search.html" with field=form.demographics public=form.demographics.name|is_public:"evidence" hide_label=True %}
                     {% include "common/form/textarea.html" with field=form.demographics_text_quotes public=form.demographics_text_quotes.name|is_public:"evidence" show_help=True %}
                     {% include "common/form/textarea.html" with field=form.demographics_notes public=form.demographics_notes.name|is_public:"evidence" %}
                 </div>
                 <div class="box">
-                    <h2 id="p-value" class="title is-4">p-value</h2>
+                    {% include "common/form/section_heading.html" with id="p-value" text="p-value" public=form.p_value_string.name|is_public:"evidence" %}
                     {% include "common/form/input/text.html" with field=form.p_value_string public=form.p_value_string.name|is_public:"evidence" hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.p_value_notes public=form.p_value_notes.name|is_public:"evidence" %}
                 </div>
                 <div class="box">
-                    <h2 id="multiple-testing-correction" class="title is-4">Multiple Testing Correction</h2>
+                    {% include "common/form/section_heading.html" with id="multiple-testing-correction" text="Multiple Testing Correction" public=form.multiple_testing_correction.name|is_public:"evidence" %}
                     {% include "common/form/select/default.html" with field=form.multiple_testing_correction public=form.multiple_testing_correction.name|is_public:"evidence" hide_label=True %}
                     {% include "common/form/textarea.html" with field=form.multiple_testing_correction_notes public=form.multiple_testing_correction_notes.name|is_public:"evidence" %}
                 </div>
                 <div class="box">
-                    <h2 id="effect-size" class="title is-4">Effect Size</h2>
+                    {% include "common/form/section_heading.html" with id="effect-size" text="Effect Size" public=form.effect_size_statistic.name|is_public:"evidence" %}
                     {% include "common/form/select/default.html" with field=form.effect_size_statistic public=form.effect_size_statistic.name|is_public:"evidence" %}
                     <div id="odds-ratio-div" class="mb-2">
                         {% include "common/form/input/text.html" with field=form.odds_ratio_string public=form.odds_ratio_string.name|is_public:"evidence" show_help=True %}
@@ -126,38 +126,38 @@
                     {% include "common/form/textarea.html" with field=form.effect_size_statistic_notes public=form.effect_size_statistic_notes.name|is_public:"evidence" show_help=False %}
                 </div>
                 <div class="box">
-                    <h2 id="confidence-interval" class="title is-4">Confidence Interval</h2>
+                    {% include "common/form/section_heading.html" with id="confidence-interval" text="Confidence Interval" %}
                     {% include "common/form/input/text.html" with field=form.ci_start_string public=form.ci_start_string.name|is_public:"evidence" show_help=True %}
                     {% include "common/form/input/text.html" with field=form.ci_end_string public=form.ci_end_string.name|is_public:"evidence" show_help=True %}
                     {% include "common/form/textarea.html" with field=form.ci_notes public=form.ci_notes.name|is_public:"evidence" %}
                 </div>
                 <div class="box">
-                    <h2 id="cohort-size" class="title is-4">Cohort Size</h2>
+                    {% include "common/form/section_heading.html" with id="cohort-size" text="Cohort Size" public=form.cohort_size.name|is_public:"evidence" %}
                     {% include "common/form/input/text.html" with field=form.cohort_size public=form.cohort_size.name|is_public:"evidence" hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.cohort_size_notes public=form.cohort_size_notes.name|is_public:"evidence" %}
                 </div>
                 <div class="box">
-                    <h2 id="additional-phenotypes" class="title is-4">Additional Phenotypes</h2>
+                    {% include "common/form/section_heading.html" with id="additional-phenotypes" text="Additional Phenotypes" public=form.additional_phenotypes.name|is_public:"evidence" %}
                     {% include "common/form/select/default.html" with field=form.additional_phenotypes public=form.additional_phenotypes.name|is_public:"evidence" hide_label=True show_help=False %}
                     {% include "common/form/textarea.html" with field=form.additional_phenotypes_notes public=form.additional_phenotypes_notes.name|is_public:"evidence" %}
                 </div>
                 <div class="box">
-                    <h2 id="significant-association" class="title is-4">Significant Association</h2>
+                    {% include "common/form/section_heading.html" with id="significant-association" text="Significant Association" public=form.has_association.name|is_public:"evidence" %}
                     {% include "common/form/input/radio.html" with field=form.has_association public=form.has_association.name|is_public:"evidence" hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.has_association_notes public=form.has_association_notes.name|is_public:"evidence" %}
                 </div>
                 <div class="box">
-                    <h2 id="protective" class="title is-4">Protective</h2>
+                    {% include "common/form/section_heading.html" with id="protective" text="Protective" public=form.is_protective.name|is_public:"evidence" %}
                     {% include "common/form/input/radio.html" with field=form.is_protective public=form.is_protective.name|is_public:"evidence" hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.is_protective_notes public=form.is_protective_notes.name|is_public:"evidence" %}
                 </div>
                 <div class="box">
-                    <h2 id="needs-review" class="title is-4">Needs Review</h2>
+                    {% include "common/form/section_heading.html" with id="needs-review" text="Needs Review" public=form.needs_review.name|is_public:"evidence" %}
                     {% include "common/form/input/radio.html" with field=form.needs_review public=form.needs_review.name|is_public:"evidence" hide_label=True show_help=True %}
                     {% include "common/form/textarea.html" with field=form.needs_review_notes public=form.needs_review_notes.name|is_public:"evidence" %}
                 </div>
                 <div class="box">
-                    <h2 id="save" class="title is-4">Save</h2>
+                    {% include "common/form/section_heading.html" with id="save" text="Save" %}
                     <div class="field is-grouped">
                         <div class="control">
                             <button type="submit"

@@ -22,25 +22,26 @@ Defines `HistoryTable`, a django-tables2 `Table` subclass for rendering an objec
 
 The Bulma modal card that `hci/js/confirm-modal.js` shows before submitting a form with a `data-confirm` attribute. `layouts/base.html` includes it once on every page.
 
-### `templates/common/form/public_note.html`
-
-The public badge on its own line, with no visible text, used by the field partials when a public field's label is hidden.
 
 ### `templates/common/form/input/radio.html`
 
-Reusable partial for rendering a radio-button form field using Bulma CSS. Supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label, or in a visible note when the label is hidden.
+Reusable partial for rendering a radio-button form field using Bulma CSS. Supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead.
 
 ### `templates/common/form/input/text.html`
 
-Reusable partial for rendering a text `<input>` form field using Bulma CSS. Accepts context variables for `type`, `autocomplete`, and `placeholder`, and supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label, or in a visible note when the label is hidden.
+Reusable partial for rendering a text `<input>` form field using Bulma CSS. Accepts context variables for `type`, `autocomplete`, and `placeholder`, and supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead.
+
+### `templates/common/form/section_heading.html`
+
+A form section's `<h2>` heading. Callers pass `id`, `text`, and `public`; when `public` is true, the public badge sits next to the heading text. The evidence edit form uses it because its field labels are hidden, so the badge can't go next to them.
 
 ### `templates/common/form/select/default.html`
 
-Reusable partial for rendering a standard `<select>` form field using Bulma CSS. Supports optional label visibility, help text, and an extra CSS class on the select wrapper. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label, or in a visible note when the label is hidden.
+Reusable partial for rendering a standard `<select>` form field using Bulma CSS. Supports optional label visibility, help text, and an extra CSS class on the select wrapper. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead.
 
 ### `templates/common/form/select/search.html`
 
-Reusable partial for rendering a `<select>` field enhanced with the Choices.js library for fuzzy search. Initialises the Choices widget on HTMX load with configurable fuse search options and a remove-item button. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label, or in a visible note when the label is hidden.
+Reusable partial for rendering a `<select>` field enhanced with the Choices.js library for fuzzy search. Initialises the Choices widget on HTMX load with configurable fuse search options and a remove-item button. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead.
 
 ### `templates/common/form/textarea.html`
 

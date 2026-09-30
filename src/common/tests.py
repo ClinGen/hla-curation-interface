@@ -199,10 +199,19 @@ class PublicBadgeTooltipTest(TestCase):
         html = render_to_string("common/public_badge.html")
         self.assertIn('tabindex="0"', html)
 
-    def test_public_note_has_no_visible_text(self):
-        html = render_to_string("common/form/public_note.html")
-        visible = re.sub(r'<span class="is-sr-only">[^<]*</span>', "", html)
-        self.assertEqual(re.sub(r"<[^>]*>|\{#.*?#\}", "", visible).strip(), "")
+    def test_section_heading_badge(self):
+        html = render_to_string(
+            "common/form/section_heading.html",
+            {"id": "p-value", "text": "p-value", "public": True},
+        )
+        self.assertIn('<h2 id="p-value" class="title is-4">', html)
+        self.assertIn("public-badge", html)
+
+    def test_section_heading_without_badge(self):
+        html = render_to_string(
+            "common/form/section_heading.html", {"id": "x", "text": "X"}
+        )
+        self.assertNotIn("public-badge", html)
 
     def test_base_layout_loads_tippy(self):
         html = self.client.get(reverse("home")).content.decode()

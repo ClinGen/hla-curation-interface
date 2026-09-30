@@ -1,6 +1,5 @@
 {% if hide_label %}
     <label class="label is-hidden" data-field="{{ field.auto_id }}">{{ field.label }}</label>
-    {% if public %}{% include "common/form/public_note.html" %}{% endif %}
 {% else %}
     <label class="label" data-field="{{ field.auto_id }}">{{ field.label }}{% if public %} {% include "common/public_badge.html" %}{% endif %}</label>
 {% endif %}
