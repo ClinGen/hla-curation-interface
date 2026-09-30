@@ -141,6 +141,12 @@ the search input to the results area so the table updates without a full page re
 Bulma provides the CSS framework. All JS and CSS dependencies are vendored under
 `src/static/hci/` — there is no build step at runtime.
 
+#### Flash Messages
+
+Views queue flash messages only for warnings and errors. A successful action already
+lands on a page that shows its result, so there are no success or info messages unless
+someone explicitly asks for one.
+
 ## Alternatives Considered
 
 ### AWS-Based Architecture (ECS + RDS)

@@ -36,7 +36,7 @@ Renders the site-wide footer containing ClinGen and Stanford Medicine logos, nav
 
 ### `partials/messages.html`
 
-Iterates over Django's messages framework queue and renders each message as a dismissible Bulma notification styled by level (debug, info, success, warning, or error). Dismiss buttons use an HTMX inline event to remove the message block from the DOM without a page reload.
+Iterates over Django's messages framework queue and renders each message as a dismissible Bulma notification styled by level (debug, info, success, warning, or error). Dismiss buttons use an HTMX inline event to remove the message block from the DOM without a page reload. Views queue only warnings and errors; the other levels are kept for a message someone explicitly asks for.
 
 ### `partials/navbar.html`
 
