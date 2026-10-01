@@ -10,12 +10,18 @@ beads by doing the following tasks.
    tell me instead of creating duplicates.
 4. Draft a breakdown and show it to me before creating anything. The breakdown should
    have:
-   - One epic for `work`. Small work may be a single task with no epic.
+   - One epic for `work`. Small work may be a single task with no epic. An epic becomes
+     a stack of pull requests that merge in order, so its children should be
+     conceptually related. If `work` contains unrelated pieces, propose separate epics
+     or standalone beads so each can be reviewed and merged on its own.
    - For an epic, a design: the problem, the decisions already made and why, and
      anything its children share. This goes in the epic's `--design` field.
-   - Child beads, each small enough to finish in one session and land as one reviewable
-     commit. Prefer vertical slices (model, view, template, and tests together) over
-     horizontal layers.
+   - Child beads, each small enough to finish in one session and land as one pull
+     request: one conceptual change, ideally about 150 changed lines or fewer. Prefer
+     vertical slices (model, view, template, and tests together) over horizontal
+     layers.
+   - An order for the children, bottom of the stack first. A bead may depend only on
+     beads below it, so make each bead's blockers the beads it builds on.
    - For each bead: a title, a description, acceptance criteria, and its blockers.
    - Descriptions that let an agent with no prior context start work: which files to
      touch, the approach, and any decisions that apply. Beads are the only record, so

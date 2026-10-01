@@ -120,6 +120,19 @@ it. After changing beads, run `bd export -o .beads/issues.jsonl` so the export i
 stays current. Don't commit, push, or run `bd dolt push` unless a prompt or I tell you
 to.
 
+## Pull Requests
+
+Each pull request is one conceptual change. Aim for about 150 changed lines; that's a
+guideline, not a hard rule. Split larger work into a stack of pull requests with
+`gh stack` (https://gh.io/stacks): each branch is based on the one below it, the bottom
+one targets `main`, and code in a branch may depend only on its own branch or lower
+ones. An epic's child beads become one stack; see `docs/prompts/05-work-beads.md`.
+
+To change a lower branch, such as after review, run `gh stack checkout <branch>`,
+commit the fix, then `gh stack rebase` to cascade it up the stack. If
+`.beads/issues.jsonl` conflicts, rerun `bd export -o .beads/issues.jsonl` and continue
+with `gh stack rebase --continue`. Don't push or submit the stack unless I ask.
+
 ## Commit Messages
 
 The first line of a commit message is a summary. On the web it's often styled as a
