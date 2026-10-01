@@ -1,0 +1,33 @@
+{# Shows the expert panel's feedback on a curation. Pass heading to override the title. #}
+<article class="message{% if curation.status == "INP" %} is-warning{% endif %} mt-2">
+    <div class="message-header">
+        <p>
+            {% if heading %}{{ heading }}
+            {% elif curation.status == "INP" %}Sent Back for Revision
+            {% else %}Expert Panel Review
+            {% endif %}
+        </p>
+    </div>
+    <div class="message-body content">
+        <ul>
+            {% if curation.ep_display %}
+                <li><strong>Expert Panel:</strong> {{ curation.ep_display }}</li>
+            {% endif %}
+            {% if curation.ep_review_date %}
+                <li><strong>Review Date:</strong> {{ curation.ep_review_date|date:"Y-m-d" }}</li>
+            {% endif %}
+            {% if curation.ep_classification %}
+                <li><strong>Classification:</strong> {{ curation.get_ep_classification_display }}</li>
+            {% endif %}
+            {% if curation.ep_override_reason %}
+                <li><strong>Override Reason:</strong> {{ curation.ep_override_reason|linebreaksbr }}</li>
+            {% endif %}
+            {% if curation.ep_evidence_summary %}
+                <li><strong>Evidence Summary:</strong> {{ curation.ep_evidence_summary|linebreaksbr }}</li>
+            {% endif %}
+            {% if curation.ep_additional_notes %}
+                <li><strong>Additional Notes:</strong> {{ curation.ep_additional_notes|linebreaksbr }}</li>
+            {% endif %}
+        </ul>
+    </div>
+</article>

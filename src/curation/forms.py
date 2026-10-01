@@ -1,12 +1,10 @@
 from django import forms
 from django.forms import ModelForm, modelformset_factory
+from django.http import QueryDict
+from django.utils import timezone
 
-from curation.constants.models.curation import CLASSIFICATION_CHOICES
+from curation.constants.models.curation import CLASSIFICATION_CHOICES, EP_CHOICES
 from curation.models import Curation, Evidence
-
-HLA_CURATION_TASKFORCE_ID = "40033"
-
-EP_CHOICES = [(HLA_CURATION_TASKFORCE_ID, "HLA Curation Taskforce")]
 
 
 class CurationCreateForm(ModelForm):
@@ -30,6 +28,14 @@ class EPReviewForm(forms.Form):
         choices=[("", "---------"), *CLASSIFICATION_CHOICES.items()],
         required=False,
     )
+    ep_override_reason = forms.CharField(
+        label="Override Reason",
+        help_text=(
+            "Explain why the panel chose a classification other than the suggested one."
+        ),
+        widget=forms.Textarea(attrs={"class": "textarea", "rows": 3}),
+        required=False,
+    )
     ep_evidence_summary = forms.CharField(
         label="Evidence Summary",
         widget=forms.Textarea(attrs={"class": "textarea", "rows": 3}),
@@ -45,12 +51,45 @@ class EPReviewForm(forms.Form):
         choices=EP_CHOICES,
         required=False,
     )
+    ep_review_date = forms.DateField(
+        label="Review Date",
+        help_text="The date the expert panel reviewed the curation.",
+        required=False,
+    )
+
+    def __init__(
+        self,
+        data: QueryDict | None = None,
+        *,
+        suggested_classification: str | None = None,
+        initial: dict[str, object] | None = None,
+    ) -> None:
+        """Labels the classification select with the suggested classification.
+
+        Args:
+            data: The submitted form data, if any.
+            suggested_classification: The curation's suggested classification code.
+            initial: Initial values for an unbound form.
+        """
+        super().__init__(data, initial=initial)
+        self.suggested_classification = suggested_classification
+        if suggested_classification:
+            label = CLASSIFICATION_CHOICES[suggested_classification]
+            self.fields[
+                "ep_classification"
+            ].label = f"Classification (suggested: {label})"
+        else:
+            self.fields["ep_classification"].label = "Classification (no suggestion)"
 
     def clean(self) -> dict | None:
         cleaned_data = super().clean()
         if not cleaned_data:
             return cleaned_data
         decision = cleaned_data.get("decision")
+        review_date = cleaned_data.get("ep_review_date")
+        # TIME_ZONE is UTC, so this is today's date with or without USE_TZ.
+        if review_date and review_date > timezone.now().date():
+            self.add_error("ep_review_date", "The review date can't be in the future.")
         if decision == "approved":
             if not cleaned_data.get("ep_classification"):
                 self.add_error("ep_classification", "Required when approving.")
@@ -58,6 +97,18 @@ class EPReviewForm(forms.Form):
                 self.add_error("ep_evidence_summary", "Required when approving.")
             if not cleaned_data.get("ep"):
                 self.add_error("ep", "Required when approving.")
+            if not review_date:
+                self.add_error("ep_review_date", "Required when approving.")
+            classification = cleaned_data.get("ep_classification") or None
+            if classification == self.suggested_classification:
+                # Don't keep a stale reason from an earlier review.
+                cleaned_data["ep_override_reason"] = ""
+            elif classification and not cleaned_data.get("ep_override_reason"):
+                self.add_error(
+                    "ep_override_reason",
+                    "Explain why the panel chose a classification other than the "
+                    "suggested one.",
+                )
         return cleaned_data
 
 
