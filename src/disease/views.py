@@ -30,7 +30,6 @@ class DiseaseCreate(ProtectedViewMixin, CreateView):
             form.instance.name = get_name(disease_data)
             form.instance.iri = get_iri(disease_data)
             form.instance.added_by = self.request.user
-            messages.success(self.request, "Disease added.")
             return super().form_valid(form)
         message = (
             "Oops, something went wrong trying to fetch data from the "

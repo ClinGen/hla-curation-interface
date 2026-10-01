@@ -1,6 +1,5 @@
 from typing import cast
 
-from django.contrib import messages
 from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import DetailView
@@ -43,7 +42,6 @@ class HaplotypeCreate(ProtectedViewMixin, CreateView):
             return self.form_invalid(form)
         form.instance.name = computed_name
         form.instance.added_by = self.request.user
-        messages.success(self.request, "Added haplotype.")
         return super().form_valid(form)
 
 

@@ -36,7 +36,6 @@ class AlleleCreate(ProtectedViewMixin, CreateView):
         if allele_data:
             form.instance.car_id = get_car_id(allele_data)
             form.instance.added_by = self.request.user
-            messages.success(self.request, "Added allele.")
             return super().form_valid(form)
         message = (
             "Oops, something went wrong trying to fetch data from the "
