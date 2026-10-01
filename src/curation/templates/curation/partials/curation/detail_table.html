@@ -25,37 +25,18 @@
             <td>
                 {% if object.status == "INP" %}
                     {% include "common/tags/in_progress.html" %}
-                {% elif object.status == "RFR" %}
-                    <span class="tag is-warning">Ready for Review</span>
-                {% elif object.status == "PRO" %}
-                    <span class="tag is-success">Provisional</span>
+                {% elif object.status == "PRV" %}
+                    {% include "common/tags/provisional.html" %}
+                {% elif object.status == "APR" %}
+                    {% include "common/tags/approved.html" %}
                 {% elif object.status == "PUB" %}
                     {% include "common/tags/published.html" %}
                 {% endif %}
             </td>
         </tr>
         <tr>
-            {% if object.ep_classification %}
-                <td>Classification</td>
-                <td>
-                    <span class="tag">{{ object.get_ep_classification_display }}</span>
-                </td>
-            {% else %}
-                <td>Suggested Classification</td>
-                <td>
-                    {% with sc=object.suggested_classification %}
-                        {% if sc == "DEF" %}<span class="tag">Definitive</span>
-                        {% elif sc == "STR" %}<span class="tag">Strong</span>
-                        {% elif sc == "MOD" %}<span class="tag">Moderate</span>
-                        {% elif sc == "LIM" %}<span class="tag">Limited</span>
-                        {% elif sc == "NOK" %}<span class="tag">No Known Association</span>
-                        {% elif sc == "DIS" %}<span class="tag">Disputed</span>
-                        {% elif sc == "REF" %}<span class="tag">Refuted</span>
-                        {% else %}------
-                        {% endif %}
-                    {% endwith %}
-                </td>
-            {% endif %}
+            <td>Classification</td>
+            <td>{% include "curation/partials/classification.html" with curation=object %}</td>
         </tr>
         <tr>
             <td>Score</td>

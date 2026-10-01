@@ -24,11 +24,11 @@ Empty file that marks the `constants/models` directory as a Python package.
 
 ### `constants/models/common.py`
 
-Defines the `Status` class with lifecycle status codes shared by `Curation` and `Evidence` (`IN_PROGRESS`, `DONE`, `READY_FOR_REVIEW`, `PROVISIONAL`, `PUBLISHED`), along with the allowed status choice dicts and the `CURATION_STATUS_TRANSITIONS` mapping that enforces valid status progressions.
+Defines the `Status` class with lifecycle status codes shared by `Curation` and `Evidence` (`IN_PROGRESS`, `DONE`, `PROVISIONAL`, `APPROVED`, `PUBLISHED`), along with the allowed status choice dicts and the `CURATION_STATUS_TRANSITIONS` mapping that enforces valid status progressions.
 
 ### `constants/models/curation.py`
 
-Defines the `CurationTypes` class (`ALLELE`, `HAPLOTYPE`) and the `Classification` class (e.g., `DEFINITIVE`, `STRONG`, `MODERATE`, `LIMITED`), along with their corresponding human-readable choice dicts used by the `Curation` model.
+Defines the `CurationTypes` class (`ALLELE`, `HAPLOTYPE`) and the `Classification` class (e.g., `DEFINITIVE`, `STRONG`, `MODERATE`, `LIMITED`), along with their corresponding human-readable choice dicts used by the `Curation` model, and `NO_CLASSIFICATION_LABEL`, the text shown when a curation has no classification.
 
 ### `constants/models/evidence.py`
 
@@ -64,7 +64,7 @@ Defines the `Interval` class, a small utility that represents a numeric interval
 
 ### `models.py`
 
-Defines the three core database models for the app. `Curation` tracks an allele or haplotype paired with a disease, manages lifecycle status transitions, stores expert panel review fields, and computes an aggregate score from its included evidence. `Demographic` holds the biogeographic population groups. `Evidence` stores all study-level data fields (typing method, p-value, effect size, cohort size, etc.) and exposes per-step score properties that feed into the HLA scoring framework; all three models use `simple_history` for change tracking.
+Defines the three core database models for the app. `Curation` tracks an allele or haplotype paired with a disease, manages lifecycle status transitions, stores expert panel review fields, and computes an aggregate score from its included evidence. Its `classification_display` property gives the EP classification's label, else the suggested classification's, else "No Classification Set", and `is_classification_suggested` says whether that label is only a suggestion. `Demographic` holds the biogeographic population groups. `Evidence` stores all study-level data fields (typing method, p-value, effect size, cohort size, etc.) and exposes per-step score properties that feed into the HLA scoring framework; all three models use `simple_history` for change tracking.
 
 ### `score.py`
 
@@ -72,7 +72,7 @@ Implements the per-step point-calculation functions (`get_step_1a_points` throug
 
 ### `tables.py`
 
-Defines the `CurationTable` class (using `django-tables2`) that renders the curation list view, including a linked slug column, type, allele/haplotype, disease, a badge-rendered status column, and a classification column that shows the EP classification if set or the computed suggested classification otherwise.
+Defines the `CurationTable` class (using `django-tables2`) that renders the curation list view, including a linked slug column, type, allele/haplotype, disease, a status column rendered as a tag from `STATUS_TAGS`, and a classification column that shows `Curation.classification_display`.
 
 ### `templates/curation/change.html`
 
@@ -84,7 +84,7 @@ Full-page template for the "Add Curation" form. Renders radio inputs for curatio
 
 ### `templates/curation/detail.html`
 
-Full-page template for viewing a curation's details. Displays status banners (locked, ready for review, provisional, published), EP classification notes when present, the curation detail table partial, the action buttons partial, and the evidence list partial.
+Full-page template for viewing a curation's details. Displays status banners (locked, provisional, approved, published), EP classification notes when present, the curation detail table partial, the action buttons partial, and the evidence list partial.
 
 ### `templates/curation/edit/evidence.html`
 
@@ -104,11 +104,15 @@ Full-page template for the curation search/list page. Renders a search input, a 
 
 ### `templates/curation/partials/buttons.html`
 
-Partial that renders the context-sensitive action buttons on the curation detail page: "Add Evidence" and "Submit for Review" when in progress, "Review" (for reviewers) when ready for review, and "Publish to Repository" when provisional.
+Partial that renders the context-sensitive action buttons on the curation detail page: "Add Evidence" and "Submit for Review" when in progress, "Review" (for reviewers) when provisional, and "Publish to Repository" when approved.
+
+### `templates/curation/partials/classification.html`
+
+Partial that renders a curation's `classification_display`, followed by a light "Suggested" tag when the label is the suggested classification rather than the EP's. Expects `curation` in the context. Used by the curation detail table, the HLArepo summary, and the publication detail page.
 
 ### `templates/curation/partials/curation/detail_table.html`
 
-Partial that renders a summary table for a `Curation` object, showing its ID, allele or haplotype, disease, status badge, EP or suggested classification, aggregate score, and timestamps, plus a "View History" button.
+Partial that renders a summary table for a `Curation` object, showing its ID, allele or haplotype, disease, status badge, classification (via `partials/classification.html`), aggregate score, and timestamps, plus a "View History" button.
 
 ### `templates/curation/partials/evidence/detail_table.html`
 
@@ -174,9 +178,13 @@ Empty file that marks the `tests` directory as a Python package.
 
 Unit tests for the `Interval` class, verifying boundary inclusion and exclusion behavior for all four combinations of inclusive/exclusive lower and upper bounds using the standard `unittest.TestCase`.
 
+### `tests/test_migrations.py`
+
+Tests for the `0021_rename_status_codes` data migration. They use `MigrationExecutor` to migrate between `0020` and `0021` and check that `RFR`/`PRO` map to `PRV`/`APR` on `Curation` and `HistoricalCuration`, and back.
+
 ### `tests/test_models.py`
 
-Integration tests for the `Curation` and `Evidence` models. Tests cover default field values, score calculation for every scoring step (including GWAS vs. non-GWAS variants and the p-value comparator edge case), suggested classification thresholds, curation copying, and validation rules for publication inclusion, allele resolution minimums, and the significant association/p-value consistency check.
+Integration tests for the `Curation` and `Evidence` models. Tests cover default field values, curation status transitions, `CurationTable` status tags, score calculation for every scoring step (including GWAS vs. non-GWAS variants and the p-value comparator edge case), suggested classification thresholds, curation copying, and validation rules for publication inclusion, allele resolution minimums, and the significant association/p-value consistency check.
 
 ### `tests/test_validators.py`
 

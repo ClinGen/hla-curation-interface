@@ -46,9 +46,7 @@
         </tr>
         <tr>
             <td>Classification</td>
-            <td>
-                {{ curation.get_ep_classification_display|default:"------" }}
-            </td>
+            <td>{% include "curation/partials/classification.html" %}</td>
         </tr>
         <tr>
             <td>Expert Panel</td>
