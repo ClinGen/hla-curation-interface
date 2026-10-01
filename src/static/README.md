@@ -104,7 +104,7 @@ A small hand-written script, not produced by `build.js`, that asks for confirmat
 
 ### `hci/js/htmx.js`
 
-The htmx library (v2.0.10). It enables HTML-first, AJAX-driven interactivity by allowing Django template elements to issue HTTP requests and swap content without a full page reload.
+The htmx library (v2.0.11). It enables HTML-first, AJAX-driven interactivity by allowing Django template elements to issue HTTP requests and swap content without a full page reload.
 
 ### `hci/js/sign-in.js`
 

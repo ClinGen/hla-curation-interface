@@ -43,31 +43,18 @@ class CurationTable(tables.Table):
         )
 
     def render_status(self, value: str, record: Curation) -> str:  # ruff: ignore[unused-method-argument]
-        if value == Status.IN_PROGRESS:
-            return format_html(
-                '<span class="tag is-warning">'
-                '<i class="bi bi-cone-striped"></i> In Progress'
-                "</span>"
-            )
-        if value == Status.READY_FOR_REVIEW:
-            return format_html(
-                '<span class="tag is-danger">'
-                '<i class="bi bi-flag-fill"></i> Needs Review'
-                "</span>"
-            )
-        if value == Status.PROVISIONAL:
-            return format_html(
-                '<span class="tag is-info">'
-                '<i class="bi bi-hourglass-split"></i> Provisional'
-                "</span>"
-            )
-        if value == Status.PUBLISHED:
-            return format_html(
-                '<span class="tag is-info is-light">'
-                '<i class="bi bi-book"></i> Published'
-                "</span>"
-            )
-        return value
+        tags = {
+            Status.IN_PROGRESS: ("is-warning", "bi-cone-striped", "In Progress"),
+            Status.READY_FOR_REVIEW: ("is-danger", "bi-flag-fill", "Needs Review"),
+            Status.PROVISIONAL: ("is-info", "bi-hourglass-split", "Provisional"),
+            Status.PUBLISHED: ("is-info is-light", "bi-book", "Published"),
+        }
+        if value not in tags:
+            return value
+        color, icon, label = tags[value]
+        return format_html(
+            '<span class="tag {}"><i class="bi {}"></i> {}</span>', color, icon, label
+        )
 
     def render_classification(self, value: str | None, record: Curation) -> str:
         if value:
