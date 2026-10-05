@@ -18,6 +18,7 @@ from curation.constants.models.common import (
 from curation.constants.models.curation import (
     CLASSIFICATION_CHOICES,
     CURATION_TYPE_CHOICES,
+    EP_CHOICES,
     NO_CLASSIFICATION_LABEL,
     Classification,
     CurationTypes,
@@ -105,6 +106,12 @@ class Curation(models.Model):
         verbose_name="EP Classification",
         help_text="The classification set by the expert panel at review time.",
     )
+    ep_override_reason = models.TextField(  # ruff: ignore[django-nullable-model-string-field]
+        null=True,
+        blank=True,
+        verbose_name="EP Override Reason",
+        help_text="Why the panel chose a classification other than the suggested one.",
+    )
     ep_evidence_summary = models.TextField(  # ruff: ignore[django-nullable-model-string-field]
         null=True,
         blank=True,
@@ -116,6 +123,12 @@ class Curation(models.Model):
         blank=True,
         verbose_name="EP Additional Notes",
         help_text="Additional notes from the expert panel.",
+    )
+    ep_review_date = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="EP Review Date",
+        help_text="The date the expert panel reviewed the curation.",
     )
     ep = models.CharField(  # ruff: ignore[django-nullable-model-string-field]
         max_length=5,
@@ -261,6 +274,33 @@ class Curation(models.Model):
     def is_classification_suggested(self) -> bool:
         """Whether the displayed classification is the suggested one, not the EP's."""
         return not self.ep_classification and self.suggested_classification is not None
+
+    @property
+    def has_ep_feedback(self) -> bool:
+        """Whether the expert panel has recorded any review feedback."""
+        return any(
+            [
+                self.ep_classification,
+                self.ep_evidence_summary,
+                self.ep_additional_notes,
+                self.ep_override_reason,
+                self.ep_review_date,
+            ]
+        )
+
+    @property
+    def ep_display(self) -> str | None:
+        """The expert panel's name, or its ID if the name is unknown."""
+        if not self.ep:
+            return None
+        return dict(EP_CHOICES).get(self.ep, self.ep)
+
+    @property
+    def is_classification_overridden(self) -> bool:
+        """Whether the EP chose a classification other than the suggested one."""
+        return bool(self.ep_classification) and (
+            self.ep_classification != self.suggested_classification
+        )
 
     @property
     def classification_display(self) -> str:

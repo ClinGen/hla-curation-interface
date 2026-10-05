@@ -244,10 +244,15 @@ def curation_review(request: HttpRequest, curation_slug: str) -> HttpResponse:
     curation = get_object_or_404(Curation, slug=curation_slug)
 
     if request.method == "POST":
-        form = EPReviewForm(request.POST)
+        form = EPReviewForm(
+            request.POST, suggested_classification=curation.suggested_classification
+        )
         if form.is_valid():
             decision = form.cleaned_data["decision"]
             curation.ep_classification = form.cleaned_data["ep_classification"] or None
+            curation.ep_override_reason = (
+                form.cleaned_data["ep_override_reason"] or None
+            )
             curation.ep_evidence_summary = (
                 form.cleaned_data["ep_evidence_summary"] or None
             )
@@ -255,6 +260,7 @@ def curation_review(request: HttpRequest, curation_slug: str) -> HttpResponse:
                 form.cleaned_data["ep_additional_notes"] or None
             )
             curation.ep = form.cleaned_data["ep"] or None
+            curation.ep_review_date = form.cleaned_data["ep_review_date"]
             if decision == "needs_revision":
                 curation.transition_to(Status.IN_PROGRESS)
             else:
@@ -262,12 +268,22 @@ def curation_review(request: HttpRequest, curation_slug: str) -> HttpResponse:
             return redirect("curation-detail", curation_slug=curation.slug)
     else:
         form = EPReviewForm(
+            suggested_classification=curation.suggested_classification,
             initial={
-                "ep_classification": curation.ep_classification,
+                "ep_classification": (
+                    curation.ep_classification or curation.suggested_classification
+                ),
+                "ep_override_reason": curation.ep_override_reason,
                 "ep_evidence_summary": curation.ep_evidence_summary,
                 "ep_additional_notes": curation.ep_additional_notes,
                 "ep": curation.ep,
-            }
+                # The date input needs ISO format, not the localized default.
+                "ep_review_date": (
+                    curation.ep_review_date.isoformat()
+                    if curation.ep_review_date
+                    else None
+                ),
+            },
         )
 
     context = {"object": curation, "form": form}

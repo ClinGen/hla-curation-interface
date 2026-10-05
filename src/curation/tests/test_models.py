@@ -1,5 +1,6 @@
 """Houses tests for the curation app's models."""
 
+from datetime import date
 from decimal import Decimal
 from unittest.mock import PropertyMock, patch
 
@@ -10,6 +11,8 @@ from django.test import TestCase
 from allele.models import Allele
 from curation.constants.models.common import Status
 from curation.constants.models.curation import (
+    EP_CHOICES,
+    HLA_CURATION_TASKFORCE_ID,
     Classification,
     CurationTypes,
 )
@@ -224,6 +227,62 @@ class TestCurationClassificationDisplay(TestCase):
         ):
             self.assertEqual(self.curation.classification_display, "Definitive")
             self.assertFalse(self.curation.is_classification_suggested)
+
+
+class TestCurationHasEpFeedback(TestCase):
+    def test_no_ep_fields_means_no_feedback(self):
+        self.assertFalse(Curation().has_ep_feedback)
+
+    def test_any_ep_field_counts_as_feedback(self):
+        for field, value in [
+            ("ep_classification", Classification.LIMITED),
+            ("ep_evidence_summary", "Summary."),
+            ("ep_additional_notes", "Notes."),
+            ("ep_override_reason", "Reason."),
+            ("ep_review_date", date(2026, 9, 1)),
+        ]:
+            with self.subTest(field=field):
+                self.assertTrue(Curation(**{field: value}).has_ep_feedback)
+
+    def test_ep_display_uses_the_panel_name(self):
+        self.assertEqual(
+            Curation(ep=HLA_CURATION_TASKFORCE_ID).ep_display,
+            dict(EP_CHOICES)[HLA_CURATION_TASKFORCE_ID],
+        )
+        self.assertIsNone(Curation().ep_display)
+
+
+class TestCurationIsClassificationOverridden(TestCase):
+    fixtures = ["test_alleles.json", "test_diseases.json"]
+
+    def setUp(self):
+        self.curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+        )
+
+    def _overridden(self, ep_classification: str | None, score: float) -> bool:
+        self.curation.ep_classification = ep_classification
+        with patch.object(
+            Curation, "score", new_callable=PropertyMock, return_value=score
+        ):
+            return self.curation.is_classification_overridden
+
+    def test_no_ep_classification_is_not_an_override(self):
+        self.assertFalse(self._overridden(None, 10))
+
+    def test_matching_the_suggestion_is_not_an_override(self):
+        self.assertFalse(self._overridden(Classification.LIMITED, 10))
+
+    def test_differing_from_the_suggestion_is_an_override(self):
+        self.assertTrue(self._overridden(Classification.MODERATE, 10))
+
+    def test_definitive_is_always_an_override(self):
+        self.assertTrue(self._overridden(Classification.DEFINITIVE, 100))
+
+    def test_any_classification_with_a_score_of_zero_is_an_override(self):
+        self.assertTrue(self._overridden(Classification.LIMITED, 0))
 
 
 class TestCurationStatusTransitions(TestCase):

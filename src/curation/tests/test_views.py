@@ -1,14 +1,24 @@
 """Houses tests for the curation app's views."""
 
+from datetime import date, timedelta
+from unittest.mock import PropertyMock, patch
+
 from django.contrib.auth.models import User
+from django.http.response import HttpResponseBase
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from allele.models import Allele
 from auth_.models import UserProfile
 from common.tests import ProtectedViewTestMixin, SuppressRequestLoggingMixin
 from curation.constants.models.common import Status
-from curation.constants.models.curation import Classification, CurationTypes
+from curation.constants.models.curation import (
+    EP_CHOICES,
+    HLA_CURATION_TASKFORCE_ID,
+    Classification,
+    CurationTypes,
+)
 from curation.constants.models.evidence import (
     AdditionalPhenotypes,
     EffectSizeStatistic,
@@ -108,6 +118,44 @@ class CurationDetailTest(ProtectedViewTestMixin, TestCase):
             response, "Diseases in grass type Pokémon in the Kanto region"
         )
         self.assertContains(response, "0.0")  # Should default to a score of 0.0.
+
+    def test_shows_ep_review_date_when_set(self):
+        curation = Curation.objects.get(slug="C000001")
+        curation.ep_review_date = date(2026, 9, 1)
+        curation.save()
+        response = self.client.get(self.url)
+        self.assertContains(response, "Review Date")
+        self.assertContains(response, "2026-09-01")
+
+    def test_shows_feedback_after_send_back_without_classification(self):
+        curation = Curation.objects.get(slug="C000001")
+        curation.ep_additional_notes = "Please add the replication cohort."
+        curation.ep = HLA_CURATION_TASKFORCE_ID
+        curation.save()
+        response = self.client.get(self.url)
+        self.assertContains(response, "Sent Back for Revision")
+        self.assertContains(response, "Please add the replication cohort.")
+        self.assertContains(response, dict(EP_CHOICES)[HLA_CURATION_TASKFORCE_ID])
+
+    def test_shows_evidence_summary_after_approval(self):
+        curation = Curation.objects.get(slug="C000001")
+        curation.status = Status.APPROVED
+        curation.ep_classification = Classification.MODERATE
+        curation.ep_evidence_summary = "Consistent association."
+        curation.save()
+        response = self.client.get(self.url)
+        self.assertContains(response, "Expert Panel Review")
+        self.assertContains(response, "Evidence Summary")
+        self.assertContains(response, "Consistent association.")
+        self.assertNotContains(response, "Classification Notes")
+        self.assertNotContains(response, "Sent Back for Revision")
+        self.assertContains(response, 'class="message mt-2"')
+        self.assertContains(response, "<li><strong>Evidence Summary:</strong>")
+
+    def test_shows_no_feedback_panel_without_feedback(self):
+        response = self.client.get(self.url)
+        self.assertNotContains(response, "Expert Panel Review")
+        self.assertNotContains(response, "Sent Back for Revision")
 
     def test_shows_no_classification_set_when_score_is_zero(self):
         response = self.client.get(self.url)
@@ -539,7 +587,10 @@ class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
             "ep_classification": Classification.MODERATE,
             "ep_evidence_summary": "Panel consensus.",
             "ep_additional_notes": "",
-            "ep": "40033",
+            "ep": HLA_CURATION_TASKFORCE_ID,
+            "ep_review_date": timezone.now().date().isoformat(),
+            # The score is 0, so no classification is suggested and any is an override.
+            "ep_override_reason": "Panel judgment.",
         }
 
     def test_approval_sets_status_to_approved(self):
@@ -567,12 +618,110 @@ class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
         self.assertEqual(
             self.curation.ep_additional_notes, "Please address the power calculation."
         )
+        self.assertIsNone(self.curation.ep_review_date)
+
+    def test_approval_saves_review_date(self):
+        self.client.force_login(self.reviewer)
+        self.client.post(self._url(), self._approval_data())
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.ep_review_date, timezone.now().date())
+
+    def test_approval_without_review_date_fails(self):
+        self.client.force_login(self.reviewer)
+        data = {**self._approval_data(), "ep_review_date": ""}
+        response = self.client.post(self._url(), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Required when approving.")
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.status, Status.PROVISIONAL)
+
+    def test_future_review_date_fails(self):
+        self.client.force_login(self.reviewer)
+        tomorrow = (timezone.now().date() + timedelta(days=1)).isoformat()
+        for decision in ("approved", "needs_revision"):
+            data = {
+                **self._approval_data(),
+                "decision": decision,
+                "ep_review_date": tomorrow,
+            }
+            response = self.client.post(self._url(), data)
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, "can&#x27;t be in the future")
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.status, Status.PROVISIONAL)
+
+    def test_review_page_shows_earlier_feedback(self):
+        self.curation.ep_additional_notes = "Check the cohort sizes."
+        self.curation.save()
+        self.client.force_login(self.reviewer)
+        response = self.client.get(self._url())
+        self.assertContains(response, "Check the cohort sizes.")
+        self.assertContains(response, "Earlier Expert Panel Feedback")
+
+    def test_review_form_prefills_review_date(self):
+        self.curation.ep_review_date = date(2026, 9, 1)
+        self.curation.save()
+        self.client.force_login(self.reviewer)
+        response = self.client.get(self._url())
+        self.assertContains(response, 'value="2026-09-01"')
 
     def test_non_ep_user_gets_403(self):
         self.client.force_login(self.curator)
         with self.suppress_request_logging():
             response = self.client.post(self._url(), self._approval_data())
         self.assertEqual(response.status_code, 403)
+
+    def _post_with_score(self, data: dict[str, str], score: float) -> HttpResponseBase:
+        self.client.force_login(self.reviewer)
+        with patch.object(
+            Curation, "score", new_callable=PropertyMock, return_value=score
+        ):
+            return self.client.post(self._url(), data)
+
+    def test_matching_suggestion_needs_no_override_reason(self):
+        data = {**self._approval_data(), "ep_classification": Classification.LIMITED}
+        response = self._post_with_score(data, 10)
+        self.assertEqual(response.status_code, 302)
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.status, Status.APPROVED)
+
+    def test_override_without_reason_fails(self):
+        data = {**self._approval_data(), "ep_override_reason": ""}
+        response = self._post_with_score(data, 10)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Explain why the panel chose")
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.status, Status.PROVISIONAL)
+
+    def test_override_with_reason_saves_both(self):
+        data = {**self._approval_data(), "ep_override_reason": "Replicated twice."}
+        response = self._post_with_score(data, 10)
+        self.assertEqual(response.status_code, 302)
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.ep_classification, Classification.MODERATE)
+        self.assertEqual(self.curation.ep_override_reason, "Replicated twice.")
+
+    def test_approving_without_override_clears_old_reason(self):
+        self.curation.ep_override_reason = "From an earlier review."
+        self.curation.save()
+        data = {
+            **self._approval_data(),
+            "ep_classification": Classification.LIMITED,
+            "ep_override_reason": "From an earlier review.",
+        }
+        self._post_with_score(data, 10)
+        self.curation.refresh_from_db()
+        self.assertIsNone(self.curation.ep_override_reason)
+
+    def test_review_form_preselects_suggestion_and_labels_it(self):
+        self.client.force_login(self.reviewer)
+        with patch.object(
+            Curation, "score", new_callable=PropertyMock, return_value=10
+        ):
+            response = self.client.get(self._url())
+        self.assertContains(response, "Classification (suggested: Limited)")
+        self.assertContains(response, '<option value="LIM" selected>')
+        self.assertNotContains(response, "confirm(")
 
 
 class CurationCopyTest(SuppressRequestLoggingMixin, TestCase):

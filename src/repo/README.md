@@ -20,7 +20,7 @@ Defines the `PublishedCuration` model, which links one-to-one to a `Curation` an
 
 ### `serializers.py`
 
-Provides `serialize_published_curation` and `serialize_evidence`, plain functions that convert `PublishedCuration` and `Evidence` instances to plain Python dictionaries suitable for JSON export, including all related entity, disease, and evidence fields. The export includes each allele's CAR ID (including haplotype member alleles) and the disease IRI.
+Provides `serialize_published_curation` and `serialize_evidence`, plain functions that convert `PublishedCuration` and `Evidence` instances to plain Python dictionaries suitable for JSON export, including all related entity, disease, and evidence fields. The export includes each allele's CAR ID (including haplotype member alleles), the disease IRI, the EP override reason, and the EP review date as an ISO date or `null`.
 
 ### `tables.py`
 
@@ -36,7 +36,7 @@ Renders the detail page for a published curation, including supersession and cop
 
 ### `templates/repo/partials/summary.html`
 
-Renders the public summary of a published curation: the curation ID, the allele (or haplotype and each member allele) with ClinGen Allele Registry linkouts, the disease with a Mondo linkout, the classification (via `curation/partials/classification.html`), the expert panel, the published date, the "Evidence Summary" heading and text, and the EP additional notes under a smaller heading.
+Renders the public summary of a published curation: the curation ID, the allele (or haplotype and each member allele) with ClinGen Allele Registry linkouts, the disease with a Mondo linkout, the classification (via `curation/partials/classification.html`), the expert panel, the EP review date, the published date, the "Evidence Summary" heading and text, and the EP additional notes and, when set, the override reason under smaller headings.
 
 ### `templates/repo/history.html`
 
