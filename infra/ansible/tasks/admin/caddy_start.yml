@@ -1,6 +1,14 @@
-- name: Ensure Caddy is running
+- name: Ensure Caddy owns its log directory
   become: true
-  ansible.builtin.command:
-    cmd: "caddy start --config /etc/caddy/Caddyfile"
-  tags:
-    - skip_ansible_lint
+  ansible.builtin.file:
+    path: /var/log/caddy
+    state: directory
+    owner: caddy
+    group: caddy
+    recurse: true
+- name: Ensure Caddy is enabled and restarted with the latest Caddyfile
+  become: true
+  ansible.builtin.systemd:
+    name: caddy
+    enabled: true
+    state: restarted
