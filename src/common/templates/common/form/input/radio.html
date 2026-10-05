@@ -1,7 +1,7 @@
 {% if hide_label %}
-    <label class="label is-hidden">{{ field.label }}</label>
+    <label class="label is-hidden" data-field="{{ field.auto_id }}">{{ field.label }}</label>
 {% else %}
-    <label class="label">{{ field.label }}</label>
+    <label class="label" data-field="{{ field.auto_id }}">{{ field.label }}{% if public %} {% include "common/public_badge.html" %}{% endif %}</label>
 {% endif %}
 {% if show_help and field.help_text %}
     <p class="help">{{ field.help_text }}</p>

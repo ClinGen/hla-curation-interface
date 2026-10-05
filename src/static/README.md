@@ -30,6 +30,10 @@ The Bootstrap Icons icon font in WOFF format. It is referenced by `bootstrap-ico
 
 The Bootstrap Icons icon font in WOFF2 format. It is the preferred, more compressed version referenced by `bootstrap-icons.css`.
 
+### `hci/css/tippy.css`
+
+The Tippy.js tooltip stylesheet (v6.3.7), copied from `node_modules` by `build.js`.
+
 ### `hci/img/android-chrome-192x192.png`
 
 A 192×192 pixel PNG version of the application icon. It is used by Android Chrome when a user adds the site to their home screen, as declared in `site.webmanifest`.
@@ -106,9 +110,29 @@ A small hand-written script, not produced by `build.js`, that asks for confirmat
 
 The htmx library (v2.0.11). It enables HTML-first, AJAX-driven interactivity by allowing Django template elements to issue HTTP requests and swap content without a full page reload.
 
+### `hci/js/popper.min.js`
+
+The minified Popper positioning library (v2.11.8), which Tippy.js needs. `build.js` copies it from `node_modules`.
+
+### `hci/js/popper.min.js.map`
+
+The source map for `popper.min.js`. `collectstatic` requires it because the minified file references it.
+
 ### `hci/js/sign-in.js`
 
 A bundled JavaScript file for rendering the Clerk sign-in component. It contains the React and Clerk SDK code needed to mount the embedded sign-in UI on the application's login page.
+
+### `hci/js/tippy.umd.min.js`
+
+The minified Tippy.js tooltip library (v6.3.7). `build.js` copies it from `node_modules`.
+
+### `hci/js/tippy.umd.min.js.map`
+
+The source map for `tippy.umd.min.js`. `collectstatic` requires it because the minified file references it.
+
+### `hci/js/tooltips.js`
+
+A small hand-written script, not produced by `build.js`, that attaches a Tippy.js tooltip to every element with a `data-tippy-content` attribute. It runs through `htmx.onLoad`, so content swapped in by HTMX gets tooltips too.
 
 ### `hci/site.webmanifest`
 

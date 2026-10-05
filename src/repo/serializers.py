@@ -1,8 +1,45 @@
+from datetime import date
+from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
+from repo.constants import PUBLIC_CURATION_FIELDS, PUBLIC_EVIDENCE_FIELDS
+
 if TYPE_CHECKING:
-    from curation.models import Evidence
+    from curation.models import Curation, Evidence
     from repo.models import PublishedCuration
+
+# Export keys that differ from the model field name, kept for existing consumers.
+EXPORT_NAMES = {"ep_classification": "classification"}
+
+
+def _export_value(value: object) -> object:
+    """Converts a model field value to a JSON-friendly value.
+
+    Returns:
+        Dates as ISO strings, decimals as strings, and anything else unchanged.
+    """
+    if isinstance(value, date):
+        return value.isoformat()
+    if isinstance(value, Decimal):
+        return str(value)
+    return value
+
+
+def _public_curation_fields(curation: "Curation") -> dict[str, Any]:
+    return {
+        EXPORT_NAMES.get(name, name): _export_value(getattr(curation, name))
+        for name in sorted(PUBLIC_CURATION_FIELDS)
+    }
+
+
+def _public_evidence_fields(evidence: "Evidence") -> dict[str, Any]:
+    data: dict[str, Any] = {}
+    for name in sorted(PUBLIC_EVIDENCE_FIELDS):
+        if name == "demographics":
+            data[name] = [demo.group for demo in evidence.demographics.all()]
+        else:
+            data[name] = _export_value(getattr(evidence, name))
+    return data
 
 
 def serialize_published_curation(published: "PublishedCuration") -> dict[str, Any]:
@@ -49,14 +86,7 @@ def serialize_published_curation(published: "PublishedCuration") -> dict[str, An
         "version": published.version,
         "curation": {
             "status": curation.status,
-            "classification": curation.ep_classification,
-            "ep_evidence_summary": curation.ep_evidence_summary,
-            "ep_additional_notes": curation.ep_additional_notes,
-            "ep_override_reason": curation.ep_override_reason,
-            "ep": curation.ep,
-            "ep_review_date": (
-                curation.ep_review_date.isoformat() if curation.ep_review_date else None
-            ),
+            **_public_curation_fields(curation),
             "copied_from": curation.copied_from.slug if curation.copied_from else None,
             "score": float(curation.score),
             **entity_data,
@@ -101,26 +131,7 @@ def serialize_evidence(evidence: "Evidence") -> dict[str, Any]:
             if evidence.publication
             else None
         ),
-        "is_gwas": evidence.is_gwas,
-        "zygosity": evidence.zygosity,
-        "phase_confirmed": evidence.phase_confirmed,
-        "typing_method": evidence.typing_method,
-        "demographics": [demo.group for demo in evidence.demographics.all()],
-        "p_value": str(evidence.p_value) if evidence.p_value else None,
-        "multiple_testing_correction": evidence.multiple_testing_correction,
-        "effect_size_statistic": evidence.effect_size_statistic,
-        "odds_ratio": str(evidence.odds_ratio) if evidence.odds_ratio else None,
-        "relative_risk": (
-            str(evidence.relative_risk) if evidence.relative_risk else None
-        ),
-        "beta": str(evidence.beta) if evidence.beta else None,
-        "ci_start": str(evidence.ci_start) if evidence.ci_start else None,
-        "ci_end": str(evidence.ci_end) if evidence.ci_end else None,
-        "cohort_size": evidence.cohort_size,
-        "additional_phenotypes": evidence.additional_phenotypes,
-        "has_association": evidence.has_association,
-        "is_protective": evidence.is_protective,
-        "needs_review": evidence.needs_review,
+        **_public_evidence_fields(evidence),
         "score": float(evidence.score),
         "added_at": evidence.added_at.isoformat(),
     }

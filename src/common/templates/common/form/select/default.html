@@ -1,7 +1,7 @@
 <div class="field">
     <div class="has-text-danger">{{ field.errors }}</div>
     {% if show_label %}
-        <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        <label class="label" for="{{ field.id_for_label }}">{{ field.label }}{% if public %} {% include "common/public_badge.html" %}{% endif %}</label>
     {% else %}
         <label class="label is-hidden" for="{{ field.id_for_label }}">{{ field.label }}</label>
     {% endif %}
