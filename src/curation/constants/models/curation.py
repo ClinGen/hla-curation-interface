@@ -36,7 +36,7 @@ CLASSIFICATION_CHOICES = {
     Classification.REFUTED: "Refuted",
 }
 
-HLA_CURATION_TASKFORCE_ID = "40033"
+HLA_CURATION_TASKFORCE_ID = "10144"
 
 # The expert panels that can review curations, as (ID, name) pairs.
 EP_CHOICES = [(HLA_CURATION_TASKFORCE_ID, "HLA Curation Taskforce")]

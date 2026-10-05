@@ -13,7 +13,12 @@ from allele.models import Allele
 from auth_.models import UserProfile
 from common.tests import ProtectedViewTestMixin, SuppressRequestLoggingMixin
 from curation.constants.models.common import Status
-from curation.constants.models.curation import Classification, CurationTypes
+from curation.constants.models.curation import (
+    EP_CHOICES,
+    HLA_CURATION_TASKFORCE_ID,
+    Classification,
+    CurationTypes,
+)
 from curation.constants.models.evidence import (
     AdditionalPhenotypes,
     EffectSizeStatistic,
@@ -125,12 +130,12 @@ class CurationDetailTest(ProtectedViewTestMixin, TestCase):
     def test_shows_feedback_after_send_back_without_classification(self):
         curation = Curation.objects.get(slug="C000001")
         curation.ep_additional_notes = "Please add the replication cohort."
-        curation.ep = "40033"
+        curation.ep = HLA_CURATION_TASKFORCE_ID
         curation.save()
         response = self.client.get(self.url)
         self.assertContains(response, "Sent Back for Revision")
         self.assertContains(response, "Please add the replication cohort.")
-        self.assertContains(response, "HLA Curation Taskforce")
+        self.assertContains(response, dict(EP_CHOICES)[HLA_CURATION_TASKFORCE_ID])
 
     def test_shows_evidence_summary_after_approval(self):
         curation = Curation.objects.get(slug="C000001")
@@ -582,7 +587,7 @@ class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
             "ep_classification": Classification.MODERATE,
             "ep_evidence_summary": "Panel consensus.",
             "ep_additional_notes": "",
-            "ep": "40033",
+            "ep": HLA_CURATION_TASKFORCE_ID,
             "ep_review_date": timezone.now().date().isoformat(),
             # The score is 0, so no classification is suggested and any is an override.
             "ep_override_reason": "Panel judgment.",

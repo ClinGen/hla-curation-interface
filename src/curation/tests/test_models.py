@@ -11,6 +11,8 @@ from django.test import TestCase
 from allele.models import Allele
 from curation.constants.models.common import Status
 from curation.constants.models.curation import (
+    EP_CHOICES,
+    HLA_CURATION_TASKFORCE_ID,
     Classification,
     CurationTypes,
 )
@@ -243,7 +245,10 @@ class TestCurationHasEpFeedback(TestCase):
                 self.assertTrue(Curation(**{field: value}).has_ep_feedback)
 
     def test_ep_display_uses_the_panel_name(self):
-        self.assertEqual(Curation(ep="40033").ep_display, "HLA Curation Taskforce")
+        self.assertEqual(
+            Curation(ep=HLA_CURATION_TASKFORCE_ID).ep_display,
+            dict(EP_CHOICES)[HLA_CURATION_TASKFORCE_ID],
+        )
         self.assertIsNone(Curation().ep_display)
 
 
