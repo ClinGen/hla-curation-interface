@@ -1,10 +1,17 @@
 import django_tables2 as tables
-from django.utils.html import format_html
+from django.template.loader import render_to_string
 from django_tables2 import A
 
 from curation.constants.models.common import Status
-from curation.constants.models.curation import CLASSIFICATION_CHOICES
 from curation.models import Curation
+
+# The common tag template for each curation status.
+STATUS_TAGS = {
+    Status.IN_PROGRESS: "common/tags/in_progress.html",
+    Status.PROVISIONAL: "common/tags/provisional.html",
+    Status.APPROVED: "common/tags/approved.html",
+    Status.PUBLISHED: "common/tags/published.html",
+}
 
 
 class CurationTable(tables.Table):
@@ -26,6 +33,7 @@ class CurationTable(tables.Table):
         accessor="ep_classification",
         verbose_name="Classification",
         orderable=False,
+        empty_values=(),
     )
     updated_at = tables.DateColumn(verbose_name="Updated", format="Y-m-d")
 
@@ -42,24 +50,11 @@ class CurationTable(tables.Table):
             "updated_at",
         )
 
-    def render_status(self, value: str, record: Curation) -> str:  # ruff: ignore[unused-method-argument]
-        tags = {
-            Status.IN_PROGRESS: ("is-warning", "bi-cone-striped", "In Progress"),
-            Status.READY_FOR_REVIEW: ("is-danger", "bi-flag-fill", "Needs Review"),
-            Status.PROVISIONAL: ("is-info", "bi-hourglass-split", "Provisional"),
-            Status.PUBLISHED: ("is-info is-light", "bi-book", "Published"),
-        }
-        if value not in tags:
+    def render_status(self, value: str, record: Curation) -> str:
+        # django-tables2 passes the choice label as value, so key on the code.
+        if record.status not in STATUS_TAGS:
             return value
-        color, icon, label = tags[value]
-        return format_html(
-            '<span class="tag {}"><i class="bi {}"></i> {}</span>', color, icon, label
-        )
+        return render_to_string(STATUS_TAGS[record.status])
 
-    def render_classification(self, value: str | None, record: Curation) -> str:
-        if value:
-            return record.get_ep_classification_display()  # type: ignore
-        sc = record.suggested_classification
-        if sc:
-            return CLASSIFICATION_CHOICES.get(sc, "------")
-        return "------"
+    def render_classification(self, record: Curation) -> str:
+        return record.classification_display

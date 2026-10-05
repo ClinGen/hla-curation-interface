@@ -15,7 +15,7 @@
             </button>
         </form>
     </div>
-{% elif object.status == "RFR" %} {# Ready for Review #}
+{% elif object.status == "PRV" %} {# Provisional #}
     {% if request.user.profile.can_review %}
         <div class="buttons">
             <a href="{% url 'curation-review' object.slug %}" class="button is-warning">
@@ -24,7 +24,7 @@
             </a>
         </div>
     {% endif %}
-{% elif object.status == "PRO" %} {# Provisional #}
+{% elif object.status == "APR" %} {# Approved #}
     <div class="buttons">
         <form method="post"
               action="{% url 'curation-publish' object.slug %}"

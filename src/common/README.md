@@ -70,6 +70,10 @@ Renders the result count and, when results exist, the django-tables2 table insid
 
 Base tag partial that renders a Bulma `<span class="tag">` with a given `color`, `icon_name`, and `text`. All concrete tag templates include this partial via `{% include %}` with specific values.
 
+### `templates/common/tags/approved.html`
+
+Renders a green "Approved" curation status tag using `_generic.html` with a check-circle icon.
+
 ### `templates/common/tags/done.html`
 
 Renders a green "Done" status tag using `_generic.html` with a filled check-circle icon.
@@ -90,6 +94,10 @@ Renders a yellow "Not Provided" status tag using `_generic.html` with an outline
 
 Renders a green "Provided" status tag using `_generic.html` with a filled check-circle icon.
 
+### `templates/common/tags/provisional.html`
+
+Renders a red "Provisional" curation status tag using `_generic.html` with an hourglass icon. Provisional curations are waiting on the expert panel.
+
 ### `templates/common/tags/published.html`
 
 Renders a light-blue "Published" status tag using `_generic.html` with a book icon.
@@ -104,7 +112,7 @@ Registers three custom Django template filters: `get_val` (retrieves a named att
 
 ### `tests.py`
 
-Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `SuppressRequestLoggingMixin`) that enforce standard view-test contracts across the project, along with `SearchListViewTest`, which exercises the search and HTMX partial-response behaviour of `SearchListView`.
+Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `SuppressRequestLoggingMixin`) that enforce standard view-test contracts across the project, along with `MigrationsUpToDateTest`, which fails when a model change has no migration, and `SearchListViewTest`, which exercises the search and HTMX partial-response behaviour of `SearchListView`.
 
 ### `views.py`
 

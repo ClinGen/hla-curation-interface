@@ -1,8 +1,10 @@
 """Houses tests for the curation app's models."""
 
 from decimal import Decimal
+from unittest.mock import PropertyMock, patch
 
 from django.core.exceptions import ValidationError
+from django.template.loader import render_to_string
 from django.test import TestCase
 
 from allele.models import Allele
@@ -25,6 +27,7 @@ from curation.models import (
     Demographic,
     Evidence,
 )
+from curation.tables import CurationTable
 from disease.models import Disease
 from haplotype.models import Haplotype
 from publication.models import Publication
@@ -191,6 +194,83 @@ class TestCuration(TestCase):
                 disease=self.disease,
             )
             curation.clean()
+
+
+class TestCurationClassificationDisplay(TestCase):
+    fixtures = ["test_alleles.json", "test_diseases.json"]
+
+    def setUp(self):
+        self.curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+        )
+
+    def test_score_of_zero_shows_no_classification_set(self):
+        self.assertEqual(self.curation.classification_display, "No Classification Set")
+        self.assertFalse(self.curation.is_classification_suggested)
+
+    def test_positive_score_shows_suggested_classification(self):
+        with patch.object(
+            Curation, "score", new_callable=PropertyMock, return_value=10
+        ):
+            self.assertEqual(self.curation.classification_display, "Limited")
+            self.assertTrue(self.curation.is_classification_suggested)
+
+    def test_ep_classification_wins_over_suggestion(self):
+        self.curation.ep_classification = Classification.DEFINITIVE
+        with patch.object(
+            Curation, "score", new_callable=PropertyMock, return_value=10
+        ):
+            self.assertEqual(self.curation.classification_display, "Definitive")
+            self.assertFalse(self.curation.is_classification_suggested)
+
+
+class TestCurationStatusTransitions(TestCase):
+    fixtures = ["test_alleles.json", "test_diseases.json"]
+
+    def setUp(self):
+        self.curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+        )
+
+    def test_status_codes(self):
+        self.assertEqual(Status.PROVISIONAL, "PRV")
+        self.assertEqual(Status.APPROVED, "APR")
+
+    def test_lifecycle_moves_through_provisional_and_approved(self):
+        self.curation.transition_to(Status.PROVISIONAL)
+        self.curation.transition_to(Status.APPROVED)
+        self.curation.transition_to(Status.PUBLISHED)
+        self.assertEqual(self.curation.status, Status.PUBLISHED)
+
+    def test_provisional_can_be_sent_back(self):
+        self.curation.transition_to(Status.PROVISIONAL)
+        self.curation.transition_to(Status.IN_PROGRESS)
+        self.assertEqual(self.curation.status, Status.IN_PROGRESS)
+
+    def test_approved_cannot_go_back_to_provisional(self):
+        self.curation.transition_to(Status.PROVISIONAL)
+        self.curation.transition_to(Status.APPROVED)
+        with self.assertRaises(ValueError):
+            self.curation.transition_to(Status.PROVISIONAL)
+
+
+class TestCurationTableRenderStatus(TestCase):
+    def setUp(self):
+        self.table = CurationTable([])
+
+    def test_provisional_label(self):
+        html = self.table.render_status(
+            "Provisional", Curation(status=Status.PROVISIONAL)
+        )
+        self.assertHTMLEqual(html, render_to_string("common/tags/provisional.html"))
+
+    def test_approved_label(self):
+        html = self.table.render_status("Approved", Curation(status=Status.APPROVED))
+        self.assertHTMLEqual(html, render_to_string("common/tags/approved.html"))
 
 
 class TestEvidence(TestCase):

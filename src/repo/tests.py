@@ -28,7 +28,7 @@ class PublishedCurationModelTest(TestCase):
             curation_type=CurationTypes.ALLELE,
             allele=self.allele,
             disease=self.disease,
-            status=Status.PROVISIONAL,
+            status=Status.APPROVED,
         )
 
     def test_create_published_curation(self):
@@ -95,7 +95,7 @@ class CurationPublishViewTest(ProtectedViewTestMixin, TestCase):
             curation_type=CurationTypes.ALLELE,
             allele=self.allele,
             disease=self.disease,
-            status=Status.PROVISIONAL,
+            status=Status.APPROVED,
         )
         self.curation.save()  # Ensure slug is generated.
         self.url = reverse(
@@ -119,7 +119,7 @@ class CurationPublishViewTest(ProtectedViewTestMixin, TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
 
-    def test_publish_provisional_curation(self):
+    def test_publish_approved_curation(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)
         response = self.client.post(self.url)
 
@@ -163,7 +163,7 @@ class CurationPublishViewTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(PublishedCuration.objects.count(), 0)
         self.curation.refresh_from_db()
-        self.assertEqual(self.curation.status, Status.PROVISIONAL)
+        self.assertEqual(self.curation.status, Status.APPROVED)
 
 
 class RepoSearchViewTest(TestCase):
@@ -196,6 +196,7 @@ class RepoSearchViewTest(TestCase):
 
         response = self.client.get(self.url)
         self.assertContains(response, curation.slug)
+        self.assertContains(response, "No Classification Set")
 
 
 class PublishedCurationDetailViewTest(TestCase):

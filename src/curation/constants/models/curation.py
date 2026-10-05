@@ -35,3 +35,6 @@ CLASSIFICATION_CHOICES = {
     Classification.DISPUTED: "Disputed",
     Classification.REFUTED: "Refuted",
 }
+
+# Shown when a curation has no EP classification and no suggested one.
+NO_CLASSIFICATION_LABEL = "No Classification Set"
