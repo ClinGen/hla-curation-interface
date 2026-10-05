@@ -54,7 +54,7 @@
     {% if request.GET.tab == "data" or not request.GET.tab %}
 
         {% if not object.curation.publication %}
-            <a href="{% url 'evidence-edit' object.curation.slug object.slug %}" class="button">
+            <a href="{% url 'evidence-edit' object.curation.slug object.slug %}" class="button is-link is-light">
                 {% include "common/icon.html" with icon_name="pencil" %}
                 Edit Data
             </a>
