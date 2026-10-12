@@ -46,6 +46,10 @@
                         <td>{{ object.author|default_if_none:"------" }}</td>
                     </tr>
                     <tr>
+                        <td>Authors</td>
+                        <td>{{ object.authors|default:"------" }}</td>
+                    </tr>
+                    <tr>
                         <td>Publication Year</td>
                         <td>{{ object.publication_year|default_if_none:"------" }}</td>
                     </tr>
@@ -73,11 +77,21 @@
             </table>
         </div>
 
-        <div class="mb-4">
+        <div class="buttons mb-4">
             <a href="{% url 'publication-history' object.slug %}" class="button is-link is-light">
                 {% include "common/icon.html" with icon_name="clock-history" %}
                 View History
             </a>
+            <form method="post"
+                  action="{% url 'publication-refresh' object.slug %}"
+                  style="display:inline;"
+                  data-confirm="Replace this publication's title, authors, and year with the latest data from PubMed?">
+                {% csrf_token %}
+                <button type="submit" class="button is-link">
+                    {% include "common/icon.html" with icon_name="arrow-clockwise" %}
+                    Refresh from PubMed
+                </button>
+            </form>
         </div>
 
         {% if object.evidence.all %}

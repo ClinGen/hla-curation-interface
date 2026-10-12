@@ -97,3 +97,40 @@ manually deploy the HCI, follow the steps below.
   ```
   just server-prod-deploy
   ```
+
+## How to Backfill Publication Authors
+
+Publications added before the HCI stored full author lists have no authors, so they
+show "------" for Authors and search matches only their primary author. The
+`backfill_publication_authors` command refreshes each of them from PubMed. That also
+updates their title, primary author, and year. Each change shows on the publication's
+history page.
+
+- Deploy a version of the HCI that includes the command, and make sure its migrations
+  have run.
+
+- SSH into the server as `ubuntu`, then change to the app's `src` directory:
+
+  ```
+  cd ~/hla-curation-interface/src
+  ```
+
+- List the publications the command would refresh, without changing anything:
+
+  ```
+  ~/.local/bin/uv run manage.py backfill_publication_authors --dry-run
+  ```
+
+- Run the backfill:
+
+  ```
+  ~/.local/bin/uv run manage.py backfill_publication_authors
+  ```
+
+  The command waits between PubMed requests, so it takes a few minutes for a few
+  hundred publications. It prints how many publications it updated and how many
+  failed, and lists each failure.
+
+- If any fail, run the command again later. It only retries publications that still
+  have no authors. You can also refresh a single publication with the Refresh from
+  PubMed button on its detail page.

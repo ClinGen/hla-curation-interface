@@ -32,6 +32,12 @@ class Publication(models.Model):
         verbose_name="Author",
         help_text="The surname of the primary author of the publication.",
     )
+    authors = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Authors",
+        help_text="All authors of the publication, in order, separated by semicolons.",
+    )
     publication_year = models.IntegerField(
         blank=True,
         null=True,

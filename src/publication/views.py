@@ -1,26 +1,25 @@
 from typing import cast
 
 from django.contrib import messages
-from django.http import HttpResponse
-from django.shortcuts import redirect
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView
 from django_tables2 import RequestConfig
 
-from auth_.permissions import ProtectedViewMixin
+from auth_.permissions import ProtectedViewMixin, protected_view
 from common.history import resolve_changes
 from common.tables import HistoryTable
 from common.views import SearchListView
-from publication.clients import (
-    fetch_pubmed_data,
-    get_pubmed_author,
-    get_pubmed_title,
-    get_pubmed_year,
-)
+from publication.clients import refresh_from_pubmed
 from publication.forms import PublicationForm
 from publication.models import Publication
 from publication.tables import PublicationTable
+
+REFRESH_FAILED_MESSAGE = (
+    "Unable to refresh this publication from PubMed. Please try again later."
+)
 
 
 class PublicationCreate(ProtectedViewMixin, CreateView):
@@ -30,11 +29,7 @@ class PublicationCreate(ProtectedViewMixin, CreateView):
     success_url = reverse_lazy("publication-list")
 
     def form_valid(self, form: PublicationForm) -> HttpResponse:
-        pubmed_data = fetch_pubmed_data(form.instance.pubmed_id)
-        if pubmed_data:
-            form.instance.author = get_pubmed_author(pubmed_data)
-            form.instance.title = get_pubmed_title(pubmed_data)
-            form.instance.publication_year = get_pubmed_year(pubmed_data)
+        if refresh_from_pubmed(form.instance):
             form.instance.added_by = self.request.user
             return super().form_valid(form)
         message = (
@@ -47,6 +42,24 @@ class PublicationCreate(ProtectedViewMixin, CreateView):
 class PublicationDetail(ProtectedViewMixin, DetailView):
     model = Publication
     template_name = "publication/detail.html"
+
+
+@protected_view
+def publication_refresh(request: HttpRequest, slug: str) -> HttpResponse:
+    """Updates a publication with the latest data from PubMed.
+
+    Returns:
+        Redirect to the publication detail page, with a warning if PubMed failed.
+    """
+    if request.method != "POST":
+        return redirect("publication-detail", slug=slug)
+
+    publication = get_object_or_404(Publication, slug=slug)
+    if refresh_from_pubmed(publication):
+        publication.save()
+    else:
+        messages.warning(request, REFRESH_FAILED_MESSAGE)
+    return redirect("publication-detail", slug=slug)
 
 
 class PublicationHistory(ProtectedViewMixin, DetailView):
@@ -85,5 +98,5 @@ class PublicationList(ProtectedViewMixin, SearchListView):  # ty: ignore[invalid
     template_name = "publication/list.html"
     ordering = ["-updated_at"]
     table_class = PublicationTable
-    search_fields = ["slug", "title", "author", "pubmed_id"]
+    search_fields = ["slug", "title", "author", "authors", "pubmed_id"]
     table_pagination = {"per_page": 25}
