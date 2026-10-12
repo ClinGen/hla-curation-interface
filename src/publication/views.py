@@ -87,5 +87,5 @@ class PublicationList(ProtectedViewMixin, SearchListView):  # ty: ignore[invalid
     template_name = "publication/list.html"
     ordering = ["-updated_at"]
     table_class = PublicationTable
-    search_fields = ["slug", "title", "author", "pubmed_id"]
+    search_fields = ["slug", "title", "author", "authors", "pubmed_id"]
     table_pagination = {"per_page": 25}
