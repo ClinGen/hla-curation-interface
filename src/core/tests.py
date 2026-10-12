@@ -36,7 +36,11 @@ class HelpViewTest(OpenViewTestMixin, TestCase):
     url = reverse("help")
     template = "core/help.html"
     page_name = "Help"
-    expected_text = ["standard operating procedure", "email", "hci@clinicalgenome.org"]
+    expected_text = ["email", "hci@clinicalgenome.org"]
+
+    def test_has_no_sop_link(self):
+        response = self.client.get(self.url)
+        self.assertNotContains(response, "standard operating procedure")
 
 
 class CitingViewTest(OpenViewTestMixin, TestCase):
@@ -123,6 +127,12 @@ class AccountActivationMessageTest(TestCase):
         response = self.client.get(self.url)
         self.assertContains(response, self.NO_PHI_MSG)
         self.assertNotContains(response, self.NO_PERMS_MSG)
+
+    def test_message_has_no_sop_link(self):
+        self.client.force_login(self.user1_no_phi_no_perms)
+        response = self.client.get(self.url)
+        self.assertContains(response, "Account Activation")
+        self.assertNotContains(response, "standard operating procedure")
 
     def test_message_for_yes_phi_yes_perms(self):
         self.client.force_login(self.user4_yes_phi_yes_perms)

@@ -32,7 +32,7 @@ Renders the Contact page, directing users to reach the HCI maintainers at `hci@c
 
 ### `templates/core/help.html`
 
-Renders the Help page, linking to the HLA curation standard operating procedure and providing instructions for reporting issues (including what information to include in a bug report email).
+Renders the Help page, providing instructions for reporting issues (including what information to include in a bug report email).
 
 ### `templates/core/home.html`
 

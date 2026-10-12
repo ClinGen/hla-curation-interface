@@ -24,7 +24,7 @@ The root layout template that all other page templates extend. It loads static a
 
 ### `partials/account_activation.html`
 
-Displays an informational banner to authenticated users who have not yet completed account setup. It lists any outstanding steps — signing the PHI agreement or requesting curation permissions — along with a link to the HLA curation standard operating procedure.
+Displays an informational banner to authenticated users who have not yet completed account setup. It lists any outstanding steps: signing the PHI agreement or requesting curation permissions.
 
 ### `partials/env_banner.html`
 
