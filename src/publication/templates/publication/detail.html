@@ -46,6 +46,10 @@
                         <td>{{ object.author|default_if_none:"------" }}</td>
                     </tr>
                     <tr>
+                        <td>Authors</td>
+                        <td>{{ object.authors|default:"------" }}</td>
+                    </tr>
+                    <tr>
                         <td>Publication Year</td>
                         <td>{{ object.publication_year|default_if_none:"------" }}</td>
                     </tr>

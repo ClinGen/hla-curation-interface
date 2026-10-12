@@ -70,6 +70,7 @@ class PublicationCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(new_publication.pubmed_id, "123")
         self.assertEqual(new_publication.added_by, self.user4_yes_phi_yes_perms)
         self.assertEqual(new_publication.author, "Oak")
+        self.assertEqual(new_publication.authors, "Oak; Birch")
         self.assertEqual(new_publication.title, "Common diseases in Pokémon")
         self.assertEqual(new_publication.publication_year, 1999)
 
@@ -107,6 +108,7 @@ class PublicationDetailTest(ProtectedViewTestMixin, TestCase):
     expected_text = [
         "Diseases in grass type Pokémon in the Kanto region",
         "Oak",
+        "Oak S; Juniper N",
         "123",
         "1990-01-01",
     ]
@@ -114,6 +116,13 @@ class PublicationDetailTest(ProtectedViewTestMixin, TestCase):
     def setUp(self):
         super().setUp()
         self.client.force_login(self.user4_yes_phi_yes_perms)
+
+    def test_shows_placeholder_without_authors(self):
+        Publication.objects.filter(slug="P000001").update(authors="")
+        response = self.client.get(self.url)
+        self.assertContains(response, "<td>Authors</td>", html=False)
+        self.assertNotContains(response, "Oak S; Juniper N")
+        self.assertContains(response, "<td>------</td>", html=True)
 
 
 class PublicationListTest(ProtectedViewTestMixin, TestCase):
