@@ -16,7 +16,7 @@ Defines the `PublicationConfig` app configuration class, setting the app name an
 
 ### `clients.py`
 
-Contains functions for fetching publication metadata from the NCBI PubMed E-utilities API (via XML). Provides helpers to extract the title, publication year, primary author (`get_pubmed_author`, the surname of the first person in the article's author list), and every author in order (`get_pubmed_authors`, each as "LastName Initials", or the group name for group authors).
+Contains functions for fetching publication metadata from the NCBI PubMed E-utilities API (via XML). Provides helpers to extract the title, publication year, primary author (`get_pubmed_author`, the surname of the first person in the article's author list), and every author in order (`get_pubmed_authors`, each as "LastName Initials", or the group name for group authors). `refresh_from_pubmed` sets a publication's title, primary author, authors, and year from PubMed without saving, and returns `False`, leaving the publication unchanged, when the fetch fails. Adding a publication and the Refresh from PubMed button both use it.
 
 ### `fixtures/test_publications.json`
 
@@ -44,7 +44,7 @@ Renders the form for adding a new publication, which has a single PubMed ID inpu
 
 ### `templates/publication/detail.html`
 
-Displays all fields for a single publication in a table, including the full author list (or "------" when it's empty), with an external link to PubMed, and a collapsible section listing any evidence records associated with the publication.
+Displays all fields for a single publication in a table, including the full author list (or "------" when it's empty), with an external link to PubMed, View History and Refresh from PubMed buttons (the latter posts to `publication-refresh` after a confirmation modal), and a collapsible section listing any evidence records associated with the publication.
 
 ### `templates/publication/history.html`
 
@@ -76,12 +76,12 @@ Unit tests for the `Publication` model, covering the required PubMed ID and the 
 
 ### `tests/test_views.py`
 
-Integration tests for the publication views covering creation of PubMed publications (with mocked API responses), the absence of preprint inputs, rejection of missing PubMed IDs and preprint submissions, basic rendering checks for the detail and list views, the detail page's author list and its "------" placeholder, and publication search matching a non-primary author.
+Integration tests for the publication views covering creation of PubMed publications (with mocked API responses), the absence of preprint inputs, rejection of missing PubMed IDs and preprint submissions, basic rendering checks for the detail and list views, the detail page's author list and its "------" placeholder, publication search matching a non-primary author, and `refresh_from_pubmed` and the refresh view (success, PubMed failure, GET, permissions, and the detail page's button).
 
 ### `urls.py`
 
-Maps URL patterns to publication views: `create`, `<slug>/detail`, `<slug>/history`, `<slug>/history/<history_id>/change`, and `list`.
+Maps URL patterns to publication views: `create`, `<slug>/detail`, `<slug>/refresh`, `<slug>/history`, `<slug>/history/<history_id>/change`, and `list`.
 
 ### `views.py`
 
-Implements the five publication views: `PublicationCreate` fetches the title, primary author, full author list, and year from PubMed and saves the record; `PublicationDetail` shows a single publication; `PublicationList` searches by ID, title, primary author, any author, and PubMed ID; `PublicationHistory` and `PublicationChange` display the audit trail; and `PublicationList` provides a searchable, paginated table of all publications.
+Implements the six publication views: `PublicationCreate` fetches the title, primary author, full author list, and year from PubMed and saves the record; `publication_refresh` (POST only, for curators) updates an existing publication from PubMed, or shows `REFRESH_FAILED_MESSAGE` and changes nothing if PubMed fails; `PublicationDetail` shows a single publication; `PublicationList` searches by ID, title, primary author, any author, and PubMed ID; `PublicationHistory` and `PublicationChange` display the audit trail; and `PublicationList` provides a searchable, paginated table of all publications.

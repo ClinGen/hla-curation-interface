@@ -2,10 +2,14 @@
 
 import logging
 import os
+from typing import TYPE_CHECKING
 
 import requests
 from bs4 import BeautifulSoup, PageElement, Tag
 from lxml import etree
+
+if TYPE_CHECKING:
+    from publication.models import Publication
 
 PUBMED_URL = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?api_key={os.getenv('PUBMED_API_KEY')}&db=PubMed&retmode=xml"
 
@@ -137,3 +141,23 @@ def get_pubmed_year(soup: BeautifulSoup) -> int | None:
                 return None
         logger.warning("Unable to get year from PubMed data; returning None")
     return None
+
+
+def refresh_from_pubmed(publication: "Publication") -> bool:
+    """Sets a publication's title, authors, and year from PubMed, without saving.
+
+    Args:
+        publication: The publication to update, which must have a PubMed ID.
+
+    Returns:
+        True if PubMed returned data, or False if the fetch failed, in which case
+        the publication is unchanged.
+    """
+    soup = fetch_pubmed_data(publication.pubmed_id)
+    if soup is None:
+        return False
+    publication.title = get_pubmed_title(soup)
+    publication.author = get_pubmed_author(soup)
+    publication.authors = "; ".join(get_pubmed_authors(soup))
+    publication.publication_year = get_pubmed_year(soup)
+    return True
