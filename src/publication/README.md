@@ -26,6 +26,18 @@ Django fixture containing a sample PubMed `Publication` record used to seed the 
 
 Defines `PublicationForm`, a `ModelForm` for creating a PubMed `Publication` that exposes only the `pubmed_id` field, with help text warning curators not to enter PubMed IDs of preprints.
 
+### `management/__init__.py`
+
+Empty file that marks `management` as a Python package.
+
+### `management/commands/__init__.py`
+
+Empty file that marks `commands` as a Python package.
+
+### `management/commands/backfill_publication_authors.py`
+
+Defines the `backfill_publication_authors` management command, which refreshes every publication that has no authors from PubMed with `refresh_from_pubmed`. That also updates each one's title, primary author, and year. It waits between requests to stay under NCBI's rate limit (shorter with `PUBMED_API_KEY` set), logs and skips any publication PubMed can't return, and prints how many it updated and how many failed. `--dry-run` lists the publications it would refresh without contacting PubMed or saving anything.
+
 ### `models.py`
 
 Defines the `Publication` model with fields for slug, a required and unique PubMed ID, title, author (the primary author's surname), authors (every author in PubMed order, joined with "; "), publication year, and audit timestamps. The slug is auto-generated as `P<pk:06d>` on first save, and `django-simple-history` tracks all changes.
@@ -65,6 +77,10 @@ Contract tests that make real HTTP calls to the PubMed API to verify that the cl
 ### `tests/test_clients_unit.py`
 
 Offline unit tests for the PubMed author parsers, using inline XML: author order, group authors, a missing author list, and a `LastName` outside the author list, which the parsers ignore.
+
+### `tests/test_commands.py`
+
+Tests for the `backfill_publication_authors` command, with PubMed mocked: it fills publications without authors, leaves the rest alone, writes nothing on `--dry-run`, and logs a failure and keeps going.
 
 ### `tests/test_migrations.py`
 
