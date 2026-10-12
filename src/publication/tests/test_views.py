@@ -147,3 +147,13 @@ class PublicationListTest(ProtectedViewTestMixin, TestCase):
     def setUp(self):
         super().setUp()
         self.client.force_login(self.user4_yes_phi_yes_perms)
+
+    def test_search_matches_a_non_primary_author(self):
+        response = self.client.get(self.url, {"q": "Juniper"})
+        self.assertContains(response, "P000001")
+        self.assertContains(response, "1 result")
+
+    def test_search_with_no_match_returns_zero_results(self):
+        response = self.client.get(self.url, {"q": "zzz_no_match"})
+        self.assertContains(response, "0 results")
+        self.assertNotContains(response, "P000001")

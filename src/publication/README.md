@@ -76,7 +76,7 @@ Unit tests for the `Publication` model, covering the required PubMed ID and the 
 
 ### `tests/test_views.py`
 
-Integration tests for the publication views covering creation of PubMed publications (with mocked API responses), the absence of preprint inputs, rejection of missing PubMed IDs and preprint submissions, basic rendering checks for the detail and list views, and the detail page's author list and its "------" placeholder.
+Integration tests for the publication views covering creation of PubMed publications (with mocked API responses), the absence of preprint inputs, rejection of missing PubMed IDs and preprint submissions, basic rendering checks for the detail and list views, the detail page's author list and its "------" placeholder, and publication search matching a non-primary author.
 
 ### `urls.py`
 
@@ -84,4 +84,4 @@ Maps URL patterns to publication views: `create`, `<slug>/detail`, `<slug>/histo
 
 ### `views.py`
 
-Implements the five publication views: `PublicationCreate` fetches the title, primary author, full author list, and year from PubMed and saves the record; `PublicationDetail` shows a single publication; `PublicationHistory` and `PublicationChange` display the audit trail; and `PublicationList` provides a searchable, paginated table of all publications.
+Implements the five publication views: `PublicationCreate` fetches the title, primary author, full author list, and year from PubMed and saves the record; `PublicationDetail` shows a single publication; `PublicationList` searches by ID, title, primary author, any author, and PubMed ID; `PublicationHistory` and `PublicationChange` display the audit trail; and `PublicationList` provides a searchable, paginated table of all publications.
