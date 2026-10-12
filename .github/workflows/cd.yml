@@ -10,6 +10,13 @@ on:
 jobs:
   deploy_to_test:
     runs-on: ubuntu-latest
+    # Every PR deploys to the one test server, so run one deploy at a time. A
+    # running deploy always finishes, since stopping it after git pull but before
+    # migrate would leave the code ahead of the database. GitHub keeps only the
+    # newest waiting deploy, so the server ends up on the latest branch.
+    concurrency:
+      group: deploy-test
+      cancel-in-progress: false
     if: |
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'pull_request'
@@ -37,6 +44,10 @@ jobs:
             -e "subdomain=hci-test"
   deploy_to_prod:
     runs-on: ubuntu-latest
+    # Run one production deploy at a time, for the same reason.
+    concurrency:
+      group: deploy-prod
+      cancel-in-progress: false
     if: |
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
