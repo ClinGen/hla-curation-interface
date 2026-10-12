@@ -56,7 +56,7 @@
         </div>
 
         {% if not object.publication and object.status == "INP" %}
-            <a href="{% url 'curation-edit-evidence' object.slug %}" class="button">
+            <a href="{% url 'curation-edit-evidence' object.slug %}" class="button is-link is-light">
                 {% include "common/icon.html" with icon_name="pencil" %}
                 Edit Evidence
             </a>

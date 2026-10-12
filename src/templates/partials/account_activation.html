@@ -1,7 +1,7 @@
 {% if user.is_authenticated %}
     {% if not user.profile.has_signed_phi_agreement or not user.profile.has_curation_permissions %}
         <div class="block mt-4">
-            <article class="message is-info">
+            <article class="message is-warning">
                 <div class="message-header">
                     {% with icon_name="info-square" %}
                         <p>{% include "common/icon.html" %}Account Activation</p>

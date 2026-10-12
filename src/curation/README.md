@@ -112,7 +112,7 @@ Partial that renders a curation's `classification_display`, followed by a light 
 
 ### `templates/curation/partials/ep_review.html`
 
-Partial that renders the expert panel's feedback on a curation as a Bulma message: "Sent Back for Revision" (warning) when the curation is in progress, otherwise "Expert Panel Review" (neutral), or a `heading` passed by the caller. Shows a bulleted list of the panel, review date, classification, override reason, evidence summary, and additional notes, skipping empty ones. Expects `curation` in the context.
+Partial that renders the expert panel's feedback on a curation as a Bulma message: "Sent Back for Revision" (red, `is-danger`) when the curation is in progress, otherwise "Expert Panel Review" (neutral), or a `heading` passed by the caller. Shows a bulleted list of the panel, review date, classification, override reason, evidence summary, and additional notes, skipping empty ones. Expects `curation` in the context.
 
 ### `templates/curation/partials/curation/detail_table.html`
 

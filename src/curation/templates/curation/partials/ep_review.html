@@ -1,5 +1,5 @@
 {# Shows the expert panel's feedback on a curation. Pass heading to override the title. #}
-<article class="message{% if curation.status == "INP" %} is-warning{% endif %} mt-2">
+<article class="message{% if curation.status == "INP" %} is-danger{% endif %} mt-2">
     <div class="message-header">
         <p>
             {% if heading %}{{ heading }}

@@ -206,6 +206,23 @@ class RepoSearchViewTest(TestCase):
         self.assertContains(response, curation.slug)
         self.assertContains(response, "No Classification Set")
 
+    def test_json_button_uses_common_icon_and_link_color(self):
+        user = User.objects.create_user(username="testuser", password="testpass")  # ruff: ignore[hardcoded-password-func-arg]
+        curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+            status=Status.PUBLISHED,
+        )
+        PublishedCuration.objects.create(curation=curation, published_by=user)
+
+        response = self.client.get(self.url)
+        url = reverse("repo-download-single", args=[curation.slug])
+        self.assertContains(
+            response, f'<a href="{url}" class="button is-small is-link is-light">'
+        )
+        self.assertContains(response, '<i class="bi bi-download mr-2"></i>')
+
 
 class PublishedCurationDetailViewTest(TestCase):
     fixtures = ["test_alleles.json", "test_diseases.json", "test_haplotypes.json"]

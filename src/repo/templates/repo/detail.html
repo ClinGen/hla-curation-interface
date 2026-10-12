@@ -51,12 +51,12 @@
 
         <div class="buttons">
             <a href="{% url 'repo-download-single' curation.slug %}"
-               class="button">
+               class="button is-link is-light">
                 {% include "common/icon.html" with icon_name="download" %}
                 Download as JSON
             </a>
             <a href="{% url 'repo-history' curation.slug %}"
-               class="button">
+               class="button is-link is-light">
                 {% include "common/icon.html" with icon_name="clock-history" %}
                 History
             </a>
@@ -66,7 +66,7 @@
                       style="display:inline;"
                       data-confirm="Copy and recurate this curation? A new editable copy will be created.">
                     {% csrf_token %}
-                    <button type="submit" class="button">
+                    <button type="submit" class="button is-link is-light">
                         {% include "common/icon.html" with icon_name="diagram-2" %}
                         Copy and Recurate
                     </button>
