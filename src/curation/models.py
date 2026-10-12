@@ -18,8 +18,8 @@ from curation.constants.models.common import (
 from curation.constants.models.curation import (
     CLASSIFICATION_CHOICES,
     CURATION_TYPE_CHOICES,
-    EP_CHOICES,
     NO_CLASSIFICATION_LABEL,
+    TASKFORCE_CHOICES,
     Classification,
     CurationTypes,
 )
@@ -95,47 +95,50 @@ class Curation(models.Model):
             f"'{CurationTypes.HAPLOTYPE}' (haplotype)."
         ),
     )
-    # null=True on EP fields is intentional: null means "not yet reviewed" (fields were
-    # never touched), whereas empty string would mean "reviewer explicitly left blank."
+    # null=True on taskforce fields is intentional: null means "not yet reviewed"
+    # (fields were never touched), whereas empty string would mean "reviewer
+    # explicitly left blank."
     # Collapsing these two states would lose information.
-    ep_classification = models.CharField(  # ruff: ignore[django-nullable-model-string-field]
+    taskforce_classification = models.CharField(  # ruff: ignore[django-nullable-model-string-field]
         max_length=3,
         choices=CLASSIFICATION_CHOICES,
         null=True,
         blank=True,
-        verbose_name="EP Classification",
-        help_text="The classification set by the expert panel at review time.",
+        verbose_name="Taskforce Classification",
+        help_text="The classification set by the taskforce at review time.",
     )
-    ep_override_reason = models.TextField(  # ruff: ignore[django-nullable-model-string-field]
+    taskforce_override_reason = models.TextField(  # ruff: ignore[django-nullable-model-string-field]
         null=True,
         blank=True,
-        verbose_name="EP Override Reason",
-        help_text="Why the panel chose a classification other than the suggested one.",
+        verbose_name="Taskforce Override Reason",
+        help_text=(
+            "Why the taskforce chose a classification other than the suggested one."
+        ),
     )
-    ep_evidence_summary = models.TextField(  # ruff: ignore[django-nullable-model-string-field]
+    taskforce_evidence_summary = models.TextField(  # ruff: ignore[django-nullable-model-string-field]
         null=True,
         blank=True,
-        verbose_name="EP Evidence Summary",
-        help_text="The expert panel's summary of the evidence.",
+        verbose_name="Taskforce Evidence Summary",
+        help_text="The taskforce's summary of the evidence.",
     )
-    ep_additional_notes = models.TextField(  # ruff: ignore[django-nullable-model-string-field]
+    taskforce_additional_notes = models.TextField(  # ruff: ignore[django-nullable-model-string-field]
         null=True,
         blank=True,
-        verbose_name="EP Additional Notes",
-        help_text="Additional notes from the expert panel.",
+        verbose_name="Taskforce Additional Notes",
+        help_text="Additional notes from the taskforce.",
     )
-    ep_review_date = models.DateField(
+    taskforce_review_date = models.DateField(
         null=True,
         blank=True,
-        verbose_name="EP Review Date",
-        help_text="The date the expert panel reviewed the curation.",
+        verbose_name="Taskforce Review Date",
+        help_text="The date the taskforce reviewed the curation.",
     )
-    ep = models.CharField(  # ruff: ignore[django-nullable-model-string-field]
+    taskforce = models.CharField(  # ruff: ignore[django-nullable-model-string-field]
         max_length=5,
         null=True,
         blank=True,
-        verbose_name="Expert Panel",
-        help_text="Five-digit numeric ID of the expert panel.",
+        verbose_name="Taskforce",
+        help_text="Five-digit numeric ID of the taskforce.",
     )
     copied_from = models.ForeignKey(
         "self",
@@ -272,40 +275,43 @@ class Curation(models.Model):
 
     @property
     def is_classification_suggested(self) -> bool:
-        """Whether the displayed classification is the suggested one, not the EP's."""
-        return not self.ep_classification and self.suggested_classification is not None
+        """Whether the classification shown is a suggestion, not the taskforce's."""
+        return (
+            not self.taskforce_classification
+            and self.suggested_classification is not None
+        )
 
     @property
-    def has_ep_feedback(self) -> bool:
-        """Whether the expert panel has recorded any review feedback."""
+    def has_taskforce_feedback(self) -> bool:
+        """Whether the taskforce has recorded any review feedback."""
         return any(
             [
-                self.ep_classification,
-                self.ep_evidence_summary,
-                self.ep_additional_notes,
-                self.ep_override_reason,
-                self.ep_review_date,
+                self.taskforce_classification,
+                self.taskforce_evidence_summary,
+                self.taskforce_additional_notes,
+                self.taskforce_override_reason,
+                self.taskforce_review_date,
             ]
         )
 
     @property
-    def ep_display(self) -> str | None:
-        """The expert panel's name, or its ID if the name is unknown."""
-        if not self.ep:
+    def taskforce_display(self) -> str | None:
+        """The taskforce's name, or its ID if the name is unknown."""
+        if not self.taskforce:
             return None
-        return dict(EP_CHOICES).get(self.ep, self.ep)
+        return dict(TASKFORCE_CHOICES).get(self.taskforce, self.taskforce)
 
     @property
     def is_classification_overridden(self) -> bool:
-        """Whether the EP chose a classification other than the suggested one."""
-        return bool(self.ep_classification) and (
-            self.ep_classification != self.suggested_classification
+        """Whether the taskforce chose a classification other than the suggested one."""
+        return bool(self.taskforce_classification) and (
+            self.taskforce_classification != self.suggested_classification
         )
 
     @property
     def classification_display(self) -> str:
-        """The EP classification label, else the suggested one, else a placeholder."""
-        code = self.ep_classification or self.suggested_classification
+        """The taskforce's classification label, else the suggestion, or a default."""
+        code = self.taskforce_classification or self.suggested_classification
         if code is None:
             return NO_CLASSIFICATION_LABEL
         return CLASSIFICATION_CHOICES[code]

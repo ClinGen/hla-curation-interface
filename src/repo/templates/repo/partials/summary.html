@@ -49,12 +49,12 @@
             <td>{% include "curation/partials/classification.html" %}</td>
         </tr>
         <tr>
-            <td>Expert Panel</td>
-            <td>{{ curation.ep|default:"------" }}</td>
+            <td>Taskforce</td>
+            <td>{{ curation.taskforce|default:"------" }}</td>
         </tr>
         <tr>
             <td>Review Date</td>
-            <td>{{ curation.ep_review_date|date:"Y-m-d"|default:"------" }}</td>
+            <td>{{ curation.taskforce_review_date|date:"Y-m-d"|default:"------" }}</td>
         </tr>
         <tr>
             <td>Published</td>
@@ -65,11 +65,11 @@
 </div>
 
 <h2 class="title is-4">Evidence Summary</h2>
-<p class="block">{{ curation.ep_evidence_summary|default:"------"|linebreaksbr }}</p>
+<p class="block">{{ curation.taskforce_evidence_summary|default:"------"|linebreaksbr }}</p>
 
 <h3 class="title is-5">Additional Notes</h3>
-<p class="block">{{ curation.ep_additional_notes|default:"------"|linebreaksbr }}</p>
-{% if curation.ep_override_reason %}
+<p class="block">{{ curation.taskforce_additional_notes|default:"------"|linebreaksbr }}</p>
+{% if curation.taskforce_override_reason %}
     <h3 class="title is-5">Override Reason</h3>
-    <p class="block">{{ curation.ep_override_reason|linebreaksbr }}</p>
+    <p class="block">{{ curation.taskforce_override_reason|linebreaksbr }}</p>
 {% endif %}

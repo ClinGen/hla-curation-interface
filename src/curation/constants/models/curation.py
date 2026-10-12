@@ -38,8 +38,8 @@ CLASSIFICATION_CHOICES = {
 
 HLA_CURATION_TASKFORCE_ID = "10144"
 
-# The expert panels that can review curations, as (ID, name) pairs.
-EP_CHOICES = [(HLA_CURATION_TASKFORCE_ID, "HLA Curation Taskforce")]
+# The taskforces that can review curations, as (ID, name) pairs.
+TASKFORCE_CHOICES = [(HLA_CURATION_TASKFORCE_ID, "HLA Curation Taskforce")]
 
-# Shown when a curation has no EP classification and no suggested one.
+# Shown when a curation has no taskforce classification and no suggested one.
 NO_CLASSIFICATION_LABEL = "No Classification Set"

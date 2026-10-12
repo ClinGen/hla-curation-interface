@@ -44,7 +44,7 @@ class ProtectedViewMixin(AccessMixin):
 
 
 class ReviewerViewMixin(AccessMixin):
-    """Ensures the user has EP reviewer permissions."""
+    """Ensures the user has taskforce reviewer permissions."""
 
     def dispatch(
         self,
@@ -61,7 +61,7 @@ class ReviewerViewMixin(AccessMixin):
 
 
 def reviewer_view(view_function: Callable) -> Callable:
-    """Ensures the user has EP reviewer permissions.
+    """Ensures the user has taskforce reviewer permissions.
 
     Returns:
         Wrapped view that enforces reviewer-only access.

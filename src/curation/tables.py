@@ -30,7 +30,7 @@ class CurationTable(tables.Table):
     disease = tables.Column(default="------")
     status = tables.Column(orderable=False)
     classification = tables.Column(
-        accessor="ep_classification",
+        accessor="taskforce_classification",
         verbose_name="Classification",
         orderable=False,
         empty_values=(),

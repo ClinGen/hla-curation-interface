@@ -23,7 +23,7 @@ class PublishedCurationTable(tables.Table):
     haplotype = tables.Column(accessor="curation__haplotype", default="------")
     disease = tables.Column(accessor="curation__disease", default="------")
     classification = tables.Column(
-        accessor="curation__ep_classification",
+        accessor="curation__taskforce_classification",
         verbose_name="Classification",
         orderable=False,
         empty_values=(),

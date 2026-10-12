@@ -1,0 +1,33 @@
+{# Shows the taskforce's feedback on a curation. Pass heading to override the title. #}
+<article class="message{% if curation.status == "INP" %} is-danger{% endif %} mt-2">
+    <div class="message-header">
+        <p>
+            {% if heading %}{{ heading }}
+            {% elif curation.status == "INP" %}Sent Back for Revision
+            {% else %}Taskforce Review
+            {% endif %}
+        </p>
+    </div>
+    <div class="message-body content">
+        <ul>
+            {% if curation.taskforce_display %}
+                <li><strong>Taskforce:</strong> {{ curation.taskforce_display }}</li>
+            {% endif %}
+            {% if curation.taskforce_review_date %}
+                <li><strong>Review Date:</strong> {{ curation.taskforce_review_date|date:"Y-m-d" }}</li>
+            {% endif %}
+            {% if curation.taskforce_classification %}
+                <li><strong>Classification:</strong> {{ curation.get_taskforce_classification_display }}</li>
+            {% endif %}
+            {% if curation.taskforce_override_reason %}
+                <li><strong>Override Reason:</strong> {{ curation.taskforce_override_reason|linebreaksbr }}</li>
+            {% endif %}
+            {% if curation.taskforce_evidence_summary %}
+                <li><strong>Evidence Summary:</strong> {{ curation.taskforce_evidence_summary|linebreaksbr }}</li>
+            {% endif %}
+            {% if curation.taskforce_additional_notes %}
+                <li><strong>Additional Notes:</strong> {{ curation.taskforce_additional_notes|linebreaksbr }}</li>
+            {% endif %}
+        </ul>
+    </div>
+</article>

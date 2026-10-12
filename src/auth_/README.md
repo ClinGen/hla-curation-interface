@@ -32,11 +32,11 @@ Renders Clerk's embedded `SignIn` widget inside a `ClerkProvider`. If the user i
 
 ### `models.py`
 
-Defines `UserProfile`, a one-to-one extension of Django's `User` model that stores curation permissions (`has_curation_permissions`), PHI agreement status (`has_signed_phi_agreement`), EP reviewer permissions (`has_review_permissions`), and the associated `clerk_user_id`. Includes `can_curate` and `can_review` computed properties and tracks full change history via `django-simple-history`.
+Defines `UserProfile`, a one-to-one extension of Django's `User` model that stores curation permissions (`has_curation_permissions`), PHI agreement status (`has_signed_phi_agreement`), taskforce reviewer permissions (`has_review_permissions`), and the associated `clerk_user_id`. Includes `can_curate` and `can_review` computed properties and tracks full change history via `django-simple-history`.
 
 ### `permissions.py`
 
-Provides four reusable permission primitives: `ProtectedViewMixin` and `protected_view` enforce that the user has curation permissions (authenticated + PHI signed + curation flag set), while `ReviewerViewMixin` and `reviewer_view` additionally require the EP reviewer flag. The mixin variants are for class-based views and the decorator variants are for function-based views.
+Provides four reusable permission primitives: `ProtectedViewMixin` and `protected_view` enforce that the user has curation permissions (authenticated + PHI signed + curation flag set), while `ReviewerViewMixin` and `reviewer_view` additionally require the taskforce reviewer flag. The mixin variants are for class-based views and the decorator variants are for function-based views.
 
 ### `templates/auth_/callback.html`
 

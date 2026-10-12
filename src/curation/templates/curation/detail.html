@@ -40,16 +40,16 @@
             </div>
         {% elif object.status == "PRV" %} {# Provisional #}
             <div class="notification is-warning is-light">
-                <strong>This curation is awaiting expert panel review and is locked.</strong>
+                <strong>This curation is awaiting taskforce review and is locked.</strong>
             </div>
         {% elif object.status == "APR" %} {# Approved #}
             <div class="notification is-success is-light">
-                <strong>This curation has been approved by the expert panel and is ready to publish.</strong>
+                <strong>This curation has been approved by the taskforce and is ready to publish.</strong>
             </div>
         {% endif %}
 
-        {% if object.has_ep_feedback %}
-            {% include "curation/partials/ep_review.html" with curation=object %}
+        {% if object.has_taskforce_feedback %}
+            {% include "curation/partials/taskforce_review.html" with curation=object %}
         {% endif %}
 
         {% include "curation/partials/curation/detail_table.html" %}

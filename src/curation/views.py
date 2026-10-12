@@ -26,10 +26,10 @@ from curation.constants.models.common import Status
 from curation.constants.views import FRAMEWORK
 from curation.forms import (
     CurationCreateForm,
-    EPReviewForm,
     EvidenceCreateForm,
     EvidenceEditForm,
     EvidenceTopLevelEditFormSet,
+    TaskforceReviewForm,
 )
 from curation.models import (
     Curation,
@@ -215,7 +215,7 @@ def curation_publish(request: HttpRequest, curation_slug: str) -> HttpResponse:
 
 @protected_view
 def curation_submit(request: HttpRequest, curation_slug: str) -> HttpResponse:
-    """Submits a curation for EP review.
+    """Submits a curation for taskforce review.
 
     Returns:
         Redirect to curation detail, with error messages set on failure.
@@ -236,7 +236,7 @@ def curation_submit(request: HttpRequest, curation_slug: str) -> HttpResponse:
 
 @reviewer_view
 def curation_review(request: HttpRequest, curation_slug: str) -> HttpResponse:
-    """Renders and processes the EP review form.
+    """Renders and processes the taskforce review form.
 
     Returns:
         Redirect on POST success, or the review form page on GET.
@@ -244,43 +244,46 @@ def curation_review(request: HttpRequest, curation_slug: str) -> HttpResponse:
     curation = get_object_or_404(Curation, slug=curation_slug)
 
     if request.method == "POST":
-        form = EPReviewForm(
+        form = TaskforceReviewForm(
             request.POST, suggested_classification=curation.suggested_classification
         )
         if form.is_valid():
             decision = form.cleaned_data["decision"]
-            curation.ep_classification = form.cleaned_data["ep_classification"] or None
-            curation.ep_override_reason = (
-                form.cleaned_data["ep_override_reason"] or None
+            curation.taskforce_classification = (
+                form.cleaned_data["taskforce_classification"] or None
             )
-            curation.ep_evidence_summary = (
-                form.cleaned_data["ep_evidence_summary"] or None
+            curation.taskforce_override_reason = (
+                form.cleaned_data["taskforce_override_reason"] or None
             )
-            curation.ep_additional_notes = (
-                form.cleaned_data["ep_additional_notes"] or None
+            curation.taskforce_evidence_summary = (
+                form.cleaned_data["taskforce_evidence_summary"] or None
             )
-            curation.ep = form.cleaned_data["ep"] or None
-            curation.ep_review_date = form.cleaned_data["ep_review_date"]
+            curation.taskforce_additional_notes = (
+                form.cleaned_data["taskforce_additional_notes"] or None
+            )
+            curation.taskforce = form.cleaned_data["taskforce"] or None
+            curation.taskforce_review_date = form.cleaned_data["taskforce_review_date"]
             if decision == "needs_revision":
                 curation.transition_to(Status.IN_PROGRESS)
             else:
                 curation.transition_to(Status.APPROVED)
             return redirect("curation-detail", curation_slug=curation.slug)
     else:
-        form = EPReviewForm(
+        form = TaskforceReviewForm(
             suggested_classification=curation.suggested_classification,
             initial={
-                "ep_classification": (
-                    curation.ep_classification or curation.suggested_classification
+                "taskforce_classification": (
+                    curation.taskforce_classification
+                    or curation.suggested_classification
                 ),
-                "ep_override_reason": curation.ep_override_reason,
-                "ep_evidence_summary": curation.ep_evidence_summary,
-                "ep_additional_notes": curation.ep_additional_notes,
-                "ep": curation.ep,
+                "taskforce_override_reason": curation.taskforce_override_reason,
+                "taskforce_evidence_summary": curation.taskforce_evidence_summary,
+                "taskforce_additional_notes": curation.taskforce_additional_notes,
+                "taskforce": curation.taskforce,
                 # The date input needs ISO format, not the localized default.
-                "ep_review_date": (
-                    curation.ep_review_date.isoformat()
-                    if curation.ep_review_date
+                "taskforce_review_date": (
+                    curation.taskforce_review_date.isoformat()
+                    if curation.taskforce_review_date
                     else None
                 ),
             },
