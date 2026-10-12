@@ -11,6 +11,11 @@ urlpatterns = [
         name="publication-detail",
     ),
     path(
+        "<slug:slug>/refresh",
+        views.publication_refresh,
+        name="publication-refresh",
+    ),
+    path(
         "<slug:slug>/history",
         views.PublicationHistory.as_view(),
         name="publication-history",
