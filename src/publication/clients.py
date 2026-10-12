@@ -4,7 +4,7 @@ import logging
 import os
 
 import requests
-from bs4 import BeautifulSoup, PageElement
+from bs4 import BeautifulSoup, PageElement, Tag
 from lxml import etree
 
 PUBMED_URL = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?api_key={os.getenv('PUBMED_API_KEY')}&db=PubMed&retmode=xml"
@@ -58,21 +58,60 @@ def get_pubmed_title(soup: BeautifulSoup) -> str:
     return title
 
 
+def _get_author_elements(soup: BeautifulSoup) -> list[Tag]:
+    """Returns the article's Author elements in order, or [] if there are none."""
+    author_list = soup.select_one("MedlineCitation > Article > AuthorList")
+    if author_list is None:
+        return []
+    return author_list.find_all("Author", recursive=False)
+
+
+def _get_text(author: Tag, name: str) -> str:
+    element = author.find(name, recursive=False)
+    return element.get_text(strip=True) if element else ""
+
+
 def get_pubmed_author(soup: BeautifulSoup) -> str:
-    """Extracts the author from the PubMed response.
+    """Extracts the primary author's surname from the PubMed response.
+
+    Group authors are skipped, since they have no surname.
 
     Args:
         soup: The BeautifulSoup object representing the PubMed response.
 
     Returns:
-        The first author in the author list if it can be found or an empty string
-        otherwise.
+        The surname of the first person in the author list if it can be found or an
+        empty string otherwise.
     """
-    author = soup.find("LastName") or ""  # Find the first instance of LastName.
-    if isinstance(author, PageElement):
-        return author.get_text(strip=True)
+    for author in _get_author_elements(soup):
+        last_name = _get_text(author, "LastName")
+        if last_name:
+            return last_name
     logger.warning("Unable to get author from PubMed data; returning empty string")
-    return author
+    return ""
+
+
+def get_pubmed_authors(soup: BeautifulSoup) -> list[str]:
+    """Extracts every author from the PubMed response, in order.
+
+    Args:
+        soup: The BeautifulSoup object representing the PubMed response.
+
+    Returns:
+        Each author as "LastName Initials", or the group name for group authors, or
+        an empty list if there's no author list.
+    """
+    names = []
+    for author in _get_author_elements(soup):
+        collective_name = _get_text(author, "CollectiveName")
+        last_name = _get_text(author, "LastName")
+        initials = _get_text(author, "Initials")
+        name = collective_name or f"{last_name} {initials}".strip()
+        if name:
+            names.append(name)
+    if not names:
+        logger.warning("Unable to get authors from PubMed data; returning []")
+    return names
 
 
 def get_pubmed_year(soup: BeautifulSoup) -> int | None:

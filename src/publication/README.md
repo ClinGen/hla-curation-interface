@@ -16,7 +16,7 @@ Defines the `PublicationConfig` app configuration class, setting the app name an
 
 ### `clients.py`
 
-Contains functions for fetching publication metadata from the NCBI PubMed E-utilities API (via XML). Provides helpers to extract title, primary author, and publication year from the response.
+Contains functions for fetching publication metadata from the NCBI PubMed E-utilities API (via XML). Provides helpers to extract the title, publication year, primary author (`get_pubmed_author`, the surname of the first person in the article's author list), and every author in order (`get_pubmed_authors`, each as "LastName Initials", or the group name for group authors).
 
 ### `fixtures/test_publications.json`
 
@@ -60,7 +60,11 @@ Empty file that marks `tests` as a Python package.
 
 ### `tests/test_clients.py`
 
-Contract tests that make real HTTP calls to the PubMed API to verify that the client functions correctly fetch and parse title, author, and year. These tests are skipped by default and only run when the `RUN_CONTRACT_TESTS=1` environment variable is set.
+Contract tests that make real HTTP calls to the PubMed API to verify that the client functions correctly fetch and parse title, primary author, all authors, and year. These tests are skipped by default and only run when the `RUN_CONTRACT_TESTS=1` environment variable is set.
+
+### `tests/test_clients_unit.py`
+
+Offline unit tests for the PubMed author parsers, using inline XML: author order, group authors, a missing author list, and a `LastName` outside the author list, which the parsers ignore.
 
 ### `tests/test_migrations.py`
 
