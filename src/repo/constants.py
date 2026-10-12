@@ -8,12 +8,12 @@ internal.
 
 PUBLIC_CURATION_FIELDS = frozenset(
     {
-        "ep",
-        "ep_additional_notes",
-        "ep_classification",
-        "ep_evidence_summary",
-        "ep_override_reason",
-        "ep_review_date",
+        "taskforce",
+        "taskforce_additional_notes",
+        "taskforce_classification",
+        "taskforce_evidence_summary",
+        "taskforce_override_reason",
+        "taskforce_review_date",
     }
 )
 

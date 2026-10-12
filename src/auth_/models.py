@@ -22,8 +22,8 @@ class UserProfile(models.Model):
     )
     has_review_permissions = models.BooleanField(
         default=False,
-        verbose_name="EP Review Permissions",
-        help_text="Whether the user can act as an EP reviewer.",
+        verbose_name="Taskforce Review Permissions",
+        help_text="Whether the user can act as an taskforce reviewer.",
     )
     clerk_user_id = models.CharField(
         max_length=255,
@@ -62,5 +62,5 @@ class UserProfile(models.Model):
 
     @property
     def can_review(self) -> bool:
-        """Whether the user can act as an EP reviewer."""
+        """Whether the user can act as an taskforce reviewer."""
         return self.has_review_permissions and self.can_curate

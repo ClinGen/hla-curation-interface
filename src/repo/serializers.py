@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from repo.models import PublishedCuration
 
 # Export keys that differ from the model field name, kept for existing consumers.
-EXPORT_NAMES = {"ep_classification": "classification"}
+EXPORT_NAMES = {"taskforce_classification": "classification"}
 
 
 def _export_value(value: object) -> object:

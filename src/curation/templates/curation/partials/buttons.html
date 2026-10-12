@@ -7,7 +7,7 @@
         <form method="post"
               action="{% url 'curation-submit' object.slug %}"
               style="display:inline;"
-              data-confirm="Submit this curation for expert panel review? It will be locked until the panel acts.">
+              data-confirm="Submit this curation for taskforce review? It will be locked until the taskforce acts.">
             {% csrf_token %}
             <button type="submit" class="button is-link">
                 {% include "common/icon.html" with icon_name="send" %}

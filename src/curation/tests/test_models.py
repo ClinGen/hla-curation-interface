@@ -11,8 +11,8 @@ from django.test import TestCase
 from allele.models import Allele
 from curation.constants.models.common import Status
 from curation.constants.models.curation import (
-    EP_CHOICES,
     HLA_CURATION_TASKFORCE_ID,
+    TASKFORCE_CHOICES,
     Classification,
     CurationTypes,
 )
@@ -220,8 +220,8 @@ class TestCurationClassificationDisplay(TestCase):
             self.assertEqual(self.curation.classification_display, "Limited")
             self.assertTrue(self.curation.is_classification_suggested)
 
-    def test_ep_classification_wins_over_suggestion(self):
-        self.curation.ep_classification = Classification.DEFINITIVE
+    def test_taskforce_classification_wins_over_suggestion(self):
+        self.curation.taskforce_classification = Classification.DEFINITIVE
         with patch.object(
             Curation, "score", new_callable=PropertyMock, return_value=10
         ):
@@ -230,26 +230,26 @@ class TestCurationClassificationDisplay(TestCase):
 
 
 class TestCurationHasEpFeedback(TestCase):
-    def test_no_ep_fields_means_no_feedback(self):
-        self.assertFalse(Curation().has_ep_feedback)
+    def test_no_taskforce_fields_means_no_feedback(self):
+        self.assertFalse(Curation().has_taskforce_feedback)
 
-    def test_any_ep_field_counts_as_feedback(self):
+    def test_any_taskforce_field_counts_as_feedback(self):
         for field, value in [
-            ("ep_classification", Classification.LIMITED),
-            ("ep_evidence_summary", "Summary."),
-            ("ep_additional_notes", "Notes."),
-            ("ep_override_reason", "Reason."),
-            ("ep_review_date", date(2026, 9, 1)),
+            ("taskforce_classification", Classification.LIMITED),
+            ("taskforce_evidence_summary", "Summary."),
+            ("taskforce_additional_notes", "Notes."),
+            ("taskforce_override_reason", "Reason."),
+            ("taskforce_review_date", date(2026, 9, 1)),
         ]:
             with self.subTest(field=field):
-                self.assertTrue(Curation(**{field: value}).has_ep_feedback)
+                self.assertTrue(Curation(**{field: value}).has_taskforce_feedback)
 
-    def test_ep_display_uses_the_panel_name(self):
+    def test_taskforce_display_uses_the_taskforce_name(self):
         self.assertEqual(
-            Curation(ep=HLA_CURATION_TASKFORCE_ID).ep_display,
-            dict(EP_CHOICES)[HLA_CURATION_TASKFORCE_ID],
+            Curation(taskforce=HLA_CURATION_TASKFORCE_ID).taskforce_display,
+            dict(TASKFORCE_CHOICES)[HLA_CURATION_TASKFORCE_ID],
         )
-        self.assertIsNone(Curation().ep_display)
+        self.assertIsNone(Curation().taskforce_display)
 
 
 class TestCurationIsClassificationOverridden(TestCase):
@@ -262,14 +262,14 @@ class TestCurationIsClassificationOverridden(TestCase):
             disease=Disease.objects.get(pk=1),
         )
 
-    def _overridden(self, ep_classification: str | None, score: float) -> bool:
-        self.curation.ep_classification = ep_classification
+    def _overridden(self, taskforce_classification: str | None, score: float) -> bool:
+        self.curation.taskforce_classification = taskforce_classification
         with patch.object(
             Curation, "score", new_callable=PropertyMock, return_value=score
         ):
             return self.curation.is_classification_overridden
 
-    def test_no_ep_classification_is_not_an_override(self):
+    def test_no_taskforce_classification_is_not_an_override(self):
         self.assertFalse(self._overridden(None, 10))
 
     def test_matching_the_suggestion_is_not_an_override(self):

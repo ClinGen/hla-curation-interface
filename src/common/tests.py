@@ -165,7 +165,11 @@ def field_block(html: str, field_id: str) -> str:
 
 class IsPublicFilterTest(TestCase):
     def test_public_curation_fields(self):
-        for name in ("ep_evidence_summary", "ep_additional_notes", "ep_review_date"):
+        for name in (
+            "taskforce_evidence_summary",
+            "taskforce_additional_notes",
+            "taskforce_review_date",
+        ):
             with self.subTest(name=name):
                 self.assertTrue(is_public(name, "curation"))
 
@@ -276,17 +280,17 @@ class ColorKeyTest(TestCase):
             with self.subTest(path=path.name):
                 self.assertNotIn("is-primary", path.read_text())
 
-    def _ep_review(self, status: str) -> str:
-        curation = SimpleNamespace(status=status, ep_display="HLA EP")
+    def _taskforce_review(self, status: str) -> str:
+        curation = SimpleNamespace(status=status, taskforce_display="HLA Taskforce")
         return render_to_string(
-            "curation/partials/ep_review.html", {"curation": curation}
+            "curation/partials/taskforce_review.html", {"curation": curation}
         )
 
     def test_sent_back_feedback_is_red(self):
-        self.assertIn('class="message is-danger', self._ep_review("INP"))
+        self.assertIn('class="message is-danger', self._taskforce_review("INP"))
 
     def test_other_feedback_is_neutral(self):
-        html = self._ep_review("APR")
+        html = self._taskforce_review("APR")
         self.assertIn('class="message mt-2"', html)
 
 

@@ -257,12 +257,14 @@ class PublishedCurationDetailViewTest(TestCase):
         self.assertContains(response, "Download as JSON")
 
     def test_displays_evidence_summary(self):
-        self.curation.ep_evidence_summary = "The panel found strong evidence."
+        self.curation.taskforce_evidence_summary = (
+            "The taskforce found strong evidence."
+        )
         self.curation.save()
         url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
         response = self.client.get(url)
         self.assertContains(response, "Evidence Summary")
-        self.assertContains(response, "The panel found strong evidence.")
+        self.assertContains(response, "The taskforce found strong evidence.")
 
     def test_copy_button_uses_the_confirm_modal(self):
         curator = User.objects.create_user(username="curator", password="pw")  # ruff: ignore[hardcoded-password-func-arg]
@@ -276,8 +278,8 @@ class PublishedCurationDetailViewTest(TestCase):
         self.assertContains(response, "data-confirm=")
         self.assertNotContains(response, "confirm(")
 
-    def test_displays_ep_review_date(self):
-        self.curation.ep_review_date = date(2026, 9, 1)
+    def test_displays_taskforce_review_date(self):
+        self.curation.taskforce_review_date = date(2026, 9, 1)
         self.curation.save()
         url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
         response = self.client.get(url)
@@ -287,7 +289,7 @@ class PublishedCurationDetailViewTest(TestCase):
     def test_displays_override_reason_when_set(self):
         url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
         self.assertNotContains(self.client.get(url), "Override Reason")
-        self.curation.ep_override_reason = "Replicated in two cohorts."
+        self.curation.taskforce_override_reason = "Replicated in two cohorts."
         self.curation.save()
         response = self.client.get(url)
         self.assertContains(response, "Override Reason")
@@ -325,12 +327,12 @@ class PublishedCurationDetailViewTest(TestCase):
             )
 
     def test_displays_additional_notes(self):
-        self.curation.ep_additional_notes = "Panel note."
+        self.curation.taskforce_additional_notes = "Taskforce note."
         self.curation.save()
         url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
         response = self.client.get(url)
         self.assertContains(response, "Additional Notes")
-        self.assertContains(response, "Panel note.")
+        self.assertContains(response, "Taskforce note.")
 
     def test_linkout_has_no_space_inside_parentheses(self):
         url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
@@ -375,28 +377,39 @@ class JSONDownloadViewTest(TestCase):
         data = json.loads(response.content)
         self.assertEqual(data["curation"]["curation_id"], self.curation.slug)
 
-    def test_json_includes_ep_review_date(self):
+    def test_json_includes_taskforce_review_date(self):
         url = reverse(
             "repo-download-single", kwargs={"curation_slug": self.curation.slug}
         )
         data = json.loads(self.client.get(url).content)
-        self.assertIsNone(data["curation"]["curation"]["ep_review_date"])
+        self.assertIsNone(data["curation"]["curation"]["taskforce_review_date"])
 
-        self.curation.ep_review_date = date(2026, 9, 1)
+        self.curation.taskforce_review_date = date(2026, 9, 1)
         self.curation.save()
         data = json.loads(self.client.get(url).content)
-        self.assertEqual(data["curation"]["curation"]["ep_review_date"], "2026-09-01")
+        self.assertEqual(
+            data["curation"]["curation"]["taskforce_review_date"], "2026-09-01"
+        )
 
     def test_json_includes_override_reason(self):
-        self.curation.ep_override_reason = "Replicated in two cohorts."
+        self.curation.taskforce_override_reason = "Replicated in two cohorts."
         self.curation.save()
         url = reverse(
             "repo-download-single", kwargs={"curation_slug": self.curation.slug}
         )
         data = json.loads(self.client.get(url).content)
         self.assertEqual(
-            data["curation"]["curation"]["ep_override_reason"],
+            data["curation"]["curation"]["taskforce_override_reason"],
             "Replicated in two cohorts.",
+        )
+
+    def test_json_has_no_expert_panel_keys(self):
+        url = reverse(
+            "repo-download-single", kwargs={"curation_slug": self.curation.slug}
+        )
+        keys = json.loads(self.client.get(url).content)["curation"]["curation"]
+        self.assertEqual(
+            [key for key in keys if key == "ep" or key.startswith("ep_")], []
         )
 
     def test_curation_keys_are_the_public_fields_plus_structure(self):

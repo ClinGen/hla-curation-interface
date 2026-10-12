@@ -1,6 +1,6 @@
 # `curation`
 
-The core Django app for the HLA Curation Interface. It manages the full lifecycle of HLA curations (allele- and haplotype-based) and their associated evidence items, including creation, editing, submission for expert panel review, approval, and publication to the repository. The app implements a multi-step evidence scoring framework that maps study-level data (typing method, p-value, cohort size, effect size, etc.) to a numeric score that drives a suggested classification.
+The core Django app for the HLA Curation Interface. It manages the full lifecycle of HLA curations (allele- and haplotype-based) and their associated evidence items, including creation, editing, submission for taskforce review, approval, and publication to the repository. The app implements a multi-step evidence scoring framework that maps study-level data (typing method, p-value, cohort size, effect size, etc.) to a numeric score that drives a suggested classification.
 
 ### `__init__.py`
 
@@ -28,7 +28,7 @@ Defines the `Status` class with lifecycle status codes shared by `Curation` and 
 
 ### `constants/models/curation.py`
 
-Defines the `CurationTypes` class (`ALLELE`, `HAPLOTYPE`) and the `Classification` class (e.g., `DEFINITIVE`, `STRONG`, `MODERATE`, `LIMITED`), along with their corresponding human-readable choice dicts used by the `Curation` model, `EP_CHOICES`, the expert panels that can review curations, and `NO_CLASSIFICATION_LABEL`, the text shown when a curation has no classification.
+Defines the `CurationTypes` class (`ALLELE`, `HAPLOTYPE`) and the `Classification` class (e.g., `DEFINITIVE`, `STRONG`, `MODERATE`, `LIMITED`), along with their corresponding human-readable choice dicts used by the `Curation` model, `TASKFORCE_CHOICES`, the taskforces that can review curations, and `NO_CLASSIFICATION_LABEL`, the text shown when a curation has no classification.
 
 ### `constants/models/evidence.py`
 
@@ -56,7 +56,7 @@ A Django fixture with a single minimal in-progress evidence item (`E000001`) lin
 
 ### `forms.py`
 
-Defines the Django forms used by curation and evidence views: `CurationCreateForm` (create a curation), `EPReviewForm` (expert panel review with decision, classification, notes, and review date; the review date is required when approving and can't be in the future; it takes a `suggested_classification` argument, labels the classification select with it, and requires an override reason when approving with any other classification), `EvidenceCreateForm` (attach a publication), `EvidenceTopLevelEditForm` / `EvidenceTopLevelEditFormSet` (inline status/inclusion editing from the curation detail page), and `EvidenceEditForm` (the full step-by-step evidence data entry form with cross-field validation).
+Defines the Django forms used by curation and evidence views: `CurationCreateForm` (create a curation), `TaskforceReviewForm` (taskforce review with decision, classification, notes, and review date; the review date is required when approving and can't be in the future; it takes a `suggested_classification` argument, labels the classification select with it, and requires an override reason when approving with any other classification), `EvidenceCreateForm` (attach a publication), `EvidenceTopLevelEditForm` / `EvidenceTopLevelEditFormSet` (inline status/inclusion editing from the curation detail page), and `EvidenceEditForm` (the full step-by-step evidence data entry form with cross-field validation).
 
 ### `interval.py`
 
@@ -64,7 +64,7 @@ Defines the `Interval` class, a small utility that represents a numeric interval
 
 ### `models.py`
 
-Defines the three core database models for the app. `Curation` tracks an allele or haplotype paired with a disease, manages lifecycle status transitions, stores expert panel review fields, and computes an aggregate score from its included evidence. Its `classification_display` property gives the EP classification's label, else the suggested classification's, else "No Classification Set", and `is_classification_suggested` says whether that label is only a suggestion. `is_classification_overridden` is true when the EP classification is set and differs from the suggestion, in which case `ep_override_reason` holds the panel's reason. `has_ep_feedback` is true when any EP review field is set, and `ep_display` gives the expert panel's name. `Demographic` holds the biogeographic population groups. `Evidence` stores all study-level data fields (typing method, p-value, effect size, cohort size, etc.) and exposes per-step score properties that feed into the HLA scoring framework; all three models use `simple_history` for change tracking.
+Defines the three core database models for the app. `Curation` tracks an allele or haplotype paired with a disease, manages lifecycle status transitions, stores taskforce review fields, and computes an aggregate score from its included evidence. Its `classification_display` property gives the taskforce classification's label, else the suggested classification's, else "No Classification Set", and `is_classification_suggested` says whether that label is only a suggestion. `is_classification_overridden` is true when the taskforce classification is set and differs from the suggestion, in which case `taskforce_override_reason` holds the taskforce's reason. `has_taskforce_feedback` is true when any taskforce review field is set, and `taskforce_display` gives the taskforce's name. `Demographic` holds the biogeographic population groups. `Evidence` stores all study-level data fields (typing method, p-value, effect size, cohort size, etc.) and exposes per-step score properties that feed into the HLA scoring framework; all three models use `simple_history` for change tracking.
 
 ### `score.py`
 
@@ -84,7 +84,7 @@ Full-page template for the "Add Curation" form. Renders radio inputs for curatio
 
 ### `templates/curation/detail.html`
 
-Full-page template for viewing a curation's details. Displays status banners (locked, provisional, approved, published), the EP feedback panel (`partials/ep_review.html`) when the expert panel has left any feedback, the curation detail table partial, the action buttons partial, and the evidence list partial.
+Full-page template for viewing a curation's details. Displays status banners (locked, provisional, approved, published), the taskforce feedback panel (`partials/taskforce_review.html`) when the taskforce has left any feedback, the curation detail table partial, the action buttons partial, and the evidence list partial.
 
 ### `templates/curation/edit/evidence.html`
 
@@ -108,11 +108,11 @@ Partial that renders the context-sensitive action buttons on the curation detail
 
 ### `templates/curation/partials/classification.html`
 
-Partial that renders a curation's `classification_display`, followed by a light "Suggested" tag when the label is the suggested classification rather than the EP's. Expects `curation` in the context. Used by the curation detail table, the HLArepo summary, and the publication detail page.
+Partial that renders a curation's `classification_display`, followed by a light "Suggested" tag when the label is the suggested classification rather than the taskforce's. Expects `curation` in the context. Used by the curation detail table, the HLArepo summary, and the publication detail page.
 
-### `templates/curation/partials/ep_review.html`
+### `templates/curation/partials/taskforce_review.html`
 
-Partial that renders the expert panel's feedback on a curation as a Bulma message: "Sent Back for Revision" (red, `is-danger`) when the curation is in progress, otherwise "Expert Panel Review" (neutral), or a `heading` passed by the caller. Shows a bulleted list of the panel, review date, classification, override reason, evidence summary, and additional notes, skipping empty ones. Expects `curation` in the context.
+Partial that renders the taskforce's feedback on a curation as a Bulma message: "Sent Back for Revision" (red, `is-danger`) when the curation is in progress, otherwise "Taskforce Review" (neutral), or a `heading` passed by the caller. Shows a bulleted list of the taskforce, review date, classification, override reason, evidence summary, and additional notes, skipping empty ones. Expects `curation` in the context.
 
 ### `templates/curation/partials/curation/detail_table.html`
 
@@ -124,7 +124,7 @@ Partial that renders a read-only summary table listing all evidence items belong
 
 ### `templates/curation/review.html`
 
-Full-page template for the expert panel review form. Displays the curation summary, the evidence table, and any earlier expert panel feedback, then renders the `EPReviewForm` fields (classification, override reason, evidence summary, notes, expert panel selector, review date, and approve/needs-revision decision). A short inline script shows the override reason only when the selected classification differs from the suggestion.
+Full-page template for the taskforce review form. Displays the curation summary, the evidence table, and any earlier taskforce feedback, then renders the `TaskforceReviewForm` fields (classification, override reason, evidence summary, notes, taskforce selector, review date, and approve/needs-revision decision). A short inline script shows the override reason only when the selected classification differs from the suggestion.
 
 ### `templates/evidence/change.html`
 

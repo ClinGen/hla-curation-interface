@@ -3,7 +3,7 @@ from django.forms import ModelForm, modelformset_factory
 from django.http import QueryDict
 from django.utils import timezone
 
-from curation.constants.models.curation import CLASSIFICATION_CHOICES, EP_CHOICES
+from curation.constants.models.curation import CLASSIFICATION_CHOICES, TASKFORCE_CHOICES
 from curation.models import Curation, Evidence
 
 
@@ -14,7 +14,7 @@ class CurationCreateForm(ModelForm):
         widgets = {"curation_type": forms.RadioSelect}
 
 
-class EPReviewForm(forms.Form):
+class TaskforceReviewForm(forms.Form):
     DECISION_CHOICES = [
         ("needs_revision", "Needs Revision"),
         ("approved", "Approved"),
@@ -23,37 +23,38 @@ class EPReviewForm(forms.Form):
         choices=DECISION_CHOICES,
         widget=forms.RadioSelect,
     )
-    ep_classification = forms.ChoiceField(
+    taskforce_classification = forms.ChoiceField(
         label="Classification",
         choices=[("", "---------"), *CLASSIFICATION_CHOICES.items()],
         required=False,
     )
-    ep_override_reason = forms.CharField(
+    taskforce_override_reason = forms.CharField(
         label="Override Reason",
         help_text=(
-            "Explain why the panel chose a classification other than the suggested one."
+            "Explain why the taskforce chose a classification other than the "
+            "suggested one."
         ),
         widget=forms.Textarea(attrs={"class": "textarea", "rows": 3}),
         required=False,
     )
-    ep_evidence_summary = forms.CharField(
+    taskforce_evidence_summary = forms.CharField(
         label="Evidence Summary",
         widget=forms.Textarea(attrs={"class": "textarea", "rows": 3}),
         required=False,
     )
-    ep_additional_notes = forms.CharField(
+    taskforce_additional_notes = forms.CharField(
         label="Additional Notes",
         widget=forms.Textarea(attrs={"class": "textarea", "rows": 3}),
         required=False,
     )
-    ep = forms.ChoiceField(
-        label="Expert Panel",
-        choices=EP_CHOICES,
+    taskforce = forms.ChoiceField(
+        label="Taskforce",
+        choices=TASKFORCE_CHOICES,
         required=False,
     )
-    ep_review_date = forms.DateField(
+    taskforce_review_date = forms.DateField(
         label="Review Date",
-        help_text="The date the expert panel reviewed the curation.",
+        help_text="The date the taskforce reviewed the curation.",
         required=False,
     )
 
@@ -76,37 +77,41 @@ class EPReviewForm(forms.Form):
         if suggested_classification:
             label = CLASSIFICATION_CHOICES[suggested_classification]
             self.fields[
-                "ep_classification"
+                "taskforce_classification"
             ].label = f"Classification (suggested: {label})"
         else:
-            self.fields["ep_classification"].label = "Classification (no suggestion)"
+            self.fields[
+                "taskforce_classification"
+            ].label = "Classification (no suggestion)"
 
     def clean(self) -> dict | None:
         cleaned_data = super().clean()
         if not cleaned_data:
             return cleaned_data
         decision = cleaned_data.get("decision")
-        review_date = cleaned_data.get("ep_review_date")
+        review_date = cleaned_data.get("taskforce_review_date")
         # TIME_ZONE is UTC, so this is today's date with or without USE_TZ.
         if review_date and review_date > timezone.now().date():
-            self.add_error("ep_review_date", "The review date can't be in the future.")
+            self.add_error(
+                "taskforce_review_date", "The review date can't be in the future."
+            )
         if decision == "approved":
-            if not cleaned_data.get("ep_classification"):
-                self.add_error("ep_classification", "Required when approving.")
-            if not cleaned_data.get("ep_evidence_summary"):
-                self.add_error("ep_evidence_summary", "Required when approving.")
-            if not cleaned_data.get("ep"):
-                self.add_error("ep", "Required when approving.")
+            if not cleaned_data.get("taskforce_classification"):
+                self.add_error("taskforce_classification", "Required when approving.")
+            if not cleaned_data.get("taskforce_evidence_summary"):
+                self.add_error("taskforce_evidence_summary", "Required when approving.")
+            if not cleaned_data.get("taskforce"):
+                self.add_error("taskforce", "Required when approving.")
             if not review_date:
-                self.add_error("ep_review_date", "Required when approving.")
-            classification = cleaned_data.get("ep_classification") or None
+                self.add_error("taskforce_review_date", "Required when approving.")
+            classification = cleaned_data.get("taskforce_classification") or None
             if classification == self.suggested_classification:
                 # Don't keep a stale reason from an earlier review.
-                cleaned_data["ep_override_reason"] = ""
-            elif classification and not cleaned_data.get("ep_override_reason"):
+                cleaned_data["taskforce_override_reason"] = ""
+            elif classification and not cleaned_data.get("taskforce_override_reason"):
                 self.add_error(
-                    "ep_override_reason",
-                    "Explain why the panel chose a classification other than the "
+                    "taskforce_override_reason",
+                    "Explain why the taskforce chose a classification other than the "
                     "suggested one.",
                 )
         return cleaned_data

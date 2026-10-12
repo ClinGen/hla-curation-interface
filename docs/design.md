@@ -147,13 +147,13 @@ Bulma provides the CSS framework. All JS and CSS dependencies are vendored under
 #### Color Key
 
 Each Bulma color has one meaning. `ColorKeyTest` in `common/tests.py` checks the status
-tags, buttons, and EP feedback panel against this key.
+tags, buttons, and taskforce feedback panel against this key.
 
 | Color | Bulma modifier | Meaning | Examples |
 | --- | --- | --- | --- |
-| Grey | none | Not finished, or neutral | In Progress, Not Provided, Suggested, EP feedback |
+| Grey | none | Not finished, or neutral | In Progress, Not Provided, Suggested, taskforce feedback |
 | Yellow | `is-warning` | Waiting on someone else, or caution | Provisional tag and banner, superseded note, account activation, demo banner, 4xx pages |
-| Red | `is-danger` | Something needs fixing | Needs Review, form errors, EP feedback on a sent-back curation, error messages, 500 page |
+| Red | `is-danger` | Something needs fixing | Needs Review, form errors, taskforce feedback on a sent-back curation, error messages, 500 page |
 | Green | `is-success` | Done or approved | Done, Provided, Approved tag and banner, awarded points |
 | Info blue | `is-info` | Published or public | Published tag and banner, public-field badge, "update of" note |
 | Link blue | `is-link` | Something you can click | Every button; secondary buttons add `is-light` |
