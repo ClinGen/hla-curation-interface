@@ -18,6 +18,7 @@ import unittest
 from publication.clients import (
     fetch_pubmed_data,
     get_pubmed_author,
+    get_pubmed_authors,
     get_pubmed_title,
     get_pubmed_year,
 )
@@ -33,6 +34,7 @@ PUBMED_TEST_CASES = [
             "Mali reveals both expected and novel disease associations"
         ),
         "expected_author": "Noble",
+        "expected_authors_contains": ["Noble JA", "Mack SJ"],
         "expected_year": 2024,
     },
     {
@@ -42,6 +44,7 @@ PUBMED_TEST_CASES = [
             "youth-onset type 1 diabetes in Mali"
         ),
         "expected_author": "Besançon",
+        "expected_authors_contains": ["Besançon S"],
         "expected_year": 2022,
     },
     {
@@ -52,6 +55,7 @@ PUBMED_TEST_CASES = [
             "Populations"
         ),
         "expected_author": "Al Yafei",
+        "expected_authors_contains": ["Al Yafei Z"],
         "expected_year": 2022,
     },
 ]
@@ -91,6 +95,18 @@ class PubMedContractTest(unittest.TestCase):
                     author,
                     f"Author mismatch for PubMed ID {test_case['pubmed_id']}",
                 )
+
+    def test_get_pubmed_authors_extracts_authors(self) -> None:
+        for test_case in PUBMED_TEST_CASES:
+            with self.subTest(pubmed_id=test_case["pubmed_id"]):
+                soup = fetch_pubmed_data(test_case["pubmed_id"])
+                self.assertIsNotNone(soup)
+                authors = get_pubmed_authors(soup)  # type: ignore[arg-type]
+                self.assertTrue(
+                    authors[0].startswith(test_case["expected_author"] + " ")
+                )
+                for name in test_case["expected_authors_contains"]:
+                    self.assertIn(name, authors)
 
     def test_get_pubmed_year_extracts_year(self) -> None:
         for test_case in PUBMED_TEST_CASES:
