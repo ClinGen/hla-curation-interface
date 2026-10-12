@@ -1,6 +1,6 @@
 # `publication`
 
-This Django app manages publications used as evidence sources in HLA curations. Every publication is a PubMed article. Migration `0004_delete_preprint_publications` deleted the old bioRxiv and medRxiv preprints (stopping with an error if any evidence cited one), and migration `0005_remove_publication_type_and_doi` removed the `publication_type` and `doi` fields. It handles creation, display, and history tracking of publication records, automatically fetching metadata such as title, author, and year from PubMed when a new publication is added.
+This Django app manages publications used as evidence sources in HLA curations. Every publication is a PubMed article. Migration `0004_delete_preprint_publications` deleted the old bioRxiv and medRxiv preprints (stopping with an error if any evidence cited one), and migration `0005_remove_publication_type_and_doi` removed the `publication_type` and `doi` fields. It handles creation, display, and history tracking of publication records, automatically fetching metadata such as title, authors, and year from PubMed when a new publication is added.
 
 ### `__init__.py`
 
@@ -20,7 +20,7 @@ Contains functions for fetching publication metadata from the NCBI PubMed E-util
 
 ### `fixtures/test_publications.json`
 
-Django fixture containing a sample PubMed `Publication` record used to seed the database during tests.
+Django fixture containing a sample PubMed `Publication` record used to seed the database during tests. Its authors include a non-primary author, Juniper, for author search tests.
 
 ### `forms.py`
 
@@ -28,7 +28,7 @@ Defines `PublicationForm`, a `ModelForm` for creating a PubMed `Publication` tha
 
 ### `models.py`
 
-Defines the `Publication` model with fields for slug, a required and unique PubMed ID, title, author, publication year, and audit timestamps. The slug is auto-generated as `P<pk:06d>` on first save, and `django-simple-history` tracks all changes.
+Defines the `Publication` model with fields for slug, a required and unique PubMed ID, title, author (the primary author's surname), authors (every author in PubMed order, joined with "; "), publication year, and audit timestamps. The slug is auto-generated as `P<pk:06d>` on first save, and `django-simple-history` tracks all changes.
 
 ### `tables.py`
 
@@ -44,7 +44,7 @@ Renders the form for adding a new publication, which has a single PubMed ID inpu
 
 ### `templates/publication/detail.html`
 
-Displays all fields for a single publication in a table, with an external link to PubMed, and a collapsible section listing any evidence records associated with the publication.
+Displays all fields for a single publication in a table, including the full author list (or "------" when it's empty), with an external link to PubMed, and a collapsible section listing any evidence records associated with the publication.
 
 ### `templates/publication/history.html`
 
@@ -76,7 +76,7 @@ Unit tests for the `Publication` model, covering the required PubMed ID and the 
 
 ### `tests/test_views.py`
 
-Integration tests for the publication views covering creation of PubMed publications (with mocked API responses), the absence of preprint inputs, rejection of missing PubMed IDs and preprint submissions, and basic rendering checks for the detail and list views.
+Integration tests for the publication views covering creation of PubMed publications (with mocked API responses), the absence of preprint inputs, rejection of missing PubMed IDs and preprint submissions, basic rendering checks for the detail and list views, and the detail page's author list and its "------" placeholder.
 
 ### `urls.py`
 
@@ -84,4 +84,4 @@ Maps URL patterns to publication views: `create`, `<slug>/detail`, `<slug>/histo
 
 ### `views.py`
 
-Implements the five publication views: `PublicationCreate` fetches metadata from PubMed and saves the record; `PublicationDetail` shows a single publication; `PublicationHistory` and `PublicationChange` display the audit trail; and `PublicationList` provides a searchable, paginated table of all publications.
+Implements the five publication views: `PublicationCreate` fetches the title, primary author, full author list, and year from PubMed and saves the record; `PublicationDetail` shows a single publication; `PublicationHistory` and `PublicationChange` display the audit trail; and `PublicationList` provides a searchable, paginated table of all publications.

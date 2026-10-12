@@ -15,6 +15,7 @@ from common.views import SearchListView
 from publication.clients import (
     fetch_pubmed_data,
     get_pubmed_author,
+    get_pubmed_authors,
     get_pubmed_title,
     get_pubmed_year,
 )
@@ -33,6 +34,7 @@ class PublicationCreate(ProtectedViewMixin, CreateView):
         pubmed_data = fetch_pubmed_data(form.instance.pubmed_id)
         if pubmed_data:
             form.instance.author = get_pubmed_author(pubmed_data)
+            form.instance.authors = "; ".join(get_pubmed_authors(pubmed_data))
             form.instance.title = get_pubmed_title(pubmed_data)
             form.instance.publication_year = get_pubmed_year(pubmed_data)
             form.instance.added_by = self.request.user
