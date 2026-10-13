@@ -55,7 +55,7 @@
             <div id="override-reason" class="field">
                 {% include "common/form/textarea.html" with field=form.taskforce_override_reason public=form.taskforce_override_reason.name|is_public:"curation" show_help=True %}
             </div>
-            {% include "common/form/textarea.html" with field=form.taskforce_evidence_summary public=form.taskforce_evidence_summary.name|is_public:"curation" %}
+            {% include "common/form/textarea.html" with field=form.taskforce_evidence_summary public=form.taskforce_evidence_summary.name|is_public:"curation" show_help=True %}
             {% include "common/form/textarea.html" with field=form.taskforce_additional_notes public=form.taskforce_additional_notes.name|is_public:"curation" %}
             {% include "common/form/select/default.html" with field=form.taskforce public=form.taskforce.name|is_public:"curation" show_label=True %}
             {% include "common/form/input/text.html" with field=form.taskforce_review_date public=form.taskforce_review_date.name|is_public:"curation" type="date" show_help=True %}

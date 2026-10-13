@@ -39,7 +39,8 @@ class TaskforceReviewForm(forms.Form):
     )
     taskforce_evidence_summary = forms.CharField(
         label="Evidence Summary",
-        widget=forms.Textarea(attrs={"class": "textarea", "rows": 3}),
+        help_text="Replace the bracketed text and remove the parts that don't apply.",
+        widget=forms.Textarea(attrs={"class": "textarea", "rows": 16}),
         required=False,
     )
     taskforce_additional_notes = forms.CharField(
@@ -63,6 +64,7 @@ class TaskforceReviewForm(forms.Form):
         data: QueryDict | None = None,
         *,
         suggested_classification: str | None = None,
+        evidence_summary_template: str = "",
         initial: dict[str, object] | None = None,
     ) -> None:
         """Labels the classification select with the suggested classification.
@@ -70,10 +72,13 @@ class TaskforceReviewForm(forms.Form):
         Args:
             data: The submitted form data, if any.
             suggested_classification: The curation's suggested classification code.
+            evidence_summary_template: The pre-filled evidence summary, which can't
+                be approved unchanged.
             initial: Initial values for an unbound form.
         """
         super().__init__(data, initial=initial)
         self.suggested_classification = suggested_classification
+        self.evidence_summary_template = evidence_summary_template
         if suggested_classification:
             label = CLASSIFICATION_CHOICES[suggested_classification]
             self.fields[
@@ -95,11 +100,10 @@ class TaskforceReviewForm(forms.Form):
             self.add_error(
                 "taskforce_review_date", "The review date can't be in the future."
             )
+        self._clean_evidence_summary(cleaned_data, decision)
         if decision == "approved":
             if not cleaned_data.get("taskforce_classification"):
                 self.add_error("taskforce_classification", "Required when approving.")
-            if not cleaned_data.get("taskforce_evidence_summary"):
-                self.add_error("taskforce_evidence_summary", "Required when approving.")
             if not cleaned_data.get("taskforce"):
                 self.add_error("taskforce", "Required when approving.")
             if not review_date:
@@ -115,6 +119,29 @@ class TaskforceReviewForm(forms.Form):
                     "suggested one.",
                 )
         return cleaned_data
+
+    def _clean_evidence_summary(self, cleaned_data: dict, decision: str | None) -> None:
+        """Rejects or discards an evidence summary that is still the template.
+
+        Args:
+            cleaned_data: The form's cleaned data, updated in place.
+            decision: The reviewer's decision.
+        """
+        evidence_summary = cleaned_data.get("taskforce_evidence_summary", "")
+        # Browsers submit textarea line breaks as CRLF.
+        if (
+            self.evidence_summary_template
+            and evidence_summary.replace("\r\n", "\n") == self.evidence_summary_template
+        ):
+            # Don't save the untouched template as if it were a summary.
+            cleaned_data["taskforce_evidence_summary"] = ""
+            if decision == "approved":
+                self.add_error(
+                    "taskforce_evidence_summary",
+                    "Fill in the template before approving.",
+                )
+        elif decision == "approved" and not evidence_summary:
+            self.add_error("taskforce_evidence_summary", "Required when approving.")
 
 
 class EvidenceCreateForm(ModelForm):
