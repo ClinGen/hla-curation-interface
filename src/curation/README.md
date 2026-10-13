@@ -18,6 +18,10 @@ Defines the `CurationConfig` app configuration class, which sets the app name to
 
 Empty file that marks the `constants` directory as a Python package.
 
+### `constants/forms.py`
+
+Defines `EVIDENCE_SUMMARY_TEMPLATE`, the taskforce's evidence summary template that the review form starts with when a curation has no evidence summary yet.
+
 ### `constants/models/__init__.py`
 
 Empty file that marks the `constants/models` directory as a Python package.
@@ -56,7 +60,7 @@ A Django fixture with a single minimal in-progress evidence item (`E000001`) lin
 
 ### `forms.py`
 
-Defines the Django forms used by curation and evidence views: `CurationCreateForm` (create a curation), `TaskforceReviewForm` (taskforce review with decision, classification, notes, and review date; the review date is required when approving and can't be in the future; it takes a `suggested_classification` argument, labels the classification select with it, and requires an override reason when approving with any other classification), `EvidenceCreateForm` (attach a publication), `EvidenceTopLevelEditForm` / `EvidenceTopLevelEditFormSet` (inline status/inclusion editing from the curation detail page), and `EvidenceEditForm` (the full step-by-step evidence data entry form with cross-field validation).
+Defines the Django forms used by curation and evidence views: `CurationCreateForm` (create a curation), `TaskforceReviewForm` (taskforce review with decision, classification, notes, and review date; the review date is required when approving and can't be in the future; it takes a `suggested_classification` argument, labels the classification select with it, and requires an override reason when approving with any other classification; it won't approve a curation whose evidence summary is still the unchanged template and saves an unchanged template as no summary), `EvidenceCreateForm` (attach a publication), `EvidenceTopLevelEditForm` / `EvidenceTopLevelEditFormSet` (inline status/inclusion editing from the curation detail page), and `EvidenceEditForm` (the full step-by-step evidence data entry form with cross-field validation).
 
 ### `interval.py`
 
