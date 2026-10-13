@@ -3,7 +3,6 @@ from django.forms import ModelForm, modelformset_factory
 from django.http import QueryDict
 from django.utils import timezone
 
-from curation.constants.forms import EVIDENCE_SUMMARY_TEMPLATE
 from curation.constants.models.curation import CLASSIFICATION_CHOICES, TASKFORCE_CHOICES
 from curation.models import Curation, Evidence
 
@@ -65,6 +64,7 @@ class TaskforceReviewForm(forms.Form):
         data: QueryDict | None = None,
         *,
         suggested_classification: str | None = None,
+        evidence_summary_template: str = "",
         initial: dict[str, object] | None = None,
     ) -> None:
         """Labels the classification select with the suggested classification.
@@ -72,10 +72,13 @@ class TaskforceReviewForm(forms.Form):
         Args:
             data: The submitted form data, if any.
             suggested_classification: The curation's suggested classification code.
+            evidence_summary_template: The pre-filled evidence summary, which can't
+                be approved unchanged.
             initial: Initial values for an unbound form.
         """
         super().__init__(data, initial=initial)
         self.suggested_classification = suggested_classification
+        self.evidence_summary_template = evidence_summary_template
         if suggested_classification:
             label = CLASSIFICATION_CHOICES[suggested_classification]
             self.fields[
@@ -126,7 +129,10 @@ class TaskforceReviewForm(forms.Form):
         """
         evidence_summary = cleaned_data.get("taskforce_evidence_summary", "")
         # Browsers submit textarea line breaks as CRLF.
-        if evidence_summary.replace("\r\n", "\n") == EVIDENCE_SUMMARY_TEMPLATE:
+        if (
+            self.evidence_summary_template
+            and evidence_summary.replace("\r\n", "\n") == self.evidence_summary_template
+        ):
             # Don't save the untouched template as if it were a summary.
             cleaned_data["taskforce_evidence_summary"] = ""
             if decision == "approved":

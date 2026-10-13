@@ -22,7 +22,6 @@ from auth_.permissions import (
 from common.history import resolve_changes
 from common.tables import HistoryTable
 from common.views import SearchListView
-from curation.constants.forms import EVIDENCE_SUMMARY_TEMPLATE
 from curation.constants.models.common import Status
 from curation.constants.views import FRAMEWORK
 from curation.forms import (
@@ -36,6 +35,7 @@ from curation.models import (
     Curation,
     Evidence,
 )
+from curation.summary import build_evidence_summary
 from curation.tables import CurationTable
 from curation.validators.views import (
     validate_beta,
@@ -243,10 +243,13 @@ def curation_review(request: HttpRequest, curation_slug: str) -> HttpResponse:
         Redirect on POST success, or the review form page on GET.
     """
     curation = get_object_or_404(Curation, slug=curation_slug)
+    evidence_summary_template = build_evidence_summary(curation)
 
     if request.method == "POST":
         form = TaskforceReviewForm(
-            request.POST, suggested_classification=curation.suggested_classification
+            request.POST,
+            suggested_classification=curation.suggested_classification,
+            evidence_summary_template=evidence_summary_template,
         )
         if form.is_valid():
             decision = form.cleaned_data["decision"]
@@ -272,6 +275,7 @@ def curation_review(request: HttpRequest, curation_slug: str) -> HttpResponse:
     else:
         form = TaskforceReviewForm(
             suggested_classification=curation.suggested_classification,
+            evidence_summary_template=evidence_summary_template,
             initial={
                 "taskforce_classification": (
                     curation.taskforce_classification
@@ -279,7 +283,7 @@ def curation_review(request: HttpRequest, curation_slug: str) -> HttpResponse:
                 ),
                 "taskforce_override_reason": curation.taskforce_override_reason,
                 "taskforce_evidence_summary": (
-                    curation.taskforce_evidence_summary or EVIDENCE_SUMMARY_TEMPLATE
+                    curation.taskforce_evidence_summary or evidence_summary_template
                 ),
                 "taskforce_additional_notes": curation.taskforce_additional_notes,
                 "taskforce": curation.taskforce,

@@ -16,7 +16,6 @@ from common.tests import (
     SuppressRequestLoggingMixin,
     field_block,
 )
-from curation.constants.forms import EVIDENCE_SUMMARY_TEMPLATE
 from curation.constants.models.common import Status
 from curation.constants.models.curation import (
     HLA_CURATION_TASKFORCE_ID,
@@ -36,6 +35,7 @@ from curation.models import (
     Demographic,
     Evidence,
 )
+from curation.summary import build_evidence_summary
 from disease.models import Disease
 from haplotype.models import Haplotype
 from publication.models import Publication
@@ -708,7 +708,7 @@ class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
         form = self.client.get(self._url()).context["form"]
         self.assertEqual(
             form.initial["taskforce_evidence_summary"],
-            EVIDENCE_SUMMARY_TEMPLATE,
+            build_evidence_summary(self.curation),
         )
 
     def test_review_form_keeps_saved_evidence_summary(self):
@@ -723,7 +723,7 @@ class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
     def test_approval_with_unchanged_template_fails(self):
         self.client.force_login(self.reviewer)
         # Browsers submit textarea line breaks as CRLF.
-        summary = EVIDENCE_SUMMARY_TEMPLATE.replace("\n", "\r\n")
+        summary = build_evidence_summary(self.curation).replace("\n", "\r\n")
         data = {**self._approval_data(), "taskforce_evidence_summary": summary}
         response = self.client.post(self._url(), data)
         self.assertEqual(response.status_code, 200)
@@ -735,7 +735,7 @@ class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
         self.client.force_login(self.reviewer)
         data = {
             "decision": "needs_revision",
-            "taskforce_evidence_summary": EVIDENCE_SUMMARY_TEMPLATE,
+            "taskforce_evidence_summary": build_evidence_summary(self.curation),
         }
         response = self.client.post(self._url(), data)
         self.assertEqual(response.status_code, 302)

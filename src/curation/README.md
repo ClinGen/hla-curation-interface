@@ -18,10 +18,6 @@ Defines the `CurationConfig` app configuration class, which sets the app name to
 
 Empty file that marks the `constants` directory as a Python package.
 
-### `constants/forms.py`
-
-Defines `EVIDENCE_SUMMARY_TEMPLATE`, the taskforce's evidence summary template that the review form starts with when a curation has no evidence summary yet.
-
 ### `constants/models/__init__.py`
 
 Empty file that marks the `constants/models` directory as a Python package.
@@ -60,7 +56,7 @@ A Django fixture with a single minimal in-progress evidence item (`E000001`) lin
 
 ### `forms.py`
 
-Defines the Django forms used by curation and evidence views: `CurationCreateForm` (create a curation), `TaskforceReviewForm` (taskforce review with decision, classification, notes, and review date; the review date is required when approving and can't be in the future; it takes a `suggested_classification` argument, labels the classification select with it, and requires an override reason when approving with any other classification; it won't approve a curation whose evidence summary is still the unchanged template and saves an unchanged template as no summary), `EvidenceCreateForm` (attach a publication), `EvidenceTopLevelEditForm` / `EvidenceTopLevelEditFormSet` (inline status/inclusion editing from the curation detail page), and `EvidenceEditForm` (the full step-by-step evidence data entry form with cross-field validation).
+Defines the Django forms used by curation and evidence views: `CurationCreateForm` (create a curation), `TaskforceReviewForm` (taskforce review with decision, classification, notes, and review date; the review date is required when approving and can't be in the future; it takes a `suggested_classification` argument, labels the classification select with it, and requires an override reason when approving with any other classification; it takes an `evidence_summary_template` argument, won't approve a curation whose evidence summary is still that unchanged template, and saves an unchanged template as no summary), `EvidenceCreateForm` (attach a publication), `EvidenceTopLevelEditForm` / `EvidenceTopLevelEditFormSet` (inline status/inclusion editing from the curation detail page), and `EvidenceEditForm` (the full step-by-step evidence data entry form with cross-field validation).
 
 ### `interval.py`
 
@@ -73,6 +69,10 @@ Defines the three core database models for the app. `Curation` tracks an allele 
 ### `score.py`
 
 Implements the per-step point-calculation functions (`get_step_1a_points` through `get_step_6b_multiplier`) that are called by the `Evidence` model's score properties. Each function takes an `Evidence` instance and returns the numeric points (or `None` if insufficient data) for its corresponding framework step.
+
+### `summary.py`
+
+Defines `build_evidence_summary`, which writes the taskforce's evidence summary template for a curation. It fills in what the curation knows (allele or haplotype, disease, Mondo ID, included publications and PMIDs, GWAS and case-control counts, zygosity, typing resolution, significance, score, and classification) and leaves brackets around the parts the reviewer must write, such as which publication first reported the pair. The review form starts with this text when a curation has no evidence summary yet.
 
 ### `tables.py`
 
@@ -193,6 +193,10 @@ Tests for the `0021_rename_status_codes` data migration. They use `MigrationExec
 ### `tests/test_models.py`
 
 Integration tests for the `Curation` and `Evidence` models. Tests cover default field values, curation status transitions, `CurationTable` status tags, score calculation for every scoring step (including GWAS vs. non-GWAS variants and the p-value comparator edge case), suggested classification thresholds, curation copying, and validation rules for publication inclusion, allele resolution minimums, and the significant association/p-value consistency check.
+
+### `tests/test_summary.py`
+
+Integration tests for `build_evidence_summary`, covering each filled-in value, its singular, plural, and partial wording, haplotype wording, the parts left in brackets, and balanced brackets.
 
 ### `tests/test_validators.py`
 
