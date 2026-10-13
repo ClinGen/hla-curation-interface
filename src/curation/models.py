@@ -423,7 +423,7 @@ class Evidence(models.Model):
         default=Zygosity.MONOALLELIC,
         max_length=2,
         verbose_name="Zygosity",
-        help_text="Either monoallelic (homozygous) or biallelic (heterozygous).",
+        help_text="Either monoallelic (heterozygous) or biallelic (homozygous).",
     )
     zygosity_notes = models.TextField(
         blank=True,

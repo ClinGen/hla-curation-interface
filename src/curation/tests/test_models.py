@@ -17,6 +17,7 @@ from curation.constants.models.curation import (
     CurationTypes,
 )
 from curation.constants.models.evidence import (
+    ZYGOSITY_CHOICES,
     AdditionalPhenotypes,
     EffectSizeStatistic,
     MultipleTestingCorrection,
@@ -363,6 +364,11 @@ class TestEvidence(TestCase):
 
     def test_is_monoallelic_when_created(self):
         self.assertEqual(self.evidence.zygosity, Zygosity.MONOALLELIC)
+
+    def test_zygosity_help_text_matches_choice_labels(self):
+        help_text = Evidence._meta.get_field("zygosity").help_text  # type: ignore # ruff: ignore[private-member-access]
+        for label in ZYGOSITY_CHOICES.values():
+            self.assertIn(label.lower(), help_text)
 
     def test_score_increases_when_biallelic_selected(self):
         initial_points = self.evidence.score_before_multipliers
