@@ -38,9 +38,13 @@ are also rejected.
 ### Curation
 
 A curation links one allele or haplotype to one disease. The system makes sure the right
-type of genetic entity is provided for the curation type chosen. It also enforces
-consistency between a curation's status and its evidence: a curation cannot be marked
-"Done" if any of its included evidence records are still "In Progress." When a
+type of genetic entity is provided for the curation type chosen. A pair can have at most
+two curations, one for risk evidence and one for protective evidence. If one already
+exists, the curator sees it and must confirm before creating a second, and can't create
+a second until the first has evidence. Copies of a published curation don't count as
+separate curations. The system also enforces consistency between a curation's status
+and its evidence: a curation cannot be submitted for review ("Provisional") if any of
+its included evidence records are still "In Progress." When a
 classification level is assigned, the system checks that the curation's total score
 actually falls within the range permitted for that classification. Once a curation is
 published to HLArepo, it becomes read-only and cannot be edited.
@@ -140,7 +144,7 @@ always populated from the external API, never from user input.
 
 **Model validators** (`src/curation/validators/models/curation.py`):
 
-- `validate_status`: If `status=DONE`, iterates over all evidence and raises
+- `validate_status`: If `status=PROVISIONAL`, iterates over all evidence and raises
   `ValidationError` if any included evidence (`is_included=True`) still has
   `status=IN_PROGRESS`.
 - `validate_curation_type`:
@@ -155,6 +159,19 @@ always populated from the external API, never from user input.
   - LIMITED: score < 25
   - MODERATE: 25 \<= score \<= 50
   - STRONG / DEFINITIVE: score >= 50
+
+**Form** (`src/curation/forms.py`): `CurationCreateForm.clean()` looks up root
+curations (`copied_from` is null) of the same allele or haplotype and disease with
+`Curation.existing_pairs()`. The form lists them, with their status and copies, above
+the submit button.
+
+- Two or more: raises a non-field error, whether or not the curator confirmed.
+- One with no evidence: raises a non-field error telling the curator to add evidence to
+  it instead.
+- One with evidence: raises a non-field error unless `confirm_duplicate` is checked. The
+  checkbox is shown only in this case.
+
+`curation_copy` doesn't use this form, so copying is never blocked.
 
 **Views**:
 

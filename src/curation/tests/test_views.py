@@ -43,7 +43,12 @@ from repo.models import PublishedCuration
 
 
 class CurationCreateTest(ProtectedViewTestMixin, TestCase):
-    fixtures = ["test_alleles.json", "test_haplotypes.json", "test_diseases.json"]
+    fixtures = [
+        "test_alleles.json",
+        "test_haplotypes.json",
+        "test_diseases.json",
+        "test_publications.json",
+    ]
     url = reverse("curation-create")
     template = "curation/create.html"
     page_name = "Add Curation"
@@ -85,6 +90,93 @@ class CurationCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(new_curation.haplotype, Haplotype.objects.get(pk=1))
         self.assertEqual(new_curation.disease, Disease.objects.get(pk=1))
         self.assertEqual(new_curation.added_by, self.user4_yes_phi_yes_perms)
+
+    def _make_existing(
+        self, curation_type: str, *, with_evidence: bool = True, **kwargs
+    ) -> Curation:
+        if curation_type == CurationTypes.ALLELE:
+            target = {"allele": Allele.objects.get(pk=1)}
+        else:
+            target = {"haplotype": Haplotype.objects.get(pk=1)}
+        curation = Curation.objects.create(
+            curation_type=curation_type,
+            disease=Disease.objects.get(pk=1),
+            **target,
+            **kwargs,
+        )
+        if with_evidence:
+            Evidence.objects.create(
+                curation=curation, publication=Publication.objects.get(pk=1)
+            )
+        return curation
+
+    def _data(self, curation_type: str, **extra) -> dict[str, str]:
+        field = "allele" if curation_type == CurationTypes.ALLELE else "haplotype"
+        return {"curation_type": curation_type, field: "1", "disease": "1", **extra}
+
+    def test_one_existing_pair_requires_confirmation(self):
+        for curation_type in (CurationTypes.ALLELE, CurationTypes.HAPLOTYPE):
+            with self.subTest(curation_type=curation_type):
+                existing = self._make_existing(curation_type)
+                count = Curation.objects.count()
+                response = self.client.post(self.url, self._data(curation_type))
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(Curation.objects.count(), count)
+                self.assertContains(response, existing.slug)
+                self.assertContains(response, 'name="confirm_duplicate"')
+
+    def test_one_existing_pair_allows_creation_after_confirmation(self):
+        for curation_type in (CurationTypes.ALLELE, CurationTypes.HAPLOTYPE):
+            with self.subTest(curation_type=curation_type):
+                self._make_existing(curation_type)
+                count = Curation.objects.count()
+                data = self._data(curation_type, confirm_duplicate="on")
+                response = self.client.post(self.url, data)
+                self.assertEqual(response.status_code, 302)
+                self.assertEqual(Curation.objects.count(), count + 1)
+
+    def test_one_existing_pair_without_evidence_blocks_creation(self):
+        for curation_type in (CurationTypes.ALLELE, CurationTypes.HAPLOTYPE):
+            with self.subTest(curation_type=curation_type):
+                existing = self._make_existing(curation_type, with_evidence=False)
+                count = Curation.objects.count()
+                data = self._data(curation_type, confirm_duplicate="on")
+                response = self.client.post(self.url, data)
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(Curation.objects.count(), count)
+                self.assertContains(response, existing.slug)
+                self.assertNotContains(response, 'name="confirm_duplicate"')
+                existing.delete()
+
+    def test_two_existing_pairs_block_creation(self):
+        for curation_type in (CurationTypes.ALLELE, CurationTypes.HAPLOTYPE):
+            with self.subTest(curation_type=curation_type):
+                first = self._make_existing(curation_type)
+                second = self._make_existing(curation_type)
+                count = Curation.objects.count()
+                data = self._data(curation_type, confirm_duplicate="on")
+                response = self.client.post(self.url, data)
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(Curation.objects.count(), count)
+                self.assertContains(response, first.slug)
+                self.assertContains(response, second.slug)
+                self.assertNotContains(response, 'name="confirm_duplicate"')
+
+    def test_published_curation_and_its_copy_count_as_one_pair(self):
+        published = self._make_existing(CurationTypes.ALLELE, status=Status.PUBLISHED)
+        copy = self._make_existing(CurationTypes.ALLELE, copied_from=published)
+        data = self._data(CurationTypes.ALLELE, confirm_duplicate="on")
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            Curation.objects.exclude(pk__in=[published.pk, copy.pk]).count(), 1
+        )
+
+    def test_same_allele_with_different_disease_is_not_flagged(self):
+        self._make_existing(CurationTypes.ALLELE)
+        data = {"curation_type": CurationTypes.ALLELE, "allele": "1", "disease": "2"}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
 
 
 class CurationDetailTest(ProtectedViewTestMixin, TestCase):
@@ -858,6 +950,12 @@ class CurationCopyTest(SuppressRequestLoggingMixin, TestCase):
         copy = Curation.objects.exclude(pk=self.curation.pk).first()
         assert copy is not None
         self.assertEqual(copy.evidence.count(), 1)  # type: ignore
+
+    def test_copy_succeeds_when_two_root_curations_exist(self):
+        _make_curation(self.allele, self.disease)
+        response = self.client.post(self._url())
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Curation.objects.filter(copied_from=self.curation).exists())
 
     def test_copy_fails_when_source_not_published(self):
         curation2 = _make_curation(self.allele, self.disease)
