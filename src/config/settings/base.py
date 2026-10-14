@@ -152,13 +152,25 @@ STORAGES = {
     "dbbackup": BACKUP_STORAGE,
 }
 
+# The server's subdomain: hci, hci-test, or dev on a developer's machine. Backup names
+# and alert subjects use it, so you can tell prod and test apart.
+SUBDOMAIN = os.getenv("SUBDOMAIN", "dev")
+
 # Backups named by django-dbbackup, like the daily one, go under daily/. Other backups
-# pass their own name with -o. Names use the subdomain (hci or hci-test) instead of
-# the server's hostname, so you can tell prod and test backups apart.
-DBBACKUP_HOSTNAME = os.getenv("SUBDOMAIN", "dev")
+# pass their own name with -o.
+DBBACKUP_HOSTNAME = SUBDOMAIN
 
 DBBACKUP_FILENAME_TEMPLATE = "daily/{servername}-{datetime}.{extension}"
 
 LOGIN_URL = "/auth/login"
 
 DJANGO_TABLES2_TEMPLATE = "tables.html"
+
+# Alerts, such as a failed nightly backup, go to these addresses. We don't use ADMINS,
+# because setting it makes Django email every server error, which Sentry already
+# reports.
+ALERT_EMAILS = [
+    address.strip()
+    for address in os.getenv("ALERT_EMAILS", "").split(",")
+    if address.strip()
+]

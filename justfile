@@ -428,3 +428,15 @@ alias stlb := server-test-list-backups
 server-prod-list-backups:
     cd infra/ansible && uv run ansible prod_server -i inventory.ini -m ansible.builtin.shell -a "cd ~/hla-curation-interface/src && ~/.local/bin/uv run manage.py list_backups"
 alias sprlb := server-prod-list-backups
+
+# Send a test alert email from the test server. ----------------------
+[group('server')]
+server-test-send-test-alert:
+    cd infra/ansible && uv run ansible test_server -i inventory.ini -m ansible.builtin.shell -a "cd ~/hla-curation-interface/src && ~/.local/bin/uv run manage.py send_test_alert"
+alias stsa := server-test-send-test-alert
+
+# Send a test alert email from the prod server. ----------------------
+[group('server')]
+server-prod-send-test-alert:
+    cd infra/ansible && uv run ansible prod_server -i inventory.ini -m ansible.builtin.shell -a "cd ~/hla-curation-interface/src && ~/.local/bin/uv run manage.py send_test_alert"
+alias sprsa := server-prod-send-test-alert

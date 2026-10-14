@@ -7,6 +7,7 @@ import sqlite3
 from contextlib import closing, contextmanager
 from io import StringIO
 from pathlib import Path
+from smtplib import SMTPException
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 from typing import Any
@@ -16,14 +17,16 @@ from dbbackup import settings as dbbackup_settings
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
+from django.core import mail
 from django.core.management import CommandError, call_command
 from django.db import connection
 from django.template.loader import render_to_string
 from django.templatetags.static import static
-from django.test import Client, TestCase, TransactionTestCase
+from django.test import Client, TestCase, TransactionTestCase, override_settings
 from django.urls import reverse
 
 from auth_.models import UserProfile
+from common.alerts import send_alert
 from common.tables import HistoryTable
 from common.templatetags.custom_filters import is_public
 
@@ -579,3 +582,43 @@ class ListBackupsCommandTest(TempBackupStorageMixin, TestCase):
 
     def test_says_so_when_there_are_none(self):
         self.assertEqual(self.list_backups(), ["No backups found."])
+
+
+@override_settings(
+    SUBDOMAIN="hci-test", ALERT_EMAILS=["a@example.com", "b@example.com"]
+)
+class SendAlertTest(TestCase):
+    """Tests the helper that emails ALERT_EMAILS when something goes wrong."""
+
+    def test_sends_one_message_to_every_alert_address(self):
+        self.assertTrue(send_alert("Backup failed", "Details"))
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["a@example.com", "b@example.com"])
+        self.assertIn("hci-test", mail.outbox[0].subject)
+        self.assertIn("Backup failed", mail.outbox[0].subject)
+        self.assertEqual(mail.outbox[0].body, "Details")
+
+    @override_settings(ALERT_EMAILS=[])
+    def test_sends_nothing_without_alert_addresses(self):
+        with self.assertLogs("common.alerts", level="WARNING"):
+            self.assertFalse(send_alert("Backup failed", "Details"))
+        self.assertEqual(mail.outbox, [])
+
+    def test_logs_instead_of_raising_when_sending_fails(self):
+        with (
+            patch("common.alerts.send_mail", side_effect=SMTPException("down")),
+            self.assertLogs("common.alerts", level="ERROR"),
+        ):
+            self.assertFalse(send_alert("Backup failed", "Details"))
+
+    def test_send_test_alert_command_sends_an_alert(self):
+        call_command("send_test_alert", stdout=StringIO())
+        self.assertEqual(len(mail.outbox), 1)
+
+    @override_settings(ALERT_EMAILS=[])
+    def test_send_test_alert_command_fails_when_nothing_is_sent(self):
+        with (
+            self.assertLogs("common.alerts", level="WARNING"),
+            self.assertRaises(CommandError),
+        ):
+            call_command("send_test_alert", stdout=StringIO())
