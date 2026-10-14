@@ -1,6 +1,6 @@
 # `templates`
 
-This directory contains the top-level Django templates shared across the entire application. It includes HTTP error pages, the base layout that all views extend, reusable UI partials included by that layout, and a custom django-tables2 rendering template. App-specific templates live in their respective app directories.
+This directory contains the top-level Django templates shared across the entire application. It includes HTTP error pages, the curator layout (`layouts/base.html`), the public HLArepo layout (`layouts/public.html`), reusable UI partials included by those layouts, and a custom django-tables2 rendering template. App-specific templates live in their respective app directories.
 
 ### `400.html`
 
@@ -20,7 +20,11 @@ Renders a 500 Internal Server Error page when an unhandled server-side exception
 
 ### `layouts/base.html`
 
-The root layout template that all other page templates extend. It loads static assets (Bulma CSS, Bootstrap Icons, Choices.js, HTMX, Tippy.js and Popper, the tooltip script, and the confirm modal script), sets up the `<head>` with favicon and meta blocks, and composes the page structure by including the environment banner, navbar, account activation notice, flash messages, and footer partials around a `{% block main %}` content slot, followed by the shared confirm modal (`common/confirm_modal.html`).
+The curator layout that every HCI page extends. It loads static assets (Bulma CSS, Bootstrap Icons, Choices.js, HTMX, Tippy.js and Popper, the tooltip script, and the confirm modal script), sets up the `<head>` with favicon and meta blocks, and composes the page structure by including the environment banner, navbar, account activation notice, flash messages, and footer partials around a `{% block main %}` content slot, followed by the shared confirm modal (`common/confirm_modal.html`).
+
+### `layouts/public.html`
+
+The public layout that HLArepo pages extend. It loads the same assets as `layouts/base.html` minus Choices.js, which no public page uses, and its title prefix is "HLArepo". It includes the environment banner, the public navbar, flash messages, the public footer, and the confirm modal, but not the curator navbar or the account activation notice, so a visitor never sees a link that needs a login.
 
 ### `partials/account_activation.html`
 
@@ -32,7 +36,11 @@ Shows a warning notification when the application is running in a non-production
 
 ### `partials/footer.html`
 
-Renders the site-wide footer containing ClinGen and Stanford Medicine logos, navigation links (About, Contact, Citing, Help, Acknowledgements, Collaborators), copyright and funding attribution, a link to the open-source repository, and the current Git SHA.
+Renders the HCI footer containing the ClinGen and Stanford Medicine logos (from `footer_logos.html`), navigation links (About, Contact, Citing, Help, Acknowledgements, Collaborators), copyright and funding attribution, a link to the open-source repository, and the current Git SHA.
+
+### `partials/footer_logos.html`
+
+Renders the ClinGen and Stanford Medicine logo columns. Both footers include it so their logos don't drift apart.
 
 ### `partials/messages.html`
 
@@ -45,6 +53,14 @@ Renders the main navigation bar with dropdown menus for Alleles, Haplotypes, Dis
 ### `partials/navbar_link.html`
 
 A micro-partial that renders a single `<a class="navbar-item">` link. It accepts `url` and `text` context variables and applies `has-text-weight-bold` when the link matches the currently active view.
+
+### `partials/public_footer.html`
+
+Renders the HLArepo footer: the shared logos, copyright and funding attribution, a link to the open-source repository, and the current Git SHA. Its text names HLArepo rather than the HCI.
+
+### `partials/public_navbar.html`
+
+Renders the HLArepo navigation bar: the HLArepo brand, linking to the repo search page, and a small, low-emphasis link back to the HCI home page in the upper-right corner. Includes the same burger menu script as `navbar.html`.
 
 ### `tables.html`
 

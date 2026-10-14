@@ -8,7 +8,9 @@
                 <tr>
                     <th>ID</th>
                     <th>Publication</th>
-                    <th>Needs Review</th>
+                    {% if not public %}
+                        <th>Needs Review</th>
+                    {% endif %}
                     <th>Status</th>
                     <th>Included</th>
                     <th>Score</th>
@@ -18,20 +20,26 @@
                 {% for evidence in object.evidence.all %}
                     <tr>
                         <td>
-                            <a href="{% url 'evidence-detail' curation_slug=object.slug evidence_slug=evidence.slug %}">
+                            {% if public %}
                                 {{ evidence.slug|default_if_none:"------" }}
-                            </a>
+                            {% else %}
+                                <a href="{% url 'evidence-detail' curation_slug=object.slug evidence_slug=evidence.slug %}">
+                                    {{ evidence.slug|default_if_none:"------" }}
+                                </a>
+                            {% endif %}
                         </td>
                         <td>
                             <i>{{ evidence.publication|default_if_none:"------" }}</i>
                         </td>
-                        <td>
-                            {% if evidence.needs_review %}
-                                {% include "common/tags/needs_review.html" with text=evidence.needs_review %}
-                            {% else %}
-                                {{ evidence.needs_review }}
-                            {% endif %}
-                        </td>
+                        {% if not public %}
+                            <td>
+                                {% if evidence.needs_review %}
+                                    {% include "common/tags/needs_review.html" with text=evidence.needs_review %}
+                                {% else %}
+                                    {{ evidence.needs_review }}
+                                {% endif %}
+                            </td>
+                        {% endif %}
                         <td>
                             {% if evidence.status == "INP" %}
                                 {% include "common/tags/in_progress.html" %}
@@ -55,7 +63,7 @@
             </table>
         </div>
 
-        {% if not object.publication and object.status == "INP" %}
+        {% if not public and not object.publication and object.status == "INP" %}
             <a href="{% url 'curation-edit-evidence' object.slug %}" class="button is-link is-light">
                 {% include "common/icon.html" with icon_name="pencil" %}
                 Edit Evidence

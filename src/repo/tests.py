@@ -1,7 +1,9 @@
 import json
 from datetime import date, datetime, timedelta
-from typing import override
+from typing import TYPE_CHECKING, override
 
+from bs4 import BeautifulSoup
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.test import Client, TestCase
@@ -24,6 +26,9 @@ from repo.serializers import (
     serialize_evidence,
     serialize_published_curation,
 )
+
+if TYPE_CHECKING:
+    from django.test.client import _MonkeyPatchedWSGIResponse
 
 
 class PublishedCurationModelTest(TestCase):
@@ -641,3 +646,132 @@ class CopyButtonTest(TestCase):
         url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
         response = self.client.get(url)
         self.assertContains(response, "Copy and Recurate")
+
+
+def assert_no_login_links(
+    test: TestCase, response: "_MonkeyPatchedWSGIResponse"
+) -> None:
+    """Asserts every internal link on a page loads for an anonymous user.
+
+    Fetches each internal href with a fresh anonymous client and fails if one
+    doesn't return 200, which catches links that send visitors to the login page.
+    """
+    soup = BeautifulSoup(response.content, "html.parser")
+    hrefs = {str(a["href"]) for a in soup.find_all("a", href=True)}
+    internal = {
+        href
+        for href in hrefs
+        if href.startswith("/") and not href.startswith(settings.STATIC_URL)
+    }
+    test.assertTrue(internal, "Expected the page to have internal links.")
+    for href in sorted(internal):
+        with test.subTest(href=href):
+            linked = Client().get(href)
+            test.assertEqual(
+                linked.status_code,
+                200,
+                f"{href} returned {linked.status_code}"
+                f" (Location: {linked.get('Location')}).",
+            )
+            test.assertFalse(linked.get("Location", "").startswith(settings.LOGIN_URL))
+
+
+class PublicLayoutTest(TestCase):
+    fixtures = [
+        "test_alleles.json",
+        "test_diseases.json",
+        "test_publications.json",
+        "test_curations.json",
+        "test_evidence.json",
+    ]
+
+    def setUp(self):
+        self.curation = Curation.objects.get(slug="C000001")
+        Curation.objects.filter(pk=self.curation.pk).update(status=Status.PUBLISHED)
+        user = User.objects.create_user(username="publisher")
+        self.published = PublishedCuration.objects.create(
+            curation=self.curation, published_by=user
+        )
+        self.evidence = self.curation.evidence.get()  # type: ignore
+        slug = self.curation.slug
+        history_id = self.published.history.get().history_id  # type: ignore
+        self.urls = [
+            reverse("repo-search"),
+            reverse("repo-detail", args=[slug]),
+            reverse("repo-history", args=[slug]),
+            reverse("repo-change", args=[slug, history_id]),
+        ]
+
+    def test_internal_links_work_without_login(self):
+        for url in self.urls:
+            with self.subTest(url=url):
+                assert_no_login_links(self, self.client.get(url))
+
+    def test_pages_use_the_public_layout(self):
+        for url in self.urls:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertTemplateUsed(response, "layouts/public.html")
+                self.assertTemplateNotUsed(response, "layouts/base.html")
+                self.assertTemplateNotUsed(response, "partials/navbar.html")
+
+    def test_pages_have_no_curator_navigation(self):
+        for url in self.urls:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertNotContains(response, "Log In")
+                self.assertNotContains(response, 'id="log-out-button"')
+                self.assertNotContains(response, f'href="{reverse("allele-list")}"')
+                self.assertNotContains(response, f'href="{reverse("about")}"')
+
+    def test_pages_link_back_to_the_hci(self):
+        for url in self.urls:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertContains(response, 'id="hci-link"')
+                self.assertContains(response, f'href="{reverse("home")}"')
+
+    def test_breadcrumbs_start_at_hlarepo(self):
+        for url in self.urls:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertNotContains(response, "bi-house")
+                self.assertContains(response, "bi-database")
+
+    def test_footer_names_hlarepo(self):
+        response = self.client.get(self.urls[0])
+        self.assertTemplateUsed(response, "partials/public_footer.html")
+        self.assertTemplateUsed(response, "partials/footer_logos.html")
+        self.assertContains(response, "The HLArepo is an open-source project.")
+        self.assertNotContains(response, "The HCI is an open-source project.")
+
+    def test_title_names_hlarepo(self):
+        response = self.client.get(self.urls[1])
+        self.assertContains(response, "<title>HLArepo |")
+
+    def test_no_activation_notice_for_logged_in_non_curator(self):
+        user = User.objects.create_user(username="visitor")
+        UserProfile.objects.create(
+            user=user, has_signed_phi_agreement=False, has_curation_permissions=False
+        )
+        self.client.force_login(user)
+        response = self.client.get(self.urls[1])
+        self.assertTemplateNotUsed(response, "partials/account_activation.html")
+
+    def test_evidence_ids_are_plain_text(self):
+        response = self.client.get(self.urls[1])
+        self.assertContains(response, self.evidence.slug)
+        evidence_url = reverse(
+            "evidence-detail",
+            kwargs={
+                "curation_slug": self.curation.slug,
+                "evidence_slug": self.evidence.slug,
+            },
+        )
+        self.assertNotContains(response, evidence_url)
+        self.assertNotContains(response, "Edit Evidence")
+
+    def test_evidence_table_hides_needs_review(self):
+        self.assertNotIn("needs_review", PUBLIC_EVIDENCE_FIELDS)
+        response = self.client.get(self.urls[1])
+        self.assertNotContains(response, "Needs Review")

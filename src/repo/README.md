@@ -1,6 +1,6 @@
 # `repo`
 
-This Django app implements HLArepo, the public-facing repository of published HLA curations. It handles the `PublishedCuration` model (which wraps a completed `Curation`), exposes searchable list and detail views, tracks full change history via `django-simple-history`, and provides JSON download endpoints for individual or bulk export of published curation data.
+This Django app implements HLArepo, the public-facing repository of published HLA curations. Its pages extend `layouts/public.html`, which has no curator navigation or other links that need a login. It handles the `PublishedCuration` model (which wraps a completed `Curation`), exposes searchable list and detail views, tracks full change history via `django-simple-history`, and provides JSON download endpoints for individual or bulk export of published curation data.
 
 ### `__init__.py`
 
@@ -36,7 +36,7 @@ Renders a single historical change record for a published curation, showing brea
 
 ### `templates/repo/detail.html`
 
-Renders the detail page for a published curation, including supersession and copied-from notices, the public summary partial, the evidence detail table, and action buttons for JSON download, history navigation, and (for curators) copying the curation for re-curation.
+Renders the detail page for a published curation, including supersession and copied-from notices, the public summary partial, the evidence detail table (with `public=True`, so evidence IDs don't link to curator pages), and action buttons for JSON download, history navigation, and (for curators) copying the curation for re-curation.
 
 ### `templates/repo/partials/summary.html`
 

@@ -217,6 +217,14 @@ class CurationDetailTest(ProtectedViewTestMixin, TestCase):
         )
         self.assertContains(response, "0.0")  # Should default to a score of 0.0.
 
+    def test_links_evidence_ids_for_curators(self):
+        response = self.client.get(self.url)
+        url = reverse(
+            "evidence-detail",
+            kwargs={"curation_slug": "C000001", "evidence_slug": "E000001"},
+        )
+        self.assertContains(response, f'href="{url}"')
+
     def test_shows_taskforce_review_date_when_set(self):
         curation = Curation.objects.get(slug="C000001")
         curation.taskforce_review_date = date(2026, 9, 1)
