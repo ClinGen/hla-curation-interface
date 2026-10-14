@@ -63,6 +63,12 @@
                     {% include "common/icon.html" with icon_name="filetype-csv" %}
                     Download All as CSV
                 </a>
+                <a href="{% url 'repo-download-all-xlsx' %}"
+                   class="button is-link is-light"
+                   id="download-xlsx-button">
+                    {% include "common/icon.html" with icon_name="file-earmark-spreadsheet" %}
+                    Download All as Excel
+                </a>
             </div>
         </div>
 

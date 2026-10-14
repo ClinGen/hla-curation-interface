@@ -14,6 +14,7 @@ from django.templatetags.static import static
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
+from openpyxl import Workbook, load_workbook
 
 from allele.models import Allele
 from auth_.models import UserProfile
@@ -1071,6 +1072,132 @@ class CSVDownloadViewTest(TestCase):
             self.client.get(self.url)
 
     def test_landing_page_has_csv_button(self):
+        response = self.client.get(reverse("repo-search"))
+        soup = BeautifulSoup(response.content, "html.parser")
+        downloads = soup.find(id="downloads")
+        assert downloads is not None
+        self.assertIsNotNone(downloads.find("a", href=self.url))
+
+
+class XLSXDownloadViewTest(TestCase):
+    fixtures = [
+        "test_alleles.json",
+        "test_diseases.json",
+        "test_haplotypes.json",
+        "demographics.json",
+    ]
+    url = reverse("repo-download-all-xlsx")
+
+    def setUp(self):
+        user = User.objects.create_user(username="publisher")
+        self.curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+            status=Status.PUBLISHED,
+            taskforce_evidence_summary="Summary.",
+        )
+        self.publication = Publication.objects.create(
+            slug="P999999", title="T", author="A", publication_year=2020, pubmed_id="1"
+        )
+        self.evidence = Evidence.objects.create(
+            curation=self.curation,
+            publication=self.publication,
+            zygosity=Zygosity.BIALLELIC,
+            p_value=Decimal("0.0001"),
+            is_included=True,
+        )
+        self.evidence.demographics.set(Demographic.objects.all()[:2])
+        self.published = PublishedCuration.objects.create(
+            curation=self.curation, published_by=user
+        )
+
+    def _workbook(self) -> Workbook:
+        response = self.client.get(self.url)
+        return load_workbook(io.BytesIO(response.content))
+
+    @staticmethod
+    def _sheet_rows(workbook: Workbook, name: str) -> list[dict[str, object]]:
+        rows = list(workbook[name].iter_rows(values_only=True))
+        header = [str(cell) for cell in rows[0]]
+        return [
+            {
+                key: ("" if value is None else value)
+                for key, value in zip(header, row, strict=True)
+            }
+            for row in rows[1:]
+        ]
+
+    def test_response_is_an_xlsx_attachment(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response["Content-Type"],
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        self.assertRegex(
+            response["Content-Disposition"],
+            r'^attachment; filename="hla_curations_all_\d{4}-\d{2}-\d{2}\.xlsx"$',
+        )
+
+    def test_has_classifications_and_evidence_sheets(self):
+        self.assertEqual(self._workbook().sheetnames, ["Classifications", "Evidence"])
+
+    def test_classifications_sheet_matches_the_flat_row(self):
+        def normalize(value: object) -> object:
+            # Excel stores 0.0 as 0, so compare numbers as numbers.
+            if isinstance(value, int | float) and not isinstance(value, bool):
+                return float(value)
+            return str(value)
+
+        url = f"http://testserver{self.published.get_absolute_url()}"
+        expected = flatten_published_curation(self.published, url)
+        (row,) = self._sheet_rows(self._workbook(), "Classifications")
+        self.assertEqual(
+            {key: normalize(value) for key, value in row.items()},
+            {key: normalize(value) for key, value in expected.items()},
+        )
+
+    def test_evidence_sheet_has_one_row_per_evidence(self):
+        (row,) = self._sheet_rows(self._workbook(), "Evidence")
+        self.assertEqual(list(row), ["Classification ID", *EVIDENCE_COLUMN_NAMES])
+        self.assertEqual(row["Classification ID"], self.curation.slug)
+        self.assertEqual(row["Evidence ID"], self.evidence.slug)
+        self.assertEqual(row["Publication Title"], self.publication.title)
+        self.assertEqual(str(row["PubMed ID"]), self.publication.pubmed_id)
+        groups = [demo.group for demo in self.evidence.demographics.all()]
+        self.assertEqual(row["Demographics"], "; ".join(groups))
+
+    def test_values_are_readable_and_decimals_are_numbers(self):
+        (row,) = self._sheet_rows(self._workbook(), "Evidence")
+        self.assertEqual(row["Zygosity"], ZYGOSITY_CHOICES[Zygosity.BIALLELIC])
+        self.assertEqual(row["Included in Score"], "Yes")
+        p_value = row["p-value"]
+        assert isinstance(p_value, float)
+        self.assertAlmostEqual(p_value, 0.0001)
+
+    def test_header_rows_are_bold_and_frozen(self):
+        workbook = self._workbook()
+        for name in workbook.sheetnames:
+            with self.subTest(sheet=name):
+                sheet = workbook[name]
+                self.assertTrue(sheet["A1"].font.bold)
+                self.assertEqual(sheet.freeze_panes, "A2")
+
+    def test_query_count_does_not_grow_with_rows(self):
+        other = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=2),
+            disease=Disease.objects.get(pk=1),
+            status=Status.PUBLISHED,
+        )
+        Evidence.objects.create(curation=other, publication=self.publication)
+        PublishedCuration.objects.create(curation=other)
+        # Curations, evidence, and demographics.
+        with self.assertNumQueries(3):
+            self.client.get(self.url)
+
+    def test_landing_page_has_xlsx_button(self):
         response = self.client.get(reverse("repo-search"))
         soup = BeautifulSoup(response.content, "html.parser")
         downloads = soup.find(id="downloads")

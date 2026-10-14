@@ -1,5 +1,6 @@
 import codecs
 import csv
+import io
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -11,6 +12,9 @@ from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views.generic import DetailView
 from django_tables2 import RequestConfig
+from openpyxl import Workbook
+from openpyxl.styles import Font
+from openpyxl.worksheet.worksheet import Worksheet
 
 from common.history import resolve_changes
 from common.tables import HistoryTable
@@ -20,6 +24,8 @@ from curation.models import Evidence
 from repo.models import PublishedCuration
 from repo.serializers import (
     flatten_classification_rows,
+    flatten_evidence,
+    flatten_published_curation,
     serialize_published_curation,
 )
 from repo.tables import PublishedCurationTable
@@ -167,17 +173,15 @@ def download_all_json(request: HttpRequest) -> HttpResponse:
     return response
 
 
-def download_all_csv(request: HttpRequest) -> HttpResponse:
-    """Downloads all published classifications as CSV, one row per evidence.
-
-    The file starts with a UTF-8 byte order mark so Excel reads non-ASCII text
-    correctly.
+def _published_for_export() -> QuerySet[PublishedCuration]:
+    """Returns every published curation with what the flat files need.
 
     Returns:
-        CSV response with all published classifications, most recently published
-        first.
+        Published curations, most recently published first, with their related
+        rows, evidence, publications, and demographics prefetched so the query
+        count doesn't grow with the number of rows.
     """
-    published_curations = (
+    return (
         PublishedCuration.objects.select_related(
             "curation__allele",
             "curation__haplotype",
@@ -194,6 +198,19 @@ def download_all_csv(request: HttpRequest) -> HttpResponse:
         )
         .order_by("-published_at")
     )
+
+
+def download_all_csv(request: HttpRequest) -> HttpResponse:
+    """Downloads all published classifications as CSV, one row per evidence.
+
+    The file starts with a UTF-8 byte order mark so Excel reads non-ASCII text
+    correctly.
+
+    Returns:
+        CSV response with all published classifications, most recently published
+        first.
+    """
+    published_curations = _published_for_export()
     timestamp = timezone.now().strftime("%Y-%m-%d")
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = (
@@ -208,6 +225,57 @@ def download_all_csv(request: HttpRequest) -> HttpResponse:
                 writer = csv.DictWriter(response, fieldnames=list(row))
                 writer.writeheader()
             writer.writerow(row)
+    return response
+
+
+XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+def _write_sheet(sheet: Worksheet, rows: list[dict[str, object]]) -> None:
+    """Writes rows to a sheet under a bold, frozen header row."""
+    if not rows:
+        return
+    sheet.append(list(rows[0]))
+    for cell in sheet[1]:
+        cell.font = Font(bold=True)
+    sheet.freeze_panes = "A2"
+    for row in rows:
+        sheet.append(list(row.values()))
+
+
+def download_all_xlsx(request: HttpRequest) -> HttpResponse:
+    """Downloads all published classifications as an Excel workbook.
+
+    The Classifications sheet has one row per classification. The Evidence sheet
+    has one row per evidence record, starting with its classification's ID.
+
+    Returns:
+        XLSX response with all published classifications, most recently
+        published first.
+    """
+    classification_rows = []
+    evidence_rows = []
+    for published in _published_for_export():
+        url = request.build_absolute_uri(published.get_absolute_url())
+        classification_rows.append(flatten_published_curation(published, url=url))
+        classification_id = {"Classification ID": published.curation.slug}
+        evidence_rows.extend(
+            {**classification_id, **flatten_evidence(evidence)}
+            for evidence in published.curation.evidence.all()
+        )
+
+    workbook = Workbook()
+    workbook.remove(workbook.worksheets[0])  # Drop the default empty sheet.
+    _write_sheet(workbook.create_sheet("Classifications"), classification_rows)
+    _write_sheet(workbook.create_sheet("Evidence"), evidence_rows)
+    buffer = io.BytesIO()
+    workbook.save(buffer)
+
+    timestamp = timezone.now().strftime("%Y-%m-%d")
+    response = HttpResponse(buffer.getvalue(), content_type=XLSX_CONTENT_TYPE)
+    response["Content-Disposition"] = (
+        f'attachment; filename="hla_curations_all_{timestamp}.xlsx"'
+    )
     return response
 
 

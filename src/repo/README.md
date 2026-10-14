@@ -76,7 +76,7 @@ The layout for the HLArepo info pages. It extends `layouts/public.html` and rend
 
 ### `templates/repo/list.html`
 
-Renders the HLArepo landing page at `/repo/`: the HCI logo, the HLArepo title and subtitle, a short description of HLArepo, a Downloads section with the bulk JSON and CSV download buttons, and the searchable, paginated list of published curations (HTMX swaps in only the results partial).
+Renders the HLArepo landing page at `/repo/`: the HCI logo, the HLArepo title and subtitle, a short description of HLArepo, a Downloads section with the bulk JSON, CSV, and Excel download buttons, and the searchable, paginated list of published curations (HTMX swaps in only the results partial).
 
 ### `tests.py`
 
@@ -84,8 +84,8 @@ Contains unit and integration tests covering the `PublishedCuration` model (crea
 
 ### `urls.py`
 
-Maps URL patterns for the repo app: the search/list page, the six info pages (About, Acknowledgements, Citing, Collaborators, Contact, Help), the bulk JSON and CSV and single JSON download endpoints, and the curation detail, history, and change views, all namespaced under the `repo-` prefix.
+Maps URL patterns for the repo app: the search/list page, the six info pages (About, Acknowledgements, Citing, Collaborators, Contact, Help), the bulk JSON, CSV, and XLSX and single JSON download endpoints, and the curation detail, history, and change views, all namespaced under the `repo-` prefix.
 
 ### `views.py`
 
-Implements the repo views: `PublishedCurationList` (searchable table list, most recently published first), `PublishedCurationDetail` (with supersession detection and related-object prefetching for the linkouts), `PublishedCurationHistory` and `PublishedCurationChange` (history audit trail), `download_all_json` / `download_single_json` function-based views that return serialized JSON responses as file attachments, `download_all_csv`, which streams every published classification as a CSV attachment with one row per evidence record (newest classification first, UTF-8 with a byte order mark so Excel reads it correctly, with evidence prefetched to keep the query count constant), and function-based views for the six info pages.
+Implements the repo views: `PublishedCurationList` (searchable table list, most recently published first), `PublishedCurationDetail` (with supersession detection and related-object prefetching for the linkouts), `PublishedCurationHistory` and `PublishedCurationChange` (history audit trail), `download_all_json` / `download_single_json` function-based views that return serialized JSON responses as file attachments, `download_all_csv`, which streams every published classification as a CSV attachment with one row per evidence record (newest classification first, UTF-8 with a byte order mark so Excel reads it correctly, with evidence prefetched to keep the query count constant), `download_all_xlsx`, which returns an Excel workbook with a Classifications sheet (one row per classification) and an Evidence sheet (one row per evidence record, starting with its classification's ID), each with a bold, frozen header row, and function-based views for the six info pages.

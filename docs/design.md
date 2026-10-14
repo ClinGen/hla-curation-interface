@@ -21,7 +21,8 @@ owners who want to understand the system's architecture and key design decisions
   framework's rules and constraints.
 - Maintain a complete, auditable change history for every record in the system.
 - Publish finalized curations to HLArepo in a human-readable format (HTML).
-- Publish finalized curations to HLArepo in a machine-readable format (JSON).
+- Publish finalized curations to HLArepo in machine-readable formats (JSON, CSV, and
+  XLSX).
 - Run reliably on minimal infrastructure; avoid cloud vendor lock-in.
 
 ## Non-Goals

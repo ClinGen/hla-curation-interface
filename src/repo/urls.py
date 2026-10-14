@@ -12,6 +12,7 @@ urlpatterns = [
     path("help", views.help_, name="repo-help"),
     path("download/all.json", views.download_all_json, name="repo-download-all"),
     path("download/all.csv", views.download_all_csv, name="repo-download-all-csv"),
+    path("download/all.xlsx", views.download_all_xlsx, name="repo-download-all-xlsx"),
     path(
         "<slug:curation_slug>/detail",
         views.PublishedCurationDetail.as_view(),
