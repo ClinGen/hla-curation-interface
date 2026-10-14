@@ -156,26 +156,42 @@ class PublishedCurationChange(DetailView):
         return context
 
 
+def _json_attachment(
+    published_curations: list[PublishedCuration], filename: str
+) -> HttpResponse:
+    """Returns curations as an indented, downloadable JSON file.
+
+    The single and bulk downloads share this shape, so one reader handles both.
+
+    Returns:
+        JSON response with the export date, the count, and the curations.
+    """
+    data = {
+        "export_date": timezone.now().strftime("%Y-%m-%d"),
+        "total_count": len(published_curations),
+        "curations": [
+            serialize_published_curation(published) for published in published_curations
+        ],
+    }
+    # Indent the file and keep non-ASCII text, since people read it as is.
+    response = JsonResponse(
+        data, json_dumps_params={"indent": 2, "ensure_ascii": False}
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
+
 def download_all_json(request: HttpRequest) -> HttpResponse:
     """Downloads all published curations as JSON.
 
     Returns:
         JSON response with all published curations and metadata.
     """
-    published_curations = PublishedCuration.objects.all()
     timestamp = timezone.now().strftime("%Y-%m-%d")
-    data = {
-        "published_curations": [
-            serialize_published_curation(pc) for pc in PublishedCuration.objects.all()
-        ],
-        "total_count": published_curations.count(),
-        "export_date": timestamp,
-    }
-    response = JsonResponse(data)
-    response["Content-Disposition"] = (
-        f'attachment; filename="hla_curations_all_{timestamp}.json"'
+    return _json_attachment(
+        list(PublishedCuration.objects.order_by("-published_at")),
+        filename=f"hla_curations_all_{timestamp}.json",
     )
-    return response
 
 
 def _published_for_export() -> QuerySet[PublishedCuration]:
@@ -291,16 +307,7 @@ def download_single_json(request: HttpRequest, curation_slug: str) -> HttpRespon
         JSON response with the specified published curation.
     """
     published = get_object_or_404(PublishedCuration, curation__slug=curation_slug)
-    timestamp = timezone.now().strftime("%Y-%m-%d")
-    data = {
-        "curation": serialize_published_curation(published),
-        "export_date": timestamp,
-    }
-    response = JsonResponse(data)
-    response["Content-Disposition"] = (
-        f'attachment; filename="hla_curation_{curation_slug}.json"'
-    )
-    return response
+    return _json_attachment([published], filename=f"hla_curation_{curation_slug}.json")
 
 
 def about(request: HttpRequest) -> HttpResponse:

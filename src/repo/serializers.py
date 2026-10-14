@@ -2,16 +2,11 @@ from datetime import UTC, date
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
-from repo.constants import PUBLIC_CURATION_FIELDS, PUBLIC_EVIDENCE_FIELDS
-
 if TYPE_CHECKING:
     from django.db.models import Model
 
     from curation.models import Curation, Evidence
     from repo.models import PublishedCuration
-
-# Export keys that differ from the model field name, kept for existing consumers.
-EXPORT_NAMES = {"taskforce_classification": "classification"}
 
 
 def _export_value(value: object) -> object:
@@ -27,31 +22,61 @@ def _export_value(value: object) -> object:
     return value
 
 
+def _choice_label(instance: "Model", name: str) -> str | None:
+    """Returns the display label of a choice field's value.
+
+    Returns:
+        The label, or None if the field has no choices or no value.
+    """
+    # Django adds a get_<name>_display method for every field with choices.
+    get_display = getattr(instance, f"get_{name}_display", None)
+    if get_display is None or getattr(instance, name) is None:
+        return None
+    return get_display()
+
+
+def _json_field(instance: "Model", name: str) -> object:
+    """Returns a field's JSON value, using the display label for a choice.
+
+    Returns:
+        The choice label for a field with choices, otherwise the JSON-friendly
+        value. None stays None.
+    """
+    label = _choice_label(instance, name)
+    return label if label is not None else _export_value(getattr(instance, name))
+
+
 def _public_curation_fields(curation: "Curation") -> dict[str, Any]:
-    return {
-        EXPORT_NAMES.get(name, name): _export_value(getattr(curation, name))
-        for name in sorted(PUBLIC_CURATION_FIELDS)
-    }
+    data: dict[str, Any] = {}
+    for name in CLASSIFICATION_COLUMNS:
+        value = getattr(curation, name)
+        if name == "taskforce":
+            value = curation.taskforce_display
+        data[name] = _export_value(value)
+    return data
 
 
 def _public_evidence_fields(evidence: "Evidence") -> dict[str, Any]:
     data: dict[str, Any] = {}
-    for name in sorted(PUBLIC_EVIDENCE_FIELDS):
+    for name in EVIDENCE_COLUMNS:
         if name == "demographics":
             data[name] = [demo.group for demo in evidence.demographics.all()]
         else:
-            data[name] = _export_value(getattr(evidence, name))
+            data[name] = _json_field(evidence, name)
     return data
 
 
 def serialize_published_curation(published: "PublishedCuration") -> dict[str, Any]:
-    """Serializes a published curation to a dictionary.
+    """Serializes a published curation to a classification dictionary.
+
+    Coded values, such as the status and the classification, are their display
+    labels, since the people who download the JSON aren't all programmers.
 
     Args:
         published: The PublishedCuration instance to serialize.
 
     Returns:
-        Dictionary with all curation data including related evidence.
+        Dictionary with all classification data including related evidence.
     """
     curation = published.curation
 
@@ -81,26 +106,25 @@ def serialize_published_curation(published: "PublishedCuration") -> dict[str, An
 
     return {
         "curation_id": curation.slug,
-        "published_at": published.published_at.isoformat(),
         "version": published.version,
-        "curation": {
-            "status": curation.status,
-            **_public_curation_fields(curation),
-            "copied_from": curation.copied_from.slug if curation.copied_from else None,
-            "score": float(curation.score),
-            **entity_data,
-            "disease": (
-                {
-                    "name": curation.disease.name,
-                    "mondo_id": curation.disease.mondo_id,
-                    "iri": curation.disease.iri,
-                    "slug": curation.disease.slug,
-                }
-                if curation.disease
-                else None
-            ),
-            "added_at": curation.added_at.isoformat(),
-        },
+        "published_at": published.published_at.isoformat(),
+        "status": _json_field(curation, "status"),
+        **entity_data,
+        "disease": (
+            {
+                "name": curation.disease.name,
+                "mondo_id": curation.disease.mondo_id,
+                "iri": curation.disease.iri,
+                "slug": curation.disease.slug,
+            }
+            if curation.disease
+            else None
+        ),
+        "classification": curation.classification_display,
+        "score": float(curation.score),
+        **_public_curation_fields(curation),
+        "update_of": curation.copied_from.slug if curation.copied_from else None,
+        "added_at": curation.added_at.isoformat(),
         "evidence": [
             serialize_evidence(evidence) for evidence in curation.evidence.all()
         ],
@@ -114,12 +138,13 @@ def serialize_evidence(evidence: "Evidence") -> dict[str, Any]:
         evidence: The Evidence instance to serialize.
 
     Returns:
-        Dictionary with all evidence data.
+        Dictionary with all evidence data, with choice labels for coded values.
     """
     return {
         "evidence_id": evidence.slug,
-        "status": evidence.status,
+        "status": _json_field(evidence, "status"),
         "is_included": evidence.is_included,
+        "score": float(evidence.score),
         "publication": (
             {
                 "slug": evidence.publication.slug,
@@ -131,13 +156,13 @@ def serialize_evidence(evidence: "Evidence") -> dict[str, Any]:
             else None
         ),
         **_public_evidence_fields(evidence),
-        "score": float(evidence.score),
         "added_at": evidence.added_at.isoformat(),
     }
 
 
-# Readable column names for the public fields in a flat row, in the order the
-# forms ask for them. The classification itself has a fixed column.
+# The public fields, in the order the forms ask for them, with their readable
+# column names for flat rows. The JSON uses the same order. The classification
+# itself has a fixed place in both.
 CLASSIFICATION_COLUMNS = {
     "taskforce": "Taskforce",
     "taskforce_review_date": "Taskforce Review Date",
@@ -202,12 +227,8 @@ def _field_label(instance: "Model", name: str) -> object:
     Returns:
         The choice label for a field with choices, otherwise the flat value.
     """
-    value = getattr(instance, name)
-    # Django adds a get_<name>_display method for every field with choices.
-    get_display = getattr(instance, f"get_{name}_display", None)
-    if get_display is not None and value is not None:
-        return get_display()
-    return _flat_value(value)
+    label = _choice_label(instance, name)
+    return label if label is not None else _flat_value(getattr(instance, name))
 
 
 def flatten_published_curation(

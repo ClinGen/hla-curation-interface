@@ -19,7 +19,11 @@ from openpyxl import Workbook, load_workbook
 from allele.models import Allele
 from auth_.models import UserProfile
 from common.tests import OpenViewTestMixin, ProtectedViewTestMixin
-from curation.constants.models.common import Status
+from curation.constants.models.common import (
+    CURATION_STATUS_CHOICES,
+    STATUS_CHOICES,
+    Status,
+)
 from curation.constants.models.curation import (
     HLA_CURATION_TASKFORCE_ID,
     TASKFORCE_CHOICES,
@@ -41,7 +45,6 @@ from repo.serializers import (
     CLASSIFICATION_COLUMNS,
     EVIDENCE_COLUMN_NAMES,
     EVIDENCE_COLUMNS,
-    EXPORT_NAMES,
     flatten_classification_rows,
     flatten_evidence,
     flatten_published_curation,
@@ -445,21 +448,19 @@ class JSONDownloadViewTest(TestCase):
         self.assertIn("attachment", response["Content-Disposition"])
 
         data = json.loads(response.content)
-        self.assertEqual(data["curation"]["curation_id"], self.curation.slug)
+        self.assertEqual(data["curations"][0]["curation_id"], self.curation.slug)
 
     def test_json_includes_taskforce_review_date(self):
         url = reverse(
             "repo-download-single", kwargs={"curation_slug": self.curation.slug}
         )
         data = json.loads(self.client.get(url).content)
-        self.assertIsNone(data["curation"]["curation"]["taskforce_review_date"])
+        self.assertIsNone(data["curations"][0]["taskforce_review_date"])
 
         self.curation.taskforce_review_date = date(2026, 9, 1)
         self.curation.save()
         data = json.loads(self.client.get(url).content)
-        self.assertEqual(
-            data["curation"]["curation"]["taskforce_review_date"], "2026-09-01"
-        )
+        self.assertEqual(data["curations"][0]["taskforce_review_date"], "2026-09-01")
 
     def test_json_includes_override_reason(self):
         self.curation.taskforce_override_reason = "Replicated in two cohorts."
@@ -469,7 +470,7 @@ class JSONDownloadViewTest(TestCase):
         )
         data = json.loads(self.client.get(url).content)
         self.assertEqual(
-            data["curation"]["curation"]["taskforce_override_reason"],
+            data["curations"][0]["taskforce_override_reason"],
             "Replicated in two cohorts.",
         )
 
@@ -477,16 +478,58 @@ class JSONDownloadViewTest(TestCase):
         url = reverse(
             "repo-download-single", kwargs={"curation_slug": self.curation.slug}
         )
-        keys = json.loads(self.client.get(url).content)["curation"]["curation"]
+        keys = json.loads(self.client.get(url).content)["curations"][0]
         self.assertEqual(
             [key for key in keys if key == "ep" or key.startswith("ep_")], []
         )
 
-    def test_curation_keys_are_the_public_fields_plus_structure(self):
-        data = serialize_published_curation(self.published)["curation"]
-        public = {EXPORT_NAMES.get(name, name) for name in PUBLIC_CURATION_FIELDS}
-        structural = {"status", "copied_from", "score", "type", "allele", "disease"}
-        self.assertEqual(set(data) - {"added_at"}, public | structural)
+    def test_classification_keys_are_the_public_fields_plus_structure(self):
+        data = serialize_published_curation(self.published)
+        public = PUBLIC_CURATION_FIELDS - {"taskforce_classification"}
+        structural = {
+            "curation_id",
+            "version",
+            "published_at",
+            "status",
+            "type",
+            "allele",
+            "disease",
+            "classification",
+            "score",
+            "update_of",
+            "added_at",
+            "evidence",
+        }
+        self.assertEqual(set(data), public | structural)
+
+    def test_json_is_indented(self):
+        url = reverse("repo-download-single", args=[self.curation.slug])
+        content = self.client.get(url).content.decode()
+        self.assertTrue(content.startswith('{\n  "export_date": '))
+
+    def test_json_keeps_non_ascii_text(self):
+        Curation.objects.filter(pk=self.curation.pk).update(
+            taskforce_evidence_summary="Pokémon"
+        )
+        url = reverse("repo-download-single", args=[self.curation.slug])
+        self.assertIn("Pokémon", self.client.get(url).content.decode())
+
+    def test_json_uses_display_labels(self):
+        Curation.objects.filter(pk=self.curation.pk).update(
+            taskforce=HLA_CURATION_TASKFORCE_ID
+        )
+        Evidence.objects.create(curation=self.curation, zygosity=Zygosity.BIALLELIC)
+        url = reverse("repo-download-single", args=[self.curation.slug])
+        (curation,) = json.loads(self.client.get(url).content)["curations"]
+        self.assertEqual(curation["status"], CURATION_STATUS_CHOICES[Status.PUBLISHED])
+        self.assertEqual(
+            curation["classification"], self.curation.classification_display
+        )
+        name = dict(TASKFORCE_CHOICES)[HLA_CURATION_TASKFORCE_ID]
+        self.assertEqual(curation["taskforce"], f"{name} ({HLA_CURATION_TASKFORCE_ID})")
+        (evidence,) = curation["evidence"]
+        self.assertEqual(evidence["zygosity"], ZYGOSITY_CHOICES[Zygosity.BIALLELIC])
+        self.assertEqual(evidence["status"], STATUS_CHOICES[Status.IN_PROGRESS])
 
     def test_evidence_keys_are_the_public_fields_plus_structure(self):
         publication = Publication.objects.create(
@@ -517,10 +560,8 @@ class JSONDownloadViewTest(TestCase):
 
         data = json.loads(response.content)
         self.assertEqual(data["total_count"], 1)
-        self.assertEqual(len(data["published_curations"]), 1)
-        self.assertEqual(
-            data["published_curations"][0]["curation_id"], self.curation.slug
-        )
+        self.assertEqual(len(data["curations"]), 1)
+        self.assertEqual(data["curations"][0]["curation_id"], self.curation.slug)
 
     def test_json_includes_disease_iri(self):
         url = reverse(
@@ -528,7 +569,7 @@ class JSONDownloadViewTest(TestCase):
         )
         data = json.loads(self.client.get(url).content)
         self.assertEqual(
-            data["curation"]["curation"]["disease"]["iri"],
+            data["curations"][0]["disease"]["iri"],
             "http://purl.obolibrary.org/obo/MONDO_123",
         )
 
@@ -542,7 +583,7 @@ class JSONDownloadViewTest(TestCase):
         PublishedCuration.objects.create(curation=curation)
         url = reverse("repo-download-single", kwargs={"curation_slug": curation.slug})
         data = json.loads(self.client.get(url).content)
-        alleles = data["curation"]["curation"]["haplotype"]["alleles"]
+        alleles = data["curations"][0]["haplotype"]["alleles"]
         self.assertEqual(sorted(a["car_id"] for a in alleles), ["XAHLA123", "XAHLA456"])
 
 

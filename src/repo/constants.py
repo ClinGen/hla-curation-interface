@@ -1,7 +1,8 @@
 """Lists the model fields that are public in HLArepo and the JSON export.
 
-These sets are the one place that decides what's public. The serializers build
-the export from them, and the forms mark these fields with a public badge.
+These sets are the one place that decides what's public. The serializers' column
+maps must name exactly these fields, which a test checks, and the forms mark
+these fields with a public badge.
 Everything else, such as needs_review and every *_notes field on Evidence, stays
 internal.
 """
