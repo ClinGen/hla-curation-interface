@@ -6,6 +6,15 @@ resource "aws_lightsail_instance" "hci" {
   availability_zone = "us-west-2a"
   blueprint_id      = "ubuntu_24_04"
   bundle_id         = terraform.workspace == "prod" ? "medium_3_0" : "small_3_0"
+
+  // Lightsail takes a snapshot of the whole instance every day and keeps the last
+  // 7. The time is in UTC: 10 or 11 PM Pacific, before the midnight Pacific
+  // database backup.
+  add_on {
+    type          = "AutoSnapshot"
+    snapshot_time = "06:00"
+    status        = "Enabled"
+  }
 }
 
 resource "aws_lightsail_instance_public_ports" "hci" {
