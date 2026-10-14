@@ -201,6 +201,7 @@ CLASSIFICATION_COLUMNS = {
 }
 EVIDENCE_COLUMNS = {
     "is_gwas": "GWAS",
+    "num_fields": "Number of Fields",
     "zygosity": "Zygosity",
     "phase_confirmed": "Phase Confirmed",
     "typing_method": "Typing Method",

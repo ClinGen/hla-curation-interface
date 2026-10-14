@@ -30,8 +30,10 @@ from curation.constants.models.curation import (
     CurationTypes,
 )
 from curation.constants.models.evidence import (
+    NUM_FIELDS_CHOICES,
     TYPING_METHOD_CHOICES,
     ZYGOSITY_CHOICES,
+    NumFields,
     TypingMethod,
     Zygosity,
 )
@@ -920,6 +922,7 @@ class PublishedEvidenceDetailTest(TestCase):
             curation=self.curation,
             publication=self.publication,
             zygosity=Zygosity.BIALLELIC,
+            num_fields=NumFields.FOUR,
             relative_risk=Decimal("0.60000"),
             needs_review=True,
             needs_review_notes="Internal note.",
@@ -944,6 +947,10 @@ class PublishedEvidenceDetailTest(TestCase):
         self.assertTemplateUsed(response, "evidence/partials/score.html")
         self.assertContains(response, 'id="evidence-body"')
         self.assertContains(response, ZYGOSITY_CHOICES[Zygosity.BIALLELIC])
+        self.assertIn(
+            ("Number of Fields", NUM_FIELDS_CHOICES[NumFields.FOUR]),
+            response.context["evidence_values"],
+        )
         self.assertContains(response, "<td>0.6</td>", html=True)
         self.assertContains(response, "https://pubmed.ncbi.nlm.nih.gov/1234")
         self.assertEqual(

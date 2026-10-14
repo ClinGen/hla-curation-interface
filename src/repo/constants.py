@@ -31,6 +31,7 @@ PUBLIC_EVIDENCE_FIELDS = frozenset(
         "is_gwas",
         "is_protective",
         "multiple_testing_correction",
+        "num_fields",
         "odds_ratio",
         "p_value",
         "phase_confirmed",
