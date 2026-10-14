@@ -424,7 +424,13 @@ class DatabaseBackupTest(TransactionTestCase):
         self.back_up()
         User.objects.filter(username="kept").delete()
         restored_db = self.backup_dir / "restored.sqlite3"
-        with patch.dict(connection.settings_dict, {"NAME": str(restored_db)}):
+        # dbrestore closes the connection first. With NAME pointing at a file, Django
+        # would really close the in-memory test database, which deletes it for every
+        # later test, so keep the connection open.
+        with (
+            patch.dict(connection.settings_dict, {"NAME": str(restored_db)}),
+            patch.object(connection, "close"),
+        ):
             call_command(
                 "dbrestore",
                 "--noinput",
