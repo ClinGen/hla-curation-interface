@@ -333,6 +333,12 @@ class TestCurationTableRenderStatus(TestCase):
         self.assertHTMLEqual(html, render_to_string("common/tags/approved.html"))
 
 
+class TestCurationTableColumns(TestCase):
+    def test_has_no_type_column(self):
+        table = CurationTable([])
+        self.assertNotIn("curation_type", table.columns.names())
+
+
 class TestEvidence(TestCase):
     fixtures = [
         "test_alleles.json",

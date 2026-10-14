@@ -340,7 +340,6 @@ class CurationListTest(ProtectedViewTestMixin, TestCase):
     page_name = "Curation Search"
     expected_text = [
         "ID",
-        "Type",
         "Allele",
         "Haplotype",
         "Disease",
@@ -363,6 +362,10 @@ class CurationListTest(ProtectedViewTestMixin, TestCase):
     def test_status_uses_the_common_tag_template(self):
         response = self.client.get(self.url)
         self.assertTemplateUsed(response, "common/tags/in_progress.html")
+
+    def test_table_has_no_type_column(self):
+        response = self.client.get(self.url)
+        self.assertNotIn("curation_type", response.context["table"].columns.names())
 
 
 class EvidenceCreateTest(ProtectedViewTestMixin, TestCase):

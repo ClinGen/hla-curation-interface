@@ -56,7 +56,7 @@ def get_superseding(published_curation: PublishedCuration) -> PublishedCuration 
 class PublishedCurationList(SearchListView):
     model = PublishedCuration
     template_name = "repo/list.html"
-    ordering = ["-curation__updated_at"]
+    ordering = ["-published_at"]
     table_class = PublishedCurationTable
     search_fields = [
         "curation__slug",

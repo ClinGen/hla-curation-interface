@@ -76,7 +76,7 @@ Defines `build_evidence_summary`, which writes the taskforce's evidence summary 
 
 ### `tables.py`
 
-Defines the `CurationTable` class (using `django-tables2`) that renders the curation list view, including a linked slug column, type, allele/haplotype, disease, a status column rendered with the common tag template for each status (`STATUS_TAGS`), and a classification column that shows `Curation.classification_display`.
+Defines the `CurationTable` class (using `django-tables2`) that renders the curation list view, including a linked slug column, allele, haplotype, disease, last-updated date, a status column rendered with the common tag template for each status (`STATUS_TAGS`), and a classification column that shows `Curation.classification_display`.
 
 ### `templates/curation/change.html`
 

@@ -1,11 +1,12 @@
 import json
-from datetime import date
+from datetime import date, datetime, timedelta
 from typing import override
 
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from allele.models import Allele
 from auth_.models import UserProfile
@@ -222,6 +223,40 @@ class RepoSearchViewTest(TestCase):
             response, f'<a href="{url}" class="button is-small is-link is-light">'
         )
         self.assertContains(response, '<i class="bi bi-download mr-2"></i>')
+
+    def _publish(self, allele_pk: int, published_at: datetime) -> Curation:
+        user, _ = User.objects.get_or_create(username="testuser")
+        curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=allele_pk),
+            disease=Disease.objects.get(pk=1),
+            status=Status.PUBLISHED,
+        )
+        published = PublishedCuration.objects.create(
+            curation=curation, published_by=user
+        )
+        PublishedCuration.objects.filter(pk=published.pk).update(
+            published_at=published_at
+        )
+        return curation
+
+    def test_lists_most_recently_published_first(self):
+        # Create the newer one first so updated_at order differs from publish order.
+        newer = self._publish(2, timezone.now() - timedelta(days=1))
+        older = self._publish(1, timezone.now() - timedelta(days=30))
+
+        content = self.client.get(self.url).content.decode()
+        self.assertLess(content.index(newer.slug), content.index(older.slug))
+
+    def test_table_shows_published_date_and_no_type(self):
+        published_at = timezone.now() - timedelta(days=30)
+        self._publish(1, published_at)
+
+        response = self.client.get(self.url)
+        columns = response.context["table"].columns
+        self.assertNotIn("curation_type", columns.names())
+        self.assertEqual(columns["published_at"].header, "Published")
+        self.assertContains(response, published_at.strftime("%Y-%m-%d"))
 
 
 class PublishedCurationDetailViewTest(TestCase):

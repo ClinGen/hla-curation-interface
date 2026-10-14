@@ -28,7 +28,7 @@ Provides `serialize_published_curation` and `serialize_evidence`, plain function
 
 ### `tables.py`
 
-Defines `PublishedCurationTable` (a `django-tables2` table) that renders the searchable list of published curations, with columns for ID, type, allele, haplotype, disease, classification (`Curation.classification_display`), last-updated date, and a per-row JSON download button.
+Defines `PublishedCurationTable` (a `django-tables2` table) that renders the searchable list of published curations, with columns for ID, allele, haplotype, disease, classification (`Curation.classification_display`), published date, and a per-row JSON download button. There's no type column, since the filled-in allele or haplotype column shows it.
 
 ### `templates/repo/change.html`
 
@@ -60,4 +60,4 @@ Maps URL patterns for the repo app: the search/list page, bulk and single JSON d
 
 ### `views.py`
 
-Implements the repo views: `PublishedCurationList` (searchable table list), `PublishedCurationDetail` (with supersession detection and related-object prefetching for the linkouts), `PublishedCurationHistory` and `PublishedCurationChange` (history audit trail), and `download_all_json` / `download_single_json` function-based views that return serialized JSON responses as file attachments.
+Implements the repo views: `PublishedCurationList` (searchable table list, most recently published first), `PublishedCurationDetail` (with supersession detection and related-object prefetching for the linkouts), `PublishedCurationHistory` and `PublishedCurationChange` (history audit trail), and `download_all_json` / `download_single_json` function-based views that return serialized JSON responses as file attachments.

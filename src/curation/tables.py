@@ -20,11 +20,6 @@ class CurationTable(tables.Table):
         kwargs={"curation_slug": A("slug")},
         verbose_name="ID",
     )
-    curation_type = tables.Column(
-        accessor="get_curation_type_display",
-        verbose_name="Type",
-        orderable=False,
-    )
     allele = tables.Column(default="------")
     haplotype = tables.Column(default="------")
     disease = tables.Column(default="------")
@@ -41,7 +36,6 @@ class CurationTable(tables.Table):
         attrs = {"class": "table is-fullwidth is-hoverable"}
         sequence = (
             "slug",
-            "curation_type",
             "allele",
             "haplotype",
             "disease",

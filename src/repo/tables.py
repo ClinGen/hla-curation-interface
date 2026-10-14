@@ -14,11 +14,6 @@ class PublishedCurationTable(tables.Table):
         accessor="curation__slug",
         verbose_name="ID",
     )
-    curation_type = tables.Column(
-        accessor="curation__get_curation_type_display",
-        verbose_name="Type",
-        orderable=False,
-    )
     allele = tables.Column(accessor="curation__allele", default="------")
     haplotype = tables.Column(accessor="curation__haplotype", default="------")
     disease = tables.Column(accessor="curation__disease", default="------")
@@ -28,23 +23,18 @@ class PublishedCurationTable(tables.Table):
         orderable=False,
         empty_values=(),
     )
-    updated_at = tables.DateColumn(
-        accessor="curation__updated_at",
-        verbose_name="Updated",
-        format="Y-m-d",
-    )
+    published_at = tables.DateColumn(verbose_name="Published", format="Y-m-d")
     actions = tables.Column(empty_values=(), verbose_name="Actions", orderable=False)
 
     class Meta:
         attrs = {"class": "table is-fullwidth is-hoverable"}
         sequence = (
             "slug",
-            "curation_type",
             "allele",
             "haplotype",
             "disease",
             "classification",
-            "updated_at",
+            "published_at",
             "actions",
         )
 
