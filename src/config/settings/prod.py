@@ -3,7 +3,6 @@
 from django.contrib import messages
 
 from .base import *  # ruff: ignore[undefined-local-with-import-star] (We want to import everything.)
-from .base import BASE_DIR
 
 DEBUG = False
 
@@ -14,26 +13,14 @@ ALLOWED_HOSTS = [
 
 MESSAGE_LEVEL = messages.INFO
 
-LOG_FILE_NAME = "hci.log"
-
-LOG_DIR = BASE_DIR.parent / "logs"
-if not LOG_DIR.exists():
-    LOG_DIR.mkdir(parents=True, exist_ok=True)
-
-LOG_FILE = LOG_DIR / LOG_FILE_NAME
-if not LOG_FILE.exists():
-    LOG_FILE.touch()
-
+# Log only to stderr. Gunicorn runs under systemd, so stderr goes to journald, which
+# adds the timestamp, host, unit, and process ID, and handles rotation and retention.
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {name} {message}",  # ruff: ignore[line-too-long]
-            "style": "{",
-        },
         "simple": {
-            "format": "{levelname} {message}",
+            "format": "{levelname} {name} {message}",
             "style": "{",
         },
     },
@@ -43,17 +30,9 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "simple",
         },
-        "file": {
-            "level": "INFO",
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": LOG_FILE,
-            "maxBytes": 1024 * 1024 * 5,  # 1024 * 1024 * 5 = 5 MB.
-            "backupCount": 5,
-            "formatter": "verbose",
-        },
     },
     "root": {
-        "handlers": ["console", "file"],
+        "handlers": ["console"],
         "level": "INFO",
     },
 }
