@@ -76,7 +76,7 @@ The layout for the HLArepo info pages. It extends `layouts/public.html` and rend
 
 ### `templates/repo/list.html`
 
-Renders the HLArepo search/list page, providing a search input, paginated results via HTMX partials, and a button to download all published curations as a single JSON file.
+Renders the HLArepo landing page at `/repo/`: the HCI logo, the HLArepo title and subtitle, a short description of HLArepo, a Downloads section with the bulk download buttons, and the searchable, paginated list of published curations (HTMX swaps in only the results partial).
 
 ### `tests.py`
 

@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import IntegrityError
+from django.templatetags.static import static
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -865,3 +866,34 @@ class RepoInfoPagesTest(TestCase):
         for name in CORE_INFO_URL_NAMES:
             with self.subTest(name=name):
                 self.assertNotContains(response, f'href="{reverse(name)}"')
+
+
+class RepoLandingPageTest(TestCase):
+    url = reverse("repo-search")
+
+    def test_has_title_subtitle_and_description(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, '<h1 class="title">HLArepo</h1>', html=True)
+        self.assertContains(response, 'class="subtitle"')
+        self.assertContains(response, 'id="repo-description"')
+        self.assertContains(response, "HLA Curation Interface")
+
+    def test_shows_the_hci_logo(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, f'src="{static("hci/img/hci-logo.png")}"')
+
+    def test_downloads_section_has_the_json_download(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        downloads = soup.find(id="downloads")
+        self.assertIsNotNone(downloads)
+        assert downloads is not None
+        link = downloads.find(id="download-button")
+        assert link is not None
+        self.assertEqual(link["href"], reverse("repo-download-all"))
+
+    def test_htmx_search_returns_only_results(self):
+        response = self.client.get(self.url, {"q": "x"}, headers={"HX-Request": "true"})
+        self.assertTemplateUsed(response, "common/partials/search_results.html")
+        self.assertTemplateNotUsed(response, "layouts/public.html")
+        self.assertNotContains(response, 'id="downloads"')
