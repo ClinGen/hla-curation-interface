@@ -3,6 +3,7 @@
 from datetime import date, timedelta
 from unittest.mock import PropertyMock, patch
 
+from bs4 import BeautifulSoup
 from django.contrib.auth.models import User
 from django.http.response import HttpResponseBase
 from django.test import TestCase
@@ -249,7 +250,53 @@ class CurationDetailTest(ProtectedViewTestMixin, TestCase):
         self.assertNotContains(response, "Classification Notes")
         self.assertNotContains(response, "Sent Back for Revision")
         self.assertContains(response, 'class="message mt-2"')
-        self.assertContains(response, "<li><strong>Evidence Summary:</strong>")
+        self.assertContains(
+            response, '<h3 class="title is-6 mb-1">Evidence Summary</h3>', html=True
+        )
+
+    def test_feedback_items_are_headings_not_a_list(self):
+        curation = Curation.objects.get(slug="C000001")
+        curation.status = Status.APPROVED
+        curation.taskforce = HLA_CURATION_TASKFORCE_ID
+        curation.taskforce_classification = Classification.MODERATE
+        curation.taskforce_override_reason = "Replicated twice."
+        curation.taskforce_evidence_summary = "Consistent association."
+        curation.save()
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        feedback = soup.select_one(".taskforce-feedback")
+        assert feedback is not None
+        self.assertIsNone(feedback.find("ul"))
+        self.assertEqual(
+            [heading.get_text(strip=True) for heading in feedback.find_all("h3")],
+            [
+                "Taskforce",
+                "Classification",
+                "Suggested Classification Override Reason",
+                "Evidence Summary",
+            ],
+        )
+        override = feedback.find(
+            "h3", string="Suggested Classification Override Reason"
+        )
+        assert override is not None
+        paragraph = override.find_next_sibling("p")
+        assert paragraph is not None
+        self.assertEqual(paragraph.get_text(strip=True), "Replicated twice.")
+
+    def test_summary_table_has_no_id_row(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        labels = [
+            row.td.get_text(strip=True)
+            for row in soup.select(".table-container table tr")
+            if row.td
+        ]
+        self.assertIn("Allele", labels)
+        self.assertNotIn("HCI Curation ID", labels)
+        breadcrumb = soup.select_one(".breadcrumb")
+        assert breadcrumb is not None
+        self.assertIn("C000001 Details", breadcrumb.get_text(" ", strip=True))
 
     def test_shows_no_feedback_panel_without_feedback(self):
         response = self.client.get(self.url)
@@ -714,6 +761,17 @@ class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
             # The score is 0, so no classification is suggested and any is an override.
             "taskforce_override_reason": "Taskforce judgment.",
         }
+
+    def test_form_names_the_suggested_classification_override_reason(self):
+        self.client.force_login(self.reviewer)
+        response = self.client.get(self._url())
+        self.assertContains(response, "Suggested Classification Override Reason")
+        # History diffs label fields with their verbose_name.
+        field = Curation._meta.get_field("taskforce_override_reason")  # ruff: ignore[private-member-access]
+        self.assertEqual(
+            getattr(field, "verbose_name", None),
+            "Suggested Classification Override Reason",
+        )
 
     def test_approval_sets_status_to_approved(self):
         self.client.force_login(self.reviewer)

@@ -116,11 +116,11 @@ Partial that renders a curation's `classification_display`, followed by a light 
 
 ### `templates/curation/partials/taskforce_review.html`
 
-Partial that renders the taskforce's feedback on a curation as a Bulma message: "Sent Back for Revision" (red, `is-danger`) when the curation is in progress, otherwise "Taskforce Review" (neutral), or a `heading` passed by the caller. Shows a bulleted list of the taskforce, review date, classification, override reason, evidence summary, and additional notes, skipping empty ones. Expects `curation` in the context.
+Partial that renders the taskforce's feedback on a curation as a Bulma message: "Sent Back for Revision" (red, `is-danger`) when the curation is in progress, otherwise "Taskforce Review" (neutral), or a `heading` passed by the caller. Shows the taskforce, review date, classification, suggested classification override reason, evidence summary, and additional notes, each under a small heading, skipping empty ones. Expects `curation` in the context.
 
 ### `templates/curation/partials/curation/detail_table.html`
 
-Partial that renders a summary table for a `Curation` object, showing its ID, allele or haplotype, disease, status badge, classification (via `partials/classification.html`), aggregate score, and timestamps, plus a "View History" button.
+Partial that renders a summary table for a `Curation` object, showing its allele or haplotype, disease, status badge, classification (via `partials/classification.html`), aggregate score, and timestamps, plus a "View History" button. It leaves out the ID, which every page that includes it shows in its breadcrumb and title.
 
 ### `templates/curation/partials/evidence/detail_table.html`
 
@@ -188,7 +188,7 @@ Unit tests for the `Interval` class, verifying boundary inclusion and exclusion 
 
 ### `tests/test_migrations.py`
 
-Tests for the `0021_rename_status_codes` data migration. They use `MigrationExecutor` to migrate between `0020` and `0021` and check that `RFR`/`PRO` map to `PRV`/`APR` on `Curation` and `HistoricalCuration`, and back.
+Tests for the data migrations. They use `MigrationExecutor` to migrate between migrations. `0021_rename_status_codes` must map `RFR`/`PRO` to `PRV`/`APR` on `Curation` and `HistoricalCuration`, and back. `0027_update_old_taskforce_id` must map the old taskforce ID `40033` to `HLA_CURATION_TASKFORCE_ID` on both models, and leave it alone going backward.
 
 ### `tests/test_models.py`
 

@@ -110,7 +110,7 @@ class Curation(models.Model):
     taskforce_override_reason = models.TextField(  # ruff: ignore[django-nullable-model-string-field]
         null=True,
         blank=True,
-        verbose_name="Taskforce Override Reason",
+        verbose_name="Suggested Classification Override Reason",
         help_text=(
             "Why the taskforce chose a classification other than the suggested one."
         ),

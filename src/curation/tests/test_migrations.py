@@ -6,7 +6,10 @@ from django.db.migrations.executor import MigrationExecutor
 from django.test import TransactionTestCase
 
 from allele.models import Allele
-from curation.constants.models.curation import CurationTypes
+from curation.constants.models.curation import (
+    HLA_CURATION_TASKFORCE_ID,
+    CurationTypes,
+)
 from curation.models import Curation
 from disease.models import Disease
 
@@ -72,3 +75,71 @@ class RenameStatusCodesTest(TransactionTestCase):
             self.assertEqual(
                 self._statuses(apps, model_name), [{"RFR"}, {"PRO"}, {"INP"}]
             )
+
+
+class UpdateOldTaskforceIdTest(TransactionTestCase):
+    """Checks that 0027 maps the old taskforce ID to the new one."""
+
+    fixtures = ["test_alleles.json", "test_diseases.json"]
+    before = [("curation", "0026_fix_zygosity_help_text")]
+    after = [("curation", "0027_update_old_taskforce_id")]
+
+    def setUp(self):
+        allele = Allele.objects.get(pk=1)
+        disease = Disease.objects.get(pk=1)
+        self.pks = [
+            Curation.objects.create(
+                curation_type=CurationTypes.ALLELE, allele=allele, disease=disease
+            ).pk
+            for _ in range(3)
+        ]
+
+    def tearDown(self):
+        executor = MigrationExecutor(connection)
+        executor.loader.build_graph()
+        executor.migrate(executor.loader.graph.leaf_nodes())
+
+    def _migrate(self, targets: list[tuple[str, str]]) -> Apps:
+        executor = MigrationExecutor(connection)
+        executor.loader.build_graph()
+        executor.migrate(targets)
+        return executor.loader.project_state(targets).apps
+
+    def _taskforces(self, apps: Apps, model_name: str) -> list[set[str | None]]:
+        model = apps.get_model("curation", model_name)
+        pk_field = "id" if model_name == "HistoricalCuration" else "pk"
+        return [
+            set(
+                model.objects.filter(**{pk_field: pk}).values_list(
+                    "taskforce", flat=True
+                )
+            )
+            for pk in self.pks
+        ]
+
+    def test_forward_maps_the_old_id_to_the_new_one(self):
+        apps = self._migrate(self.before)
+        for model_name in ("Curation", "HistoricalCuration"):
+            model = apps.get_model("curation", model_name)
+            pk_field = "id" if model_name == "HistoricalCuration" else "pk"
+            for pk, taskforce in zip(
+                self.pks, ["40033", HLA_CURATION_TASKFORCE_ID, None], strict=True
+            ):
+                model.objects.filter(**{pk_field: pk}).update(taskforce=taskforce)
+        apps = self._migrate(self.after)
+        for model_name in ("Curation", "HistoricalCuration"):
+            self.assertEqual(
+                self._taskforces(apps, model_name),
+                [{HLA_CURATION_TASKFORCE_ID}, {HLA_CURATION_TASKFORCE_ID}, {None}],
+            )
+
+    def test_backward_leaves_the_new_id(self):
+        apps = self._migrate(self.after)
+        curation_model = apps.get_model("curation", "Curation")
+        curation_model.objects.filter(pk=self.pks[0]).update(
+            taskforce=HLA_CURATION_TASKFORCE_ID
+        )
+        apps = self._migrate(self.before)
+        self.assertEqual(
+            self._taskforces(apps, "Curation")[0], {HLA_CURATION_TASKFORCE_ID}
+        )

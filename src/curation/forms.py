@@ -88,7 +88,7 @@ class TaskforceReviewForm(forms.Form):
         required=False,
     )
     taskforce_override_reason = forms.CharField(
-        label="Override Reason",
+        label="Suggested Classification Override Reason",
         help_text=(
             "Explain why the taskforce chose a classification other than the "
             "suggested one."
