@@ -72,7 +72,7 @@ Renders the full audit-history page for a published curation, listing all histor
 
 ### `templates/repo/layouts/page.html`
 
-The layout for the HLArepo info pages. It extends `layouts/public.html` and renders breadcrumbs rooted at HLArepo, a `heading` block, and a `content` block.
+The layout for the HLArepo info pages. It extends `layouts/public.html` and renders breadcrumbs rooted at HLArepo Home, a `heading` block, and a `content` block.
 
 ### `templates/repo/list.html`
 

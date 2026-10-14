@@ -739,12 +739,15 @@ class PublicLayoutTest(TestCase):
         self.assertNotIn(f'href="{reverse("repo-search")}"', navbar)
         self.assertIn('id="hci-link"', navbar)
 
-    def test_breadcrumbs_start_at_hlarepo(self):
+    def test_breadcrumbs_start_at_hlarepo_home(self):
         for url in self.urls:
             with self.subTest(url=url):
                 response = self.client.get(url)
-                self.assertNotContains(response, "bi-house")
-                self.assertContains(response, "bi-database")
+                breadcrumb = response.content.decode().split('class="breadcrumb"')[1]
+                breadcrumb = breadcrumb.split("</nav>")[0]
+                self.assertIn("bi-house", breadcrumb)
+                self.assertIn("HLArepo Home", breadcrumb)
+                self.assertNotIn("bi-database", breadcrumb)
 
     def test_footer_names_hlarepo(self):
         response = self.client.get(self.urls[0])
@@ -855,7 +858,7 @@ class RepoInfoPagesTest(TestCase):
             with self.subTest(name=name):
                 response = self.client.get(reverse(name))
                 self.assertTemplateUsed(response, "layouts/public.html")
-                self.assertNotContains(response, "bi-house")
+                self.assertContains(response, "HLArepo Home")
                 assert_no_login_links(self, response)
 
     def test_public_footer_links_to_repo_info_pages(self):
