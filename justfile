@@ -18,7 +18,7 @@ set dotenv-load := true
 #=====================================================================
 
 # Run all checks and tests. ------------------------------------------
-pre-commit: src-all test-all infra-all
+pre-commit: env-check src-all test-all infra-all
 alias pre := pre-commit
 
 #=====================================================================
@@ -265,6 +265,16 @@ alias djlp := django-loaddata-prod
 docs-format:
     uv run mdformat --wrap 88 --number docs src
 alias dofm := docs-format
+
+#=====================================================================
+# Environment Recipes
+#=====================================================================
+
+# Check that .env and .env.example have the same keys. ---------------
+[group('env')]
+env-check:
+    uv run env_check.py
+alias envc := env-check
 
 #=====================================================================
 # Terraform Recipes
