@@ -306,6 +306,14 @@ class PublishedCurationDetailViewTest(TestCase):
             published_by=user,
         )
 
+    def test_shows_the_taskforce_name_and_id(self):
+        Curation.objects.filter(pk=self.curation.pk).update(
+            taskforce=HLA_CURATION_TASKFORCE_ID
+        )
+        response = self.client.get(reverse("repo-detail", args=[self.curation.slug]))
+        name = dict(TASKFORCE_CHOICES)[HLA_CURATION_TASKFORCE_ID]
+        self.assertContains(response, f"{name} ({HLA_CURATION_TASKFORCE_ID})")
+
     def test_response_code(self):
         url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
         response = self.client.get(url)
@@ -988,7 +996,7 @@ class CSVDownloadViewTest(TestCase):
     def test_one_row_per_evidence_newest_classification_first(self):
         rows = self._rows()
         self.assertEqual(
-            [(row["Classification ID"], row["Evidence ID"]) for row in rows],
+            [(row["Curation ID"], row["Evidence ID"]) for row in rows],
             [
                 (self.allele_curation.slug, self.first_evidence.slug),
                 (self.allele_curation.slug, self.second_evidence.slug),
@@ -1086,7 +1094,7 @@ class FlattenPublishedCurationTest(TestCase):
     def test_starts_with_the_identifying_columns(self):
         row = flatten_published_curation(self.published, url="https://example.org")
         self.assertEqual(
-            list(row)[:4], ["Classification ID", "URL", "Version", "Published (UTC)"]
+            list(row)[:4], ["Curation ID", "URL", "Version", "Published (UTC)"]
         )
         self.assertEqual(row["URL"], "https://example.org")
 
@@ -1101,15 +1109,14 @@ class FlattenPublishedCurationTest(TestCase):
         row = flatten_published_curation(self.published, url="")
         self.assertEqual(row["Classification"], self.curation.classification_display)
 
-    def test_taskforce_is_its_name(self):
+    def test_taskforce_is_its_name_and_id(self):
         Curation.objects.filter(pk=self.curation.pk).update(
             taskforce=HLA_CURATION_TASKFORCE_ID
         )
         self.published.refresh_from_db()
         row = flatten_published_curation(self.published, url="")
-        self.assertEqual(
-            row["Taskforce"], dict(TASKFORCE_CHOICES)[HLA_CURATION_TASKFORCE_ID]
-        )
+        name = dict(TASKFORCE_CHOICES)[HLA_CURATION_TASKFORCE_ID]
+        self.assertEqual(row["Taskforce"], f"{name} ({HLA_CURATION_TASKFORCE_ID})")
 
     def test_every_public_field_has_a_column(self):
         self.assertEqual(

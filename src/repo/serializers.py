@@ -2,7 +2,6 @@ from datetime import UTC, date
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
-from curation.constants.models.curation import TASKFORCE_CHOICES
 from repo.constants import PUBLIC_CURATION_FIELDS, PUBLIC_EVIDENCE_FIELDS
 
 if TYPE_CHECKING:
@@ -13,8 +12,6 @@ if TYPE_CHECKING:
 
 # Export keys that differ from the model field name, kept for existing consumers.
 EXPORT_NAMES = {"taskforce_classification": "classification"}
-
-TASKFORCE_LABELS = dict(TASKFORCE_CHOICES)
 
 
 def _export_value(value: object) -> object:
@@ -237,7 +234,7 @@ def flatten_published_curation(
     disease = curation.disease
     published_at = published.published_at.astimezone(UTC)
     row: dict[str, object] = {
-        "Classification ID": curation.slug,
+        "Curation ID": curation.slug,
         "URL": url,
         "Version": published.version,
         "Published (UTC)": published_at.strftime("%Y-%m-%d %H:%M"),
@@ -248,12 +245,12 @@ def flatten_published_curation(
         "Disease MONDO ID": _flat_value(disease.mondo_id) if disease else "",
         "Disease IRI": _flat_value(disease.iri) if disease else "",
         "Classification": curation.classification_display,
-        "Classification Score": curation.score,
+        "Score": curation.score,
     }
     for name, column in CLASSIFICATION_COLUMNS.items():
         value = getattr(curation, name)
         if name == "taskforce":
-            value = TASKFORCE_LABELS.get(value, value)
+            value = curation.taskforce_display
         row[column] = _flat_value(value)
     row["Update Of"] = curation.copied_from.slug if curation.copied_from else ""
     return row
