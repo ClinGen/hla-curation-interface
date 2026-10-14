@@ -188,7 +188,7 @@ Unit tests for the `Interval` class, verifying boundary inclusion and exclusion 
 
 ### `tests/test_migrations.py`
 
-Tests for the `0021_rename_status_codes` data migration. They use `MigrationExecutor` to migrate between `0020` and `0021` and check that `RFR`/`PRO` map to `PRV`/`APR` on `Curation` and `HistoricalCuration`, and back.
+Tests for the data migrations. They use `MigrationExecutor` to migrate between migrations. `0021_rename_status_codes` must map `RFR`/`PRO` to `PRV`/`APR` on `Curation` and `HistoricalCuration`, and back. `0027_update_old_taskforce_id` must map the old taskforce ID `40033` to `HLA_CURATION_TASKFORCE_ID` on both models, and leave it alone going backward.
 
 ### `tests/test_models.py`
 
