@@ -26,7 +26,7 @@ alias pre := pre-commit
 #=====================================================================
 
 # Run all checks and tests that are run in CI. -----------------------
-continuous-integration: py-format-check js-format-check py-lint js-lint py-type-check django-check django-collectstatic test-all
+continuous-integration: env-check py-format-check js-format-check py-lint js-lint py-type-check django-check django-collectstatic test-all
 alias ci := continuous-integration
 
 #=====================================================================
@@ -273,7 +273,7 @@ alias dofm := docs-format
 # Check that .env and .env.example have the same keys. ---------------
 [group('env')]
 env-check:
-    uv run env_check.py
+    uv run scripts/env_check.py
 alias envc := env-check
 
 #=====================================================================
