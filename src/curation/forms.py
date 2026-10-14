@@ -217,24 +217,24 @@ class TaskforceReviewForm(forms.Form):
             self.add_error("taskforce_evidence_summary", "Required when approving.")
 
 
-def _mentions_date(text: str, day: date) -> bool:
+def _mentions_date(text: str, review_date: date) -> bool:
     """Returns whether the text spells out the date in a common format.
 
     Args:
         text: The text to search.
-        day: The date to look for.
+        review_date: The date to look for.
 
     Returns:
         True if the text contains the date, e.g., "October 13, 2026",
         "13 October 2026", "Oct 13, 2026", "2026-10-13", or "10/13/2026".
     """
-    month = rf"(?:{day:%B}|{day:%b}\.?)"
+    month = rf"(?:{review_date:%B}|{review_date:%b}\.?)"
     pattern = "|".join(
         [
-            rf"{month} {day.day},? {day.year}",
-            rf"{day.day} {month},? {day.year}",
-            day.isoformat(),
-            f"0?{day.month}/0?{day.day}/{day.year}",
+            rf"{month} {review_date.day},? {review_date.year}",
+            rf"{review_date.day} {month},? {review_date.year}",
+            review_date.isoformat(),
+            f"0?{review_date.month}/0?{review_date.day}/{review_date.year}",
         ]
     )
     normalized = " ".join(text.split())
