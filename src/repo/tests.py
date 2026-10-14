@@ -1140,10 +1140,10 @@ class XLSXDownloadViewTest(TestCase):
             r'^attachment; filename="hla_curations_all_\d{4}-\d{2}-\d{2}\.xlsx"$',
         )
 
-    def test_has_classifications_and_evidence_sheets(self):
-        self.assertEqual(self._workbook().sheetnames, ["Classifications", "Evidence"])
+    def test_has_curations_and_evidence_sheets(self):
+        self.assertEqual(self._workbook().sheetnames, ["Curations", "Evidence"])
 
-    def test_classifications_sheet_matches_the_flat_row(self):
+    def test_curations_sheet_matches_the_flat_row(self):
         def normalize(value: object) -> object:
             # Excel stores 0.0 as 0, so compare numbers as numbers.
             if isinstance(value, int | float) and not isinstance(value, bool):
@@ -1152,7 +1152,7 @@ class XLSXDownloadViewTest(TestCase):
 
         url = f"http://testserver{self.published.get_absolute_url()}"
         expected = flatten_published_curation(self.published, url)
-        (row,) = self._sheet_rows(self._workbook(), "Classifications")
+        (row,) = self._sheet_rows(self._workbook(), "Curations")
         self.assertEqual(
             {key: normalize(value) for key, value in row.items()},
             {key: normalize(value) for key, value in expected.items()},
@@ -1160,8 +1160,8 @@ class XLSXDownloadViewTest(TestCase):
 
     def test_evidence_sheet_has_one_row_per_evidence(self):
         (row,) = self._sheet_rows(self._workbook(), "Evidence")
-        self.assertEqual(list(row), ["Classification ID", *EVIDENCE_COLUMN_NAMES])
-        self.assertEqual(row["Classification ID"], self.curation.slug)
+        self.assertEqual(list(row), ["Curation ID", *EVIDENCE_COLUMN_NAMES])
+        self.assertEqual(row["Curation ID"], self.curation.slug)
         self.assertEqual(row["Evidence ID"], self.evidence.slug)
         self.assertEqual(row["Publication Title"], self.publication.title)
         self.assertEqual(str(row["PubMed ID"]), self.publication.pubmed_id)

@@ -244,29 +244,29 @@ def _write_sheet(sheet: Worksheet, rows: list[dict[str, object]]) -> None:
 
 
 def download_all_xlsx(request: HttpRequest) -> HttpResponse:
-    """Downloads all published classifications as an Excel workbook.
+    """Downloads all published curations as an Excel workbook.
 
-    The Classifications sheet has one row per classification. The Evidence sheet
-    has one row per evidence record, starting with its classification's ID.
+    The Curations sheet has one row per curation. The Evidence sheet has one row
+    per evidence record, starting with its curation's ID.
 
     Returns:
-        XLSX response with all published classifications, most recently
-        published first.
+        XLSX response with all published curations, most recently published
+        first.
     """
-    classification_rows = []
+    curation_rows = []
     evidence_rows = []
     for published in _published_for_export():
         url = request.build_absolute_uri(published.get_absolute_url())
-        classification_rows.append(flatten_published_curation(published, url=url))
-        classification_id = {"Classification ID": published.curation.slug}
+        curation_rows.append(flatten_published_curation(published, url=url))
+        curation_id = {"Curation ID": published.curation.slug}
         evidence_rows.extend(
-            {**classification_id, **flatten_evidence(evidence)}
+            {**curation_id, **flatten_evidence(evidence)}
             for evidence in published.curation.evidence.all()
         )
 
     workbook = Workbook()
     workbook.remove(workbook.worksheets[0])  # Drop the default empty sheet.
-    _write_sheet(workbook.create_sheet("Classifications"), classification_rows)
+    _write_sheet(workbook.create_sheet("Curations"), curation_rows)
     _write_sheet(workbook.create_sheet("Evidence"), evidence_rows)
     buffer = io.BytesIO()
     workbook.save(buffer)
