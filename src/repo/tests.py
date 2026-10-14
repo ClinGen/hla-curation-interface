@@ -255,6 +255,28 @@ class RepoSearchViewTest(TestCase):
         )
         self.assertContains(response, '<i class="bi bi-download mr-2"></i>')
 
+    def test_actions_have_json_csv_and_excel_buttons(self):
+        curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+            status=Status.PUBLISHED,
+        )
+        PublishedCuration.objects.create(curation=curation)
+        soup = BeautifulSoup(self.client.get(self.url).content, "html.parser")
+        buttons = soup.select("#search-results td .buttons a.button")
+        self.assertEqual(
+            [(button["href"], button.get_text(strip=True)) for button in buttons],
+            [
+                (reverse(name, args=[curation.slug]), label)
+                for name, label in (
+                    ("repo-download-single", "JSON"),
+                    ("repo-download-single-csv", "CSV"),
+                    ("repo-download-single-xlsx", "Excel"),
+                )
+            ],
+        )
+
     def _publish(self, allele_pk: int, published_at: datetime) -> Curation:
         user, _ = User.objects.get_or_create(username="testuser")
         curation = Curation.objects.create(
@@ -1265,6 +1287,92 @@ class XLSXDownloadViewTest(TestCase):
         downloads = soup.find(id="downloads")
         assert downloads is not None
         self.assertIsNotNone(downloads.find("a", href=self.url))
+
+
+class SingleFlatDownloadViewTest(TestCase):
+    fixtures = ["test_alleles.json", "test_diseases.json"]
+
+    def setUp(self):
+        self.publication = Publication.objects.create(
+            slug="P999999", title="T", author="A", publication_year=2020, pubmed_id="1"
+        )
+        self.curation = self._published_curation(allele_pk=1)
+        self.other = self._published_curation(allele_pk=2)
+        self.evidence = list(self.curation.evidence.all())  # type: ignore
+        self.slug = self.curation.slug
+
+    def _published_curation(self, allele_pk: int) -> Curation:
+        curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=allele_pk),
+            disease=Disease.objects.get(pk=1),
+            status=Status.PUBLISHED,
+        )
+        for _ in range(2):
+            Evidence.objects.create(curation=curation, publication=self.publication)
+        PublishedCuration.objects.create(curation=curation)
+        return curation
+
+    def test_csv_has_only_this_curations_evidence(self):
+        response = self.client.get(
+            reverse("repo-download-single-csv", args=[self.slug])
+        )
+        self.assertTrue(response["Content-Type"].startswith("text/csv"))
+        self.assertEqual(
+            response["Content-Disposition"],
+            f'attachment; filename="hla_curation_{self.slug}.csv"',
+        )
+        rows = list(csv.DictReader(io.StringIO(response.content.decode("utf-8-sig"))))
+        self.assertEqual(
+            [row["Evidence ID"] for row in rows],
+            [evidence.slug for evidence in self.evidence],
+        )
+        self.assertEqual({row["Curation ID"] for row in rows}, {self.slug})
+
+    def test_xlsx_has_only_this_curation(self):
+        url = reverse("repo-download-single-xlsx", args=[self.slug])
+        response = self.client.get(url)
+        self.assertEqual(
+            response["Content-Type"],
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        self.assertEqual(
+            response["Content-Disposition"],
+            f'attachment; filename="hla_curation_{self.slug}.xlsx"',
+        )
+        workbook = load_workbook(io.BytesIO(response.content))
+        classifications = list(workbook["Curations"].iter_rows(values_only=True))
+        self.assertEqual([row[0] for row in classifications[1:]], [self.slug])
+        evidence = list(workbook["Evidence"].iter_rows(values_only=True))
+        self.assertEqual({row[0] for row in evidence[1:]}, {self.slug})
+        self.assertEqual(len(evidence) - 1, len(self.evidence))
+
+    def test_xlsx_evidence_sheet_has_a_header_without_evidence(self):
+        self.curation.evidence.all().delete()  # type: ignore
+        url = reverse("repo-download-single-xlsx", args=[self.slug])
+        workbook = load_workbook(io.BytesIO(self.client.get(url).content))
+        (header,) = workbook["Evidence"].iter_rows(values_only=True)
+        self.assertEqual(list(header), ["Curation ID", *EVIDENCE_COLUMN_NAMES])
+
+    def test_unknown_or_unpublished_slug_is_not_found(self):
+        unpublished = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+        )
+        for name in ("repo-download-single-csv", "repo-download-single-xlsx"):
+            for slug in ("C999999", unpublished.slug):
+                with self.subTest(name=name, slug=slug):
+                    response = self.client.get(reverse(name, args=[slug]))
+                    self.assertEqual(response.status_code, 404)
+
+    def test_detail_page_links_to_both(self):
+        response = self.client.get(reverse("repo-detail", args=[self.slug]))
+        for name in ("repo-download-single-csv", "repo-download-single-xlsx"):
+            with self.subTest(name=name):
+                self.assertContains(
+                    response, f'href="{reverse(name, args=[self.slug])}"'
+                )
 
 
 class FlattenPublishedCurationTest(TestCase):

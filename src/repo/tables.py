@@ -1,10 +1,17 @@
 import django_tables2 as tables
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils.html import format_html
+from django.utils.html import format_html, format_html_join
 from django_tables2 import A
 
 from repo.models import PublishedCuration
+
+# The download buttons in each row: URL name, icon, and label.
+DOWNLOAD_BUTTONS = (
+    ("repo-download-single", "download", "JSON"),
+    ("repo-download-single-csv", "filetype-csv", "CSV"),
+    ("repo-download-single-xlsx", "file-earmark-spreadsheet", "Excel"),
+)
 
 
 class PublishedCurationTable(tables.Table):
@@ -42,10 +49,20 @@ class PublishedCurationTable(tables.Table):
         return record.curation.classification_display
 
     def render_actions(self, record: PublishedCuration) -> str:
-        url = reverse("repo-download-single", args=[record.curation.slug])
-        icon = render_to_string("common/icon.html", {"icon_name": "download"})
+        slug = record.curation.slug
+        links = (
+            (
+                reverse(url_name, args=[slug]),
+                render_to_string("common/icon.html", {"icon_name": icon}),
+                label,
+            )
+            for url_name, icon, label in DOWNLOAD_BUTTONS
+        )
         return format_html(
-            '<a href="{}" class="button is-small is-link is-light">{}JSON</a>',
-            url,
-            icon,
+            '<div class="buttons is-flex-wrap-nowrap">{}</div>',
+            format_html_join(
+                "",
+                '<a href="{}" class="button is-small is-link is-light">{}{}</a>',
+                links,
+            ),
         )

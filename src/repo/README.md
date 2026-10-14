@@ -28,7 +28,7 @@ Provides `serialize_published_curation` and `serialize_evidence`, plain function
 
 ### `tables.py`
 
-Defines `PublishedCurationTable` (a `django-tables2` table) that renders the searchable list of published curations, with columns for ID, allele, haplotype, disease, classification (`Curation.classification_display`), published date, and a per-row JSON download button. There's no type column, since the filled-in allele or haplotype column shows it.
+Defines `PublishedCurationTable` (a `django-tables2` table) that renders the searchable list of published curations, with columns for ID, allele, haplotype, disease, classification (`Curation.classification_display`), published date, and per-row JSON, CSV, and Excel download buttons (`DOWNLOAD_BUTTONS`). There's no type column, since the filled-in allele or haplotype column shows it.
 
 ### `templates/repo/about.html`
 
@@ -56,7 +56,7 @@ Renders the HLArepo Contact page with the maintainers' email address.
 
 ### `templates/repo/detail.html`
 
-Renders the detail page for a published curation, including supersession and copied-from notices, the public summary partial, the evidence detail table (with `public=True`, so evidence IDs don't link to curator pages), and action buttons for JSON download, history navigation, and (for curators) copying the curation for re-curation.
+Renders the detail page for a published curation, including supersession and copied-from notices, the public summary partial, the evidence detail table (with `public=True`, so evidence IDs don't link to curator pages), and action buttons for JSON, CSV, and Excel downloads of that classification, history navigation, and (for curators) copying the curation for re-curation.
 
 ### `templates/repo/partials/summary.html`
 
@@ -84,8 +84,8 @@ Contains unit and integration tests covering the `PublishedCuration` model (crea
 
 ### `urls.py`
 
-Maps URL patterns for the repo app: the search/list page, the six info pages (About, Acknowledgements, Citing, Collaborators, Contact, Help), the bulk JSON, CSV, and XLSX and single JSON download endpoints, and the curation detail, history, and change views, all namespaced under the `repo-` prefix.
+Maps URL patterns for the repo app: the search/list page, the six info pages (About, Acknowledgements, Citing, Collaborators, Contact, Help), the bulk and single JSON, CSV, and XLSX download endpoints, and the curation detail, history, and change views, all namespaced under the `repo-` prefix.
 
 ### `views.py`
 
-Implements the repo views: `PublishedCurationList` (searchable table list, most recently published first), `PublishedCurationDetail` (with supersession detection and related-object prefetching for the linkouts), `PublishedCurationHistory` and `PublishedCurationChange` (history audit trail, with curator identities hidden: no Changed By column or row and no `published_by` diff), `download_all_json` / `download_single_json` function-based views that return indented JSON file attachments in one shared shape (export date, count, and a `curations` list), `download_all_csv`, which streams every published classification as a CSV attachment with one row per evidence record (newest classification first, UTF-8 with a byte order mark so Excel reads it correctly, with evidence prefetched to keep the query count constant), `download_all_xlsx`, which returns an Excel workbook with a Curations sheet (one row per curation) and an Evidence sheet (one row per evidence record, starting with its curation's ID), each with a bold, frozen header row, and function-based views for the six info pages.
+Implements the repo views: `PublishedCurationList` (searchable table list, most recently published first), `PublishedCurationDetail` (with supersession detection and related-object prefetching for the linkouts), `PublishedCurationHistory` and `PublishedCurationChange` (history audit trail, with curator identities hidden: no Changed By column or row and no `published_by` diff), `download_all_json` / `download_single_json` function-based views that return indented JSON file attachments in one shared shape (export date, count, and a `curations` list), `download_all_csv` / `download_single_csv`, which return every published curation, or one, as a CSV attachment with one row per evidence record (newest first, UTF-8 with a byte order mark so Excel reads it correctly, with evidence prefetched to keep the query count constant), `download_all_xlsx` / `download_single_xlsx`, which return an Excel workbook with a Curations sheet (one row per curation) and an Evidence sheet (one row per evidence record, starting with its curation's ID), each with a bold, frozen header row, and both single downloads return 404 for a slug that isn't published, and function-based views for the six info pages.

@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from curation.models import Curation
 
 from django.db.models import Prefetch, QuerySet
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import Http404, HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views.generic import DetailView
@@ -24,6 +24,7 @@ from curation.constants.models.common import Status
 from curation.models import Evidence
 from repo.models import PublishedCuration
 from repo.serializers import (
+    EVIDENCE_COLUMN_NAMES,
     flatten_classification_rows,
     flatten_evidence,
     flatten_published_curation,
@@ -223,22 +224,36 @@ def _published_for_export() -> QuerySet[PublishedCuration]:
     )
 
 
-def download_all_csv(request: HttpRequest) -> HttpResponse:
-    """Downloads all published classifications as CSV, one row per evidence.
+def _published_one_for_export(curation_slug: str) -> QuerySet[PublishedCuration]:
+    """Returns one published curation, prefetched like the bulk downloads.
+
+    Returns:
+        A queryset holding the published curation with the given slug.
+
+    Raises:
+        Http404: If no published curation has the slug.
+    """
+    published_curations = _published_for_export().filter(curation__slug=curation_slug)
+    if not published_curations.exists():
+        raise Http404
+    return published_curations
+
+
+def _csv_attachment(
+    request: HttpRequest,
+    published_curations: QuerySet[PublishedCuration],
+    filename: str,
+) -> HttpResponse:
+    """Returns curations as a CSV attachment, one row per evidence.
 
     The file starts with a UTF-8 byte order mark so Excel reads non-ASCII text
     correctly.
 
     Returns:
-        CSV response with all published classifications, most recently published
-        first.
+        CSV response with the curations in the queryset's order.
     """
-    published_curations = _published_for_export()
-    timestamp = timezone.now().strftime("%Y-%m-%d")
     response = HttpResponse(content_type="text/csv; charset=utf-8")
-    response["Content-Disposition"] = (
-        f'attachment; filename="hla_curations_all_{timestamp}.csv"'
-    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
     response.write(codecs.BOM_UTF8)
     writer = None
     for published in published_curations:
@@ -258,14 +273,43 @@ def download_all_csv(request: HttpRequest) -> HttpResponse:
     return response
 
 
+def download_all_csv(request: HttpRequest) -> HttpResponse:
+    """Downloads all published curations as CSV, one row per evidence.
+
+    Returns:
+        CSV response with all published curations, most recently published
+        first.
+    """
+    timestamp = timezone.now().strftime("%Y-%m-%d")
+    return _csv_attachment(
+        request,
+        _published_for_export(),
+        filename=f"hla_curations_all_{timestamp}.csv",
+    )
+
+
+def download_single_csv(request: HttpRequest, curation_slug: str) -> HttpResponse:
+    """Downloads a single published curation as CSV, one row per evidence.
+
+    Returns:
+        CSV response with the specified published curation.
+    """
+    published_curations = _published_one_for_export(curation_slug)
+    return _csv_attachment(
+        request,
+        published_curations,
+        filename=f"hla_curation_{curation_slug}.csv",
+    )
+
+
 XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
-def _write_sheet(sheet: Worksheet, rows: list[dict[str, object]]) -> None:
+def _write_sheet(
+    sheet: Worksheet, header: list[str], rows: list[dict[str, object]]
+) -> None:
     """Writes rows to a sheet under a bold, frozen header row."""
-    if not rows:
-        return
-    sheet.append(list(rows[0]))
+    sheet.append(header)
     for cell in sheet[1]:
         cell.font = Font(bold=True)
     sheet.freeze_panes = "A2"
@@ -273,19 +317,22 @@ def _write_sheet(sheet: Worksheet, rows: list[dict[str, object]]) -> None:
         sheet.append(list(row.values()))
 
 
-def download_all_xlsx(request: HttpRequest) -> HttpResponse:
-    """Downloads all published curations as an Excel workbook.
+def _xlsx_attachment(
+    request: HttpRequest,
+    published_curations: QuerySet[PublishedCuration],
+    filename: str,
+) -> HttpResponse:
+    """Returns curations as an Excel workbook attachment.
 
-    The Curations sheet has one row per curation. The Evidence sheet has one row
-    per evidence record, starting with its curation's ID.
+    The Curations sheet has one row per curation. The Evidence sheet
+    has one row per evidence record, starting with its curation's ID.
 
     Returns:
-        XLSX response with all published curations, most recently published
-        first.
+        XLSX response with the curations in the queryset's order.
     """
     curation_rows = []
     evidence_rows = []
-    for published in _published_for_export():
+    for published in published_curations:
         url = request.build_absolute_uri(published.get_absolute_url())
         curation_rows.append(flatten_published_curation(published, url=url))
         curation_id = {"Curation ID": published.curation.slug}
@@ -296,17 +343,52 @@ def download_all_xlsx(request: HttpRequest) -> HttpResponse:
 
     workbook = Workbook()
     workbook.remove(workbook.worksheets[0])  # Drop the default empty sheet.
-    _write_sheet(workbook.create_sheet("Curations"), curation_rows)
-    _write_sheet(workbook.create_sheet("Evidence"), evidence_rows)
+    curation_header = list(curation_rows[0]) if curation_rows else []
+    _write_sheet(
+        workbook.create_sheet("Curations"),
+        curation_header,
+        curation_rows,
+    )
+    _write_sheet(
+        workbook.create_sheet("Evidence"),
+        ["Curation ID", *EVIDENCE_COLUMN_NAMES],
+        evidence_rows,
+    )
     buffer = io.BytesIO()
     workbook.save(buffer)
 
-    timestamp = timezone.now().strftime("%Y-%m-%d")
     response = HttpResponse(buffer.getvalue(), content_type=XLSX_CONTENT_TYPE)
-    response["Content-Disposition"] = (
-        f'attachment; filename="hla_curations_all_{timestamp}.xlsx"'
-    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
+
+
+def download_all_xlsx(request: HttpRequest) -> HttpResponse:
+    """Downloads all published curations as an Excel workbook.
+
+    Returns:
+        XLSX response with all published curations, most recently
+        published first.
+    """
+    timestamp = timezone.now().strftime("%Y-%m-%d")
+    return _xlsx_attachment(
+        request,
+        _published_for_export(),
+        filename=f"hla_curations_all_{timestamp}.xlsx",
+    )
+
+
+def download_single_xlsx(request: HttpRequest, curation_slug: str) -> HttpResponse:
+    """Downloads a single published curation as an Excel workbook.
+
+    Returns:
+        XLSX response with the specified published curation.
+    """
+    published_curations = _published_one_for_export(curation_slug)
+    return _xlsx_attachment(
+        request,
+        published_curations,
+        filename=f"hla_curation_{curation_slug}.xlsx",
+    )
 
 
 def download_single_json(request: HttpRequest, curation_slug: str) -> HttpResponse:

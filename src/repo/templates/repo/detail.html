@@ -49,6 +49,16 @@
                 {% include "common/icon.html" with icon_name="download" %}
                 Download as JSON
             </a>
+            <a href="{% url 'repo-download-single-csv' curation.slug %}"
+               class="button is-link is-light">
+                {% include "common/icon.html" with icon_name="filetype-csv" %}
+                Download as CSV
+            </a>
+            <a href="{% url 'repo-download-single-xlsx' curation.slug %}"
+               class="button is-link is-light">
+                {% include "common/icon.html" with icon_name="file-earmark-spreadsheet" %}
+                Download as Excel
+            </a>
             <a href="{% url 'repo-history' curation.slug %}"
                class="button is-link is-light">
                 {% include "common/icon.html" with icon_name="clock-history" %}

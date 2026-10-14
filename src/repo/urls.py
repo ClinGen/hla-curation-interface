@@ -24,6 +24,16 @@ urlpatterns = [
         name="repo-download-single",
     ),
     path(
+        "<slug:curation_slug>/download.csv",
+        views.download_single_csv,
+        name="repo-download-single-csv",
+    ),
+    path(
+        "<slug:curation_slug>/download.xlsx",
+        views.download_single_xlsx,
+        name="repo-download-single-xlsx",
+    ),
+    path(
         "<slug:curation_slug>/history",
         views.PublishedCurationHistory.as_view(),
         name="repo-history",
