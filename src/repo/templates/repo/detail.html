@@ -34,15 +34,6 @@
             </div>
         {% endif %}
 
-        {% if curation.copied_from %}
-            <div class="notification is-info is-light">
-                <p>
-                    This classification is an update of
-                    <a href="{% url 'repo-detail' curation.copied_from.slug %}">{{ curation.copied_from.slug }}</a>.
-                </p>
-            </div>
-        {% endif %}
-
         {% include "repo/partials/summary.html" with published=object %}
 
         <div class="buttons">
@@ -79,6 +70,8 @@
                 </form>
             {% endif %}
         </div>
+
+        {% include "repo/partials/lineage.html" %}
 
         {% include "repo/partials/evidence_table.html" %}
 

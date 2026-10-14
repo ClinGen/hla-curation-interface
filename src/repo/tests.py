@@ -42,6 +42,7 @@ from disease.models import Disease
 from haplotype.models import Haplotype
 from publication.models import Publication
 from repo.constants import PUBLIC_CURATION_FIELDS, PUBLIC_EVIDENCE_FIELDS
+from repo.lineage import Lineage, LineageNode, build_lineage
 from repo.models import PublishedCuration
 from repo.serializers import (
     CLASSIFICATION_COLUMNS,
@@ -1099,6 +1100,143 @@ class ExcludedEvidenceTest(TestCase):
         response = self.client.get(reverse("repo-download-single", args=[self.slug]))
         (curation,) = json.loads(response.content)["curations"]
         self.assertEqual(curation["score"], float(self.curation.score))
+
+
+class LineageTest(TestCase):
+    fixtures = ["test_alleles.json", "test_diseases.json"]
+
+    def setUp(self):
+        self.start = timezone.now() - timedelta(days=100)
+        self.original = self._published(None, days=0)
+
+    def _published(self, parent: Curation | None, days: int) -> Curation:
+        curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+            status=Status.PUBLISHED,
+            copied_from=parent,
+        )
+        published = PublishedCuration.objects.create(curation=curation)
+        PublishedCuration.objects.filter(pk=published.pk).update(
+            published_at=self.start + timedelta(days=days)
+        )
+        return curation
+
+    def _lineage(self, curation: Curation) -> Lineage | None:
+        return build_lineage(PublishedCuration.objects.get(curation=curation))
+
+    @staticmethod
+    def _rows(node: LineageNode) -> list[tuple[str, str]]:
+        rows = [(node.prefix, node.published.curation.slug)]
+        for child in node.children:
+            rows.extend(LineageTest._rows(child))
+        return rows
+
+    def test_lone_classification_has_no_tree(self):
+        self.assertIsNone(self._lineage(self.original))
+        response = self.client.get(reverse("repo-detail", args=[self.original.slug]))
+        self.assertNotContains(response, 'id="lineage"')
+
+    def test_chain_draws_one_branch_per_update(self):
+        update = self._published(self.original, days=1)
+        latest = self._published(update, days=2)
+        lineage = self._lineage(update)
+        assert lineage is not None
+        self.assertEqual(
+            self._rows(lineage.root),
+            [
+                ("", self.original.slug),
+                ("└── ", update.slug),
+                ("    └── ", latest.slug),
+            ],
+        )
+
+    def test_branching_family_orders_updates_by_publish_date(self):
+        later = self._published(self.original, days=5)
+        earlier = self._published(self.original, days=1)
+        nested = self._published(earlier, days=2)
+        lineage = self._lineage(nested)
+        assert lineage is not None
+        self.assertEqual(
+            self._rows(lineage.root),
+            [
+                ("", self.original.slug),
+                ("├── ", earlier.slug),
+                ("│   └── ", nested.slug),
+                ("└── ", later.slug),
+            ],
+        )
+
+    def test_marks_the_current_and_newest_classifications(self):
+        update = self._published(self.original, days=1)
+        lineage = self._lineage(self.original)
+        assert lineage is not None
+        self.assertTrue(lineage.root.is_current)
+        self.assertFalse(lineage.root.is_newest)
+        (child,) = lineage.root.children
+        self.assertTrue(child.is_newest)
+        self.assertFalse(child.is_current)
+        self.assertEqual(child.published.curation, update)
+
+    def test_leaves_out_unpublished_copies(self):
+        Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+            copied_from=self.original,
+        )
+        self.assertIsNone(self._lineage(self.original))
+        update = self._published(self.original, days=1)
+        lineage = self._lineage(update)
+        assert lineage is not None
+        self.assertEqual(len(self._rows(lineage.root)), 2)
+
+    def test_description_states_every_update(self):
+        first = self._published(self.original, days=1)
+        second = self._published(self.original, days=2)
+        nested = self._published(first, days=3)
+        lineage = self._lineage(first)
+        assert lineage is not None
+        o, f, s, n = (c.slug for c in (self.original, first, second, nested))
+        self.assertEqual(
+            lineage.description,
+            [
+                "This family has 4 published classifications.",
+                f"{o} is the original.",
+                f"{f} and {s} are updates of {o}.",
+                f"{n} is an update of {f}.",
+                f"You're viewing {f}. The newest classification is {n}.",
+            ],
+        )
+
+    def test_detail_page_shows_the_tree_and_description(self):
+        update = self._published(self.original, days=1)
+        response = self.client.get(reverse("repo-detail", args=[self.original.slug]))
+        soup = BeautifulSoup(response.content, "html.parser")
+        tree = soup.select_one("#lineage ul.lineage")
+        assert tree is not None
+        self.assertEqual(tree["aria-describedby"], "lineage-description")
+        prefixes = [span.get_text() for span in tree.select(".lineage-prefix")]
+        self.assertEqual(prefixes, ["", "└── "])
+        for span in tree.select(".lineage-prefix"):
+            self.assertEqual(span["aria-hidden"], "true")
+        current = tree.select_one('[aria-current="page"]')
+        assert current is not None
+        self.assertEqual(current.get_text(strip=True), self.original.slug)
+        self.assertIsNotNone(
+            tree.find("a", href=reverse("repo-detail", args=[update.slug]))
+        )
+        description = soup.select_one("#lineage-description")
+        assert description is not None
+        self.assertIn(f"{update.slug} is an update of", description.get_text())
+
+    def test_update_notice_is_gone_but_superseded_warning_stays(self):
+        update = self._published(self.original, days=1)
+        response = self.client.get(reverse("repo-detail", args=[update.slug]))
+        self.assertNotContains(response, "notification is-info")
+        response = self.client.get(reverse("repo-detail", args=[self.original.slug]))
+        self.assertContains(response, "has been superseded by")
 
 
 class RepoAboutViewTest(OpenViewTestMixin, TestCase):

@@ -23,6 +23,7 @@ from common.views import SearchListView
 from curation.constants.models.common import Status
 from curation.constants.views import FRAMEWORK
 from curation.models import Evidence
+from repo.lineage import build_lineage
 from repo.models import PublishedCuration
 from repo.serializers import (
     EVIDENCE_COLUMN_NAMES,
@@ -107,13 +108,15 @@ class PublishedCurationDetail(DetailView):
         """Add curation to context for template convenience.
 
         Returns:
-            Context dict with curation, superseded, and superseding keys added.
+            Context dict with curation, superseded, superseding, evidence, and lineage
+            keys added.
         """
         context = super().get_context_data(**kwargs)
         context["curation"] = self.object.curation
         context["superseded"] = is_superseded(self.object)
         context["superseding"] = get_superseding(self.object)
         context["evidence"] = public_evidence(self.object.curation)
+        context["lineage"] = build_lineage(self.object)
         return context
 
 

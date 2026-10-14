@@ -20,7 +20,7 @@ The minified Choices.js stylesheet. It provides the styles for the Choices.js cu
 
 ### `hci/css/custom.css`
 
-Application-specific CSS overrides and utility classes. It defines styles for entity-type logo sizing, footer logo containers, a horizontal scroll container, and a wider modal card for the HLArepo evidence modal.
+Application-specific CSS overrides and utility classes. It defines styles for entity-type logo sizing, footer logo containers, a horizontal scroll container, a wider modal card for the HLArepo evidence modal, and the HLArepo family tree (no list indentation, rows one line tall so the box-drawing lines connect, and horizontal scrolling instead of wrapping).
 
 ### `hci/css/fonts/bootstrap-icons.woff`
 

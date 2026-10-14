@@ -22,6 +22,10 @@ Defines `PUBLIC_CURATION_FIELDS` and `PUBLIC_EVIDENCE_FIELDS`, the model fields 
 
 Defines the `PublishedCuration` model, which links one-to-one to a `Curation` and records who published it, when, and at what version. Change history is tracked automatically via `HistoricalRecords`.
 
+### `lineage.py`
+
+Builds a published curation's family tree for its detail page. `build_lineage` walks `copied_from` up to the original, then down through every published update (oldest first), leaving out unpublished copies. Each `LineageNode` gets its box-drawing prefix, drawn like the `tree` command, and is marked if it's the current page or the newest in the family. The `Lineage` also carries a plain-text description that states every update relationship, for readers who can't see the tree. It returns `None` for a curation with no published relatives.
+
 ### `serializers.py`
 
 Provides `serialize_published_curation` and `serialize_evidence`, plain functions that convert `PublishedCuration` and `Evidence` instances to plain Python dictionaries suitable for JSON export. Each curation is one flat object keyed by `curation_id`, with its evidence in an `evidence` list. `public_evidence` decides which evidence is public: only evidence included in the score, since HLArepo records no reason for an exclusion and excluded evidence may never have been finished. Every public output uses it. Coded values are their display labels (for example, `Published` and the classification as shown on the page), since the people who download the JSON aren't all programmers. Curator identities aren't exported, so there's no `published_by` key. The taskforce and evidence data fields are the ones named in `CLASSIFICATION_COLUMNS` and `EVIDENCE_COLUMNS`, which must match the public field lists in `constants.py`. Decimals are written the way a person would write them, by `format_decimal`, which the CSV download also uses. The export includes each allele's CAR ID (including haplotype member alleles), the disease IRI, the taskforce override reason, and the taskforce review date as an ISO date or `null`. It also builds rows for flat files, with readable column names and readable values: choice labels instead of codes, Yes or No for booleans, ISO dates, and empty strings for missing values; decimals stay numbers so spreadsheets can compute on them. `flatten_published_curation` gives a classification's columns (ID, absolute URL, version, published time in UTC, allele and CAR ID, haplotype name, disease, Mondo ID, IRI, classification as shown on the page, score, the taskforce fields named in `CLASSIFICATION_COLUMNS`, and the classification it updates). `flatten_evidence` gives an evidence record's columns (ID, score, publication, and the fields named in `EVIDENCE_COLUMNS`, with demographic groups joined by semicolons). `evidence_values` lists an evidence record's public column names and values for its HLArepo page, without the ID and publication columns and with decimals formatted. `flatten_classification_rows` joins them into one row per evidence record, giving a classification without evidence one row with blank evidence columns (`EVIDENCE_COLUMN_NAMES`). Haplotypes are represented by name alone, since the name lists the alleles.
@@ -56,7 +60,7 @@ Renders the HLArepo Contact page with the maintainers' email address.
 
 ### `templates/repo/detail.html`
 
-Renders the detail page for a published curation, including supersession and copied-from notices, the public summary partial, the public evidence table (`repo/partials/evidence_table.html`), the `evidence-modal.js` script, and action buttons for JSON, CSV, and Excel downloads of that classification, history navigation, and (for curators) copying the curation for re-curation.
+Renders the detail page for a published curation, including the superseded notice, the public summary partial, the family tree (`repo/partials/lineage.html`), the public evidence table (`repo/partials/evidence_table.html`), the `evidence-modal.js` script, and action buttons for JSON, CSV, and Excel downloads of that classification, history navigation, and (for curators) copying the curation for re-curation.
 
 ### `templates/repo/evidence.html`
 
@@ -73,6 +77,14 @@ The Bulma modal card that `evidence-modal.js` opens on the detail page. Its body
 ### `templates/repo/partials/evidence_table.html`
 
 The detail page's public evidence table, listing only the evidence in the `evidence` context variable (`public_evidence`): ID, publication with a PubMed linkout, and score. Each ID links to its evidence page. An eye icon before it loads that page's body into the evidence modal with `hx-get` and `hx-select`, and `ignoreTitle` keeps the evidence page's title out of the browser tab. It includes the modal.
+
+### `templates/repo/partials/lineage.html`
+
+Renders the "Related Classifications" section: the family tree as a nested list, described by the plain-text description below it (`aria-describedby`). Shows nothing when there's no tree.
+
+### `templates/repo/partials/lineage_node.html`
+
+Renders one line of the family tree and, recursively, its updates. The box-drawing prefix is `aria-hidden`, since the nested list carries the structure. The current page is bold with `aria-current="page"` and a "You are here" tag; every other line links to its detail page. The newest gets a "Newest" tag.
 
 ### `templates/repo/partials/summary.html`
 

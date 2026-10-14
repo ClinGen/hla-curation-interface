@@ -1,0 +1,10 @@
+{# A published curation's family tree (repo/lineage.py), drawn with box-drawing characters over a nested list, then described in words. #}
+{% if lineage %}
+    <section class="block" id="lineage" aria-labelledby="lineage-heading">
+        <h2 class="title is-5" id="lineage-heading">Related Classifications</h2>
+        <ul class="lineage" aria-describedby="lineage-description">
+            {% include "repo/partials/lineage_node.html" with node=lineage.root %}
+        </ul>
+        <p class="block mt-3" id="lineage-description">{{ lineage.description|join:" " }}</p>
+    </section>
+{% endif %}
