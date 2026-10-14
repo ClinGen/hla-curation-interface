@@ -50,6 +50,46 @@
   terraform destroy
   ```
 
+## How to Configure Backup Credentials
+
+Each server backs up its database to its own S3 bucket. The bucket and the IAM users
+that use it are created by `infra/terraform/backup.tf`. After you run `terraform apply`
+in a workspace, give that workspace's server its credentials:
+
+- In `infra/terraform`, select the workspace (`test` or `prod`) and read the outputs:
+
+  ```
+  terraform workspace select test
+  terraform output backup_bucket_name
+  terraform output backup_writer_access_key_id
+  terraform output -raw backup_writer_secret_access_key
+  ```
+
+- SSH into that workspace's server and add these lines to the `.env` file in the root of
+  the repository. Use `hci` for `SUBDOMAIN` on prod and `hci-test` on test. It's used in
+  backup names.
+
+  ```
+  AWS_ACCESS_KEY_ID=<backup_writer_access_key_id>
+  AWS_SECRET_ACCESS_KEY=<backup_writer_secret_access_key>
+  DBBACKUP_BUCKET_NAME=<backup_bucket_name>
+  SUBDOMAIN=hci-test
+  ```
+
+- Check that the server can reach the bucket. It should print an empty list, or the
+  backups taken so far, with no error:
+
+  ```
+  cd ~/hla-curation-interface/src
+  ~/.local/bin/uv run manage.py listbackups
+  ```
+
+The weekly restore check in GitHub Actions reads prod backups with a separate, read-only
+user. In the `prod` workspace, read `backup_bucket_name`, `backup_reader_access_key_id`,
+and `backup_reader_secret_access_key`, then add them to the repository's GitHub secrets
+as `PROD_BACKUP_BUCKET_NAME`, `BACKUP_READER_AWS_ACCESS_KEY_ID`, and
+`BACKUP_READER_AWS_SECRET_ACCESS_KEY`.
+
 ## How to Set Up a Server for the First Time
 
 - Create the cloud infrastructure for the server if you haven't already done so.
