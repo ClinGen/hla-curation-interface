@@ -745,9 +745,9 @@ class PublicLayoutTest(TestCase):
                 response = self.client.get(url)
                 breadcrumb = response.content.decode().split('class="breadcrumb"')[1]
                 breadcrumb = breadcrumb.split("</nav>")[0]
-                self.assertIn("bi-house", breadcrumb)
+                self.assertIn("bi-database", breadcrumb)
                 self.assertIn("HLArepo Home", breadcrumb)
-                self.assertNotIn("bi-database", breadcrumb)
+                self.assertNotIn("bi-house", breadcrumb)
 
     def test_footer_names_hlarepo(self):
         response = self.client.get(self.urls[0])
