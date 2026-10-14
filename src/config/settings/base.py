@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "simple_history",
     "django_tables2",
+    "dbbackup",
     "allele",
     "auth_",
     "core",
@@ -124,11 +125,39 @@ STATIC_ROOT = BASE_DIR / "public"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Servers keep database backups in S3. Without a bucket, as in dev and CI, backups go
+# to a backups/ directory next to src/. boto3 reads the AWS_ACCESS_KEY_ID and
+# AWS_SECRET_ACCESS_KEY environment variables itself.
+DBBACKUP_BUCKET_NAME = os.getenv("DBBACKUP_BUCKET_NAME")
+
+if DBBACKUP_BUCKET_NAME:
+    BACKUP_STORAGE = {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "bucket_name": DBBACKUP_BUCKET_NAME,
+            "region_name": "us-west-2",
+            "default_acl": None,
+        },
+    }
+else:
+    BACKUP_STORAGE = {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "OPTIONS": {"location": BASE_DIR.parent / "backups"},
+    }
+
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
+    "dbbackup": BACKUP_STORAGE,
 }
+
+# Backups named by django-dbbackup, like the daily one, go under daily/. Other backups
+# pass their own name with -o. Names use the subdomain (hci or hci-test) instead of
+# the server's hostname, so you can tell prod and test backups apart.
+DBBACKUP_HOSTNAME = os.getenv("SUBDOMAIN", "dev")
+
+DBBACKUP_FILENAME_TEMPLATE = "daily/{servername}-{datetime}.{extension}"
 
 LOGIN_URL = "/auth/login"
 

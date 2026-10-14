@@ -30,6 +30,8 @@ The HCI is maintained by the Stanford contingent of
   When you add or remove a key, change both files; `just env-check` reports any
   differences.
 - Run the development server: `just django-runserver`.
+- Back up your local database, if you want, with `uv run src/manage.py dbbackup`.
+  Backups go to `backups/`, which Git ignores.
 
 ## Contributing
 
