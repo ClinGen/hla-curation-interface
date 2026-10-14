@@ -986,15 +986,34 @@ class PublishedEvidenceDetailTest(TestCase):
             response, f'href="{reverse("repo-detail", args=[self.curation.slug])}"'
         )
 
-    def test_detail_page_loads_evidence_into_the_modal(self):
+    def test_evidence_id_links_to_the_evidence_page(self):
         response = self.client.get(reverse("repo-detail", args=[self.curation.slug]))
         soup = BeautifulSoup(response.content, "html.parser")
-        link = soup.select_one("#evidence-table a")
+        link = soup.select_one("#evidence-table a.evidence-link")
         assert link is not None
         self.assertEqual(link["href"], self.url)
-        self.assertEqual(link["hx-get"], self.url)
-        self.assertEqual(link["hx-target"], "#evidence-modal-body")
-        self.assertEqual(link["hx-select"], "#evidence-body")
+        self.assertEqual(link.get_text(strip=True), self.evidence.slug)
+        self.assertFalse(link.has_attr("hx-get"))
+
+    def test_eye_icon_previews_the_evidence_in_the_modal(self):
+        response = self.client.get(reverse("repo-detail", args=[self.curation.slug]))
+        soup = BeautifulSoup(response.content, "html.parser")
+        preview = soup.select_one("#evidence-table a.evidence-preview")
+        assert preview is not None
+        self.assertIsNotNone(preview.select_one("i.bi-eye"))
+        cell = preview.find_parent("td")
+        assert cell is not None
+        self.assertEqual(
+            [link["class"][0] for link in cell.find_all("a")],
+            ["evidence-preview", "evidence-link"],
+        )
+        self.assertTrue(preview.has_attr("aria-label"))
+        self.assertEqual(preview["href"], self.url)
+        self.assertEqual(preview["hx-get"], self.url)
+        self.assertEqual(preview["hx-target"], "#evidence-modal-body")
+        self.assertEqual(preview["hx-select"], "#evidence-body")
+        # The evidence page's title must not replace the detail page's.
+        self.assertIn("ignoreTitle:true", str(preview["hx-swap"]))
         self.assertIsNotNone(soup.select_one("#evidence-modal .modal-card-body"))
         self.assertContains(response, static("hci/js/evidence-modal.js"))
 
@@ -1035,7 +1054,7 @@ class ExcludedEvidenceTest(TestCase):
         soup = BeautifulSoup(response.content, "html.parser")
         ids = [
             link.get_text(strip=True)
-            for link in soup.select("#evidence-table td:first-child a")
+            for link in soup.select("#evidence-table a.evidence-link")
         ]
         self.assertEqual(ids, [self.included.slug])
 

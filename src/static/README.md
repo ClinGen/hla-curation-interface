@@ -104,7 +104,7 @@ The minified production build of the Choices.js library. It is the version loade
 
 ### `hci/js/evidence-modal.js`
 
-A small hand-written script, not produced by `build.js`, for the HLArepo detail page. When HTMX swaps an evidence page's body into `#evidence-modal-body`, it sets the modal's title from the link's `data-evidence-modal-title`, opens the modal from `repo/partials/evidence_modal.html`, and moves focus into it. Escape, the background, and the close button close the modal and return focus to the link.
+A small hand-written script, not produced by `build.js`, for the HLArepo detail page. When HTMX swaps an evidence page's body into `#evidence-modal-body`, it sets the modal's title from the eye icon link's `data-evidence-modal-title`, opens the modal from `repo/partials/evidence_modal.html`, and moves focus into it. Escape, the background, and the close button close the modal and return focus to the link.
 
 ### `hci/js/confirm-modal.js`
 

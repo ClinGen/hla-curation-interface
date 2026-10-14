@@ -60,7 +60,7 @@ Renders the detail page for a published curation, including supersession and cop
 
 ### `templates/repo/evidence.html`
 
-Renders the public page for one evidence record of a published curation at `/repo/<curation>/evidence/<evidence>`, with breadcrumbs back through the detail page and the shared `repo/partials/evidence_body.html`. Without JavaScript, the evidence links on the detail page open this page; with it, HTMX loads its body into the evidence modal.
+Renders the public page for one evidence record of a published curation at `/repo/<curation>/evidence/<evidence>`, with breadcrumbs back through the detail page and the shared `repo/partials/evidence_body.html`. The evidence IDs on the detail page link here, and their eye icons load its body into the evidence modal.
 
 ### `templates/repo/partials/evidence_body.html`
 
@@ -72,7 +72,7 @@ The Bulma modal card that `evidence-modal.js` opens on the detail page. Its body
 
 ### `templates/repo/partials/evidence_table.html`
 
-The detail page's public evidence table, listing only the evidence in the `evidence` context variable (`public_evidence`): ID, publication with a PubMed linkout, and score. Each ID links to its evidence page and, with `hx-get` and `hx-select`, loads that page's body into the evidence modal. It includes the modal.
+The detail page's public evidence table, listing only the evidence in the `evidence` context variable (`public_evidence`): ID, publication with a PubMed linkout, and score. Each ID links to its evidence page. An eye icon before it loads that page's body into the evidence modal with `hx-get` and `hx-select`, and `ignoreTitle` keeps the evidence page's title out of the browser tab. It includes the modal.
 
 ### `templates/repo/partials/summary.html`
 
