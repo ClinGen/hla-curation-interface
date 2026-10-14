@@ -26,6 +26,10 @@ Empty file that marks `management` as a Python package.
 
 Empty file that marks `commands` as a Python package.
 
+### `management/commands/backup_db.py`
+
+Defines the `backup_db` management command, which the `hci-backup.timer` systemd timer runs every night at midnight Pacific. It backs up the database under `daily/`. If the backup fails, it emails an alert with `send_alert`, then raises the error again so systemd marks the run failed.
+
 ### `management/commands/list_backups.py`
 
 Defines the `list_backups` management command, which prints every database backup, oldest first, with its modification time and the name to pass to `restore.yml`. Unlike django-dbbackup's `listbackups`, it looks under prefixes like `daily/` and `pre-deployment/`. The `server-test-list-backups` and `server-prod-list-backups` just recipes run it on a server.
@@ -145,7 +149,7 @@ Registers four custom Django template filters: `get_val` (retrieves a named attr
 
 ### `tests.py`
 
-Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `SuppressRequestLoggingMixin`) that enforce standard view-test contracts across the project, along with `IsPublicFilterTest`, `PublicBadgeTooltipTest`, which checks the globe badge's tooltip and that no text sits beside it, `ColorKeyTest`, which checks tags, buttons (in templates and `tables.py` files), and the taskforce feedback panel against the color key in `docs/design.md`, the `field_block` helper for checking a field's public badge, `MigrationsUpToDateTest`, which fails when a model change has no migration, `HistoryTableHideUserTest`, which checks the `hide_user` option, `DatabaseBackupTest`, which checks that `dbbackup` writes a backup and `dbrestore` brings back a row deleted after it, `AdminBackupViewTest`, which checks who can use the admin's Back up now button and what it does, `ListBackupsCommandTest`, which checks that `list_backups` finds backups under prefixes and skips `.metadata` files, `SendAlertTest`, which checks `send_alert` and the `send_test_alert` command, and `SearchListViewTest`, which exercises the search and HTMX partial-response behaviour of `SearchListView`.
+Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `SuppressRequestLoggingMixin`) that enforce standard view-test contracts across the project, along with `IsPublicFilterTest`, `PublicBadgeTooltipTest`, which checks the globe badge's tooltip and that no text sits beside it, `ColorKeyTest`, which checks tags, buttons (in templates and `tables.py` files), and the taskforce feedback panel against the color key in `docs/design.md`, the `field_block` helper for checking a field's public badge, `MigrationsUpToDateTest`, which fails when a model change has no migration, `HistoryTableHideUserTest`, which checks the `hide_user` option, `DatabaseBackupTest`, which checks that `dbbackup` writes a backup and `dbrestore` brings back a row deleted after it, `AdminBackupViewTest`, which checks who can use the admin's Back up now button and what it does, `ListBackupsCommandTest`, which checks that `list_backups` finds backups under prefixes and skips `.metadata` files, `SendAlertTest`, which checks `send_alert` and the `send_test_alert` command, `BackupDbCommandTest`, which checks that `backup_db` writes a `daily/` backup and alerts and fails when the backup fails, and `SearchListViewTest`, which exercises the search and HTMX partial-response behaviour of `SearchListView`.
 
 ### `views.py`
 

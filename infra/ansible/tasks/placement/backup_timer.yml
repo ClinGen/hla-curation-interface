@@ -1,0 +1,12 @@
+- name: Place the database backup systemd service file
+  become: true
+  ansible.builtin.template:
+    src: "files/templates/hci-backup.service"
+    dest: /etc/systemd/system/hci-backup.service
+    mode: "644"
+- name: Place the database backup systemd timer file
+  become: true
+  ansible.builtin.copy:
+    src: "files/hci-backup.timer"
+    dest: /etc/systemd/system/hci-backup.timer
+    mode: "644"

@@ -34,3 +34,7 @@
       ansible.builtin.include_tasks: ../tasks/placement/fail2ban.yml
     - name: Admin | fail2ban start
       ansible.builtin.include_tasks: ../tasks/admin/fail2ban_start.yml
+    - name: Placement | Database backup timer files
+      ansible.builtin.include_tasks: ../tasks/placement/backup_timer.yml
+    - name: Admin | Database backup timer start
+      ansible.builtin.include_tasks: ../tasks/admin/backup_timer_start.yml
