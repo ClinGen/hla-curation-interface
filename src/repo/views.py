@@ -31,6 +31,7 @@ from repo.serializers import (
     flatten_evidence,
     flatten_published_curation,
     format_decimal,
+    public_evidence,
     serialize_published_curation,
 )
 from repo.tables import PublishedCurationTable
@@ -112,6 +113,7 @@ class PublishedCurationDetail(DetailView):
         context["curation"] = self.object.curation
         context["superseded"] = is_superseded(self.object)
         context["superseding"] = get_superseding(self.object)
+        context["evidence"] = public_evidence(self.object.curation)
         return context
 
 
@@ -132,6 +134,7 @@ class PublishedEvidenceDetail(DetailView):
             slug=self.kwargs["evidence_slug"],
             curation__slug=self.kwargs["curation_slug"],
             curation__publication__isnull=False,
+            is_included=True,
         )
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
@@ -372,7 +375,7 @@ def _xlsx_attachment(
         curation_id = {"Curation ID": published.curation.slug}
         evidence_rows.extend(
             {**curation_id, **flatten_evidence(evidence)}
-            for evidence in published.curation.evidence.all()
+            for evidence in public_evidence(published.curation)
         )
 
     workbook = Workbook()

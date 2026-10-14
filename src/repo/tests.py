@@ -538,7 +538,9 @@ class JSONDownloadViewTest(TestCase):
         self.assertIn("Pokémon", self.client.get(url).content.decode())
 
     def test_json_writes_decimals_readably(self):
-        Evidence.objects.create(curation=self.curation, odds_ratio=Decimal("2.50000"))
+        Evidence.objects.create(
+            is_included=True, curation=self.curation, odds_ratio=Decimal("2.50000")
+        )
         url = reverse("repo-download-single", args=[self.curation.slug])
         (curation,) = json.loads(self.client.get(url).content)["curations"]
         self.assertEqual(curation["evidence"][0]["odds_ratio"], "2.5")
@@ -547,7 +549,9 @@ class JSONDownloadViewTest(TestCase):
         Curation.objects.filter(pk=self.curation.pk).update(
             taskforce=HLA_CURATION_TASKFORCE_ID
         )
-        Evidence.objects.create(curation=self.curation, zygosity=Zygosity.BIALLELIC)
+        Evidence.objects.create(
+            is_included=True, curation=self.curation, zygosity=Zygosity.BIALLELIC
+        )
         url = reverse("repo-download-single", args=[self.curation.slug])
         (curation,) = json.loads(self.client.get(url).content)["curations"]
         self.assertEqual(curation["status"], CURATION_STATUS_CHOICES[Status.PUBLISHED])
@@ -565,12 +569,11 @@ class JSONDownloadViewTest(TestCase):
             slug="P999999", title="T", author="A", publication_year=2020, pubmed_id="1"
         )
         evidence = Evidence.objects.create(
-            curation=self.curation, publication=publication
+            is_included=True, curation=self.curation, publication=publication
         )
         structural = {
             "evidence_id",
             "status",
-            "is_included",
             "publication",
             "score",
             "added_at",
@@ -792,6 +795,7 @@ class PublicLayoutTest(TestCase):
         self.published = PublishedCuration.objects.create(
             curation=self.curation, published_by=user
         )
+        self.curation.evidence.update(is_included=True)  # type: ignore
         self.evidence = self.curation.evidence.get()  # type: ignore
         slug = self.curation.slug
         history_id = self.published.history.get().history_id  # type: ignore
@@ -912,6 +916,7 @@ class PublishedEvidenceDetailTest(TestCase):
         )
         self.curation = self._curation(allele_pk=1)
         self.evidence = Evidence.objects.create(
+            is_included=True,
             curation=self.curation,
             publication=self.publication,
             zygosity=Zygosity.BIALLELIC,
@@ -943,7 +948,7 @@ class PublishedEvidenceDetailTest(TestCase):
         self.assertContains(response, "https://pubmed.ncbi.nlm.nih.gov/1234")
         self.assertEqual(
             [label for label, _ in response.context["evidence_values"]][:2],
-            ["Included in Score", "Evidence Score"],
+            ["Evidence Score", "GWAS"],
         )
 
     def test_hides_internal_fields(self):
@@ -954,7 +959,9 @@ class PublishedEvidenceDetailTest(TestCase):
 
     def test_not_found_unless_published_and_matching(self):
         unpublished = self._curation(allele_pk=2)
-        unpublished_evidence = Evidence.objects.create(curation=unpublished)
+        unpublished_evidence = Evidence.objects.create(
+            is_included=True, curation=unpublished
+        )
         other = self._curation(allele_pk=2)
         PublishedCuration.objects.create(curation=other)
         for curation_slug, evidence_slug in (
@@ -988,7 +995,84 @@ class PublishedEvidenceDetailTest(TestCase):
         response = self.client.get(reverse("repo-detail", args=[self.curation.slug]))
         soup = BeautifulSoup(response.content, "html.parser")
         headers = [th.get_text(strip=True) for th in soup.select("#evidence-table th")]
-        self.assertEqual(headers, ["ID", "Publication", "Included", "Score"])
+        self.assertEqual(headers, ["ID", "Publication", "Score"])
+
+
+class ExcludedEvidenceTest(TestCase):
+    fixtures = ["test_alleles.json", "test_diseases.json"]
+
+    def setUp(self):
+        publication = Publication.objects.create(
+            slug="P999999", title="T", author="A", publication_year=2020, pubmed_id="1"
+        )
+        self.curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+            status=Status.PUBLISHED,
+        )
+        self.included = Evidence.objects.create(
+            is_included=True, curation=self.curation, publication=publication
+        )
+        self.excluded = Evidence.objects.create(
+            is_included=False,
+            curation=self.curation,
+            publication=publication,
+            status=Status.IN_PROGRESS,
+        )
+        PublishedCuration.objects.create(curation=self.curation)
+        self.slug = self.curation.slug
+
+    def test_detail_table_lists_only_included_evidence(self):
+        response = self.client.get(reverse("repo-detail", args=[self.slug]))
+        soup = BeautifulSoup(response.content, "html.parser")
+        ids = [
+            link.get_text(strip=True)
+            for link in soup.select("#evidence-table td:first-child a")
+        ]
+        self.assertEqual(ids, [self.included.slug])
+
+    def test_excluded_evidence_page_is_not_found(self):
+        url = reverse("repo-evidence", args=[self.slug, self.excluded.slug])
+        self.assertEqual(self.client.get(url).status_code, 404)
+
+    def test_downloads_leave_out_excluded_evidence(self):
+        for name in (
+            "repo-download-all",
+            "repo-download-single-csv",
+            "repo-download-single-xlsx",
+        ):
+            args = [] if name == "repo-download-all" else [self.slug]
+            response = self.client.get(reverse(name, args=args))
+            if name.endswith("xlsx"):
+                workbook = load_workbook(io.BytesIO(response.content))
+                content = " ".join(
+                    str(value)
+                    for sheet in workbook
+                    for row in sheet.iter_rows(values_only=True)
+                    for value in row
+                )
+            else:
+                content = response.content.decode("utf-8-sig")
+            with self.subTest(name=name):
+                self.assertIn(self.included.slug, content)
+                self.assertNotIn(self.excluded.slug, content)
+                self.assertNotIn("is_included", content)
+                self.assertNotIn("Included in Score", content)
+
+    def test_curation_with_only_excluded_evidence_has_one_blank_csv_row(self):
+        self.included.delete()
+        response = self.client.get(
+            reverse("repo-download-single-csv", args=[self.slug])
+        )
+        rows = list(csv.DictReader(io.StringIO(response.content.decode("utf-8-sig"))))
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["Evidence ID"], "")
+
+    def test_score_still_counts_only_included_evidence(self):
+        response = self.client.get(reverse("repo-download-single", args=[self.slug]))
+        (curation,) = json.loads(response.content)["curations"]
+        self.assertEqual(curation["score"], float(self.curation.score))
 
 
 class RepoAboutViewTest(OpenViewTestMixin, TestCase):
@@ -1133,13 +1217,16 @@ class CSVDownloadViewTest(TestCase):
             slug="P999999", title="T", author="A", publication_year=2020, pubmed_id="1"
         )
         self.first_evidence = Evidence.objects.create(
+            is_included=True,
             curation=self.allele_curation,
             publication=self.publication,
             zygosity=Zygosity.MONOALLELIC,
             is_gwas=True,
         )
         self.second_evidence = Evidence.objects.create(
-            curation=self.allele_curation, publication=self.publication
+            is_included=True,
+            curation=self.allele_curation,
+            publication=self.publication,
         )
         # Publish the allele curation more recently, but create it first.
         self._publish(self.allele_curation, timezone.now() - timedelta(days=1))
@@ -1244,7 +1331,9 @@ class CSVDownloadViewTest(TestCase):
 
     def test_query_count_does_not_grow_with_rows(self):
         Evidence.objects.create(
-            curation=self.haplotype_curation, publication=self.publication
+            is_included=True,
+            curation=self.haplotype_curation,
+            publication=self.publication,
         )
         # One query for the curations and their related rows, one for evidence
         # and its publication, and one for demographics.
@@ -1281,11 +1370,11 @@ class XLSXDownloadViewTest(TestCase):
             slug="P999999", title="T", author="A", publication_year=2020, pubmed_id="1"
         )
         self.evidence = Evidence.objects.create(
+            is_included=True,
             curation=self.curation,
             publication=self.publication,
             zygosity=Zygosity.BIALLELIC,
             p_value=Decimal("0.0001"),
-            is_included=True,
         )
         self.evidence.demographics.set(Demographic.objects.all()[:2])
         self.published = PublishedCuration.objects.create(
@@ -1351,7 +1440,6 @@ class XLSXDownloadViewTest(TestCase):
     def test_values_are_readable_and_decimals_are_numbers(self):
         (row,) = self._sheet_rows(self._workbook(), "Evidence")
         self.assertEqual(row["Zygosity"], ZYGOSITY_CHOICES[Zygosity.BIALLELIC])
-        self.assertEqual(row["Included in Score"], "Yes")
         p_value = row["p-value"]
         assert isinstance(p_value, float)
         self.assertAlmostEqual(p_value, 0.0001)
@@ -1371,7 +1459,9 @@ class XLSXDownloadViewTest(TestCase):
             disease=Disease.objects.get(pk=1),
             status=Status.PUBLISHED,
         )
-        Evidence.objects.create(curation=other, publication=self.publication)
+        Evidence.objects.create(
+            is_included=True, curation=other, publication=self.publication
+        )
         PublishedCuration.objects.create(curation=other)
         # Curations, evidence, and demographics.
         with self.assertNumQueries(3):
@@ -1405,7 +1495,9 @@ class SingleFlatDownloadViewTest(TestCase):
             status=Status.PUBLISHED,
         )
         for _ in range(2):
-            Evidence.objects.create(curation=curation, publication=self.publication)
+            Evidence.objects.create(
+                is_included=True, curation=curation, publication=self.publication
+            )
         PublishedCuration.objects.create(curation=curation)
         return curation
 
@@ -1541,6 +1633,7 @@ class FlattenEvidenceTest(TestCase):
             disease=Disease.objects.get(pk=1),
         )
         self.evidence = Evidence.objects.create(
+            is_included=True,
             curation=curation,
             typing_method=TypingMethod.SEROLOGICAL,
             is_protective=False,

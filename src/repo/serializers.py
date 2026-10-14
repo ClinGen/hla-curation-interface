@@ -25,6 +25,20 @@ def format_decimal(value: Decimal) -> str:
     return f"{normalized:f}"
 
 
+def public_evidence(curation: "Curation") -> list["Evidence"]:
+    """Returns the evidence that HLArepo shows for a curation.
+
+    Only evidence included in the score is public. HLArepo records no reason for
+    an exclusion, and excluded evidence may never have been finished.
+
+    Filtering in Python keeps any prefetched evidence from being queried again.
+
+    Returns:
+        The curation's included evidence, in its default order.
+    """
+    return [evidence for evidence in curation.evidence.all() if evidence.is_included]  # type: ignore
+
+
 def _export_value(value: object) -> object:
     """Converts a model field value to a JSON-friendly value.
 
@@ -142,7 +156,7 @@ def serialize_published_curation(published: "PublishedCuration") -> dict[str, An
         "update_of": curation.copied_from.slug if curation.copied_from else None,
         "added_at": curation.added_at.isoformat(),
         "evidence": [
-            serialize_evidence(evidence) for evidence in curation.evidence.all()
+            serialize_evidence(evidence) for evidence in public_evidence(curation)
         ],
     }
 
@@ -159,7 +173,6 @@ def serialize_evidence(evidence: "Evidence") -> dict[str, Any]:
     return {
         "evidence_id": evidence.slug,
         "status": _json_field(evidence, "status"),
-        "is_included": evidence.is_included,
         "score": float(evidence.score),
         "publication": (
             {
@@ -210,7 +223,6 @@ EVIDENCE_COLUMNS = {
 # evidence can still fill them in with blanks.
 EVIDENCE_COLUMN_NAMES = [
     "Evidence ID",
-    "Included in Score",
     "Evidence Score",
     "Publication ID",
     "Publication Title",
@@ -305,7 +317,6 @@ def flatten_evidence(evidence: "Evidence") -> dict[str, object]:
     publication = evidence.publication
     row: dict[str, object] = {
         "Evidence ID": evidence.slug,
-        "Included in Score": _flat_value(evidence.is_included),
         "Evidence Score": evidence.score,
         "Publication ID": publication.slug if publication else "",
         "Publication Title": publication.title if publication else "",
@@ -368,7 +379,7 @@ def flatten_classification_rows(
     """
     classification = flatten_published_curation(published, url=url)
     evidence_rows = [
-        flatten_evidence(evidence) for evidence in published.curation.evidence.all()
+        flatten_evidence(evidence) for evidence in public_evidence(published.curation)
     ]
     if not evidence_rows:
         evidence_rows = [dict.fromkeys(EVIDENCE_COLUMN_NAMES, "")]

@@ -1,5 +1,5 @@
-{# The public evidence table on the HLArepo detail page. Each ID opens the evidence's scoring matrix in the evidence modal, or its own page without JavaScript. #}
-{% if curation.evidence.all %}
+{# The public evidence table on the HLArepo detail page, listing only evidence included in the score. Each ID opens the evidence's scoring matrix in the evidence modal, or its own page without JavaScript. #}
+{% if evidence %}
     <h2 class="title is-5 mt-6">Evidence</h2>
     <div class="block table-container">
         <table class="table is-fullwidth" id="evidence-table">
@@ -7,13 +7,12 @@
             <tr>
                 <th>ID</th>
                 <th>Publication</th>
-                <th>Included</th>
                 <th>Score</th>
             </tr>
             </thead>
             <tbody>
-            {% for evidence in curation.evidence.all %}
-                {% url 'repo-evidence' curation.slug evidence.slug as evidence_url %}
+            {% for item in evidence %}
+                {% url 'repo-evidence' curation.slug item.slug as evidence_url %}
                 <tr>
                     <td>
                         <a href="{{ evidence_url }}"
@@ -21,22 +20,21 @@
                            hx-target="#evidence-modal-body"
                            hx-select="#evidence-body"
                            hx-swap="innerHTML"
-                           data-evidence-modal-title="{{ evidence.slug }} Scoring Matrix">
-                            {{ evidence.slug }}
+                           data-evidence-modal-title="{{ item.slug }} Scoring Matrix">
+                            {{ item.slug }}
                         </a>
                     </td>
                     <td>
-                        {% if evidence.publication %}
-                            <i>{{ evidence.publication.title }}</i>
-                            {% if evidence.publication.pubmed_id %}
-                                ({% with url="https://pubmed.ncbi.nlm.nih.gov/"|add:evidence.publication.pubmed_id text="PMID:"|add:evidence.publication.pubmed_id %}{% include "common/linkout.html" %}{% endwith %})
+                        {% if item.publication %}
+                            <i>{{ item.publication.title }}</i>
+                            {% if item.publication.pubmed_id %}
+                                ({% with url="https://pubmed.ncbi.nlm.nih.gov/"|add:item.publication.pubmed_id text="PMID:"|add:item.publication.pubmed_id %}{% include "common/linkout.html" %}{% endwith %})
                             {% endif %}
                         {% else %}
                             ------
                         {% endif %}
                     </td>
-                    <td>{{ evidence.is_included|yesno:"Yes,No" }}</td>
-                    <td>{{ evidence.score }}</td>
+                    <td>{{ item.score }}</td>
                 </tr>
             {% endfor %}
             </tbody>
