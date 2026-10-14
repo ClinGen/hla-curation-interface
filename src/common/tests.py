@@ -17,6 +17,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from auth_.models import UserProfile
+from common.tables import HistoryTable
 from common.templatetags.custom_filters import is_public
 
 
@@ -356,3 +357,13 @@ class SearchListViewTest(ProtectedViewTestMixin, TestCase):
         self.assertContains(response_empty_q, "A000001")
         self.assertContains(response_empty_q, "A000002")
         self.assertContains(response_empty_q, "A000003")
+
+
+class HistoryTableHideUserTest(TestCase):
+    def test_shows_changed_by_by_default(self):
+        table = HistoryTable([], change_url_name="allele-change")
+        self.assertIn("history_user", table.columns.names())
+
+    def test_hide_user_drops_changed_by(self):
+        table = HistoryTable([], change_url_name="allele-change", hide_user=True)
+        self.assertNotIn("history_user", table.columns.names())

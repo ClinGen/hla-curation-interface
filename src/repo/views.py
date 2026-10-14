@@ -125,6 +125,7 @@ class PublishedCurationHistory(DetailView):
             self.object.history.all(),
             change_url_name="repo-change",
             change_url_slug1=self.object.curation.slug,
+            hide_user=True,
         )
         RequestConfig(self.request).configure(history_table)
         context["history_table"] = history_table
@@ -146,7 +147,11 @@ class PublishedCurationChange(DetailView):
         record = self.object.history.get(history_id=self.kwargs["history_id"])
         prev_record = record.prev_record
         context["record"] = record
-        context["changes"] = resolve_changes(PublishedCuration, record, prev_record)
+        # HLArepo is public, so it doesn't show who changed or published a curation.
+        context["changes"] = resolve_changes(
+            PublishedCuration, record, prev_record, exclude=["published_by"]
+        )
+        context["hide_user"] = True
         context["curation"] = self.object.curation
         return context
 

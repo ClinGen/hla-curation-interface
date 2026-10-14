@@ -1291,3 +1291,75 @@ class FlattenEvidenceTest(TestCase):
             with self.subTest(group=group.group):
                 self.assertIn(group.group, str(row["Demographics"]))
         self.assertIn("; ", str(row["Demographics"]))
+
+
+class HiddenCuratorIdentityTest(TestCase):
+    fixtures = ["test_alleles.json", "test_diseases.json"]
+
+    def setUp(self):
+        self.publisher = User.objects.create_user(
+            username="publisher@example.org", email="publisher@example.org"
+        )
+        self.curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+            status=Status.PUBLISHED,
+        )
+        self.published = PublishedCuration.objects.create(
+            curation=self.curation, published_by=self.publisher
+        )
+        other = User.objects.create_user(username="other@example.org")
+        self.published.published_by = other
+        self.published.save()
+        # Record the users on the history, as requests from curators would.
+        self.published.history.update(history_user=self.publisher)  # type: ignore
+        self.slug = self.curation.slug
+
+    def _assert_hidden(self, content: str) -> None:
+        self.assertNotIn("publisher@example.org", content)
+        self.assertNotIn("other@example.org", content)
+
+    def test_history_page_hides_the_changed_by_column(self):
+        response = self.client.get(reverse("repo-history", args=[self.slug]))
+        self.assertNotIn(
+            "history_user", response.context["history_table"].columns.names()
+        )
+        self.assertNotContains(response, "Changed By")
+        self._assert_hidden(response.content.decode())
+
+    def test_change_page_hides_the_user_and_publisher_change(self):
+        record = self.published.history.latest()  # type: ignore
+        url = reverse("repo-change", args=[self.slug, record.history_id])
+        response = self.client.get(url)
+        self.assertNotContains(response, "Changed By")
+        self.assertNotIn("published by", response.content.decode().lower())
+        self._assert_hidden(response.content.decode())
+
+    def test_json_has_no_publisher(self):
+        self.assertNotIn("published_by", serialize_published_curation(self.published))
+        for url in (
+            reverse("repo-download-single", args=[self.slug]),
+            reverse("repo-download-all"),
+        ):
+            with self.subTest(url=url):
+                self._assert_hidden(self.client.get(url).content.decode())
+
+    def test_csv_and_xlsx_have_no_publisher(self):
+        csv_response = self.client.get(reverse("repo-download-all-csv"))
+        self._assert_hidden(csv_response.content.decode("utf-8-sig"))
+        xlsx_response = self.client.get(reverse("repo-download-all-xlsx"))
+        workbook = load_workbook(io.BytesIO(xlsx_response.content))
+        for sheet in workbook:
+            for row in sheet.iter_rows(values_only=True):
+                self._assert_hidden(" ".join(str(value) for value in row))
+
+    def test_curator_history_pages_still_show_changed_by(self):
+        curator = User.objects.create_user(username="curator")
+        UserProfile.objects.create(
+            user=curator, has_signed_phi_agreement=True, has_curation_permissions=True
+        )
+        self.client.force_login(curator)
+        response = self.client.get(reverse("curation-history", args=[self.slug]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Changed By")

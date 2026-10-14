@@ -19,9 +19,21 @@ class HistoryTable(tables.Table):
         change_url_name: str = "",
         change_url_slug1: str | None = None,
         change_url_slug2: str | None = None,
+        hide_user: bool = False,
         **kwargs,
     ) -> None:
-        """Store change URL parameters before delegating to the parent."""
+        """Store change URL parameters before delegating to the parent.
+
+        Args:
+            *args: Positional arguments for the django-tables2 table.
+            change_url_name: The URL name of the change-detail view.
+            change_url_slug1: The first slug in the change-detail URL, if any.
+            change_url_slug2: The second slug in the change-detail URL, if any.
+            hide_user: Whether to drop the Changed By column, for public pages.
+            **kwargs: Keyword arguments for the django-tables2 table.
+        """
+        if hide_user:
+            kwargs["exclude"] = (*kwargs.get("exclude", ()), "history_user")
         super().__init__(*args, **kwargs)
         self.change_url_name = change_url_name
         self.change_url_slug1 = change_url_slug1

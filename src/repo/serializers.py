@@ -82,9 +82,6 @@ def serialize_published_curation(published: "PublishedCuration") -> dict[str, An
     return {
         "curation_id": curation.slug,
         "published_at": published.published_at.isoformat(),
-        "published_by": (
-            published.published_by.username if published.published_by else None
-        ),
         "version": published.version,
         "curation": {
             "status": curation.status,
