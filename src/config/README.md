@@ -20,11 +20,15 @@ Extends `base.py` with development-specific overrides: `DEBUG = True`, no `ALLOW
 
 ### `settings/prod.py`
 
-Extends `base.py` with production-specific overrides: `DEBUG = False`, `ALLOWED_HOSTS` restricted to the ClinGen production and test hostnames, `MESSAGE_LEVEL` set to `INFO`, and a rotating file logger (5 MB, 5 backups) alongside a console handler. Timezone support (`USE_TZ`) is enabled.
+Extends `base.py` with production-specific overrides: `DEBUG = False`, `ALLOWED_HOSTS` restricted to the ClinGen production and test hostnames, `MESSAGE_LEVEL` set to `INFO`, and logging to stderr only, with the level, logger name, and message. Gunicorn runs under systemd, so journald collects stderr and adds the timestamp. Timezone support (`USE_TZ`) is enabled.
 
 ### `settings/test.py`
 
 Extends `dev.py` for use during test runs. Disables Sentry to prevent background HTTP flushes from polluting test output, and replaces the console log handler with a null handler so logs are suppressed by default and only surfaced by pytest for failing tests.
+
+### `tests.py`
+
+Houses `ProdLoggingTest`, which imports the production settings with Sentry patched out and checks that they log only to the console, with the logger name, and define no log file.
 
 ### `urls.py`
 

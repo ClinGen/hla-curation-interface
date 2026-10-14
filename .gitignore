@@ -14,6 +14,7 @@ src/version.txt
 __pycache__/
 build/
 coverage/
+# Only for old logs/hci.log files. Production now logs to journald.
 logs/
 backups/
 node_modules/
