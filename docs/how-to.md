@@ -97,6 +97,42 @@ and Caddy's certificates. Restoring one means building a new instance from it in
 Lightsail console, which replaces the whole server, so for database problems, restore a
 database backup instead.
 
+## How to Configure Email
+
+Each server sends email, such as an alert when the nightly backup fails, through Amazon
+SES. `infra/terraform/ses.tf` sets up SES to send from the server's own subdomain and
+creates an IAM user that can only send email. After you run `terraform apply` in a
+workspace:
+
+- Wait a few minutes, then check that the subdomain shows as verified in the SES
+  console's Identities page, in us-west-2. Its DKIM records are created for you.
+
+- While SES is in the sandbox, it delivers only to verified addresses. In the SES
+  console, choose Create identity, then Email address, and enter each address in
+  `ALERT_EMAILS`. Each owner clicks the link that AWS emails them.
+
+- Read the SMTP credentials:
+
+  ```
+  terraform workspace select test
+  terraform output email_smtp_username
+  terraform output -raw email_smtp_password
+  ```
+
+- SSH into that workspace's server and add these lines to the `.env` file in the root
+  of the repository. Use `noreply@hci.clinicalgenome.org` on prod. Separate several
+  alert addresses with commas.
+
+  ```
+  EMAIL_HOST_USER=<email_smtp_username>
+  EMAIL_HOST_PASSWORD=<email_smtp_password>
+  DEFAULT_FROM_EMAIL=noreply@hci-test.clinicalgenome.org
+  ALERT_EMAILS=you@example.com
+  ```
+
+To email people who haven't verified their address, such as curators, request
+production access for SES in the AWS console first.
+
 ## How to Set Up a Server for the First Time
 
 - Create the cloud infrastructure for the server if you haven't already done so.
