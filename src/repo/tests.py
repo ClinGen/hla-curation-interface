@@ -12,7 +12,7 @@ from django.utils import timezone
 
 from allele.models import Allele
 from auth_.models import UserProfile
-from common.tests import ProtectedViewTestMixin
+from common.tests import OpenViewTestMixin, ProtectedViewTestMixin
 from curation.constants.models.common import Status
 from curation.constants.models.curation import CurationTypes
 from curation.models import Curation, Evidence
@@ -782,3 +782,86 @@ class PublicLayoutTest(TestCase):
         self.assertNotIn("needs_review", PUBLIC_EVIDENCE_FIELDS)
         response = self.client.get(self.urls[1])
         self.assertNotContains(response, "Needs Review")
+
+
+class RepoAboutViewTest(OpenViewTestMixin, TestCase):
+    url = reverse("repo-about")
+    template = "repo/about.html"
+    page_name = "About"
+    expected_text = ["HLArepo", "published", "HLA Curation Interface", "Stanford"]
+
+
+class RepoContactViewTest(OpenViewTestMixin, TestCase):
+    url = reverse("repo-contact")
+    template = "repo/contact.html"
+    page_name = "Contact"
+    expected_text = ["HLArepo", "hci@clinicalgenome.org"]
+
+
+class RepoHelpViewTest(OpenViewTestMixin, TestCase):
+    url = reverse("repo-help")
+    template = "repo/help.html"
+    page_name = "Help"
+    expected_text = ["HLArepo", "hci@clinicalgenome.org", "subject"]
+
+
+class RepoCitingViewTest(OpenViewTestMixin, TestCase):
+    url = reverse("repo-citing")
+    template = "repo/citing.html"
+    page_name = "Citing"
+    expected_text = [
+        "Clinical Genome Resource. HLArepo. Stanford University.",
+        "https://hci.clinicalgenome.org/repo/",
+        "downloaded",
+    ]
+
+
+class RepoAcknowledgementsViewTest(OpenViewTestMixin, TestCase):
+    url = reverse("repo-acknowledgements")
+    template = "repo/acknowledgements.html"
+    page_name = "Acknowledgements"
+    expected_text = ["HLArepo", "U24HG009649", "Steven Mack"]
+
+
+class RepoCollaboratorsViewTest(OpenViewTestMixin, TestCase):
+    url = reverse("repo-collaborators")
+    template = "repo/collaborators.html"
+    page_name = "Collaborators"
+    expected_text = ["The Baylor College of Medicine ClinGen Team", "ClinPGx"]
+
+
+REPO_INFO_URL_NAMES = [
+    "repo-about",
+    "repo-contact",
+    "repo-citing",
+    "repo-help",
+    "repo-acknowledgements",
+    "repo-collaborators",
+]
+CORE_INFO_URL_NAMES = [
+    "about",
+    "contact",
+    "citing",
+    "help",
+    "acknowledgements",
+    "collaborators",
+]
+
+
+class RepoInfoPagesTest(TestCase):
+    def test_pages_use_the_public_layout_without_login_links(self):
+        for name in REPO_INFO_URL_NAMES:
+            with self.subTest(name=name):
+                response = self.client.get(reverse(name))
+                self.assertTemplateUsed(response, "layouts/public.html")
+                self.assertNotContains(response, "bi-house")
+                assert_no_login_links(self, response)
+
+    def test_public_footer_links_to_repo_info_pages(self):
+        response = self.client.get(reverse("repo-search"))
+        for name in REPO_INFO_URL_NAMES:
+            with self.subTest(name=name):
+                self.assertContains(response, f'href="{reverse(name)}"')
+        for name in CORE_INFO_URL_NAMES:
+            with self.subTest(name=name):
+                self.assertNotContains(response, f'href="{reverse(name)}"')

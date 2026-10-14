@@ -56,7 +56,7 @@ A micro-partial that renders a single `<a class="navbar-item">` link. It accepts
 
 ### `partials/public_footer.html`
 
-Renders the HLArepo footer: the shared logos, copyright and funding attribution, a link to the open-source repository, and the current Git SHA. Its text names HLArepo rather than the HCI.
+Renders the HLArepo footer: the shared logos, links to the HLArepo info pages (About, Contact, Citing, Help, Acknowledgements, Collaborators), copyright and funding attribution, a link to the open-source repository, and the current Git SHA. Its text names HLArepo rather than the HCI.
 
 ### `partials/public_navbar.html`
 

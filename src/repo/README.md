@@ -30,9 +30,29 @@ Provides `serialize_published_curation` and `serialize_evidence`, plain function
 
 Defines `PublishedCurationTable` (a `django-tables2` table) that renders the searchable list of published curations, with columns for ID, allele, haplotype, disease, classification (`Curation.classification_display`), published date, and a per-row JSON download button. There's no type column, since the filled-in allele or haplotype column shows it.
 
+### `templates/repo/about.html`
+
+Renders the HLArepo About page: what HLArepo is, how curations reach it from the HCI, and who maintains it.
+
+### `templates/repo/acknowledgements.html`
+
+Renders the HLArepo Acknowledgements page, crediting the NIH grant and contributors.
+
 ### `templates/repo/change.html`
 
 Renders a single historical change record for a published curation, showing breadcrumbs back through the repo list, detail, and history pages, then including the shared `change_body.html` partial.
+
+### `templates/repo/citing.html`
+
+Renders the HLArepo Citing page with the citation format for HLArepo and a request to cite curation IDs and download dates.
+
+### `templates/repo/collaborators.html`
+
+Renders the HLArepo Collaborators page, listing partner organizations.
+
+### `templates/repo/contact.html`
+
+Renders the HLArepo Contact page with the maintainers' email address.
 
 ### `templates/repo/detail.html`
 
@@ -42,9 +62,17 @@ Renders the detail page for a published curation, including supersession and cop
 
 Renders the public summary of a published curation: the curation ID, the allele (or haplotype and each member allele) with ClinGen Allele Registry linkouts, the disease with a Mondo linkout, the classification (via `curation/partials/classification.html`), the taskforce, the taskforce review date, the published date, the "Evidence Summary" heading and text, and the taskforce additional notes and, when set, the override reason under smaller headings.
 
+### `templates/repo/help.html`
+
+Renders the HLArepo Help page, explaining how to report an issue by email.
+
 ### `templates/repo/history.html`
 
 Renders the full audit-history page for a published curation, listing all historical records via the shared `history_body.html` partial with breadcrumbs linking back to the repo list and curation detail.
+
+### `templates/repo/layouts/page.html`
+
+The layout for the HLArepo info pages. It extends `layouts/public.html` and renders breadcrumbs rooted at HLArepo, a `heading` block, and a `content` block.
 
 ### `templates/repo/list.html`
 
@@ -56,8 +84,8 @@ Contains unit and integration tests covering the `PublishedCuration` model (crea
 
 ### `urls.py`
 
-Maps URL patterns for the repo app: the search/list page, bulk and single JSON download endpoints, and the curation detail, history, and change views, all namespaced under the `repo-` prefix.
+Maps URL patterns for the repo app: the search/list page, the six info pages (About, Acknowledgements, Citing, Collaborators, Contact, Help), bulk and single JSON download endpoints, and the curation detail, history, and change views, all namespaced under the `repo-` prefix.
 
 ### `views.py`
 
-Implements the repo views: `PublishedCurationList` (searchable table list, most recently published first), `PublishedCurationDetail` (with supersession detection and related-object prefetching for the linkouts), `PublishedCurationHistory` and `PublishedCurationChange` (history audit trail), and `download_all_json` / `download_single_json` function-based views that return serialized JSON responses as file attachments.
+Implements the repo views: `PublishedCurationList` (searchable table list, most recently published first), `PublishedCurationDetail` (with supersession detection and related-object prefetching for the linkouts), `PublishedCurationHistory` and `PublishedCurationChange` (history audit trail), `download_all_json` / `download_single_json` function-based views that return serialized JSON responses as file attachments, and function-based views for the six info pages.

@@ -4,6 +4,12 @@ from repo import views
 
 urlpatterns = [
     path("", views.PublishedCurationList.as_view(), name="repo-search"),
+    path("about", views.about, name="repo-about"),
+    path("acknowledgements", views.acknowledgements, name="repo-acknowledgements"),
+    path("citing", views.citing, name="repo-citing"),
+    path("collaborators", views.collaborators, name="repo-collaborators"),
+    path("contact", views.contact, name="repo-contact"),
+    path("help", views.help_, name="repo-help"),
     path("download/all.json", views.download_all_json, name="repo-download-all"),
     path(
         "<slug:curation_slug>/detail",

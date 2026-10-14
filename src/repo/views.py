@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views.generic import DetailView
 from django_tables2 import RequestConfig
@@ -178,3 +178,33 @@ def download_single_json(request: HttpRequest, curation_slug: str) -> HttpRespon
         f'attachment; filename="hla_curation_{curation_slug}.json"'
     )
     return response
+
+
+def about(request: HttpRequest) -> HttpResponse:
+    """Returns the HLArepo about page."""
+    return render(request, "repo/about.html")
+
+
+def contact(request: HttpRequest) -> HttpResponse:
+    """Returns the HLArepo contact page."""
+    return render(request, "repo/contact.html")
+
+
+def help_(request: HttpRequest) -> HttpResponse:
+    """Returns the HLArepo help page."""
+    return render(request, "repo/help.html")
+
+
+def citing(request: HttpRequest) -> HttpResponse:
+    """Returns the HLArepo citing page."""
+    return render(request, "repo/citing.html")
+
+
+def acknowledgements(request: HttpRequest) -> HttpResponse:
+    """Returns the HLArepo acknowledgements page."""
+    return render(request, "repo/acknowledgements.html")
+
+
+def collaborators(request: HttpRequest) -> HttpResponse:
+    """Returns the HLArepo collaborators page."""
+    return render(request, "repo/collaborators.html")
