@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from curation.models import Curation
 
-from django.db.models import QuerySet
+from django.db.models import Prefetch, QuerySet
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
@@ -16,9 +16,10 @@ from common.history import resolve_changes
 from common.tables import HistoryTable
 from common.views import SearchListView
 from curation.constants.models.common import Status
+from curation.models import Evidence
 from repo.models import PublishedCuration
 from repo.serializers import (
-    flatten_published_curation,
+    flatten_classification_rows,
     serialize_published_curation,
 )
 from repo.tables import PublishedCurationTable
@@ -167,24 +168,32 @@ def download_all_json(request: HttpRequest) -> HttpResponse:
 
 
 def download_all_csv(request: HttpRequest) -> HttpResponse:
-    """Downloads all published curations as CSV, one row per curation.
+    """Downloads all published classifications as CSV, one row per evidence.
 
     The file starts with a UTF-8 byte order mark so Excel reads non-ASCII text
     correctly.
 
     Returns:
-        CSV response with all published curations, most recently published first.
+        CSV response with all published classifications, most recently published
+        first.
     """
-    published_curations = PublishedCuration.objects.select_related(
-        "curation__allele",
-        "curation__haplotype",
-        "curation__disease",
-        "curation__copied_from",
+    published_curations = (
+        PublishedCuration.objects.select_related(
+            "curation__allele",
+            "curation__haplotype",
+            "curation__disease",
+            "curation__copied_from",
+        )
+        .prefetch_related(
+            Prefetch(
+                "curation__evidence",
+                queryset=Evidence.objects.select_related(
+                    "publication"
+                ).prefetch_related("demographics"),
+            )
+        )
+        .order_by("-published_at")
     )
-    # The score and classification are computed from every evidence row.
-    published_curations = published_curations.prefetch_related(
-        "curation__evidence"
-    ).order_by("-published_at")
     timestamp = timezone.now().strftime("%Y-%m-%d")
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = (
@@ -194,11 +203,11 @@ def download_all_csv(request: HttpRequest) -> HttpResponse:
     writer = None
     for published in published_curations:
         url = request.build_absolute_uri(published.get_absolute_url())
-        row = flatten_published_curation(published, url=url)
-        if writer is None:
-            writer = csv.DictWriter(response, fieldnames=list(row))
-            writer.writeheader()
-        writer.writerow(row)
+        for row in flatten_classification_rows(published, url=url):
+            if writer is None:
+                writer = csv.DictWriter(response, fieldnames=list(row))
+                writer.writeheader()
+            writer.writerow(row)
     return response
 
 

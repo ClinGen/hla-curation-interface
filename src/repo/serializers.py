@@ -1,19 +1,20 @@
-from datetime import date
+from datetime import UTC, date
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
+from curation.constants.models.curation import TASKFORCE_CHOICES
 from repo.constants import PUBLIC_CURATION_FIELDS, PUBLIC_EVIDENCE_FIELDS
 
 if TYPE_CHECKING:
+    from django.db.models import Model
+
     from curation.models import Curation, Evidence
     from repo.models import PublishedCuration
 
 # Export keys that differ from the model field name, kept for existing consumers.
 EXPORT_NAMES = {"taskforce_classification": "classification"}
 
-# Public curation fields that the flat row lists after its fixed leading columns.
-# The classification comes first, with the other identifying columns.
-_ROW_TRAILING_FIELDS = sorted(PUBLIC_CURATION_FIELDS - {"taskforce_classification"})
+TASKFORCE_LABELS = dict(TASKFORCE_CHOICES)
 
 
 def _export_value(value: object) -> object:
@@ -141,49 +142,174 @@ def serialize_evidence(evidence: "Evidence") -> dict[str, Any]:
     }
 
 
+# Readable column names for the public fields in a flat row, in the order the
+# forms ask for them. The classification itself has a fixed column.
+CLASSIFICATION_COLUMNS = {
+    "taskforce": "Taskforce",
+    "taskforce_review_date": "Taskforce Review Date",
+    "taskforce_evidence_summary": "Taskforce Evidence Summary",
+    "taskforce_override_reason": "Taskforce Override Reason",
+    "taskforce_additional_notes": "Taskforce Additional Notes",
+}
+EVIDENCE_COLUMNS = {
+    "is_gwas": "GWAS",
+    "zygosity": "Zygosity",
+    "phase_confirmed": "Phase Confirmed",
+    "typing_method": "Typing Method",
+    "demographics": "Demographics",
+    "p_value": "p-value",
+    "multiple_testing_correction": "Multiple Testing Correction",
+    "effect_size_statistic": "Effect Size Statistic",
+    "odds_ratio": "Odds Ratio",
+    "relative_risk": "Relative Risk",
+    "beta": "Beta Coefficient",
+    "ci_start": "Confidence Interval Start",
+    "ci_end": "Confidence Interval End",
+    "cohort_size": "Cohort Size",
+    "additional_phenotypes": "Additional Phenotypes",
+    "has_association": "Has Association",
+    "is_protective": "Protective",
+}
+
+# The evidence columns of a flat row, in order, so a classification without
+# evidence can still fill them in with blanks.
+EVIDENCE_COLUMN_NAMES = [
+    "Evidence ID",
+    "Included in Score",
+    "Evidence Score",
+    "Publication ID",
+    "Publication Title",
+    "Publication Author",
+    "PubMed ID",
+    *EVIDENCE_COLUMNS.values(),
+]
+
+
 def _flat_value(value: object) -> object:
-    """Converts a model field value to a flat-file value.
+    """Converts a model field value to a readable flat-file value.
 
     Returns:
-        An empty string for None, otherwise the JSON-friendly value.
+        An empty string for None, Yes or No for a boolean, an ISO string for a
+        date, and anything else unchanged. Decimals stay numbers so spreadsheets
+        can sort and compute on them.
     """
-    return "" if value is None else _export_value(value)
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return "Yes" if value else "No"
+    if isinstance(value, date):
+        return value.isoformat()
+    return value
+
+
+def _field_label(instance: "Model", name: str) -> object:
+    """Returns a field's readable value, using the display label for a choice.
+
+    Returns:
+        The choice label for a field with choices, otherwise the flat value.
+    """
+    value = getattr(instance, name)
+    # Django adds a get_<name>_display method for every field with choices.
+    get_display = getattr(instance, f"get_{name}_display", None)
+    if get_display is not None and value is not None:
+        return get_display()
+    return _flat_value(value)
 
 
 def flatten_published_curation(
     published: "PublishedCuration", url: str
 ) -> dict[str, object]:
-    """Flattens a published curation to one row for a CSV or spreadsheet.
+    """Flattens a published curation to its classification columns.
 
     A haplotype is represented by its name alone, since the name already lists
-    its alleles. Evidence isn't included; the JSON export has it.
+    its alleles.
 
     Args:
         published: The PublishedCuration instance to flatten.
-        url: The absolute URL of the curation's HLArepo page.
+        url: The absolute URL of the classification's HLArepo page.
 
     Returns:
-        An ordered mapping of column name to value, with None as an empty string.
+        An ordered mapping of readable column name to readable value.
     """
     curation = published.curation
     allele = curation.allele
     haplotype = curation.haplotype
     disease = curation.disease
+    published_at = published.published_at.astimezone(UTC)
     row: dict[str, object] = {
-        "curation_id": curation.slug,
-        "url": url,
-        "version": published.version,
-        "published_at": published.published_at.isoformat(),
-        "allele": allele.name if allele else "",
-        "allele_car_id": _flat_value(allele.car_id) if allele else "",
-        "haplotype": haplotype.name if haplotype else "",
-        "disease": disease.name if disease else "",
-        "disease_mondo_id": _flat_value(disease.mondo_id) if disease else "",
-        "disease_iri": _flat_value(disease.iri) if disease else "",
-        EXPORT_NAMES["taskforce_classification"]: curation.classification_display,
-        "score": _flat_value(curation.score),
+        "Classification ID": curation.slug,
+        "URL": url,
+        "Version": published.version,
+        "Published (UTC)": published_at.strftime("%Y-%m-%d %H:%M"),
+        "Allele": allele.name if allele else "",
+        "Allele CAR ID": _flat_value(allele.car_id) if allele else "",
+        "Haplotype": haplotype.name if haplotype else "",
+        "Disease": disease.name if disease else "",
+        "Disease MONDO ID": _flat_value(disease.mondo_id) if disease else "",
+        "Disease IRI": _flat_value(disease.iri) if disease else "",
+        "Classification": curation.classification_display,
+        "Classification Score": curation.score,
     }
-    for name in _ROW_TRAILING_FIELDS:
-        row[EXPORT_NAMES.get(name, name)] = _flat_value(getattr(curation, name))
-    row["copied_from"] = curation.copied_from.slug if curation.copied_from else ""
+    for name, column in CLASSIFICATION_COLUMNS.items():
+        value = getattr(curation, name)
+        if name == "taskforce":
+            value = TASKFORCE_LABELS.get(value, value)
+        row[column] = _flat_value(value)
+    row["Update Of"] = curation.copied_from.slug if curation.copied_from else ""
     return row
+
+
+def flatten_evidence(evidence: "Evidence") -> dict[str, object]:
+    """Flattens an evidence record to its evidence columns.
+
+    The publication is split into separate columns, and the demographic groups
+    are joined with semicolons.
+
+    Args:
+        evidence: The Evidence instance to flatten.
+
+    Returns:
+        An ordered mapping of readable column name to readable value.
+    """
+    publication = evidence.publication
+    row: dict[str, object] = {
+        "Evidence ID": evidence.slug,
+        "Included in Score": _flat_value(evidence.is_included),
+        "Evidence Score": evidence.score,
+        "Publication ID": publication.slug if publication else "",
+        "Publication Title": publication.title if publication else "",
+        "Publication Author": publication.author if publication else "",
+        "PubMed ID": _flat_value(publication.pubmed_id) if publication else "",
+    }
+    for name, column in EVIDENCE_COLUMNS.items():
+        if name == "demographics":
+            groups = evidence.demographics.all()
+            row[column] = "; ".join(demo.group for demo in groups)
+        else:
+            row[column] = _field_label(evidence, name)
+    return row
+
+
+def flatten_classification_rows(
+    published: "PublishedCuration", url: str
+) -> list[dict[str, object]]:
+    """Flattens a published curation to one row per evidence record.
+
+    Each row has the classification columns followed by one evidence record's
+    columns. A classification without evidence gets one row with blank evidence
+    columns, so it still appears in the file.
+
+    Args:
+        published: The PublishedCuration instance to flatten.
+        url: The absolute URL of the classification's HLArepo page.
+
+    Returns:
+        The rows, each an ordered mapping of readable column name to value.
+    """
+    classification = flatten_published_curation(published, url=url)
+    evidence_rows = [
+        flatten_evidence(evidence) for evidence in published.curation.evidence.all()
+    ]
+    if not evidence_rows:
+        evidence_rows = [dict.fromkeys(EVIDENCE_COLUMN_NAMES, "")]
+    return [{**classification, **evidence} for evidence in evidence_rows]

@@ -3,6 +3,7 @@ import csv
 import io
 import json
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 from typing import TYPE_CHECKING, override
 
 from bs4 import BeautifulSoup
@@ -18,15 +19,30 @@ from allele.models import Allele
 from auth_.models import UserProfile
 from common.tests import OpenViewTestMixin, ProtectedViewTestMixin
 from curation.constants.models.common import Status
-from curation.constants.models.curation import CurationTypes
-from curation.models import Curation, Evidence
+from curation.constants.models.curation import (
+    HLA_CURATION_TASKFORCE_ID,
+    TASKFORCE_CHOICES,
+    CurationTypes,
+)
+from curation.constants.models.evidence import (
+    TYPING_METHOD_CHOICES,
+    ZYGOSITY_CHOICES,
+    TypingMethod,
+    Zygosity,
+)
+from curation.models import Curation, Demographic, Evidence
 from disease.models import Disease
 from haplotype.models import Haplotype
 from publication.models import Publication
 from repo.constants import PUBLIC_CURATION_FIELDS, PUBLIC_EVIDENCE_FIELDS
 from repo.models import PublishedCuration
 from repo.serializers import (
+    CLASSIFICATION_COLUMNS,
+    EVIDENCE_COLUMN_NAMES,
+    EVIDENCE_COLUMNS,
     EXPORT_NAMES,
+    flatten_classification_rows,
+    flatten_evidence,
     flatten_published_curation,
     serialize_evidence,
     serialize_published_curation,
@@ -907,7 +923,12 @@ class RepoLandingPageTest(TestCase):
 
 
 class CSVDownloadViewTest(TestCase):
-    fixtures = ["test_alleles.json", "test_diseases.json", "test_haplotypes.json"]
+    fixtures = [
+        "test_alleles.json",
+        "test_diseases.json",
+        "test_haplotypes.json",
+        "demographics.json",
+    ]
     url = reverse("repo-download-all-csv")
 
     def setUp(self):
@@ -924,6 +945,18 @@ class CSVDownloadViewTest(TestCase):
             haplotype=Haplotype.objects.get(pk=1),
             disease=Disease.objects.get(pk=1),
             status=Status.PUBLISHED,
+        )
+        self.publication = Publication.objects.create(
+            slug="P999999", title="T", author="A", publication_year=2020, pubmed_id="1"
+        )
+        self.first_evidence = Evidence.objects.create(
+            curation=self.allele_curation,
+            publication=self.publication,
+            zygosity=Zygosity.MONOALLELIC,
+            is_gwas=True,
+        )
+        self.second_evidence = Evidence.objects.create(
+            curation=self.allele_curation, publication=self.publication
         )
         # Publish the allele curation more recently, but create it first.
         self._publish(self.allele_curation, timezone.now() - timedelta(days=1))
@@ -952,63 +985,81 @@ class CSVDownloadViewTest(TestCase):
         )
         self.assertTrue(response.content.startswith(codecs.BOM_UTF8))
 
-    def test_one_row_per_curation_newest_first(self):
+    def test_one_row_per_evidence_newest_classification_first(self):
         rows = self._rows()
         self.assertEqual(
-            [row["curation_id"] for row in rows],
-            [self.allele_curation.slug, self.haplotype_curation.slug],
+            [(row["Classification ID"], row["Evidence ID"]) for row in rows],
+            [
+                (self.allele_curation.slug, self.first_evidence.slug),
+                (self.allele_curation.slug, self.second_evidence.slug),
+                (self.haplotype_curation.slug, ""),
+            ],
         )
 
+    def test_classification_without_evidence_has_blank_evidence_columns(self):
+        haplotype_row = self._rows()[-1]
+        for column in EVIDENCE_COLUMN_NAMES:
+            with self.subTest(column=column):
+                self.assertEqual(haplotype_row[column], "")
+
     def test_header_comes_from_the_row_builder(self):
-        published = PublishedCuration.objects.first()
-        assert published is not None
-        expected = list(flatten_published_curation(published, url="").keys())
+        published = PublishedCuration.objects.get(curation=self.allele_curation)
+        expected = list(flatten_classification_rows(published, url="")[0])
         response = self.client.get(self.url)
         header = next(csv.reader(io.StringIO(response.content.decode("utf-8-sig"))))
         self.assertEqual(header, expected)
 
     def test_allele_and_haplotype_columns(self):
-        allele_row, haplotype_row = self._rows()
+        allele_row, _, haplotype_row = self._rows()
         allele = self.allele_curation.allele
         assert allele is not None
-        self.assertEqual(allele_row["allele"], allele.name)
-        self.assertEqual(allele_row["allele_car_id"], allele.car_id or "")
-        self.assertEqual(allele_row["haplotype"], "")
+        self.assertEqual(allele_row["Allele"], allele.name)
+        self.assertEqual(allele_row["Allele CAR ID"], allele.car_id or "")
+        self.assertEqual(allele_row["Haplotype"], "")
         haplotype = self.haplotype_curation.haplotype
         assert haplotype is not None
-        self.assertEqual(haplotype_row["haplotype"], haplotype.name)
-        self.assertEqual(haplotype_row["allele"], "")
-        self.assertEqual(haplotype_row["allele_car_id"], "")
+        self.assertEqual(haplotype_row["Haplotype"], haplotype.name)
+        self.assertEqual(haplotype_row["Allele"], "")
+        self.assertEqual(haplotype_row["Allele CAR ID"], "")
 
     def test_evidence_summary_round_trips(self):
         allele_row = self._rows()[0]
         self.assertEqual(
-            allele_row["taskforce_evidence_summary"],
+            allele_row["Taskforce Evidence Summary"],
             'Line one, with a comma.\nLine "two".',
         )
 
     def test_url_is_the_absolute_repo_url(self):
         allele_row = self._rows()[0]
         path = reverse("repo-detail", args=[self.allele_curation.slug])
-        self.assertEqual(allele_row["url"], f"http://testserver{path}")
+        self.assertEqual(allele_row["URL"], f"http://testserver{path}")
+
+    def test_evidence_values_are_readable(self):
+        row = self._rows()[0]
+        self.assertEqual(row["Zygosity"], ZYGOSITY_CHOICES[Zygosity.MONOALLELIC])
+        self.assertEqual(row["GWAS"], "Yes")
+        self.assertEqual(row["Publication Title"], self.publication.title)
+        self.assertEqual(row["PubMed ID"], self.publication.pubmed_id)
 
     def test_has_only_public_columns(self):
         header = set(self._rows()[0].keys())
-        for name in PUBLIC_CURATION_FIELDS:
-            with self.subTest(name=name):
-                self.assertIn(EXPORT_NAMES.get(name, name), header)
-        self.assertNotIn("needs_review", header)
-        self.assertNotIn("published_by", header)
-        self.assertNotIn("status", header)
+        for column in [*CLASSIFICATION_COLUMNS.values(), *EVIDENCE_COLUMNS.values()]:
+            with self.subTest(column=column):
+                self.assertIn(column, header)
+        for column in header:
+            with self.subTest(column=column):
+                self.assertNotIn("Review", column.replace("Review Date", ""))
+                self.assertNotIn("Notes", column.replace("Additional Notes", ""))
+        self.assertNotIn("Published By", header)
+        self.assertNotIn("Status", header)
 
     def test_query_count_does_not_grow_with_rows(self):
-        publication = Publication.objects.create(
-            slug="P999999", title="T", author="A", publication_year=2020, pubmed_id="1"
+        Evidence.objects.create(
+            curation=self.haplotype_curation, publication=self.publication
         )
-        for curation in (self.allele_curation, self.haplotype_curation):
-            Evidence.objects.create(curation=curation, publication=publication)
-        # One query for the curations and their related rows, one for evidence.
-        with self.assertNumQueries(2):
+        # One query for the curations and their related rows, one for evidence
+        # and its publication, and one for demographics.
+        with self.assertNumQueries(3):
             self.client.get(self.url)
 
     def test_landing_page_has_csv_button(self):
@@ -1020,7 +1071,7 @@ class CSVDownloadViewTest(TestCase):
 
 
 class FlattenPublishedCurationTest(TestCase):
-    fixtures = ["test_alleles.json", "test_diseases.json"]
+    fixtures = ["test_alleles.json", "test_diseases.json", "demographics.json"]
 
     def setUp(self):
         self.curation = Curation.objects.create(
@@ -1035,17 +1086,74 @@ class FlattenPublishedCurationTest(TestCase):
     def test_starts_with_the_identifying_columns(self):
         row = flatten_published_curation(self.published, url="https://example.org")
         self.assertEqual(
-            list(row)[:4], ["curation_id", "url", "version", "published_at"]
+            list(row)[:4], ["Classification ID", "URL", "Version", "Published (UTC)"]
         )
-        self.assertEqual(row["url"], "https://example.org")
+        self.assertEqual(row["URL"], "https://example.org")
 
     def test_formats_dates_and_blanks_missing_values(self):
         row = flatten_published_curation(self.published, url="")
-        self.assertEqual(row["taskforce_review_date"], "2026-09-01")
-        self.assertEqual(row["taskforce_override_reason"], "")
-        self.assertEqual(row["copied_from"], "")
+        self.assertEqual(row["Taskforce Review Date"], "2026-09-01")
+        self.assertEqual(row["Taskforce Override Reason"], "")
+        self.assertEqual(row["Update Of"], "")
         self.assertNotIn(None, row.values())
 
     def test_classification_matches_the_page(self):
         row = flatten_published_curation(self.published, url="")
-        self.assertEqual(row["classification"], self.curation.classification_display)
+        self.assertEqual(row["Classification"], self.curation.classification_display)
+
+    def test_taskforce_is_its_name(self):
+        Curation.objects.filter(pk=self.curation.pk).update(
+            taskforce=HLA_CURATION_TASKFORCE_ID
+        )
+        self.published.refresh_from_db()
+        row = flatten_published_curation(self.published, url="")
+        self.assertEqual(
+            row["Taskforce"], dict(TASKFORCE_CHOICES)[HLA_CURATION_TASKFORCE_ID]
+        )
+
+    def test_every_public_field_has_a_column(self):
+        self.assertEqual(
+            set(CLASSIFICATION_COLUMNS),
+            PUBLIC_CURATION_FIELDS - {"taskforce_classification"},
+        )
+        self.assertEqual(set(EVIDENCE_COLUMNS), PUBLIC_EVIDENCE_FIELDS)
+
+
+class FlattenEvidenceTest(TestCase):
+    fixtures = ["test_alleles.json", "test_diseases.json", "demographics.json"]
+
+    def setUp(self):
+        curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+        )
+        self.evidence = Evidence.objects.create(
+            curation=curation,
+            typing_method=TypingMethod.SEROLOGICAL,
+            is_protective=False,
+            odds_ratio=Decimal("2.5"),
+        )
+
+    def test_columns_match_the_blank_evidence_columns(self):
+        self.assertEqual(list(flatten_evidence(self.evidence)), EVIDENCE_COLUMN_NAMES)
+
+    def test_uses_display_labels(self):
+        row = flatten_evidence(self.evidence)
+        self.assertEqual(
+            row["Typing Method"], TYPING_METHOD_CHOICES[TypingMethod.SEROLOGICAL]
+        )
+        self.assertEqual(row["Protective"], "No")
+
+    def test_decimals_stay_numbers(self):
+        row = flatten_evidence(self.evidence)
+        self.assertEqual(row["Odds Ratio"], Decimal("2.5"))
+
+    def test_joins_demographic_groups(self):
+        groups = list(Demographic.objects.order_by("group")[:2])
+        self.evidence.demographics.set(groups)
+        row = flatten_evidence(self.evidence)
+        for group in groups:
+            with self.subTest(group=group.group):
+                self.assertIn(group.group, str(row["Demographics"]))
+        self.assertIn("; ", str(row["Demographics"]))
