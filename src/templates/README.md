@@ -60,7 +60,7 @@ Renders the HLArepo footer: the shared logos, copyright and funding attribution,
 
 ### `partials/public_navbar.html`
 
-Renders the HLArepo navigation bar: the HLArepo brand, linking to the repo search page, and a small, low-emphasis link back to the HCI home page in the upper-right corner. Includes the same burger menu script as `navbar.html`.
+Renders the HLArepo navigation bar: a single small, low-emphasis link back to the HCI home page in the upper-right corner. It has no brand link, since the breadcrumb already links to the HLArepo home page, and no burger menu, since there is nothing to collapse.
 
 ### `tables.html`
 

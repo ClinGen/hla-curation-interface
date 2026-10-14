@@ -731,6 +731,13 @@ class PublicLayoutTest(TestCase):
                 self.assertContains(response, 'id="hci-link"')
                 self.assertContains(response, f'href="{reverse("home")}"')
 
+    def test_navbar_has_no_hlarepo_link(self):
+        response = self.client.get(self.urls[1])
+        navbar = response.content.decode().split('<nav class="navbar"')[1]
+        navbar = navbar.split("</nav>")[0]
+        self.assertNotIn(f'href="{reverse("repo-search")}"', navbar)
+        self.assertIn('id="hci-link"', navbar)
+
     def test_breadcrumbs_start_at_hlarepo(self):
         for url in self.urls:
             with self.subTest(url=url):

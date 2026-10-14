@@ -1,36 +1,8 @@
 <nav class="navbar" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand">
-        <a class="navbar-item has-text-weight-bold" href="{% url 'repo-search' %}">
-            {% include "common/icon.html" with icon_name="database" %}
-            HLArepo
+    <div class="navbar-brand is-flex-grow-1 is-justify-content-flex-end">
+        <a id="hci-link" class="navbar-item is-size-7 has-text-grey" href="{% url 'home' %}">
+            HLA Curation Interface
+            {% include "common/icon.html" with icon_name="arrow-up-right" %}
         </a>
-        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbar-menu">
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-        </a>
-    </div>
-    <div id="navbar-menu" class="navbar-menu">
-        <div class="navbar-end">
-            <a id="hci-link" class="navbar-item is-size-7 has-text-grey" href="{% url 'home' %}">
-                HLA Curation Interface
-                {% include "common/icon.html" with icon_name="arrow-up-right" %}
-            </a>
-        </div>
     </div>
 </nav>
-<script>
-    // Adds navbar burger functionality. Copied from Bulma docs.
-    document.addEventListener('htmx:load', () => {
-        const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
-        $navbarBurgers.forEach( el => {
-            el.addEventListener('click', () => {
-                const target = el.dataset.target;
-                const $target = document.getElementById(target);
-                el.classList.toggle('is-active');
-                $target.classList.toggle('is-active');
-            });
-        });
-    });
-</script>
