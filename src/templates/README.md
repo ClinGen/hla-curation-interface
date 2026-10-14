@@ -18,6 +18,10 @@ Renders a 404 Not Found error page when a requested URL does not match any known
 
 Renders a 500 Internal Server Error page when an unhandled server-side exception occurs. It instructs the user to try again and provides the support email address for persistent issues.
 
+### `admin/index.html`
+
+Extends Django's admin index page. For superusers, it adds a Back up now button above the app list, which posts to the `admin-backup` view and backs up the database under `manual/`.
+
 ### `layouts/base.html`
 
 The curator layout that every HCI page extends. It loads static assets (Bulma CSS, Bootstrap Icons, Choices.js, HTMX, Tippy.js and Popper, the tooltip script, and the confirm modal script), sets up the `<head>` with favicon and meta blocks, and composes the page structure by including the environment banner, navbar, account activation notice, flash messages, and footer partials around a `{% block main %}` content slot, followed by the shared confirm modal (`common/confirm_modal.html`).

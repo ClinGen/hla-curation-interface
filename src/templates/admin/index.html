@@ -1,0 +1,12 @@
+{% extends "admin/index.html" %}
+{% block content %}
+  {% if request.user.is_superuser %}
+    <form method="post" action="{% url 'admin-backup' %}" class="module">
+      {% csrf_token %}
+      <h2>Database</h2>
+      <p>Back up the database now, for example before a large change. Backups are kept for 90 days.</p>
+      <input type="submit" value="Back up now">
+    </form>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}
