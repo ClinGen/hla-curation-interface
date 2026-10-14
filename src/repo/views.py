@@ -21,10 +21,12 @@ from common.history import resolve_changes
 from common.tables import HistoryTable
 from common.views import SearchListView
 from curation.constants.models.common import Status
+from curation.constants.views import FRAMEWORK
 from curation.models import Evidence
 from repo.models import PublishedCuration
 from repo.serializers import (
     EVIDENCE_COLUMN_NAMES,
+    evidence_values,
     flatten_classification_rows,
     flatten_evidence,
     flatten_published_curation,
@@ -110,6 +112,38 @@ class PublishedCurationDetail(DetailView):
         context["curation"] = self.object.curation
         context["superseded"] = is_superseded(self.object)
         context["superseding"] = get_superseding(self.object)
+        return context
+
+
+class PublishedEvidenceDetail(DetailView):
+    model = Evidence
+    template_name = "repo/evidence.html"
+
+    def get_object(self, queryset: QuerySet[Any] | None = None) -> Evidence:  # ruff: ignore[unused-method-argument]
+        """Gets the evidence by its slug, if its curation is published.
+
+        Returns:
+            The evidence record matching the slugs from the URL kwargs.
+        """
+        return get_object_or_404(
+            Evidence.objects.select_related("curation", "publication").prefetch_related(
+                "demographics"
+            ),
+            slug=self.kwargs["evidence_slug"],
+            curation__slug=self.kwargs["curation_slug"],
+            curation__publication__isnull=False,
+        )
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        """Adds the curation, the public values, and the scoring framework.
+
+        Returns:
+            Context dict with curation, evidence_values, and framework keys added.
+        """
+        context = super().get_context_data(**kwargs)
+        context["curation"] = self.object.curation
+        context["evidence_values"] = evidence_values(self.object)
+        context["framework"] = FRAMEWORK
         return context
 
 

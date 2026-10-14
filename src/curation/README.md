@@ -124,7 +124,7 @@ Partial that renders a summary table for a `Curation` object, showing its allele
 
 ### `templates/curation/partials/evidence/detail_table.html`
 
-Partial that renders a read-only summary table listing all evidence items belonging to a curation, with columns for ID, publication, needs-review flag, status, inclusion checkbox, and score. With `public=True` (passed by the HLArepo detail page), evidence IDs are plain text instead of links to the protected evidence page, the internal needs-review column is hidden, and the Edit Evidence button never shows.
+Partial that renders a read-only summary table listing all evidence items belonging to a curation, with columns for ID, publication, needs-review flag, status, inclusion checkbox, and score. Only HCI pages use it; HLArepo has its own public evidence table.
 
 ### `templates/curation/review.html`
 

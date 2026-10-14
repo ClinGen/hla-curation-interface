@@ -34,6 +34,11 @@ urlpatterns = [
         name="repo-download-single-xlsx",
     ),
     path(
+        "<slug:curation_slug>/evidence/<slug:evidence_slug>",
+        views.PublishedEvidenceDetail.as_view(),
+        name="repo-evidence",
+    ),
+    path(
         "<slug:curation_slug>/history",
         views.PublishedCurationHistory.as_view(),
         name="repo-history",

@@ -20,3 +20,8 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* The scoring matrix needs more room than Bulma's default modal width. */
+.evidence-modal-card {
+  --bulma-modal-content-width: min(60rem, calc(100vw - 2rem));
+}

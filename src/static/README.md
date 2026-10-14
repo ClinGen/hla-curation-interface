@@ -20,7 +20,7 @@ The minified Choices.js stylesheet. It provides the styles for the Choices.js cu
 
 ### `hci/css/custom.css`
 
-Application-specific CSS overrides and utility classes. It defines styles for entity-type logo sizing, footer logo containers, and a horizontal scroll container.
+Application-specific CSS overrides and utility classes. It defines styles for entity-type logo sizing, footer logo containers, a horizontal scroll container, and a wider modal card for the HLArepo evidence modal.
 
 ### `hci/css/fonts/bootstrap-icons.woff`
 
@@ -101,6 +101,10 @@ The full, unminified source of the Choices.js library (v11.2.3). It provides a c
 ### `hci/js/choices.min.js`
 
 The minified production build of the Choices.js library. It is the version loaded in production to reduce page load time.
+
+### `hci/js/evidence-modal.js`
+
+A small hand-written script, not produced by `build.js`, for the HLArepo detail page. When HTMX swaps an evidence page's body into `#evidence-modal-body`, it sets the modal's title from the link's `data-evidence-modal-title`, opens the modal from `repo/partials/evidence_modal.html`, and moves focus into it. Escape, the background, and the close button close the modal and return focus to the link.
 
 ### `hci/js/confirm-modal.js`
 

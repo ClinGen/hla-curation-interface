@@ -1,7 +1,9 @@
 {% extends "layouts/public.html" %}
+{% load static %}
 {% block title %}{{ curation.slug }} - Published Classification{% endblock %}
 {% block description %}View published classification {{ curation.slug }}.{% endblock %}
 {% block main %}
+    <script src="{% static 'hci/js/evidence-modal.js' %}" defer></script>
     <div class="box mt-6 mb-6">
 
         <nav class="breadcrumb" aria-label="breadcrumbs">
@@ -78,7 +80,7 @@
             {% endif %}
         </div>
 
-        {% include "curation/partials/evidence/detail_table.html" with object=curation public=True %}
+        {% include "repo/partials/evidence_table.html" %}
 
     </div>
 {% endblock %}

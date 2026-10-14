@@ -800,6 +800,7 @@ class PublicLayoutTest(TestCase):
             reverse("repo-detail", args=[slug]),
             reverse("repo-history", args=[slug]),
             reverse("repo-change", args=[slug, history_id]),
+            reverse("repo-evidence", args=[slug, self.evidence.slug]),
         ]
 
     def test_internal_links_work_without_login(self):
@@ -876,9 +877,12 @@ class PublicLayoutTest(TestCase):
         response = self.client.get(self.urls[1])
         self.assertTemplateNotUsed(response, "partials/account_activation.html")
 
-    def test_evidence_ids_are_plain_text(self):
+    def test_evidence_ids_link_to_public_evidence_pages(self):
         response = self.client.get(self.urls[1])
-        self.assertContains(response, self.evidence.slug)
+        public_url = reverse(
+            "repo-evidence", args=[self.curation.slug, self.evidence.slug]
+        )
+        self.assertContains(response, f'href="{public_url}"')
         evidence_url = reverse(
             "evidence-detail",
             kwargs={
@@ -893,6 +897,98 @@ class PublicLayoutTest(TestCase):
         self.assertNotIn("needs_review", PUBLIC_EVIDENCE_FIELDS)
         response = self.client.get(self.urls[1])
         self.assertNotContains(response, "Needs Review")
+
+
+class PublishedEvidenceDetailTest(TestCase):
+    fixtures = ["test_alleles.json", "test_diseases.json", "demographics.json"]
+
+    def setUp(self):
+        self.publication = Publication.objects.create(
+            slug="P999999",
+            title="Title",
+            author="A",
+            publication_year=2020,
+            pubmed_id="1234",
+        )
+        self.curation = self._curation(allele_pk=1)
+        self.evidence = Evidence.objects.create(
+            curation=self.curation,
+            publication=self.publication,
+            zygosity=Zygosity.BIALLELIC,
+            relative_risk=Decimal("0.60000"),
+            needs_review=True,
+            needs_review_notes="Internal note.",
+            zygosity_notes="Another internal note.",
+        )
+        PublishedCuration.objects.create(curation=self.curation)
+        self.url = reverse(
+            "repo-evidence", args=[self.curation.slug, self.evidence.slug]
+        )
+
+    def _curation(self, allele_pk: int) -> Curation:
+        return Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=allele_pk),
+            disease=Disease.objects.get(pk=1),
+            status=Status.PUBLISHED,
+        )
+
+    def test_shows_public_values_and_the_scoring_matrix(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "evidence/partials/score.html")
+        self.assertContains(response, 'id="evidence-body"')
+        self.assertContains(response, ZYGOSITY_CHOICES[Zygosity.BIALLELIC])
+        self.assertContains(response, "<td>0.6</td>", html=True)
+        self.assertContains(response, "https://pubmed.ncbi.nlm.nih.gov/1234")
+        self.assertEqual(
+            [label for label, _ in response.context["evidence_values"]][:2],
+            ["Included in Score", "Evidence Score"],
+        )
+
+    def test_hides_internal_fields(self):
+        response = self.client.get(self.url)
+        self.assertNotContains(response, "Needs Review")
+        self.assertNotContains(response, "Internal note.")
+        self.assertNotContains(response, "Another internal note.")
+
+    def test_not_found_unless_published_and_matching(self):
+        unpublished = self._curation(allele_pk=2)
+        unpublished_evidence = Evidence.objects.create(curation=unpublished)
+        other = self._curation(allele_pk=2)
+        PublishedCuration.objects.create(curation=other)
+        for curation_slug, evidence_slug in (
+            (unpublished.slug, unpublished_evidence.slug),
+            (other.slug, self.evidence.slug),
+            (self.curation.slug, "E999999"),
+        ):
+            with self.subTest(curation=curation_slug, evidence=evidence_slug):
+                url = reverse("repo-evidence", args=[curation_slug, evidence_slug])
+                self.assertEqual(self.client.get(url).status_code, 404)
+
+    def test_breadcrumb_links_back_to_the_detail_page(self):
+        response = self.client.get(self.url)
+        self.assertContains(
+            response, f'href="{reverse("repo-detail", args=[self.curation.slug])}"'
+        )
+
+    def test_detail_page_loads_evidence_into_the_modal(self):
+        response = self.client.get(reverse("repo-detail", args=[self.curation.slug]))
+        soup = BeautifulSoup(response.content, "html.parser")
+        link = soup.select_one("#evidence-table a")
+        assert link is not None
+        self.assertEqual(link["href"], self.url)
+        self.assertEqual(link["hx-get"], self.url)
+        self.assertEqual(link["hx-target"], "#evidence-modal-body")
+        self.assertEqual(link["hx-select"], "#evidence-body")
+        self.assertIsNotNone(soup.select_one("#evidence-modal .modal-card-body"))
+        self.assertContains(response, static("hci/js/evidence-modal.js"))
+
+    def test_detail_table_has_only_public_columns(self):
+        response = self.client.get(reverse("repo-detail", args=[self.curation.slug]))
+        soup = BeautifulSoup(response.content, "html.parser")
+        headers = [th.get_text(strip=True) for th in soup.select("#evidence-table th")]
+        self.assertEqual(headers, ["ID", "Publication", "Included", "Score"])
 
 
 class RepoAboutViewTest(OpenViewTestMixin, TestCase):

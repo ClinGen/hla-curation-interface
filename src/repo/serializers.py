@@ -321,6 +321,35 @@ def flatten_evidence(evidence: "Evidence") -> dict[str, object]:
     return row
 
 
+# Evidence columns that the evidence page shows elsewhere, or that only identify it.
+_EVIDENCE_PAGE_SKIPPED = {
+    "Evidence ID",
+    "Publication ID",
+    "Publication Title",
+    "Publication Author",
+    "PubMed ID",
+}
+
+
+def evidence_values(evidence: "Evidence") -> list[tuple[str, object]]:
+    """Lists an evidence record's public values for its HLArepo page.
+
+    These are the CSV's evidence columns and values, without the ones the page
+    shows elsewhere, and with decimals formatted for reading.
+
+    Args:
+        evidence: The Evidence instance to list.
+
+    Returns:
+        (column name, value) pairs, in column order.
+    """
+    return [
+        (column, format_decimal(value) if isinstance(value, Decimal) else value)
+        for column, value in flatten_evidence(evidence).items()
+        if column not in _EVIDENCE_PAGE_SKIPPED
+    ]
+
+
 def flatten_classification_rows(
     published: "PublishedCuration", url: str
 ) -> list[dict[str, object]]:
