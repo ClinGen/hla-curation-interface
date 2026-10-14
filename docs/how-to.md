@@ -138,6 +138,17 @@ manually deploy the HCI, follow the steps below.
   just server-prod-deploy
   ```
 
+Every deploy, manual or not, backs up the database just before it migrates. The deploy
+output prints the backup's name, for example:
+
+```
+Pre-deployment backup: pre-deployment/hci-3f2a9c1-to-88c5e47-2026-09-25T180102Z.sqlite3.gz
+```
+
+The first SHA is the code the backup's data matches, and the second is the code being
+deployed. If the backup fails, the deploy stops before it migrates, so the server needs
+its backup credentials first (see How to Configure Backup Credentials).
+
 ## How to Backfill Publication Authors
 
 Publications added before the HCI stored full author lists have no authors, so they
