@@ -1,7 +1,7 @@
 {% extends "layouts/public.html" %}
 {% load static %}
-{% block title %}Published Curations{% endblock %}
-{% block description %}Browse, search, and download ClinGen's published HLA allele and haplotype disease curations.{% endblock %}
+{% block title %}Published Classifications{% endblock %}
+{% block description %}Browse, search, and download ClinGen's published HLA allele and haplotype disease classifications.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
 
@@ -29,22 +29,22 @@
                 <h1 class="title">HLArepo</h1>
                 <p class="subtitle">
                     The ClinGen repository of published HLA allele and haplotype
-                    disease curations.
+                    disease classifications.
                 </p>
             </div>
         </article>
 
         <div class="content" id="repo-description">
             <p>
-                Each curation in HLArepo classifies the relationship between an HLA
-                allele or haplotype and a disease, based on evidence from the published
-                literature. ClinGen expert curators create and review curations in the
-                <a href="{% url 'home' %}">HLA Curation Interface</a>, and a curation
-                appears here once it has been approved and published.
+                Each classification in HLArepo describes the relationship between an
+                HLA allele or haplotype and a disease, based on evidence from the
+                published literature. ClinGen expert curators weigh the evidence in the
+                <a href="{% url 'home' %}">HLA Curation Interface</a>, and a
+                classification appears here once it has been approved and published.
             </p>
             <p>
-                Every published curation keeps its full change history, and all of the
-                data is free to browse, search, and download.
+                Every classification keeps its full change history, and all of the data
+                is free to browse, search, and download.
             </p>
         </div>
 
@@ -72,7 +72,7 @@
             </div>
         </div>
 
-        <h2 class="title is-5">Published Curations</h2>
+        <h2 class="title is-5">Published Classifications</h2>
         {% include "common/partials/search_input.html" %}
         <div id="search-results">
             {% include "common/partials/search_results.html" %}

@@ -778,6 +778,14 @@ class PublicLayoutTest(TestCase):
                 self.assertIn("HLArepo Home", breadcrumb)
                 self.assertNotIn("bi-house", breadcrumb)
 
+    def test_pages_call_published_curations_classifications(self):
+        urls = [*self.urls, *(reverse(name) for name in REPO_INFO_URL_NAMES)]
+        for url in urls:
+            with self.subTest(url=url):
+                soup = BeautifulSoup(self.client.get(url).content, "html.parser")
+                text = soup.get_text(" ").replace("HLA Curation Interface", "")
+                self.assertNotIn("curation", text.lower())
+
     def test_footer_names_hlarepo(self):
         response = self.client.get(self.urls[0])
         self.assertTemplateUsed(response, "partials/public_footer.html")

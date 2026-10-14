@@ -1,6 +1,6 @@
 {% extends "layouts/public.html" %}
-{% block title %}{{ curation.slug }} - Published Curation{% endblock %}
-{% block description %}View published curation {{ curation.slug }}.{% endblock %}
+{% block title %}{{ curation.slug }} - Published Classification{% endblock %}
+{% block description %}View published classification {{ curation.slug }}.{% endblock %}
 {% block main %}
     <div class="box mt-6 mb-6">
 
@@ -26,7 +26,7 @@
         {% if superseded and superseding %}
             <div class="notification is-warning is-light">
                 <p>
-                    This curation has been superseded by
+                    This classification has been superseded by
                     <a href="{% url 'repo-detail' superseding.curation.slug %}">{{ superseding.curation.slug }}</a>.
                 </p>
             </div>
@@ -35,7 +35,7 @@
         {% if curation.copied_from %}
             <div class="notification is-info is-light">
                 <p>
-                    This curation is an update of
+                    This classification is an update of
                     <a href="{% url 'repo-detail' curation.copied_from.slug %}">{{ curation.copied_from.slug }}</a>.
                 </p>
             </div>
