@@ -9,6 +9,22 @@ if TYPE_CHECKING:
     from repo.models import PublishedCuration
 
 
+def format_decimal(value: Decimal) -> str:
+    """Formats a decimal the way a person would write it.
+
+    The database stores decimals with trailing zeros, such as 0.60000 or
+    1.00000000000000000000000E-7. This drops them, and uses scientific notation
+    only for numbers too small to read as plain decimals.
+
+    Returns:
+        The decimal as a string, such as "0.6", "120", or "1E-7".
+    """
+    normalized = value.normalize()
+    if normalized.adjusted() < -6:
+        return str(normalized)
+    return f"{normalized:f}"
+
+
 def _export_value(value: object) -> object:
     """Converts a model field value to a JSON-friendly value.
 
@@ -18,7 +34,7 @@ def _export_value(value: object) -> object:
     if isinstance(value, date):
         return value.isoformat()
     if isinstance(value, Decimal):
-        return str(value)
+        return format_decimal(value)
     return value
 
 

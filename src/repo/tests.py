@@ -48,6 +48,7 @@ from repo.serializers import (
     flatten_classification_rows,
     flatten_evidence,
     flatten_published_curation,
+    format_decimal,
     serialize_evidence,
     serialize_published_curation,
 )
@@ -513,6 +514,12 @@ class JSONDownloadViewTest(TestCase):
         )
         url = reverse("repo-download-single", args=[self.curation.slug])
         self.assertIn("Pokémon", self.client.get(url).content.decode())
+
+    def test_json_writes_decimals_readably(self):
+        Evidence.objects.create(curation=self.curation, odds_ratio=Decimal("2.50000"))
+        url = reverse("repo-download-single", args=[self.curation.slug])
+        (curation,) = json.loads(self.client.get(url).content)["curations"]
+        self.assertEqual(curation["evidence"][0]["odds_ratio"], "2.5")
 
     def test_json_uses_display_labels(self):
         Curation.objects.filter(pk=self.curation.pk).update(
@@ -1099,6 +1106,12 @@ class CSVDownloadViewTest(TestCase):
         self.assertEqual(row["Publication Title"], self.publication.title)
         self.assertEqual(row["PubMed ID"], self.publication.pubmed_id)
 
+    def test_decimals_are_written_readably(self):
+        Evidence.objects.filter(pk=self.first_evidence.pk).update(
+            relative_risk=Decimal("0.60000")
+        )
+        self.assertEqual(self._rows()[0]["Relative Risk"], "0.6")
+
     def test_has_only_public_columns(self):
         header = set(self._rows()[0].keys())
         for column in [*CLASSIFICATION_COLUMNS.values(), *EVIDENCE_COLUMNS.values()]:
@@ -1300,6 +1313,18 @@ class FlattenPublishedCurationTest(TestCase):
             PUBLIC_CURATION_FIELDS - {"taskforce_classification"},
         )
         self.assertEqual(set(EVIDENCE_COLUMNS), PUBLIC_EVIDENCE_FIELDS)
+
+
+class FormatDecimalTest(TestCase):
+    def test_drops_trailing_zeros(self):
+        self.assertEqual(format_decimal(Decimal("0.60000")), "0.6")
+        self.assertEqual(format_decimal(Decimal("120.000")), "120")
+
+    def test_uses_scientific_notation_only_for_tiny_numbers(self):
+        self.assertEqual(format_decimal(Decimal("0.0001000")), "0.0001")
+        self.assertEqual(
+            format_decimal(Decimal("1.00000000000000000000000E-7")), "1E-7"
+        )
 
 
 class FlattenEvidenceTest(TestCase):

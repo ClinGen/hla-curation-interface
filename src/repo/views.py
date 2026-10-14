@@ -1,6 +1,7 @@
 import codecs
 import csv
 import io
+from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -26,6 +27,7 @@ from repo.serializers import (
     flatten_classification_rows,
     flatten_evidence,
     flatten_published_curation,
+    format_decimal,
     serialize_published_curation,
 )
 from repo.tables import PublishedCurationTable
@@ -245,7 +247,14 @@ def download_all_csv(request: HttpRequest) -> HttpResponse:
             if writer is None:
                 writer = csv.DictWriter(response, fieldnames=list(row))
                 writer.writeheader()
-            writer.writerow(row)
+            writer.writerow(
+                {
+                    column: format_decimal(value)
+                    if isinstance(value, Decimal)
+                    else value
+                    for column, value in row.items()
+                }
+            )
     return response
 
 
