@@ -85,6 +85,18 @@ in a workspace, give that workspace's server its credentials:
   ~/.local/bin/uv run manage.py list_backups
   ```
 
+Every deploy installs a systemd timer, `hci-backup.timer`, that backs up the database
+under `daily/` every night at midnight Pacific. If a backup fails, it emails
+`ALERT_EMAILS` (see How to Configure Email). To check the timer, SSH into the server and
+run:
+
+```
+systemctl list-timers hci-backup.timer
+journalctl -u hci-backup.service --since yesterday
+```
+
+To take a backup right away, run `sudo systemctl start hci-backup.service`.
+
 The weekly restore check in GitHub Actions reads prod backups with a separate, read-only
 user. In the `prod` workspace, read `backup_bucket_name`, `backup_reader_access_key_id`,
 and `backup_reader_secret_access_key`, then add them to the repository's GitHub secrets

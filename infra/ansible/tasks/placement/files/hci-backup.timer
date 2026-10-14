@@ -1,0 +1,11 @@
+[Unit]
+Description=Back up the HCI database every night at midnight Pacific
+
+[Timer]
+# The time zone makes this follow daylight saving time.
+OnCalendar=*-*-* 00:00:00 America/Los_Angeles
+# If the server was off at midnight, back up as soon as it boots.
+Persistent=true
+
+[Install]
+WantedBy=timers.target

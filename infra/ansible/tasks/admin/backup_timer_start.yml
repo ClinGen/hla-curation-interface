@@ -1,0 +1,7 @@
+- name: Ensure the database backup systemd timer is enabled and started
+  become: true
+  ansible.builtin.systemd:
+    name: hci-backup.timer
+    enabled: true
+    state: started
+    daemon_reload: true

@@ -1,0 +1,10 @@
+[Unit]
+Description=Back up the HCI database
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User={{ ansible_user }}
+WorkingDirectory={{ repo_dir }}/src
+ExecStart={{ repo_dir }}/.venv/bin/python manage.py backup_db

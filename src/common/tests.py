@@ -622,3 +622,38 @@ class SendAlertTest(TestCase):
             self.assertRaises(CommandError),
         ):
             call_command("send_test_alert", stdout=StringIO())
+
+
+class BackupDbCommandTest(TempBackupStorageMixin, TransactionTestCase):
+    """Tests the nightly backup command that the systemd timer runs.
+
+    This is a TransactionTestCase because SQLite's backup API waits forever on the
+    transaction a TestCase holds open.
+    """
+
+    def setUp(self):
+        self.use_temp_backup_storage()
+
+    def test_writes_one_backup_under_daily(self):
+        call_command("backup_db", stdout=StringIO())
+        self.assertEqual(len(list((self.backup_dir / "daily").glob("*.gz"))), 1)
+
+    def test_failure_sends_an_alert_and_propagates(self):
+        with (
+            patch(
+                "common.management.commands.backup_db.call_command",
+                side_effect=CommandError("disk full"),
+            ),
+            patch("common.management.commands.backup_db.send_alert") as send_alert,
+            patch(
+                "common.management.commands.backup_db.socket.gethostname",
+                return_value="hci-lightsail-test",
+            ),
+            self.assertRaisesMessage(CommandError, "disk full"),
+        ):
+            call_command("backup_db", stdout=StringIO())
+        send_alert.assert_called_once()
+        subject, body = send_alert.call_args.args
+        self.assertIn("backup failed", subject.lower())
+        self.assertIn("hci-lightsail-test", body)
+        self.assertIn("disk full", body)
