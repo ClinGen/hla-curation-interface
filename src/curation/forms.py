@@ -1,3 +1,6 @@
+import re
+from datetime import date
+
 from django import forms
 from django.forms import ModelForm, modelformset_factory
 from django.http import QueryDict
@@ -157,6 +160,20 @@ class TaskforceReviewForm(forms.Form):
                 "taskforce_review_date", "The review date can't be in the future."
             )
         self._clean_evidence_summary(cleaned_data, decision)
+        evidence_summary = cleaned_data.get("taskforce_evidence_summary")
+        if (
+            decision == "approved"
+            and review_date
+            and evidence_summary
+            and not _mentions_date(evidence_summary, review_date)
+        ):
+            # The summary repeats the approval date, so keep it in step with the field.
+            self.add_error(
+                "taskforce_evidence_summary",
+                "Include the review date, "
+                f"{review_date:%B} {review_date.day}, {review_date.year}, "
+                "as the final approval date.",
+            )
         if decision == "approved":
             if not cleaned_data.get("taskforce_classification"):
                 self.add_error("taskforce_classification", "Required when approving.")
@@ -198,6 +215,30 @@ class TaskforceReviewForm(forms.Form):
                 )
         elif decision == "approved" and not evidence_summary:
             self.add_error("taskforce_evidence_summary", "Required when approving.")
+
+
+def _mentions_date(text: str, review_date: date) -> bool:
+    """Returns whether the text spells out the date in a common format.
+
+    Args:
+        text: The text to search.
+        review_date: The date to look for.
+
+    Returns:
+        True if the text contains the date, e.g., "October 13, 2026",
+        "13 October 2026", "Oct 13, 2026", "2026-10-13", or "10/13/2026".
+    """
+    month = rf"(?:{review_date:%B}|{review_date:%b}\.?)"
+    pattern = "|".join(
+        [
+            rf"{month} {review_date.day},? {review_date.year}",
+            rf"{review_date.day} {month},? {review_date.year}",
+            review_date.isoformat(),
+            f"0?{review_date.month}/0?{review_date.day}/{review_date.year}",
+        ]
+    )
+    normalized = " ".join(text.split())
+    return bool(re.search(rf"(?<!\w)(?:{pattern})(?!\w)", normalized, re.IGNORECASE))
 
 
 class EvidenceCreateForm(ModelForm):
