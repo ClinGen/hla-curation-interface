@@ -116,7 +116,7 @@ Partial that renders a curation's `classification_display`, followed by a light 
 
 ### `templates/curation/partials/taskforce_review.html`
 
-Partial that renders the taskforce's feedback on a curation as a Bulma message: "Sent Back for Revision" (red, `is-danger`) when the curation is in progress, otherwise "Taskforce Review" (neutral), or a `heading` passed by the caller. Shows a bulleted list of the taskforce, review date, classification, override reason, evidence summary, and additional notes, skipping empty ones. Expects `curation` in the context.
+Partial that renders the taskforce's feedback on a curation as a Bulma message: "Sent Back for Revision" (red, `is-danger`) when the curation is in progress, otherwise "Taskforce Review" (neutral), or a `heading` passed by the caller. Shows the taskforce, review date, classification, suggested classification override reason, evidence summary, and additional notes, each under a small heading, skipping empty ones. Expects `curation` in the context.
 
 ### `templates/curation/partials/curation/detail_table.html`
 
