@@ -14,7 +14,8 @@ from unittest.mock import patch
 from dbbackup import settings as dbbackup_settings
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.management import call_command
+from django.contrib.messages import get_messages
+from django.core.management import CommandError, call_command
 from django.db import connection
 from django.template.loader import render_to_string
 from django.templatetags.static import static
@@ -374,18 +375,17 @@ class HistoryTableHideUserTest(TestCase):
         self.assertNotIn("history_user", table.columns.names())
 
 
-class DatabaseBackupTest(TransactionTestCase):
-    """Tests that django-dbbackup can back up and restore our SQLite database.
+class TempBackupStorageMixin:
+    """Sends backups to a temporary directory, available as self.backup_dir.
 
-    django-dbbackup reads STORAGES["dbbackup"] once, at import, so the tests patch its
-    settings module instead of using override_settings. The test database is in
-    memory, but restoring copies the backup over the file named by the database's
-    NAME, so the restore test points NAME at a temporary file and reads that file.
+    django-dbbackup reads STORAGES["dbbackup"] once, at import, so this patches its
+    settings module instead of using override_settings.
     """
 
-    backup_name = "pre-deployment/x.sqlite3.gz"
+    addCleanup: Any
 
-    def setUp(self):
+    def use_temp_backup_storage(self):
+        """Patch django-dbbackup's storage to a new temporary directory."""
         backup_dir = TemporaryDirectory()
         self.addCleanup(backup_dir.cleanup)
         self.backup_dir = Path(backup_dir.name)
@@ -403,6 +403,20 @@ class DatabaseBackupTest(TransactionTestCase):
         ):
             patcher.start()
             self.addCleanup(patcher.stop)
+
+
+class DatabaseBackupTest(TempBackupStorageMixin, TransactionTestCase):
+    """Tests that django-dbbackup can back up and restore our SQLite database.
+
+    The test database is in memory, but restoring copies the backup over the file
+    named by the database's NAME, so the restore test points NAME at a temporary file
+    and reads that file.
+    """
+
+    backup_name = "pre-deployment/x.sqlite3.gz"
+
+    def setUp(self):
+        self.use_temp_backup_storage()
 
     def back_up(self):
         """Back up the test database to the temporary backup directory."""
@@ -442,3 +456,76 @@ class DatabaseBackupTest(TransactionTestCase):
         with closing(sqlite3.connect(restored_db)) as restored:
             usernames = restored.execute("SELECT username FROM auth_user").fetchall()
         self.assertIn(("kept",), usernames)
+
+
+class AdminBackupViewTest(
+    TempBackupStorageMixin, SuppressRequestLoggingMixin, TransactionTestCase
+):
+    """Tests the admin's Back up now button.
+
+    This is a TransactionTestCase because SQLite's backup API waits forever on the
+    transaction a TestCase holds open.
+    """
+
+    url = reverse("admin-backup")
+
+    def setUp(self):
+        self.use_temp_backup_storage()
+        self.superuser = User.objects.create_superuser(username="admin@example.com")
+        self.staff = User.objects.create_user(
+            username="staff@example.com", is_staff=True
+        )
+
+    def manual_backups(self) -> list[Path]:
+        """Return the backups, not their metadata files, under manual/."""
+        return sorted((self.backup_dir / "manual").glob("*.gz"))
+
+    def test_superuser_post_backs_up_and_names_the_backup(self):
+        self.client.force_login(self.superuser)
+        response = self.client.post(self.url, follow=True)
+        backups = self.manual_backups()
+        self.assertEqual(len(backups), 1)
+        self.assertIn("admin-example.com", backups[0].name)
+        self.assertRedirects(response, reverse("admin:index"))
+        messages = [str(m) for m in get_messages(response.wsgi_request)]
+        self.assertTrue(any(f"manual/{backups[0].name}" in m for m in messages))
+
+    def test_staff_who_isnt_superuser_is_forbidden(self):
+        self.client.force_login(self.staff)
+        with self.suppress_request_logging():
+            response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(self.manual_backups(), [])
+
+    def test_anonymous_post_redirects_to_admin_login(self):
+        response = self.client.post(self.url)
+        self.assertRedirects(
+            response,
+            f"{reverse('admin:login')}?next={self.url}",
+            target_status_code=200,
+        )
+        self.assertEqual(self.manual_backups(), [])
+
+    def test_get_is_not_allowed(self):
+        self.client.force_login(self.superuser)
+        with self.suppress_request_logging():
+            response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 405)
+        self.assertEqual(self.manual_backups(), [])
+
+    def test_failed_backup_shows_an_error_instead_of_a_500(self):
+        self.client.force_login(self.superuser)
+        with (
+            patch("common.views.call_command", side_effect=CommandError("boom")),
+            self.assertLogs("common.views", level="ERROR"),
+        ):
+            response = self.client.post(self.url, follow=True)
+        self.assertRedirects(response, reverse("admin:index"))
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual([m.level_tag for m in messages], ["error"])
+
+    def test_admin_index_shows_button_to_superusers_only(self):
+        self.client.force_login(self.superuser)
+        self.assertContains(self.client.get(reverse("admin:index")), self.url)
+        self.client.force_login(self.staff)
+        self.assertNotContains(self.client.get(reverse("admin:index")), self.url)

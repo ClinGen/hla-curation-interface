@@ -28,7 +28,7 @@ Extends `dev.py` for use during test runs. Disables Sentry to prevent background
 
 ### `urls.py`
 
-Defines the project-level URL configuration, routing requests to the `core`, `admin`, `allele`, `auth_`, `curation`, `disease`, `haplotype`, `publication`, and `repo` apps.
+Defines the project-level URL configuration. It routes `admin/backup/` to the admin's Back up now view, and routes requests to the `core`, `admin`, `allele`, `auth_`, `curation`, `disease`, `haplotype`, `publication`, and `repo` apps.
 
 ### `wsgi.py`
 
