@@ -196,7 +196,7 @@ CLASSIFICATION_COLUMNS = {
     "taskforce": "Taskforce",
     "taskforce_review_date": "Taskforce Review Date",
     "taskforce_evidence_summary": "Taskforce Evidence Summary",
-    "taskforce_override_reason": "Taskforce Override Reason",
+    "taskforce_override_reason": "Suggested Classification Override Reason",
     "taskforce_additional_notes": "Taskforce Additional Notes",
 }
 EVIDENCE_COLUMNS = {

@@ -403,7 +403,7 @@ class PublishedCurationDetailViewTest(TestCase):
         self.curation.taskforce_override_reason = "Replicated in two cohorts."
         self.curation.save()
         response = self.client.get(url)
-        self.assertContains(response, "Override Reason")
+        self.assertContains(response, "Suggested Classification Override Reason")
         self.assertContains(response, "Replicated in two cohorts.")
 
     def test_displays_car_linkout_for_allele(self):
@@ -444,6 +444,10 @@ class PublishedCurationDetailViewTest(TestCase):
         response = self.client.get(url)
         self.assertContains(response, "Additional Notes")
         self.assertContains(response, "Taskforce note.")
+
+    def test_leaves_out_blank_additional_notes(self):
+        url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
+        self.assertNotContains(self.client.get(url), "Additional Notes")
 
     def test_linkout_has_no_space_inside_parentheses(self):
         url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
@@ -1762,7 +1766,7 @@ class FlattenPublishedCurationTest(TestCase):
     def test_formats_dates_and_blanks_missing_values(self):
         row = flatten_published_curation(self.published, url="")
         self.assertEqual(row["Taskforce Review Date"], "2026-09-01")
-        self.assertEqual(row["Taskforce Override Reason"], "")
+        self.assertEqual(row["Suggested Classification Override Reason"], "")
         self.assertEqual(row["Update Of"], "")
         self.assertNotIn(None, row.values())
 
