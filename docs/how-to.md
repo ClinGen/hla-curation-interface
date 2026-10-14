@@ -90,6 +90,12 @@ and `backup_reader_secret_access_key`, then add them to the repository's GitHub 
 as `PROD_BACKUP_BUCKET_NAME`, `BACKUP_READER_AWS_ACCESS_KEY_ID`, and
 `BACKUP_READER_AWS_SECRET_ACCESS_KEY`.
 
+Lightsail also takes a snapshot of each server every day at 06:00 UTC and keeps the
+last 7. A snapshot covers what the database backups don't, such as the hand-kept `.env`
+and Caddy's certificates. Restoring one means building a new instance from it in the
+Lightsail console, which replaces the whole server, so for database problems, restore a
+database backup instead.
+
 ## How to Set Up a Server for the First Time
 
 - Create the cloud infrastructure for the server if you haven't already done so.
