@@ -97,8 +97,14 @@ journalctl -u hci-backup.service --since yesterday
 
 To take a backup right away, run `sudo systemctl start hci-backup.service`.
 
-The weekly restore check in GitHub Actions reads prod backups with a separate, read-only
-user. In the `prod` workspace, read `backup_bucket_name`, `backup_reader_access_key_id`,
+Every Monday, the restore check workflow in GitHub Actions
+(`.github/workflows/restore-check.yml`) restores the newest `daily/` prod backup on a
+GitHub runner, applies `main`'s migrations, and checks that the site serves the
+published curations. It fails if the newest backup is more than 48 hours old, which
+catches a timer that stopped. GitHub emails you when it fails. To run it now, open the
+workflow on GitHub's Actions tab and choose Run workflow.
+
+The restore check reads prod backups with a separate, read-only user. In the `prod` workspace, read `backup_bucket_name`, `backup_reader_access_key_id`,
 and `backup_reader_secret_access_key`, then add them to the repository's GitHub secrets
 as `PROD_BACKUP_BUCKET_NAME`, `BACKUP_READER_AWS_ACCESS_KEY_ID`, and
 `BACKUP_READER_AWS_SECRET_ACCESS_KEY`.

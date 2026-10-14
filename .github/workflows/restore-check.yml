@@ -1,0 +1,69 @@
+---
+# Checks every week that the newest nightly prod backup restores and serves pages.
+# It runs here, on main, instead of on the test server: test runs whatever branch was
+# deployed last, and this keeps prod data off the test server. GitHub emails the
+# repository owner when a scheduled workflow fails, which is the alert.
+name: "restore check"
+on:
+  schedule:
+    # Mondays at 10:00 UTC, after the midnight Pacific backup.
+    - cron: "0 10 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: "read"
+jobs:
+  restore_newest_daily_backup:
+    runs-on: "ubuntu-latest"
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_READER_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_READER_AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: "us-west-2"
+      CLERK_SECRET_KEY: "dummy"
+      CLERK_PUBLISHABLE_KEY: "dummy"
+      CLERK_SIGN_IN_URL: "dummy"
+      DBBACKUP_BUCKET_NAME: ${{ secrets.PROD_BACKUP_BUCKET_NAME }}
+      DJANGO_SETTINGS_MODULE: "config.settings.prod"
+      SECRET_KEY: "dummy"
+      SENTRY_ENV: "restore-check"
+      SUBDOMAIN: "hci"
+    steps:
+      - uses: "actions/checkout@v4"
+        with:
+          ref: "main"
+      - uses: "./.github/actions/install-python-dependencies"
+      - uses: "./.github/actions/install-javascript-dependencies"
+      - uses: "extractions/setup-just@v3"
+      - name: "Collect static files"
+        run: "just django-collectstatic"
+      - name: "Find the newest daily backup, and fail if it's more than 48 hours old"
+        id: "newest"
+        run: |
+          read -r key modified < <(aws s3api list-objects-v2 \
+            --bucket "$DBBACKUP_BUCKET_NAME" --prefix "daily/" \
+            --query 'sort_by(Contents[?!ends_with(Key, `.metadata`)], &LastModified)[-1].[Key, LastModified]' \
+            --output text)
+          echo "Newest daily backup: $key, from $modified"
+          age_hours=$(( ($(date +%s) - $(date -d "$modified" +%s)) / 3600 ))
+          if [ "$age_hours" -gt 48 ]; then
+            echo "::error::The newest daily backup is $age_hours hours old. Is hci-backup.timer running?"
+            exit 1
+          fi
+          echo "key=$key" >> "$GITHUB_OUTPUT"
+      - name: "Restore the backup into a new database"
+        working-directory: "src"
+        env:
+          BACKUP_KEY: ${{ steps.newest.outputs.key }}
+        run: 'uv run manage.py dbrestore --noinput --uncompress -i "$BACKUP_KEY"'
+      # Apply rather than only check migrations: a deploy since the backup may have
+      # added some, and restoring on a server runs migrate too.
+      - name: "Apply main's migrations to the restored database"
+        working-directory: "src"
+        run: "uv run manage.py migrate && uv run manage.py check"
+      - name: "Check that the restored database serves the published curations"
+        working-directory: "src"
+        run: |
+          uv run gunicorn config.wsgi:application --bind 127.0.0.1:8000 --daemon
+          curl --fail --silent --show-error --retry 10 --retry-connrefused --retry-delay 1 \
+            --header "Host: hci.clinicalgenome.org" \
+            http://127.0.0.1:8000/repo/download/all.json \
+            | jq --exit-status '.curations | length > 0'
