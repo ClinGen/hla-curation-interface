@@ -28,7 +28,7 @@ Extends `dev.py` for use during test runs. Keeps email in memory with the locmem
 
 ### `tests.py`
 
-Houses `ProdLoggingTest`, which imports the production settings with Sentry patched out and checks that they log only to the console, with the logger name, and define no log file, and `AlertEmailsSettingTest`, which checks how `ALERT_EMAILS` is parsed.
+Houses `ProdLoggingTest`, which imports the production settings with Sentry patched out and checks that they log only to the console, with the logger name, and define no log file; `AlertEmailsSettingTest`, which checks how `ALERT_EMAILS` is parsed; and `EmptyEnvironmentVariableTest`, which checks that an empty `SUBDOMAIN` or `DEFAULT_FROM_EMAIL` falls back to its default.
 
 ### `urls.py`
 

@@ -58,8 +58,8 @@ MAILERS = {
     },
 }
 
-DEFAULT_FROM_EMAIL = os.getenv(
-    "DEFAULT_FROM_EMAIL", f"noreply@{SUBDOMAIN}.clinicalgenome.org"
+DEFAULT_FROM_EMAIL = (
+    os.getenv("DEFAULT_FROM_EMAIL") or f"noreply@{SUBDOMAIN}.clinicalgenome.org"
 )
 
 SERVER_EMAIL = DEFAULT_FROM_EMAIL

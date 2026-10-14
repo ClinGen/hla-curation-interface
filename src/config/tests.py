@@ -64,3 +64,18 @@ class AlertEmailsSettingTest(SimpleTestCase):
     def test_is_empty_when_unset(self):
         base = import_base_settings({"ALERT_EMAILS": ""})
         self.assertEqual(base.ALERT_EMAILS, [])
+
+
+class EmptyEnvironmentVariableTest(SimpleTestCase):
+    """Checks that empty keys, as in a .env copied from .env.example, use defaults."""
+
+    def test_empty_subdomain_defaults_to_dev(self):
+        base = import_base_settings({"SUBDOMAIN": ""})
+        self.assertEqual(base.SUBDOMAIN, "dev")
+
+    def test_empty_from_email_uses_the_subdomain(self):
+        environ = {"SUBDOMAIN": "hci-test", "DEFAULT_FROM_EMAIL": ""}
+        with patch.dict(os.environ, environ):
+            import_base_settings(environ)
+            prod = import_prod_settings()
+        self.assertEqual(prod.DEFAULT_FROM_EMAIL, "noreply@hci-test.clinicalgenome.org")
