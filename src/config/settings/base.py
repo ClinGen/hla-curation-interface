@@ -153,8 +153,9 @@ STORAGES = {
 }
 
 # The server's subdomain: hci, hci-test, or dev on a developer's machine. Backup names
-# and alert subjects use it, so you can tell prod and test apart.
-SUBDOMAIN = os.getenv("SUBDOMAIN", "dev")
+# and alert subjects use it, so you can tell prod and test apart. An empty value, as in
+# a .env copied from .env.example, means dev too.
+SUBDOMAIN = os.getenv("SUBDOMAIN") or "dev"
 
 # Backups named by django-dbbackup, like the daily one, go under daily/. Other backups
 # pass their own name with -o.
