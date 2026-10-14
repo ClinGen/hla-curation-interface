@@ -344,6 +344,18 @@ class PublishedCurationDetailViewTest(TestCase):
         name = dict(TASKFORCE_CHOICES)[HLA_CURATION_TASKFORCE_ID]
         self.assertContains(response, f"{name} ({HLA_CURATION_TASKFORCE_ID})")
 
+    def test_summary_table_has_no_id_row(self):
+        response = self.client.get(reverse("repo-detail", args=[self.curation.slug]))
+        soup = BeautifulSoup(response.content, "html.parser")
+        labels = [
+            row.td.get_text(strip=True)
+            for row in soup.select("table.table:not(#evidence-table) tr")
+            if row.td
+        ]
+        self.assertIn("Allele", labels)
+        self.assertNotIn("Classification ID", labels)
+        self.assertNotIn(self.curation.slug, labels)
+
     def test_response_code(self):
         url = reverse("repo-detail", kwargs={"curation_slug": self.curation.slug})
         response = self.client.get(url)

@@ -88,7 +88,7 @@ Renders one line of the family tree and, recursively, its updates. The box-drawi
 
 ### `templates/repo/partials/summary.html`
 
-Renders the public summary of a published curation: the curation ID, the allele (or haplotype and each member allele) with ClinGen Allele Registry linkouts, the disease with a Mondo linkout, the classification (via `curation/partials/classification.html`), the taskforce, the taskforce review date, the published date, the "Evidence Summary" heading and text, and the taskforce additional notes and, when set, the override reason under smaller headings.
+Renders the public summary of a published curation, without its ID, which the breadcrumb and title already show: the allele (or haplotype and each member allele) with ClinGen Allele Registry linkouts, the disease with a Mondo linkout, the classification (via `curation/partials/classification.html`), the taskforce, the taskforce review date, the published date, the "Evidence Summary" heading and text, and the taskforce additional notes and, when set, the override reason under smaller headings.
 
 ### `templates/repo/help.html`
 
