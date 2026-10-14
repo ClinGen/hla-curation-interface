@@ -76,7 +76,7 @@ Defines `build_evidence_summary`, which writes the taskforce's evidence summary 
 
 ### `tables.py`
 
-Defines the `CurationTable` class (using `django-tables2`) that renders the curation list view, including a linked slug column, type, allele/haplotype, disease, a status column rendered with the common tag template for each status (`STATUS_TAGS`), and a classification column that shows `Curation.classification_display`.
+Defines the `CurationTable` class (using `django-tables2`) that renders the curation list view, including a linked slug column, allele, haplotype, disease, last-updated date, a status column rendered with the common tag template for each status (`STATUS_TAGS`), and a classification column that shows `Curation.classification_display`.
 
 ### `templates/curation/change.html`
 
@@ -124,7 +124,7 @@ Partial that renders a summary table for a `Curation` object, showing its allele
 
 ### `templates/curation/partials/evidence/detail_table.html`
 
-Partial that renders a read-only summary table listing all evidence items belonging to a curation, with columns for ID, publication, needs-review flag, status, inclusion checkbox, and score.
+Partial that renders a read-only summary table listing all evidence items belonging to a curation, with columns for ID, publication, needs-review flag, status, inclusion checkbox, and score. Only HCI pages use it; HLArepo has its own public evidence table.
 
 ### `templates/curation/review.html`
 

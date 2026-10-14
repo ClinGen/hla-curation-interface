@@ -1,10 +1,6 @@
 <div class="block table-container mt-4">
     <table class="table">
         <tbody>
-        <tr>
-            <td>HCI Curation ID</td>
-            <td>{{ curation.slug }}</td>
-        </tr>
         {% if curation.curation_type == "ALL" %}
             <tr>
                 <td>Allele</td>
@@ -50,7 +46,7 @@
         </tr>
         <tr>
             <td>Taskforce</td>
-            <td>{{ curation.taskforce|default:"------" }}</td>
+            <td>{{ curation.taskforce_display|default:"------" }}</td>
         </tr>
         <tr>
             <td>Review Date</td>
@@ -67,9 +63,11 @@
 <h2 class="title is-4">Evidence Summary</h2>
 <p class="block">{{ curation.taskforce_evidence_summary|default:"------"|linebreaksbr }}</p>
 
-<h3 class="title is-5">Additional Notes</h3>
-<p class="block">{{ curation.taskforce_additional_notes|default:"------"|linebreaksbr }}</p>
+{% if curation.taskforce_additional_notes %}
+    <h3 class="title is-5">Additional Notes</h3>
+    <p class="block">{{ curation.taskforce_additional_notes|linebreaksbr }}</p>
+{% endif %}
 {% if curation.taskforce_override_reason %}
-    <h3 class="title is-5">Override Reason</h3>
+    <h3 class="title is-5">Suggested Classification Override Reason</h3>
     <p class="block">{{ curation.taskforce_override_reason|linebreaksbr }}</p>
 {% endif %}

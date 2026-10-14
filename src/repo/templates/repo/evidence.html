@@ -1,0 +1,35 @@
+{% extends "layouts/public.html" %}
+{% block title %}{{ object.slug }} - Evidence for {{ curation.slug }}{% endblock %}
+{% block description %}View the evidence data and scoring matrix for {{ object.slug }}.{% endblock %}
+{% block main %}
+    <div class="box mt-6 mb-6">
+
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li>
+                    <a href="{% url 'repo-search' %}">
+                        {% include "common/icon.html" with icon_name="database" %}
+                        HLArepo Home
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'repo-detail' curation.slug %}">
+                        {% include "common/icon.html" with icon_name="journal-text" %}
+                        {{ curation.slug }} Details
+                    </a>
+                </li>
+                <li class="is-active">
+                    <b>
+                        <a href="" aria-current="page">
+                            {% include "common/icon.html" with icon_name="table" %}
+                            {{ object.slug }} Scoring Matrix
+                        </a>
+                    </b>
+                </li>
+            </ul>
+        </nav>
+
+        {% include "repo/partials/evidence_body.html" %}
+
+    </div>
+{% endblock %}

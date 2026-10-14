@@ -12,11 +12,11 @@ Provides two Django context processors — `git_sha` and `env` — that inject t
 
 ### `history.py`
 
-Provides `resolve_changes`, which computes a human-readable diff between two django-simple-history records. It maps internal field names to their `verbose_name` labels and resolves choice values to their display strings.
+Provides `resolve_changes`, which computes a human-readable diff between two django-simple-history records. It maps internal field names to their `verbose_name` labels, resolves choice values to their display strings, and can leave out fields named in `exclude`.
 
 ### `tables.py`
 
-Defines `HistoryTable`, a django-tables2 `Table` subclass for rendering an object's audit history. It renders the change type as a labelled icon link pointing to the corresponding change-detail view.
+Defines `HistoryTable`, a django-tables2 `Table` subclass for rendering an object's audit history. It renders the change type as a labelled icon link pointing to the corresponding change-detail view. Pass `hide_user=True` to drop the Changed By column on public pages.
 
 ### `templates/common/confirm_modal.html`
 
@@ -49,7 +49,7 @@ Reusable partial for rendering a `<textarea>` form field using Bulma CSS, with a
 
 ### `templates/common/history/change_body.html`
 
-Renders the detail view for a single history record: a metadata table (changed-by, change type, date) and, for update records, a before/after diff table of individual field changes.
+Renders the detail view for a single history record: a metadata table (changed-by, unless `hide_user` is set, change type, date) and, for update records, a before/after diff table of individual field changes.
 
 ### `templates/common/history/history_body.html`
 
@@ -125,7 +125,7 @@ Registers four custom Django template filters: `get_val` (retrieves a named attr
 
 ### `tests.py`
 
-Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `SuppressRequestLoggingMixin`) that enforce standard view-test contracts across the project, along with `IsPublicFilterTest`, `PublicBadgeTooltipTest`, which checks the globe badge's tooltip and that no text sits beside it, `ColorKeyTest`, which checks tags, buttons (in templates and `tables.py` files), and the taskforce feedback panel against the color key in `docs/design.md`, the `field_block` helper for checking a field's public badge, `MigrationsUpToDateTest`, which fails when a model change has no migration, and `SearchListViewTest`, which exercises the search and HTMX partial-response behaviour of `SearchListView`.
+Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `SuppressRequestLoggingMixin`) that enforce standard view-test contracts across the project, along with `IsPublicFilterTest`, `PublicBadgeTooltipTest`, which checks the globe badge's tooltip and that no text sits beside it, `ColorKeyTest`, which checks tags, buttons (in templates and `tables.py` files), and the taskforce feedback panel against the color key in `docs/design.md`, the `field_block` helper for checking a field's public badge, `MigrationsUpToDateTest`, which fails when a model change has no migration, `HistoryTableHideUserTest`, which checks the `hide_user` option, and `SearchListViewTest`, which exercises the search and HTMX partial-response behaviour of `SearchListView`.
 
 ### `views.py`
 

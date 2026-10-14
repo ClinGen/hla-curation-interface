@@ -245,12 +245,16 @@ class TestCurationHasEpFeedback(TestCase):
             with self.subTest(field=field):
                 self.assertTrue(Curation(**{field: value}).has_taskforce_feedback)
 
-    def test_taskforce_display_uses_the_taskforce_name(self):
+    def test_taskforce_display_uses_the_taskforce_name_and_id(self):
+        name = dict(TASKFORCE_CHOICES)[HLA_CURATION_TASKFORCE_ID]
         self.assertEqual(
             Curation(taskforce=HLA_CURATION_TASKFORCE_ID).taskforce_display,
-            dict(TASKFORCE_CHOICES)[HLA_CURATION_TASKFORCE_ID],
+            f"{name} ({HLA_CURATION_TASKFORCE_ID})",
         )
         self.assertIsNone(Curation().taskforce_display)
+
+    def test_taskforce_display_falls_back_to_an_unknown_id(self):
+        self.assertEqual(Curation(taskforce="99999").taskforce_display, "99999")
 
 
 class TestCurationIsClassificationOverridden(TestCase):
@@ -331,6 +335,12 @@ class TestCurationTableRenderStatus(TestCase):
     def test_approved_label(self):
         html = self.table.render_status("Approved", Curation(status=Status.APPROVED))
         self.assertHTMLEqual(html, render_to_string("common/tags/approved.html"))
+
+
+class TestCurationTableColumns(TestCase):
+    def test_has_no_type_column(self):
+        table = CurationTable([])
+        self.assertNotIn("curation_type", table.columns.names())
 
 
 class TestEvidence(TestCase):

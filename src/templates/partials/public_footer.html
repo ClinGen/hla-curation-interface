@@ -1,0 +1,40 @@
+<div class="footer" hx-boost="true">
+    <div class="columns">
+        {% include "partials/footer_logos.html" %}
+        <div class="column">
+            <ul>
+                <li><a href="{% url 'repo-about' %}">About</a></li>
+                <li><a href="{% url 'repo-contact' %}">Contact</a></li>
+            </ul>
+        </div>
+        <div class="column">
+            <ul>
+                <li><a href="{% url 'repo-citing' %}">Citing</a></li>
+                <li><a href="{% url 'repo-help' %}">Help</a></li>
+            </ul>
+        </div>
+        <div class="column">
+            <ul>
+                <li><a href="{% url 'repo-acknowledgements' %}">Acknowledgements</a></li>
+                <li><a href="{% url 'repo-collaborators' %}">Collaborators</a></li>
+            </ul>
+        </div>
+    </div>
+    <hr>
+    <div class="content is-small">
+        <p>&copy; Clinical Genome Resource</p>
+        <p>
+            The development and maintenance of the HLArepo is financially supported by
+            NIH/NHGRI. It is managed at Stanford University U24HG009649.
+        </p>
+        <p>
+            The HLArepo is an open-source project. View the
+            <a href="https://github.com/ClinGen/hla-curation-interface">source code</a>.
+            The source code is subject to the
+            <a href="https://opensource.org/license/MIT">MIT License</a>.
+        </p>
+        <p>
+            {{ GIT_SHA }}
+        </p>
+    </div>
+</div>

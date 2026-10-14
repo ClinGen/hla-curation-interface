@@ -1,0 +1,11 @@
+{# The modal that evidence-modal.js opens when HTMX loads an evidence page into it. #}
+<div class="modal" id="evidence-modal" role="dialog" aria-modal="true" aria-labelledby="evidence-modal-title">
+    <div class="modal-background" data-evidence-modal-close></div>
+    <div class="modal-card evidence-modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title" id="evidence-modal-title"></p>
+            <button type="button" class="delete" aria-label="Close" data-evidence-modal-close></button>
+        </header>
+        <section class="modal-card-body" id="evidence-modal-body" tabindex="-1"></section>
+    </div>
+</div>

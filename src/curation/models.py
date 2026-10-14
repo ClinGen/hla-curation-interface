@@ -332,10 +332,11 @@ class Curation(models.Model):
 
     @property
     def taskforce_display(self) -> str | None:
-        """The taskforce's name, or its ID if the name is unknown."""
+        """The taskforce's name followed by its ID, or the ID if the name is unknown."""
         if not self.taskforce:
             return None
-        return dict(TASKFORCE_CHOICES).get(self.taskforce, self.taskforce)
+        name = dict(TASKFORCE_CHOICES).get(self.taskforce)
+        return f"{name} ({self.taskforce})" if name else self.taskforce
 
     @property
     def is_classification_overridden(self) -> bool:

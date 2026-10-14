@@ -20,3 +20,39 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* The scoring matrix needs more room than Bulma's default modal width. */
+.evidence-modal-card {
+  --bulma-modal-content-width: min(60rem, calc(100vw - 2rem));
+}
+
+/* The HLArepo family tree. The box-drawing prefixes draw the indentation, so the
+   nested lists add none of their own. */
+.lineage,
+.lineage ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* A wrapped row would break the lines, so narrow screens scroll instead. */
+.lineage {
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+/* Rows exactly one line tall, so the vertical lines between rows connect. */
+.lineage li {
+  line-height: 1.2;
+}
+
+.lineage .tag {
+  height: auto;
+  line-height: inherit;
+  padding-block: 0;
+}
+
+.lineage-prefix {
+  font-family: var(--bulma-family-code);
+  white-space: pre;
+}

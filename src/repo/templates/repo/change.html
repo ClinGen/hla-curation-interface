@@ -1,4 +1,4 @@
-{% extends "layouts/base.html" %}
+{% extends "layouts/public.html" %}
 {% block title %}{{ curation.slug }} Change{% endblock %}
 {% block description %}View a change to {{ curation.slug }}.{% endblock %}
 {% block main %}
@@ -7,15 +7,9 @@
         <nav class="breadcrumb" aria-label="breadcrumbs">
             <ul>
                 <li>
-                    <a href="{% url 'home' %}">
-                        {% include "common/icon.html" with icon_name="house" %}
-                        Home
-                    </a>
-                </li>
-                <li>
                     <a href="{% url 'repo-search' %}">
-                        {% include "common/icon.html" with icon_name="search" %}
-                        HLArepo
+                        {% include "common/icon.html" with icon_name="database" %}
+                        HLArepo Home
                     </a>
                 </li>
                 <li>

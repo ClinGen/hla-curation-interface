@@ -1,5 +1,6 @@
 """Provides a hacky function for getting human-readable history diffs."""
 
+from collections.abc import Collection
 from typing import Any
 
 from django.core.exceptions import FieldDoesNotExist
@@ -10,18 +11,22 @@ def resolve_changes(
     model_class: type[models.Model],
     record: Any,  # ruff: ignore[any-type]
     prev_record: Any,  # ruff: ignore[any-type]
+    exclude: Collection[str] = (),
 ) -> list[dict[str, Any]] | None:
     """Returns a human-readable diff between two history records.
 
     Returns `None` when there is no previous record (i.e. this is the creation
     record). Otherwise, returns a list of dicts with keys `field`, `old`,
     and `new`, using `verbose_name` for the field label and the choice display
-    value for fields that define choices.
+    value for fields that define choices. Fields named in `exclude` are left out,
+    for example to keep curator identities off public pages.
     """
     if not prev_record:
         return None
     result = []
-    for change in record.diff_against(prev_record).changes:
+    for change in record.diff_against(
+        prev_record, excluded_fields=list(exclude)
+    ).changes:
         label: str = change.field
         old_val: Any = change.old
         new_val: Any = change.new

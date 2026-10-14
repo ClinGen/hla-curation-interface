@@ -1,0 +1,26 @@
+{# An evidence record's public values and scoring matrix. The evidence page shows it, and the evidence modal loads it. #}
+<div id="evidence-body">
+    <p class="block">
+        {% if object.publication %}
+            <i>{{ object.publication.title }}</i>
+            {% if object.publication.pubmed_id %}
+                ({% with url="https://pubmed.ncbi.nlm.nih.gov/"|add:object.publication.pubmed_id text="PMID:"|add:object.publication.pubmed_id %}{% include "common/linkout.html" %}{% endwith %})
+            {% endif %}
+        {% endif %}
+    </p>
+    <h3 class="title is-5">Evidence Data</h3>
+    <div class="block table-container">
+        <table class="table is-fullwidth is-narrow" id="evidence-values">
+            <tbody>
+            {% for label, value in evidence_values %}
+                <tr>
+                    <td>{{ label }}</td>
+                    <td>{{ value|default:"------" }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <h3 class="title is-5">Scoring Matrix</h3>
+    {% include "evidence/partials/score.html" %}
+</div>

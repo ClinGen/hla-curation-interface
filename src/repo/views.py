@@ -1,21 +1,40 @@
+import codecs
+import csv
+import io
+from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from curation.models import Curation
 
-from django.db.models import QuerySet
-from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404
+from django.db.models import Prefetch, QuerySet
+from django.http import Http404, HttpRequest, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views.generic import DetailView
 from django_tables2 import RequestConfig
+from openpyxl import Workbook
+from openpyxl.styles import Font
+from openpyxl.worksheet.worksheet import Worksheet
 
 from common.history import resolve_changes
 from common.tables import HistoryTable
 from common.views import SearchListView
 from curation.constants.models.common import Status
+from curation.constants.views import FRAMEWORK
+from curation.models import Evidence
+from repo.lineage import build_lineage
 from repo.models import PublishedCuration
-from repo.serializers import serialize_published_curation
+from repo.serializers import (
+    EVIDENCE_COLUMN_NAMES,
+    evidence_values,
+    flatten_classification_rows,
+    flatten_evidence,
+    flatten_published_curation,
+    format_decimal,
+    public_evidence,
+    serialize_published_curation,
+)
 from repo.tables import PublishedCurationTable
 
 
@@ -56,7 +75,7 @@ def get_superseding(published_curation: PublishedCuration) -> PublishedCuration 
 class PublishedCurationList(SearchListView):
     model = PublishedCuration
     template_name = "repo/list.html"
-    ordering = ["-curation__updated_at"]
+    ordering = ["-published_at"]
     table_class = PublishedCurationTable
     search_fields = [
         "curation__slug",
@@ -89,12 +108,48 @@ class PublishedCurationDetail(DetailView):
         """Add curation to context for template convenience.
 
         Returns:
-            Context dict with curation, superseded, and superseding keys added.
+            Context dict with curation, superseded, superseding, evidence, and lineage
+            keys added.
         """
         context = super().get_context_data(**kwargs)
         context["curation"] = self.object.curation
         context["superseded"] = is_superseded(self.object)
         context["superseding"] = get_superseding(self.object)
+        context["evidence"] = public_evidence(self.object.curation)
+        context["lineage"] = build_lineage(self.object)
+        return context
+
+
+class PublishedEvidenceDetail(DetailView):
+    model = Evidence
+    template_name = "repo/evidence.html"
+
+    def get_object(self, queryset: QuerySet[Any] | None = None) -> Evidence:  # ruff: ignore[unused-method-argument]
+        """Gets the evidence by its slug, if its curation is published.
+
+        Returns:
+            The evidence record matching the slugs from the URL kwargs.
+        """
+        return get_object_or_404(
+            Evidence.objects.select_related("curation", "publication").prefetch_related(
+                "demographics"
+            ),
+            slug=self.kwargs["evidence_slug"],
+            curation__slug=self.kwargs["curation_slug"],
+            curation__publication__isnull=False,
+            is_included=True,
+        )
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        """Adds the curation, the public values, and the scoring framework.
+
+        Returns:
+            Context dict with curation, evidence_values, and framework keys added.
+        """
+        context = super().get_context_data(**kwargs)
+        context["curation"] = self.object.curation
+        context["evidence_values"] = evidence_values(self.object)
+        context["framework"] = FRAMEWORK
         return context
 
 
@@ -113,6 +168,7 @@ class PublishedCurationHistory(DetailView):
             self.object.history.all(),
             change_url_name="repo-change",
             change_url_slug1=self.object.curation.slug,
+            hide_user=True,
         )
         RequestConfig(self.request).configure(history_table)
         context["history_table"] = history_table
@@ -134,9 +190,38 @@ class PublishedCurationChange(DetailView):
         record = self.object.history.get(history_id=self.kwargs["history_id"])
         prev_record = record.prev_record
         context["record"] = record
-        context["changes"] = resolve_changes(PublishedCuration, record, prev_record)
+        # HLArepo is public, so it doesn't show who changed or published a curation.
+        context["changes"] = resolve_changes(
+            PublishedCuration, record, prev_record, exclude=["published_by"]
+        )
+        context["hide_user"] = True
         context["curation"] = self.object.curation
         return context
+
+
+def _json_attachment(
+    published_curations: list[PublishedCuration], filename: str
+) -> HttpResponse:
+    """Returns curations as an indented, downloadable JSON file.
+
+    The single and bulk downloads share this shape, so one reader handles both.
+
+    Returns:
+        JSON response with the export date, the count, and the curations.
+    """
+    data = {
+        "export_date": timezone.now().strftime("%Y-%m-%d"),
+        "total_count": len(published_curations),
+        "curations": [
+            serialize_published_curation(published) for published in published_curations
+        ],
+    }
+    # Indent the file and keep non-ASCII text, since people read it as is.
+    response = JsonResponse(
+        data, json_dumps_params={"indent": 2, "ensure_ascii": False}
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
 
 
 def download_all_json(request: HttpRequest) -> HttpResponse:
@@ -145,20 +230,205 @@ def download_all_json(request: HttpRequest) -> HttpResponse:
     Returns:
         JSON response with all published curations and metadata.
     """
-    published_curations = PublishedCuration.objects.all()
     timestamp = timezone.now().strftime("%Y-%m-%d")
-    data = {
-        "published_curations": [
-            serialize_published_curation(pc) for pc in PublishedCuration.objects.all()
-        ],
-        "total_count": published_curations.count(),
-        "export_date": timestamp,
-    }
-    response = JsonResponse(data)
-    response["Content-Disposition"] = (
-        f'attachment; filename="hla_curations_all_{timestamp}.json"'
+    return _json_attachment(
+        list(PublishedCuration.objects.order_by("-published_at")),
+        filename=f"hla_curations_all_{timestamp}.json",
     )
+
+
+def _published_for_export() -> QuerySet[PublishedCuration]:
+    """Returns every published curation with what the flat files need.
+
+    Returns:
+        Published curations, most recently published first, with their related
+        rows, evidence, publications, and demographics prefetched so the query
+        count doesn't grow with the number of rows.
+    """
+    return (
+        PublishedCuration.objects.select_related(
+            "curation__allele",
+            "curation__haplotype",
+            "curation__disease",
+            "curation__copied_from",
+        )
+        .prefetch_related(
+            Prefetch(
+                "curation__evidence",
+                queryset=Evidence.objects.select_related(
+                    "publication"
+                ).prefetch_related("demographics"),
+            )
+        )
+        .order_by("-published_at")
+    )
+
+
+def _published_one_for_export(curation_slug: str) -> QuerySet[PublishedCuration]:
+    """Returns one published curation, prefetched like the bulk downloads.
+
+    Returns:
+        A queryset holding the published curation with the given slug.
+
+    Raises:
+        Http404: If no published curation has the slug.
+    """
+    published_curations = _published_for_export().filter(curation__slug=curation_slug)
+    if not published_curations.exists():
+        raise Http404
+    return published_curations
+
+
+def _csv_attachment(
+    request: HttpRequest,
+    published_curations: QuerySet[PublishedCuration],
+    filename: str,
+) -> HttpResponse:
+    """Returns curations as a CSV attachment, one row per evidence.
+
+    The file starts with a UTF-8 byte order mark so Excel reads non-ASCII text
+    correctly.
+
+    Returns:
+        CSV response with the curations in the queryset's order.
+    """
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    response.write(codecs.BOM_UTF8)
+    writer = None
+    for published in published_curations:
+        url = request.build_absolute_uri(published.get_absolute_url())
+        for row in flatten_classification_rows(published, url=url):
+            if writer is None:
+                writer = csv.DictWriter(response, fieldnames=list(row))
+                writer.writeheader()
+            writer.writerow(
+                {
+                    column: format_decimal(value)
+                    if isinstance(value, Decimal)
+                    else value
+                    for column, value in row.items()
+                }
+            )
     return response
+
+
+def download_all_csv(request: HttpRequest) -> HttpResponse:
+    """Downloads all published curations as CSV, one row per evidence.
+
+    Returns:
+        CSV response with all published curations, most recently published
+        first.
+    """
+    timestamp = timezone.now().strftime("%Y-%m-%d")
+    return _csv_attachment(
+        request,
+        _published_for_export(),
+        filename=f"hla_curations_all_{timestamp}.csv",
+    )
+
+
+def download_single_csv(request: HttpRequest, curation_slug: str) -> HttpResponse:
+    """Downloads a single published curation as CSV, one row per evidence.
+
+    Returns:
+        CSV response with the specified published curation.
+    """
+    published_curations = _published_one_for_export(curation_slug)
+    return _csv_attachment(
+        request,
+        published_curations,
+        filename=f"hla_curation_{curation_slug}.csv",
+    )
+
+
+XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+def _write_sheet(
+    sheet: Worksheet, header: list[str], rows: list[dict[str, object]]
+) -> None:
+    """Writes rows to a sheet under a bold, frozen header row."""
+    sheet.append(header)
+    for cell in sheet[1]:
+        cell.font = Font(bold=True)
+    sheet.freeze_panes = "A2"
+    for row in rows:
+        sheet.append(list(row.values()))
+
+
+def _xlsx_attachment(
+    request: HttpRequest,
+    published_curations: QuerySet[PublishedCuration],
+    filename: str,
+) -> HttpResponse:
+    """Returns curations as an Excel workbook attachment.
+
+    The Curations sheet has one row per curation. The Evidence sheet
+    has one row per evidence record, starting with its curation's ID.
+
+    Returns:
+        XLSX response with the curations in the queryset's order.
+    """
+    curation_rows = []
+    evidence_rows = []
+    for published in published_curations:
+        url = request.build_absolute_uri(published.get_absolute_url())
+        curation_rows.append(flatten_published_curation(published, url=url))
+        curation_id = {"Curation ID": published.curation.slug}
+        evidence_rows.extend(
+            {**curation_id, **flatten_evidence(evidence)}
+            for evidence in public_evidence(published.curation)
+        )
+
+    workbook = Workbook()
+    workbook.remove(workbook.worksheets[0])  # Drop the default empty sheet.
+    curation_header = list(curation_rows[0]) if curation_rows else []
+    _write_sheet(
+        workbook.create_sheet("Curations"),
+        curation_header,
+        curation_rows,
+    )
+    _write_sheet(
+        workbook.create_sheet("Evidence"),
+        ["Curation ID", *EVIDENCE_COLUMN_NAMES],
+        evidence_rows,
+    )
+    buffer = io.BytesIO()
+    workbook.save(buffer)
+
+    response = HttpResponse(buffer.getvalue(), content_type=XLSX_CONTENT_TYPE)
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
+
+def download_all_xlsx(request: HttpRequest) -> HttpResponse:
+    """Downloads all published curations as an Excel workbook.
+
+    Returns:
+        XLSX response with all published curations, most recently
+        published first.
+    """
+    timestamp = timezone.now().strftime("%Y-%m-%d")
+    return _xlsx_attachment(
+        request,
+        _published_for_export(),
+        filename=f"hla_curations_all_{timestamp}.xlsx",
+    )
+
+
+def download_single_xlsx(request: HttpRequest, curation_slug: str) -> HttpResponse:
+    """Downloads a single published curation as an Excel workbook.
+
+    Returns:
+        XLSX response with the specified published curation.
+    """
+    published_curations = _published_one_for_export(curation_slug)
+    return _xlsx_attachment(
+        request,
+        published_curations,
+        filename=f"hla_curation_{curation_slug}.xlsx",
+    )
 
 
 def download_single_json(request: HttpRequest, curation_slug: str) -> HttpResponse:
@@ -168,13 +438,34 @@ def download_single_json(request: HttpRequest, curation_slug: str) -> HttpRespon
         JSON response with the specified published curation.
     """
     published = get_object_or_404(PublishedCuration, curation__slug=curation_slug)
-    timestamp = timezone.now().strftime("%Y-%m-%d")
-    data = {
-        "curation": serialize_published_curation(published),
-        "export_date": timestamp,
-    }
-    response = JsonResponse(data)
-    response["Content-Disposition"] = (
-        f'attachment; filename="hla_curation_{curation_slug}.json"'
-    )
-    return response
+    return _json_attachment([published], filename=f"hla_curation_{curation_slug}.json")
+
+
+def about(request: HttpRequest) -> HttpResponse:
+    """Returns the HLArepo about page."""
+    return render(request, "repo/about.html")
+
+
+def contact(request: HttpRequest) -> HttpResponse:
+    """Returns the HLArepo contact page."""
+    return render(request, "repo/contact.html")
+
+
+def help_(request: HttpRequest) -> HttpResponse:
+    """Returns the HLArepo help page."""
+    return render(request, "repo/help.html")
+
+
+def citing(request: HttpRequest) -> HttpResponse:
+    """Returns the HLArepo citing page."""
+    return render(request, "repo/citing.html")
+
+
+def acknowledgements(request: HttpRequest) -> HttpResponse:
+    """Returns the HLArepo acknowledgements page."""
+    return render(request, "repo/acknowledgements.html")
+
+
+def collaborators(request: HttpRequest) -> HttpResponse:
+    """Returns the HLArepo collaborators page."""
+    return render(request, "repo/collaborators.html")

@@ -1,10 +1,17 @@
 import django_tables2 as tables
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils.html import format_html
+from django.utils.html import format_html, format_html_join
 from django_tables2 import A
 
 from repo.models import PublishedCuration
+
+# The download buttons in each row: URL name, icon, and label.
+DOWNLOAD_BUTTONS = (
+    ("repo-download-single", "download", "JSON"),
+    ("repo-download-single-csv", "filetype-csv", "CSV"),
+    ("repo-download-single-xlsx", "file-earmark-spreadsheet", "Excel"),
+)
 
 
 class PublishedCurationTable(tables.Table):
@@ -13,11 +20,6 @@ class PublishedCurationTable(tables.Table):
         kwargs={"curation_slug": A("curation__slug")},
         accessor="curation__slug",
         verbose_name="ID",
-    )
-    curation_type = tables.Column(
-        accessor="curation__get_curation_type_display",
-        verbose_name="Type",
-        orderable=False,
     )
     allele = tables.Column(accessor="curation__allele", default="------")
     haplotype = tables.Column(accessor="curation__haplotype", default="------")
@@ -28,23 +30,18 @@ class PublishedCurationTable(tables.Table):
         orderable=False,
         empty_values=(),
     )
-    updated_at = tables.DateColumn(
-        accessor="curation__updated_at",
-        verbose_name="Updated",
-        format="Y-m-d",
-    )
+    published_at = tables.DateColumn(verbose_name="Published", format="Y-m-d")
     actions = tables.Column(empty_values=(), verbose_name="Actions", orderable=False)
 
     class Meta:
         attrs = {"class": "table is-fullwidth is-hoverable"}
         sequence = (
             "slug",
-            "curation_type",
             "allele",
             "haplotype",
             "disease",
             "classification",
-            "updated_at",
+            "published_at",
             "actions",
         )
 
@@ -52,10 +49,20 @@ class PublishedCurationTable(tables.Table):
         return record.curation.classification_display
 
     def render_actions(self, record: PublishedCuration) -> str:
-        url = reverse("repo-download-single", args=[record.curation.slug])
-        icon = render_to_string("common/icon.html", {"icon_name": "download"})
+        slug = record.curation.slug
+        links = (
+            (
+                reverse(url_name, args=[slug]),
+                render_to_string("common/icon.html", {"icon_name": icon}),
+                label,
+            )
+            for url_name, icon, label in DOWNLOAD_BUTTONS
+        )
         return format_html(
-            '<a href="{}" class="button is-small is-link is-light">{}JSON</a>',
-            url,
-            icon,
+            '<div class="buttons is-flex-wrap-nowrap">{}</div>',
+            format_html_join(
+                "",
+                '<a href="{}" class="button is-small is-link is-light">{}{}</a>',
+                links,
+            ),
         )

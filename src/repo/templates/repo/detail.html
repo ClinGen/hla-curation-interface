@@ -1,21 +1,17 @@
-{% extends "layouts/base.html" %}
-{% block title %}{{ curation.slug }} - Published Curation{% endblock %}
-{% block description %}View published curation {{ curation.slug }}.{% endblock %}
+{% extends "layouts/public.html" %}
+{% load static %}
+{% block title %}{{ curation.slug }} - Published Classification{% endblock %}
+{% block description %}View published classification {{ curation.slug }}.{% endblock %}
 {% block main %}
+    <script src="{% static 'hci/js/evidence-modal.js' %}" defer></script>
     <div class="box mt-6 mb-6">
 
         <nav class="breadcrumb" aria-label="breadcrumbs">
             <ul>
                 <li>
-                    <a href="{% url 'home' %}">
-                        {% include "common/icon.html" with icon_name="house" %}
-                        Home
-                    </a>
-                </li>
-                <li>
                     <a href="{% url 'repo-search' %}">
-                        {% include "common/icon.html" with icon_name="search" %}
-                        HLArepo
+                        {% include "common/icon.html" with icon_name="database" %}
+                        HLArepo Home
                     </a>
                 </li>
                 <li class="is-active">
@@ -32,17 +28,8 @@
         {% if superseded and superseding %}
             <div class="notification is-warning is-light">
                 <p>
-                    This curation has been superseded by
+                    This classification has been superseded by
                     <a href="{% url 'repo-detail' superseding.curation.slug %}">{{ superseding.curation.slug }}</a>.
-                </p>
-            </div>
-        {% endif %}
-
-        {% if curation.copied_from %}
-            <div class="notification is-info is-light">
-                <p>
-                    This curation is an update of
-                    <a href="{% url 'repo-detail' curation.copied_from.slug %}">{{ curation.copied_from.slug }}</a>.
                 </p>
             </div>
         {% endif %}
@@ -54,6 +41,16 @@
                class="button is-link is-light">
                 {% include "common/icon.html" with icon_name="download" %}
                 Download as JSON
+            </a>
+            <a href="{% url 'repo-download-single-csv' curation.slug %}"
+               class="button is-link is-light">
+                {% include "common/icon.html" with icon_name="filetype-csv" %}
+                Download as CSV
+            </a>
+            <a href="{% url 'repo-download-single-xlsx' curation.slug %}"
+               class="button is-link is-light">
+                {% include "common/icon.html" with icon_name="file-earmark-spreadsheet" %}
+                Download as Excel
             </a>
             <a href="{% url 'repo-history' curation.slug %}"
                class="button is-link is-light">
@@ -74,7 +71,9 @@
             {% endif %}
         </div>
 
-        {% include "curation/partials/evidence/detail_table.html" with object=curation %}
+        {% include "repo/partials/lineage.html" %}
+
+        {% include "repo/partials/evidence_table.html" %}
 
     </div>
 {% endblock %}

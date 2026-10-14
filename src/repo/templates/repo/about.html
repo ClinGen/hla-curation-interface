@@ -1,0 +1,29 @@
+{% extends "repo/layouts/page.html" %}
+{% block title %}About{% endblock %}
+{% block description %}About HLArepo, the repository of published HLA classifications.{% endblock %}
+{% block heading %}About{% endblock %}
+{% block content %}
+    <div class="block">
+        <p>
+            HLArepo is the public repository of HLA allele and haplotype
+            classifications published by the Clinical Genome Resource (ClinGen). Each
+            classification describes the relationship between an HLA allele or
+            haplotype and a disease, based on the published evidence.
+        </p>
+    </div>
+    <div class="block">
+        <p>
+            Expert curators weigh the evidence in the
+            <a href="{% url 'home' %}">HLA Curation Interface</a> (HCI). A
+            classification appears in HLArepo once it has been approved and published.
+            HLArepo keeps the full history of each classification, and all of its data
+            is free to browse and download.
+        </p>
+    </div>
+    <div class="block">
+        <p>
+            HLArepo and the HCI are developed and maintained by the Stanford
+            University contingent of the Clinical Genome Resource project.
+        </p>
+    </div>
+{% endblock %}
