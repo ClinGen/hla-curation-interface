@@ -1,3 +1,6 @@
+import codecs
+import csv
+import io
 import json
 from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING, override
@@ -24,6 +27,7 @@ from repo.constants import PUBLIC_CURATION_FIELDS, PUBLIC_EVIDENCE_FIELDS
 from repo.models import PublishedCuration
 from repo.serializers import (
     EXPORT_NAMES,
+    flatten_published_curation,
     serialize_evidence,
     serialize_published_curation,
 )
@@ -900,3 +904,148 @@ class RepoLandingPageTest(TestCase):
         self.assertTemplateUsed(response, "common/partials/search_results.html")
         self.assertTemplateNotUsed(response, "layouts/public.html")
         self.assertNotContains(response, 'id="downloads"')
+
+
+class CSVDownloadViewTest(TestCase):
+    fixtures = ["test_alleles.json", "test_diseases.json", "test_haplotypes.json"]
+    url = reverse("repo-download-all-csv")
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="publisher")
+        self.allele_curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+            status=Status.PUBLISHED,
+            taskforce_evidence_summary='Line one, with a comma.\nLine "two".',
+        )
+        self.haplotype_curation = Curation.objects.create(
+            curation_type=CurationTypes.HAPLOTYPE,
+            haplotype=Haplotype.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+            status=Status.PUBLISHED,
+        )
+        # Publish the allele curation more recently, but create it first.
+        self._publish(self.allele_curation, timezone.now() - timedelta(days=1))
+        self._publish(self.haplotype_curation, timezone.now() - timedelta(days=30))
+
+    def _publish(self, curation: Curation, published_at: datetime) -> None:
+        published = PublishedCuration.objects.create(
+            curation=curation, published_by=self.user
+        )
+        PublishedCuration.objects.filter(pk=published.pk).update(
+            published_at=published_at
+        )
+
+    def _rows(self) -> list[dict[str, str]]:
+        response = self.client.get(self.url)
+        text = response.content.decode("utf-8-sig")
+        return list(csv.DictReader(io.StringIO(text)))
+
+    def test_response_is_a_csv_attachment(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response["Content-Type"].startswith("text/csv"))
+        self.assertRegex(
+            response["Content-Disposition"],
+            r'^attachment; filename="hla_curations_all_\d{4}-\d{2}-\d{2}\.csv"$',
+        )
+        self.assertTrue(response.content.startswith(codecs.BOM_UTF8))
+
+    def test_one_row_per_curation_newest_first(self):
+        rows = self._rows()
+        self.assertEqual(
+            [row["curation_id"] for row in rows],
+            [self.allele_curation.slug, self.haplotype_curation.slug],
+        )
+
+    def test_header_comes_from_the_row_builder(self):
+        published = PublishedCuration.objects.first()
+        assert published is not None
+        expected = list(flatten_published_curation(published, url="").keys())
+        response = self.client.get(self.url)
+        header = next(csv.reader(io.StringIO(response.content.decode("utf-8-sig"))))
+        self.assertEqual(header, expected)
+
+    def test_allele_and_haplotype_columns(self):
+        allele_row, haplotype_row = self._rows()
+        allele = self.allele_curation.allele
+        assert allele is not None
+        self.assertEqual(allele_row["allele"], allele.name)
+        self.assertEqual(allele_row["allele_car_id"], allele.car_id or "")
+        self.assertEqual(allele_row["haplotype"], "")
+        haplotype = self.haplotype_curation.haplotype
+        assert haplotype is not None
+        self.assertEqual(haplotype_row["haplotype"], haplotype.name)
+        self.assertEqual(haplotype_row["allele"], "")
+        self.assertEqual(haplotype_row["allele_car_id"], "")
+
+    def test_evidence_summary_round_trips(self):
+        allele_row = self._rows()[0]
+        self.assertEqual(
+            allele_row["taskforce_evidence_summary"],
+            'Line one, with a comma.\nLine "two".',
+        )
+
+    def test_url_is_the_absolute_repo_url(self):
+        allele_row = self._rows()[0]
+        path = reverse("repo-detail", args=[self.allele_curation.slug])
+        self.assertEqual(allele_row["url"], f"http://testserver{path}")
+
+    def test_has_only_public_columns(self):
+        header = set(self._rows()[0].keys())
+        for name in PUBLIC_CURATION_FIELDS:
+            with self.subTest(name=name):
+                self.assertIn(EXPORT_NAMES.get(name, name), header)
+        self.assertNotIn("needs_review", header)
+        self.assertNotIn("published_by", header)
+        self.assertNotIn("status", header)
+
+    def test_query_count_does_not_grow_with_rows(self):
+        publication = Publication.objects.create(
+            slug="P999999", title="T", author="A", publication_year=2020, pubmed_id="1"
+        )
+        for curation in (self.allele_curation, self.haplotype_curation):
+            Evidence.objects.create(curation=curation, publication=publication)
+        # One query for the curations and their related rows, one for evidence.
+        with self.assertNumQueries(2):
+            self.client.get(self.url)
+
+    def test_landing_page_has_csv_button(self):
+        response = self.client.get(reverse("repo-search"))
+        soup = BeautifulSoup(response.content, "html.parser")
+        downloads = soup.find(id="downloads")
+        assert downloads is not None
+        self.assertIsNotNone(downloads.find("a", href=self.url))
+
+
+class FlattenPublishedCurationTest(TestCase):
+    fixtures = ["test_alleles.json", "test_diseases.json"]
+
+    def setUp(self):
+        self.curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+            status=Status.PUBLISHED,
+            taskforce_review_date=date(2026, 9, 1),
+        )
+        self.published = PublishedCuration.objects.create(curation=self.curation)
+
+    def test_starts_with_the_identifying_columns(self):
+        row = flatten_published_curation(self.published, url="https://example.org")
+        self.assertEqual(
+            list(row)[:4], ["curation_id", "url", "version", "published_at"]
+        )
+        self.assertEqual(row["url"], "https://example.org")
+
+    def test_formats_dates_and_blanks_missing_values(self):
+        row = flatten_published_curation(self.published, url="")
+        self.assertEqual(row["taskforce_review_date"], "2026-09-01")
+        self.assertEqual(row["taskforce_override_reason"], "")
+        self.assertEqual(row["copied_from"], "")
+        self.assertNotIn(None, row.values())
+
+    def test_classification_matches_the_page(self):
+        row = flatten_published_curation(self.published, url="")
+        self.assertEqual(row["classification"], self.curation.classification_display)

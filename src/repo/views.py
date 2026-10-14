@@ -1,3 +1,5 @@
+import codecs
+import csv
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -15,7 +17,10 @@ from common.tables import HistoryTable
 from common.views import SearchListView
 from curation.constants.models.common import Status
 from repo.models import PublishedCuration
-from repo.serializers import serialize_published_curation
+from repo.serializers import (
+    flatten_published_curation,
+    serialize_published_curation,
+)
 from repo.tables import PublishedCurationTable
 
 
@@ -158,6 +163,42 @@ def download_all_json(request: HttpRequest) -> HttpResponse:
     response["Content-Disposition"] = (
         f'attachment; filename="hla_curations_all_{timestamp}.json"'
     )
+    return response
+
+
+def download_all_csv(request: HttpRequest) -> HttpResponse:
+    """Downloads all published curations as CSV, one row per curation.
+
+    The file starts with a UTF-8 byte order mark so Excel reads non-ASCII text
+    correctly.
+
+    Returns:
+        CSV response with all published curations, most recently published first.
+    """
+    published_curations = PublishedCuration.objects.select_related(
+        "curation__allele",
+        "curation__haplotype",
+        "curation__disease",
+        "curation__copied_from",
+    )
+    # The score and classification are computed from every evidence row.
+    published_curations = published_curations.prefetch_related(
+        "curation__evidence"
+    ).order_by("-published_at")
+    timestamp = timezone.now().strftime("%Y-%m-%d")
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = (
+        f'attachment; filename="hla_curations_all_{timestamp}.csv"'
+    )
+    response.write(codecs.BOM_UTF8)
+    writer = None
+    for published in published_curations:
+        url = request.build_absolute_uri(published.get_absolute_url())
+        row = flatten_published_curation(published, url=url)
+        if writer is None:
+            writer = csv.DictWriter(response, fieldnames=list(row))
+            writer.writeheader()
+        writer.writerow(row)
     return response
 
 

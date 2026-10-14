@@ -57,6 +57,12 @@
                     {% include "common/icon.html" with icon_name="download" %}
                     Download All as JSON
                 </a>
+                <a href="{% url 'repo-download-all-csv' %}"
+                   class="button is-link is-light"
+                   id="download-csv-button">
+                    {% include "common/icon.html" with icon_name="filetype-csv" %}
+                    Download All as CSV
+                </a>
             </div>
         </div>
 

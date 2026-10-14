@@ -24,7 +24,7 @@ Defines the `PublishedCuration` model, which links one-to-one to a `Curation` an
 
 ### `serializers.py`
 
-Provides `serialize_published_curation` and `serialize_evidence`, plain functions that convert `PublishedCuration` and `Evidence` instances to plain Python dictionaries suitable for JSON export. The taskforce and evidence data fields come from the public field lists in `constants.py`; `EXPORT_NAMES` keeps the `classification` key for `taskforce_classification`. The export includes each allele's CAR ID (including haplotype member alleles), the disease IRI, the taskforce override reason, and the taskforce review date as an ISO date or `null`.
+Provides `serialize_published_curation` and `serialize_evidence`, plain functions that convert `PublishedCuration` and `Evidence` instances to plain Python dictionaries suitable for JSON export. The taskforce and evidence data fields come from the public field lists in `constants.py`; `EXPORT_NAMES` keeps the `classification` key for `taskforce_classification`. The export includes each allele's CAR ID (including haplotype member alleles), the disease IRI, the taskforce override reason, and the taskforce review date as an ISO date or `null`. It also provides `flatten_published_curation`, which flattens a published curation into one row for flat files: identifying columns (ID, absolute URL, version, published date, allele and CAR ID, haplotype name, disease, Mondo ID, IRI, classification as shown on the page, score), then the other public curation fields, then `copied_from`, with empty strings for missing values. Haplotypes are represented by name alone, since the name lists the alleles, and evidence is left to the JSON export.
 
 ### `tables.py`
 
@@ -76,7 +76,7 @@ The layout for the HLArepo info pages. It extends `layouts/public.html` and rend
 
 ### `templates/repo/list.html`
 
-Renders the HLArepo landing page at `/repo/`: the HCI logo, the HLArepo title and subtitle, a short description of HLArepo, a Downloads section with the bulk download buttons, and the searchable, paginated list of published curations (HTMX swaps in only the results partial).
+Renders the HLArepo landing page at `/repo/`: the HCI logo, the HLArepo title and subtitle, a short description of HLArepo, a Downloads section with the bulk JSON and CSV download buttons, and the searchable, paginated list of published curations (HTMX swaps in only the results partial).
 
 ### `tests.py`
 
@@ -84,8 +84,8 @@ Contains unit and integration tests covering the `PublishedCuration` model (crea
 
 ### `urls.py`
 
-Maps URL patterns for the repo app: the search/list page, the six info pages (About, Acknowledgements, Citing, Collaborators, Contact, Help), bulk and single JSON download endpoints, and the curation detail, history, and change views, all namespaced under the `repo-` prefix.
+Maps URL patterns for the repo app: the search/list page, the six info pages (About, Acknowledgements, Citing, Collaborators, Contact, Help), the bulk JSON and CSV and single JSON download endpoints, and the curation detail, history, and change views, all namespaced under the `repo-` prefix.
 
 ### `views.py`
 
-Implements the repo views: `PublishedCurationList` (searchable table list, most recently published first), `PublishedCurationDetail` (with supersession detection and related-object prefetching for the linkouts), `PublishedCurationHistory` and `PublishedCurationChange` (history audit trail), `download_all_json` / `download_single_json` function-based views that return serialized JSON responses as file attachments, and function-based views for the six info pages.
+Implements the repo views: `PublishedCurationList` (searchable table list, most recently published first), `PublishedCurationDetail` (with supersession detection and related-object prefetching for the linkouts), `PublishedCurationHistory` and `PublishedCurationChange` (history audit trail), `download_all_json` / `download_single_json` function-based views that return serialized JSON responses as file attachments, `download_all_csv`, which streams every published curation as a CSV attachment (newest first, UTF-8 with a byte order mark so Excel reads it correctly, with evidence prefetched to keep the query count constant), and function-based views for the six info pages.

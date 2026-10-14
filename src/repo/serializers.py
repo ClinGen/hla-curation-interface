@@ -11,6 +11,10 @@ if TYPE_CHECKING:
 # Export keys that differ from the model field name, kept for existing consumers.
 EXPORT_NAMES = {"taskforce_classification": "classification"}
 
+# Public curation fields that the flat row lists after its fixed leading columns.
+# The classification comes first, with the other identifying columns.
+_ROW_TRAILING_FIELDS = sorted(PUBLIC_CURATION_FIELDS - {"taskforce_classification"})
+
 
 def _export_value(value: object) -> object:
     """Converts a model field value to a JSON-friendly value.
@@ -135,3 +139,51 @@ def serialize_evidence(evidence: "Evidence") -> dict[str, Any]:
         "score": float(evidence.score),
         "added_at": evidence.added_at.isoformat(),
     }
+
+
+def _flat_value(value: object) -> object:
+    """Converts a model field value to a flat-file value.
+
+    Returns:
+        An empty string for None, otherwise the JSON-friendly value.
+    """
+    return "" if value is None else _export_value(value)
+
+
+def flatten_published_curation(
+    published: "PublishedCuration", url: str
+) -> dict[str, object]:
+    """Flattens a published curation to one row for a CSV or spreadsheet.
+
+    A haplotype is represented by its name alone, since the name already lists
+    its alleles. Evidence isn't included; the JSON export has it.
+
+    Args:
+        published: The PublishedCuration instance to flatten.
+        url: The absolute URL of the curation's HLArepo page.
+
+    Returns:
+        An ordered mapping of column name to value, with None as an empty string.
+    """
+    curation = published.curation
+    allele = curation.allele
+    haplotype = curation.haplotype
+    disease = curation.disease
+    row: dict[str, object] = {
+        "curation_id": curation.slug,
+        "url": url,
+        "version": published.version,
+        "published_at": published.published_at.isoformat(),
+        "allele": allele.name if allele else "",
+        "allele_car_id": _flat_value(allele.car_id) if allele else "",
+        "haplotype": haplotype.name if haplotype else "",
+        "disease": disease.name if disease else "",
+        "disease_mondo_id": _flat_value(disease.mondo_id) if disease else "",
+        "disease_iri": _flat_value(disease.iri) if disease else "",
+        EXPORT_NAMES["taskforce_classification"]: curation.classification_display,
+        "score": _flat_value(curation.score),
+    }
+    for name in _ROW_TRAILING_FIELDS:
+        row[EXPORT_NAMES.get(name, name)] = _flat_value(getattr(curation, name))
+    row["copied_from"] = curation.copied_from.slug if curation.copied_from else ""
+    return row
