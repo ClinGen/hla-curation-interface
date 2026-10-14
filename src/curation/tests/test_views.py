@@ -703,10 +703,11 @@ class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
 
     @staticmethod
     def _approval_data() -> dict[str, str]:
+        today = timezone.now().date()
         return {
             "decision": "approved",
             "taskforce_classification": Classification.MODERATE,
-            "taskforce_evidence_summary": "Taskforce consensus.",
+            "taskforce_evidence_summary": f"Approved on {today.isoformat()}.",
             "taskforce_additional_notes": "",
             "taskforce": HLA_CURATION_TASKFORCE_ID,
             "taskforce_review_date": timezone.now().date().isoformat(),
@@ -822,6 +823,52 @@ class CurationReviewTest(SuppressRequestLoggingMixin, TestCase):
         self.assertContains(response, "Fill in the template before approving.")
         self.curation.refresh_from_db()
         self.assertEqual(self.curation.status, Status.PROVISIONAL)
+
+    def test_approval_with_summary_missing_review_date_fails(self):
+        self.client.force_login(self.reviewer)
+        yesterday = timezone.now().date() - timedelta(days=1)
+        for summary in (
+            "Taskforce consensus.",
+            f"Approved on {yesterday.isoformat()}.",
+        ):
+            data = {**self._approval_data(), "taskforce_evidence_summary": summary}
+            response = self.client.post(self._url(), data)
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, "Include the review date")
+        self.curation.refresh_from_db()
+        self.assertEqual(self.curation.status, Status.PROVISIONAL)
+
+    def test_approval_accepts_common_review_date_formats(self):
+        self.client.force_login(self.reviewer)
+        for spelling in (
+            "September 1, 2026",
+            "september  1 2026",
+            "1 September 2026",
+            "Sep. 1, 2026",
+            "2026-09-01",
+            "9/1/2026",
+            "09/01/2026",
+        ):
+            with self.subTest(spelling=spelling):
+                self.curation.status = Status.PROVISIONAL
+                self.curation.save()
+                data = {
+                    **self._approval_data(),
+                    "taskforce_review_date": "2026-09-01",
+                    "taskforce_evidence_summary": f"Approved on {spelling}.",
+                }
+                response = self.client.post(self._url(), data)
+                self.assertEqual(response.status_code, 302)
+
+    def test_approval_rejects_review_date_inside_another_date(self):
+        self.client.force_login(self.reviewer)
+        data = {
+            **self._approval_data(),
+            "taskforce_review_date": "2026-09-01",
+            "taskforce_evidence_summary": "Approved on 19/1/2026 and 2026-09-011.",
+        }
+        response = self.client.post(self._url(), data)
+        self.assertContains(response, "Include the review date")
 
     def test_needs_revision_discards_unchanged_template(self):
         self.client.force_login(self.reviewer)
