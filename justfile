@@ -404,3 +404,27 @@ alias sted := server-test-deploy
 server-prod-deploy:
     cd infra/ansible && uv run ansible-playbook -i inventory.ini playbooks/deploy.yml --limit prod_server
 alias sprd := server-prod-deploy
+
+# Restore a test server backup, and optionally a SHA. ----------------
+[group('server')]
+server-test-restore backup sha='':
+    cd infra/ansible && uv run ansible-playbook -i inventory.ini playbooks/restore.yml --limit test_server -e "backup_name={{ backup }}" -e "restore_sha={{ sha }}"
+alias stere := server-test-restore
+
+# Restore a prod server backup, and optionally a SHA. ----------------
+[group('server')]
+server-prod-restore backup sha='':
+    cd infra/ansible && uv run ansible-playbook -i inventory.ini playbooks/restore.yml --limit prod_server -e "backup_name={{ backup }}" -e "restore_sha={{ sha }}"
+alias sprre := server-prod-restore
+
+# List the database backups for the test server. ---------------------
+[group('server')]
+server-test-list-backups:
+    cd infra/ansible && uv run ansible test_server -i inventory.ini -m ansible.builtin.shell -a "cd ~/hla-curation-interface/src && ~/.local/bin/uv run manage.py listbackups"
+alias stlb := server-test-list-backups
+
+# List the database backups for the prod server. ---------------------
+[group('server')]
+server-prod-list-backups:
+    cd infra/ansible && uv run ansible prod_server -i inventory.ini -m ansible.builtin.shell -a "cd ~/hla-curation-interface/src && ~/.local/bin/uv run manage.py listbackups"
+alias sprlb := server-prod-list-backups

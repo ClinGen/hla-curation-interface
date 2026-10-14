@@ -155,6 +155,86 @@ The first SHA is the code the backup's data matches, and the second is the code 
 deployed. If the backup fails, the deploy stops before it migrates, so the server needs
 its backup credentials first (see How to Configure Backup Credentials).
 
+## How to Revert a Bad Deploy
+
+Use this when a deploy broke the site or damaged data. Restoring the deploy's
+pre-deployment backup puts the code and the data back to exactly where they were before
+the deploy. Anything entered since the deploy is lost from the live site. That's
+acceptable for the HCI, and the restore saves it in a pre-restore backup first, so you
+can copy back anything someone needs by hand.
+
+- Find the deploy's backup name. The deploy output prints it (in your terminal, or in
+  the GitHub Actions log while continuous deployment exists):
+
+  ```
+  Pre-deployment backup: pre-deployment/hci-3f2a9c1-to-88c5e47-2026-09-25T180102Z.sqlite3.gz
+  ```
+
+  Or list the backups and pick the newest `pre-deployment/` one:
+
+  ```
+  just server-prod-list-backups
+  ```
+
+- Restore the backup and its "from" SHA, the first SHA in the name. Gunicorn is stopped
+  while this runs, so the site is down for a minute or two:
+
+  ```
+  just server-prod-restore pre-deployment/hci-3f2a9c1-to-88c5e47-2026-09-25T180102Z.sqlite3.gz 3f2a9c1
+  ```
+
+- Check that the site's footer shows the "from" SHA (`3f2a9c1` above).
+
+- Open a pull request that runs `git revert` on the bad commit, and merge it. Until it's
+  merged, merge nothing else: the next deploy checks out `main` again, which would put
+  the bad code back.
+
+- If someone needs data entered after the bad deploy, it's in the `pre-restore/` backup
+  that the restore printed. Restore that backup on your machine, not on the server, and
+  copy what's needed back by hand.
+
+To rehearse, run the same steps on the test server with `just server-test-list-backups`
+and `just server-test-restore`.
+
+## How to Restore After Data Corruption
+
+Use this when data was damaged, for example by a bug, and you find out after the fact.
+
+- List the backups and pick the newest one from before the damage. `daily/` backups are
+  taken every night at midnight Pacific. `pre-deployment/` backups are taken before each
+  deploy, and `manual/` backups by the admin's Back up now button.
+
+  ```
+  just server-prod-list-backups
+  ```
+
+- Restore it. If the code that's running now is the same as or newer than the code the
+  backup came from, leave out the SHA: the restore runs `migrate`, which brings the
+  schema up to date. Otherwise, pass the SHA that matches the backup.
+
+  ```
+  just server-prod-restore daily/hci-2026-10-14-000000.sqlite3.gz
+  ```
+
+- As with reverting a deploy, anything entered after the backup is in the `pre-restore/`
+  backup that the restore printed.
+
+If only the schema is damaged, for example by a bad migration, and the data is fine, you
+can keep everything entered since the deploy by migrating back instead of restoring.
+Check out the previous code and run `manage.py migrate <app> <previous_migration>` on
+the server. This works only if every migration involved can be reversed.
+
+If the restore fails partway, it leaves the site down on purpose, because serving code
+that doesn't match the database is worse. Read the error in the output, fix the cause,
+and run the same restore again. If it stopped because an `hci.db-journal` or
+`hci.db-wal` file exists, SQLite crashed in the middle of a write. Move that file and
+`hci.db` somewhere safe before you run the restore again; don't delete them until the
+site works. To bring the site back up without restoring, SSH into the server and run:
+
+```
+sudo systemctl start gunicorn.socket gunicorn.service
+```
+
 ## How to Backfill Publication Authors
 
 Publications added before the HCI stored full author lists have no authors, so they

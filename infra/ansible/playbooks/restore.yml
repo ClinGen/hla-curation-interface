@@ -1,0 +1,42 @@
+# Restores a database backup, and optionally checks out the code that matches it.
+# See How to Revert a Bad Deploy and How to Restore After Data Corruption in
+# docs/how-to.md. If any step after Gunicorn stops fails, the site stays down on
+# purpose. That's safer than serving code that doesn't match the database.
+- name: Restore a database backup
+  hosts: all
+  gather_facts: true
+  vars:
+    restore_sha: ""
+  tasks:
+    - name: Check that a backup name was given
+      ansible.builtin.assert:
+        that:
+          - backup_name is defined
+          - backup_name | length > 0
+        fail_msg: "Pass the backup to restore, for example -e backup_name=daily/hci-2026-10-14-000000.sqlite3.gz"
+    - name: Admin | Gunicorn stop
+      ansible.builtin.include_tasks: ../tasks/admin/gunicorn_stop.yml
+    - name: Admin | Django pre-restore backup
+      ansible.builtin.include_tasks: ../tasks/admin/django_dbbackup_prerestore.yml
+    # Restore before checking out older code, which might not have django-dbbackup.
+    - name: Admin | Django restore
+      ansible.builtin.include_tasks: ../tasks/admin/django_dbrestore.yml
+    - name: Admin | Git checkout of the given SHA
+      ansible.builtin.include_tasks: ../tasks/admin/git_checkout_sha.yml
+      when: restore_sha | length > 0
+    - name: Admin | Git SHA
+      ansible.builtin.include_tasks: ../tasks/admin/git_sha.yml
+    - name: Admin | uv sync
+      ansible.builtin.include_tasks: ../tasks/admin/uv_sync.yml
+      when: restore_sha | length > 0
+    - name: Admin | npm install
+      ansible.builtin.include_tasks: ../tasks/admin/npm_install.yml
+      when: restore_sha | length > 0
+    # A no-op when the code matches the backup. Otherwise it brings the schema up to
+    # the current code.
+    - name: Admin | Django migrate
+      ansible.builtin.include_tasks: ../tasks/admin/django_migrate.yml
+    - name: Admin | Django collectstatic
+      ansible.builtin.include_tasks: ../tasks/admin/django_collectstatic.yml
+    - name: Admin | Gunicorn start
+      ansible.builtin.include_tasks: ../tasks/admin/gunicorn_start.yml

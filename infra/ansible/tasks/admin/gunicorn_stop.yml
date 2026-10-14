@@ -1,0 +1,12 @@
+# Stop both units. If only the service stops, the socket starts it again on the
+# next request.
+- name: Ensure the Gunicorn systemd socket is stopped
+  become: true
+  ansible.builtin.systemd:
+    name: gunicorn.socket
+    state: stopped
+- name: Ensure the Gunicorn systemd service is stopped
+  become: true
+  ansible.builtin.systemd:
+    name: gunicorn.service
+    state: stopped

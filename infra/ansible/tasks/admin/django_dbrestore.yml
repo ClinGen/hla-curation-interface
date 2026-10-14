@@ -1,0 +1,27 @@
+# Restoring writes the backup over hci.db. SQLite would apply a leftover journal or
+# WAL file to the restored database and corrupt it, so stop if either exists.
+- name: Look for leftover SQLite journal and WAL files
+  ansible.builtin.stat:
+    path: "{{ repo_dir }}/src/hci.db{{ item }}"
+  loop:
+    - "-journal"
+    - "-wal"
+  register: sqlite_leftovers
+
+- name: Stop if a leftover SQLite journal or WAL file exists
+  ansible.builtin.assert:
+    that: not item.stat.exists
+    fail_msg: >-
+      {{ repo_dir }}/src/hci.db{{ item.item }} exists, so restoring could corrupt the database. The site
+      is stopped. See How to Restore After Data Corruption in docs/how-to.md.
+    quiet: true
+  loop: "{{ sqlite_leftovers.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: Restore the database backup
+  ansible.builtin.command:
+    chdir: "{{ repo_dir }}/src"
+    cmd: "~/.local/bin/uv run manage.py dbrestore --noinput --uncompress -i {{ backup_name }}"
+  tags:
+    - skip_ansible_lint

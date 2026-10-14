@@ -1,0 +1,6 @@
+- name: Check out the code that matches the restored backup
+  ansible.builtin.git:
+    repo: "{{ repo_url }}"
+    dest: "{{ repo_dir }}"
+    version: "{{ restore_sha }}"
+    update: true
