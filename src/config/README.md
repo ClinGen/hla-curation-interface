@@ -12,7 +12,7 @@ Empty file that marks `settings` as a Python package.
 
 ### `settings/base.py`
 
-Defines settings shared across all environments, including installed apps, middleware, database (SQLite), static file handling via WhiteNoise, Clerk authentication keys and backends, Sentry initialization, and the custom `django-tables2` template. Environment-specific settings files import from this module.
+Defines settings shared across all environments, including installed apps, middleware, database (SQLite), static file handling via WhiteNoise, Clerk authentication keys and backends, Sentry initialization, the custom `django-tables2` template, and database backups with `django-dbbackup`. Backups go to the S3 bucket named by `DBBACKUP_BUCKET_NAME` when it's set, using the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables, and to a `backups/` directory next to `src/` otherwise. Backups that `django-dbbackup` names itself go under `daily/` and include the `SUBDOMAIN` environment variable (`hci`, `hci-test`, or `dev` by default). Environment-specific settings files import from this module.
 
 ### `settings/dev.py`
 

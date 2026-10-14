@@ -2,18 +2,23 @@
 
 import logging
 import re
-from contextlib import contextmanager
+import sqlite3
+from contextlib import closing, contextmanager
 from io import StringIO
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 from typing import Any
+from unittest.mock import patch
 
+from dbbackup import settings as dbbackup_settings
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management import call_command
+from django.db import connection
 from django.template.loader import render_to_string
 from django.templatetags.static import static
-from django.test import Client, TestCase
+from django.test import Client, TestCase, TransactionTestCase
 from django.urls import reverse
 
 from auth_.models import UserProfile
@@ -367,3 +372,67 @@ class HistoryTableHideUserTest(TestCase):
     def test_hide_user_drops_changed_by(self):
         table = HistoryTable([], change_url_name="allele-change", hide_user=True)
         self.assertNotIn("history_user", table.columns.names())
+
+
+class DatabaseBackupTest(TransactionTestCase):
+    """Tests that django-dbbackup can back up and restore our SQLite database.
+
+    django-dbbackup reads STORAGES["dbbackup"] once, at import, so the tests patch its
+    settings module instead of using override_settings. The test database is in
+    memory, but restoring copies the backup over the file named by the database's
+    NAME, so the restore test points NAME at a temporary file and reads that file.
+    """
+
+    backup_name = "pre-deployment/x.sqlite3.gz"
+
+    def setUp(self):
+        backup_dir = TemporaryDirectory()
+        self.addCleanup(backup_dir.cleanup)
+        self.backup_dir = Path(backup_dir.name)
+        for patcher in (
+            patch.object(
+                dbbackup_settings,
+                "STORAGE",
+                "django.core.files.storage.FileSystemStorage",
+            ),
+            patch.object(
+                dbbackup_settings,
+                "STORAGE_OPTIONS",
+                {"location": str(self.backup_dir)},
+            ),
+        ):
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+    def back_up(self):
+        """Back up the test database to the temporary backup directory."""
+        call_command(
+            "dbbackup",
+            "--noinput",
+            "--compress",
+            "-o",
+            self.backup_name,
+            stdout=StringIO(),
+        )
+
+    def test_backup_writes_file(self):
+        self.back_up()
+        self.assertTrue((self.backup_dir / self.backup_name).is_file())
+
+    def test_restore_brings_back_row_deleted_after_backup(self):
+        User.objects.create(username="kept")
+        self.back_up()
+        User.objects.filter(username="kept").delete()
+        restored_db = self.backup_dir / "restored.sqlite3"
+        with patch.dict(connection.settings_dict, {"NAME": str(restored_db)}):
+            call_command(
+                "dbrestore",
+                "--noinput",
+                "--uncompress",
+                "-i",
+                self.backup_name,
+                stdout=StringIO(),
+            )
+        with closing(sqlite3.connect(restored_db)) as restored:
+            usernames = restored.execute("SELECT username FROM auth_user").fetchall()
+        self.assertIn(("kept",), usernames)

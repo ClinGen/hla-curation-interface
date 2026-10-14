@@ -15,6 +15,7 @@ __pycache__/
 build/
 coverage/
 logs/
+backups/
 node_modules/
 public/
 
