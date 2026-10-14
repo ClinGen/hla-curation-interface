@@ -8,10 +8,66 @@ from curation.models import Curation, Evidence
 
 
 class CurationCreateForm(ModelForm):
+    confirm_duplicate = forms.BooleanField(
+        label="Create another curation for this pair anyway",
+        required=False,
+    )
+
     class Meta:
         model = Curation
         fields = ["curation_type", "allele", "haplotype", "disease"]
         widgets = {"curation_type": forms.RadioSelect}
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Starts with no existing curations of the pair; clean() finds them."""
+        super().__init__(*args, **kwargs)
+        self.existing_pairs: list[Curation] = []
+
+    @property
+    def can_confirm_duplicate(self) -> bool:
+        """Whether the curator may confirm creating a second curation."""
+        return len(self.existing_pairs) == 1 and bool(
+            self.existing_pairs[0].evidence_count  # ty: ignore[unresolved-attribute]
+        )
+
+    def clean(self) -> dict | None:
+        cleaned_data = super().clean()
+        if not cleaned_data or not cleaned_data.get("disease"):
+            return cleaned_data
+        # A missing allele or haplotype is reported by Curation.clean().
+        if not cleaned_data.get("allele") and not cleaned_data.get("haplotype"):
+            return cleaned_data
+        self.existing_pairs = list(
+            Curation.existing_pairs(
+                curation_type=cleaned_data.get("curation_type", ""),
+                allele=cleaned_data.get("allele"),
+                haplotype=cleaned_data.get("haplotype"),
+                disease=cleaned_data["disease"],
+            )
+        )
+        # The working group allows one curation for risk evidence and one for
+        # protective evidence, so a pair can have at most two.
+        if len(self.existing_pairs) >= 2:
+            slugs = ", ".join(c.slug for c in self.existing_pairs)
+            self.add_error(
+                None,
+                f"This pair already has two curations ({slugs}). "
+                "Add evidence to one of them instead.",
+            )
+        elif self.existing_pairs and not self.can_confirm_duplicate:
+            self.add_error(
+                None,
+                f"This pair is already being curated in {self.existing_pairs[0].slug}, "
+                "which has no evidence yet. Add evidence to it instead.",
+            )
+        elif self.existing_pairs and not cleaned_data.get("confirm_duplicate"):
+            self.add_error(
+                None,
+                f"This pair is already being curated in {self.existing_pairs[0].slug}. "
+                "Review it, then confirm below to create a second curation, for "
+                "example for evidence in the opposite direction.",
+            )
+        return cleaned_data
 
 
 class TaskforceReviewForm(forms.Form):

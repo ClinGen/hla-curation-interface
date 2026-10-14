@@ -41,6 +41,29 @@
             {% with field=form.disease %}
                 {% include "common/form/select/search.html" %}
             {% endwith %}
+            {% if form.existing_pairs %}
+                <div class="notification is-warning">
+                    <p><b>Existing curations of this pair:</b></p>
+                    <ul>
+                        {% for curation in form.existing_pairs %}
+                            <li>
+                                <a href="{{ curation.get_absolute_url }}">{{ curation.slug }}</a>
+                                ({{ curation.get_status_display }})
+                                {% for copy in curation.copies.all %}
+                                    {% if forloop.first %}copies:{% endif %}
+                                    <a href="{{ copy.get_absolute_url }}">{{ copy.slug }}</a>{% if not forloop.last %},{% endif %}
+                                {% endfor %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    {% if form.can_confirm_duplicate %}
+                        <label class="checkbox mt-3">
+                            {{ form.confirm_duplicate }}
+                            {{ form.confirm_duplicate.label }}
+                        </label>
+                    {% endif %}
+                </div>
+            {% endif %}
             <button type="submit" class="button is-link">
                 Submit
             </button>

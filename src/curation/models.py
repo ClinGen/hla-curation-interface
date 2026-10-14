@@ -211,6 +211,42 @@ class Curation(models.Model):
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         return reverse("curation-detail", kwargs={"curation_slug": self.slug})
 
+    @classmethod
+    def existing_pairs(
+        cls,
+        *,
+        curation_type: str,
+        allele: Allele | None,
+        haplotype: Haplotype | None,
+        disease: Disease,
+    ) -> models.QuerySet["Curation"]:
+        """Returns root curations of the same HLA-disease pair, oldest first.
+
+        Copies are new versions of their source, not separate pairs, so only
+        curations that weren't copied from another one count.
+
+        Args:
+            curation_type: The type of the new curation.
+            allele: The new curation's allele, for allele curations.
+            haplotype: The new curation's haplotype, for haplotype curations.
+            disease: The new curation's disease.
+        """
+        if curation_type == CurationTypes.ALLELE:
+            target = {"allele": allele}
+        else:
+            target = {"haplotype": haplotype}
+        return (
+            cls.objects.filter(
+                curation_type=curation_type,
+                disease=disease,
+                copied_from__isnull=True,
+                **target,
+            )
+            .prefetch_related("copies")
+            .annotate(evidence_count=models.Count("evidence"))
+            .order_by("added_at")
+        )
+
     def clean(self) -> None:
         super().clean()
         validate_status(self)

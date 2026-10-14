@@ -56,7 +56,7 @@ A Django fixture with a single minimal in-progress evidence item (`E000001`) lin
 
 ### `forms.py`
 
-Defines the Django forms used by curation and evidence views: `CurationCreateForm` (create a curation), `TaskforceReviewForm` (taskforce review with decision, classification, notes, and review date; the review date is required when approving and can't be in the future; it takes a `suggested_classification` argument, labels the classification select with it, and requires an override reason when approving with any other classification; it takes an `evidence_summary_template` argument, won't approve a curation whose evidence summary is still that unchanged template, and saves an unchanged template as no summary), `EvidenceCreateForm` (attach a publication), `EvidenceTopLevelEditForm` / `EvidenceTopLevelEditFormSet` (inline status/inclusion editing from the curation detail page), and `EvidenceEditForm` (the full step-by-step evidence data entry form with cross-field validation).
+Defines the Django forms used by curation and evidence views: `CurationCreateForm` (create a curation; it blocks a third curation of the same HLA-disease pair, blocks a second while the first has no evidence, and otherwise asks the curator to confirm a second), `TaskforceReviewForm` (taskforce review with decision, classification, notes, and review date; the review date is required when approving and can't be in the future; it takes a `suggested_classification` argument, labels the classification select with it, and requires an override reason when approving with any other classification; it takes an `evidence_summary_template` argument, won't approve a curation whose evidence summary is still that unchanged template, and saves an unchanged template as no summary), `EvidenceCreateForm` (attach a publication), `EvidenceTopLevelEditForm` / `EvidenceTopLevelEditFormSet` (inline status/inclusion editing from the curation detail page), and `EvidenceEditForm` (the full step-by-step evidence data entry form with cross-field validation).
 
 ### `interval.py`
 
@@ -64,7 +64,7 @@ Defines the `Interval` class, a small utility that represents a numeric interval
 
 ### `models.py`
 
-Defines the three core database models for the app. `Curation` tracks an allele or haplotype paired with a disease, manages lifecycle status transitions, stores taskforce review fields, and computes an aggregate score from its included evidence. Its `classification_display` property gives the taskforce classification's label, else the suggested classification's, else "No Classification Set", and `is_classification_suggested` says whether that label is only a suggestion. `is_classification_overridden` is true when the taskforce classification is set and differs from the suggestion, in which case `taskforce_override_reason` holds the taskforce's reason. `has_taskforce_feedback` is true when any taskforce review field is set, and `taskforce_display` gives the taskforce's name. `Demographic` holds the biogeographic population groups. `Evidence` stores all study-level data fields (typing method, p-value, effect size, cohort size, etc.) and exposes per-step score properties that feed into the HLA scoring framework; all three models use `simple_history` for change tracking.
+Defines the three core database models for the app. `Curation` tracks an allele or haplotype paired with a disease, manages lifecycle status transitions, stores taskforce review fields, and computes an aggregate score from its included evidence. `Curation.existing_pairs()` returns the root curations (not copies) of a given allele or haplotype and disease, with their evidence counts. Its `classification_display` property gives the taskforce classification's label, else the suggested classification's, else "No Classification Set", and `is_classification_suggested` says whether that label is only a suggestion. `is_classification_overridden` is true when the taskforce classification is set and differs from the suggestion, in which case `taskforce_override_reason` holds the taskforce's reason. `has_taskforce_feedback` is true when any taskforce review field is set, and `taskforce_display` gives the taskforce's name. `Demographic` holds the biogeographic population groups. `Evidence` stores all study-level data fields (typing method, p-value, effect size, cohort size, etc.) and exposes per-step score properties that feed into the HLA scoring framework; all three models use `simple_history` for change tracking.
 
 ### `score.py`
 
@@ -84,7 +84,7 @@ Full-page template for viewing a single historical change record on a curation. 
 
 ### `templates/curation/create.html`
 
-Full-page template for the "Add Curation" form. Renders radio inputs for curation type and searchable selects for allele/haplotype and disease, and includes JavaScript that shows or hides the allele and haplotype fields based on the selected curation type.
+Full-page template for the "Add Curation" form. Renders radio inputs for curation type and searchable selects for allele/haplotype and disease, and includes JavaScript that shows or hides the allele and haplotype fields based on the selected curation type. When the pair already has curations, it lists them in a warning box with their status and copies, and shows the confirmation checkbox when a second curation is allowed.
 
 ### `templates/curation/detail.html`
 
