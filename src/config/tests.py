@@ -1,10 +1,25 @@
 """Houses tests for the project's settings."""
 
 import importlib
+import os
 from types import ModuleType
 from unittest.mock import patch
 
 from django.test import SimpleTestCase
+
+
+def import_base_settings(environ: dict[str, str]) -> ModuleType:
+    """Import a fresh copy of the base settings module with extra environment variables.
+
+    Args:
+        environ: Environment variables to set while importing.
+
+    Returns:
+        The base settings module.
+    """
+    with patch("sentry_sdk.init"), patch.dict(os.environ, environ):
+        base = importlib.import_module("config.settings.base")
+        return importlib.reload(base)
 
 
 def import_prod_settings() -> ModuleType:
@@ -39,3 +54,13 @@ class ProdLoggingTest(SimpleTestCase):
     def test_log_file_settings_are_gone(self):
         self.assertFalse(hasattr(self.prod, "LOG_DIR"))
         self.assertFalse(hasattr(self.prod, "LOG_FILE"))
+
+
+class AlertEmailsSettingTest(SimpleTestCase):
+    def test_parses_comma_separated_addresses_with_spaces(self):
+        base = import_base_settings({"ALERT_EMAILS": " a@example.com, b@example.com ,"})
+        self.assertEqual(base.ALERT_EMAILS, ["a@example.com", "b@example.com"])
+
+    def test_is_empty_when_unset(self):
+        base = import_base_settings({"ALERT_EMAILS": ""})
+        self.assertEqual(base.ALERT_EMAILS, [])

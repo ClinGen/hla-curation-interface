@@ -130,6 +130,12 @@ workspace:
   ALERT_EMAILS=you@example.com
   ```
 
+- Send a test alert, and check that it arrives:
+
+  ```
+  just server-test-send-test-alert
+  ```
+
 To email people who haven't verified their address, such as curators, request
 production access for SES in the AWS console first.
 

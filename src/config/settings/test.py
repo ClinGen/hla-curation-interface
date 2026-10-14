@@ -8,6 +8,11 @@ from .dev import *  # ruff: ignore[undefined-local-with-import-star]
 # which pollute test output with urllib3/asyncio DEBUG logs when root is at DEBUG level.
 sentry_sdk.init()
 
+# Keep email in memory, in django.core.mail.outbox.
+MAILERS = {
+    "default": {"BACKEND": "django.core.mail.backends.locmem.EmailBackend"},
+}
+
 # Replace dev.py's console StreamHandler with a null handler so logs don't print to
 # stderr during test runs. pytest installs its own LogCaptureHandler on root alongside
 # this and shows captured logs only for failing tests. assertLogs() is unaffected: it
