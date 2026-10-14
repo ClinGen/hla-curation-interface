@@ -120,7 +120,7 @@ Partial that renders the taskforce's feedback on a curation as a Bulma message: 
 
 ### `templates/curation/partials/curation/detail_table.html`
 
-Partial that renders a summary table for a `Curation` object, showing its ID, allele or haplotype, disease, status badge, classification (via `partials/classification.html`), aggregate score, and timestamps, plus a "View History" button.
+Partial that renders a summary table for a `Curation` object, showing its allele or haplotype, disease, status badge, classification (via `partials/classification.html`), aggregate score, and timestamps, plus a "View History" button. It leaves out the ID, which every page that includes it shows in its breadcrumb and title.
 
 ### `templates/curation/partials/evidence/detail_table.html`
 

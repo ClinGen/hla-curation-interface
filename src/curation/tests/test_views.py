@@ -284,6 +284,20 @@ class CurationDetailTest(ProtectedViewTestMixin, TestCase):
         assert paragraph is not None
         self.assertEqual(paragraph.get_text(strip=True), "Replicated twice.")
 
+    def test_summary_table_has_no_id_row(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        labels = [
+            row.td.get_text(strip=True)
+            for row in soup.select(".table-container table tr")
+            if row.td
+        ]
+        self.assertIn("Allele", labels)
+        self.assertNotIn("HCI Curation ID", labels)
+        breadcrumb = soup.select_one(".breadcrumb")
+        assert breadcrumb is not None
+        self.assertIn("C000001 Details", breadcrumb.get_text(" ", strip=True))
+
     def test_shows_no_feedback_panel_without_feedback(self):
         response = self.client.get(self.url)
         self.assertNotContains(response, "Taskforce Review")
