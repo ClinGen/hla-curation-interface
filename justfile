@@ -420,11 +420,11 @@ alias sprre := server-prod-restore
 # List the database backups for the test server. ---------------------
 [group('server')]
 server-test-list-backups:
-    cd infra/ansible && uv run ansible test_server -i inventory.ini -m ansible.builtin.shell -a "cd ~/hla-curation-interface/src && ~/.local/bin/uv run manage.py listbackups"
+    cd infra/ansible && uv run ansible test_server -i inventory.ini -m ansible.builtin.shell -a "cd ~/hla-curation-interface/src && ~/.local/bin/uv run manage.py list_backups"
 alias stlb := server-test-list-backups
 
 # List the database backups for the prod server. ---------------------
 [group('server')]
 server-prod-list-backups:
-    cd infra/ansible && uv run ansible prod_server -i inventory.ini -m ansible.builtin.shell -a "cd ~/hla-curation-interface/src && ~/.local/bin/uv run manage.py listbackups"
+    cd infra/ansible && uv run ansible prod_server -i inventory.ini -m ansible.builtin.shell -a "cd ~/hla-curation-interface/src && ~/.local/bin/uv run manage.py list_backups"
 alias sprlb := server-prod-list-backups
