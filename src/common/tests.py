@@ -1,6 +1,7 @@
 """Houses code used commonly in tests."""
 
 import logging
+import os
 import re
 import sqlite3
 from contextlib import closing, contextmanager
@@ -529,3 +530,52 @@ class AdminBackupViewTest(
         self.assertContains(self.client.get(reverse("admin:index")), self.url)
         self.client.force_login(self.staff)
         self.assertNotContains(self.client.get(reverse("admin:index")), self.url)
+
+
+class ListBackupsCommandTest(TempBackupStorageMixin, TestCase):
+    """Tests list_backups, which finds backups stored under prefixes like daily/."""
+
+    def setUp(self):
+        self.use_temp_backup_storage()
+
+    def add_backup(self, name: str, modified: int) -> None:
+        """Write a fake backup file with the given modification time.
+
+        Args:
+            name: The backup's name, relative to the backup storage.
+            modified: The file's modification time, in seconds since the epoch.
+        """
+        path = self.backup_dir / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"backup")
+        os.utime(path, (modified, modified))
+
+    def list_backups(self) -> list[str]:
+        """Run list_backups.
+
+        Returns:
+            The lines it printed.
+        """
+        out = StringIO()
+        call_command("list_backups", stdout=out)
+        return out.getvalue().splitlines()
+
+    def test_lists_backups_under_prefixes_oldest_first(self):
+        self.add_backup("pre-deployment/hci-test-a-to-b.sqlite3.gz", 2_000_000_000)
+        self.add_backup("daily/hci-test-2026-10-14.sqlite3.gz", 1_900_000_000)
+        lines = self.list_backups()
+        self.assertEqual(
+            [line.split()[-1] for line in lines],
+            [
+                "daily/hci-test-2026-10-14.sqlite3.gz",
+                "pre-deployment/hci-test-a-to-b.sqlite3.gz",
+            ],
+        )
+
+    def test_skips_metadata_files(self):
+        self.add_backup("daily/hci-test.sqlite3.gz", 1_900_000_000)
+        self.add_backup("daily/hci-test.sqlite3.gz.metadata", 1_900_000_000)
+        self.assertEqual(len(self.list_backups()), 1)
+
+    def test_says_so_when_there_are_none(self):
+        self.assertEqual(self.list_backups(), ["No backups found."])

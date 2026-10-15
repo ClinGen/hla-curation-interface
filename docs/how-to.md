@@ -76,12 +76,13 @@ in a workspace, give that workspace's server its credentials:
   SUBDOMAIN=hci-test
   ```
 
-- Check that the server can reach the bucket. It should print an empty list, or the
-  backups taken so far, with no error:
+- Check that the server can reach the bucket. It should print "No backups found." or
+  the backups taken so far, with no error. Use `list_backups`, not django-dbbackup's
+  `listbackups`, which doesn't look under prefixes like `daily/`:
 
   ```
   cd ~/hla-curation-interface/src
-  ~/.local/bin/uv run manage.py listbackups
+  ~/.local/bin/uv run manage.py list_backups
   ```
 
 The weekly restore check in GitHub Actions reads prod backups with a separate, read-only
