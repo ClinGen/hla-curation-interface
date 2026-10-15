@@ -1,6 +1,7 @@
 *.db
 .env
 .env.*
+!.env.example
 coverage.xml
 firebase-account-key*
 inventory.ini

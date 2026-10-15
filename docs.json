@@ -1,5 +1,6 @@
 {
   "directories": [
+    "scripts",
     "src/allele",
     "src/auth_",
     "src/common",
