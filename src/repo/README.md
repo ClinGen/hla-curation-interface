@@ -76,7 +76,7 @@ The Bulma modal card that `evidence-modal.js` opens on the detail page. Its body
 
 ### `templates/repo/partials/evidence_table.html`
 
-The detail page's public evidence table, listing only the evidence in the `evidence` context variable (`public_evidence`): ID, publication with a PubMed linkout, and score. Each ID links to its evidence page. An eye icon before it loads that page's body into the evidence modal with `hx-get` and `hx-select`, and `ignoreTitle` keeps the evidence page's title out of the browser tab. It includes the modal.
+The detail page's public evidence table, listing only the evidence in the `evidence` context variable (`public_evidence`): ID, publication with a PubMed linkout, score, and details. Each ID links to its evidence page. An eye icon in the Details column loads that page's body into the evidence modal with `hx-get` and `hx-select`, and `ignoreTitle` keeps the evidence page's title out of the browser tab. It includes the modal.
 
 ### `templates/repo/partials/lineage.html`
 

@@ -1018,11 +1018,17 @@ class PublishedEvidenceDetailTest(TestCase):
         preview = soup.select_one("#evidence-table a.evidence-preview")
         assert preview is not None
         self.assertIsNotNone(preview.select_one("i.bi-eye"))
+        # The preview sits alone in the last column, apart from the ID link.
         cell = preview.find_parent("td")
         assert cell is not None
+        self.assertIsNone(cell.find_next_sibling("td"))
+        self.assertEqual(cell.find_all("a"), [preview])
+        link = soup.select_one("#evidence-table a.evidence-link")
+        assert link is not None
+        id_cell = link.find_parent("td")
+        assert id_cell is not None
         self.assertEqual(
-            [link["class"][0] for link in cell.find_all("a")],
-            ["evidence-preview", "evidence-link"],
+            [link["class"][0] for link in id_cell.find_all("a")], ["evidence-link"]
         )
         self.assertTrue(preview.has_attr("aria-label"))
         self.assertEqual(preview["href"], self.url)
@@ -1038,7 +1044,7 @@ class PublishedEvidenceDetailTest(TestCase):
         response = self.client.get(reverse("repo-detail", args=[self.curation.slug]))
         soup = BeautifulSoup(response.content, "html.parser")
         headers = [th.get_text(strip=True) for th in soup.select("#evidence-table th")]
-        self.assertEqual(headers, ["ID", "Publication", "Score"])
+        self.assertEqual(headers, ["ID", "Publication", "Score", "Details"])
 
 
 class ExcludedEvidenceTest(TestCase):

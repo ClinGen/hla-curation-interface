@@ -1,4 +1,4 @@
-{# The public evidence table on the HLArepo detail page, listing only evidence included in the score. Each ID links to its evidence page, and the eye icon before it previews that page in the evidence modal. #}
+{# The public evidence table on the HLArepo detail page, listing only evidence included in the score. Each ID links to its evidence page, and the eye icon in the Details column previews that page in the evidence modal. #}
 {% if evidence %}
     <h2 class="title is-5 mt-6">Evidence</h2>
     <div class="block table-container">
@@ -8,6 +8,7 @@
                 <th>ID</th>
                 <th>Publication</th>
                 <th>Score</th>
+                <th>Details</th>
             </tr>
             </thead>
             <tbody>
@@ -15,18 +16,6 @@
                 {% url 'repo-evidence' curation.slug item.slug as evidence_url %}
                 <tr>
                     <td>
-                        {# ignoreTitle keeps the evidence page's title out of the tab. #}
-                        <a href="{{ evidence_url }}"
-                           class="evidence-preview mr-2"
-                           hx-get="{{ evidence_url }}"
-                           hx-target="#evidence-modal-body"
-                           hx-select="#evidence-body"
-                           hx-swap="innerHTML ignoreTitle:true"
-                           aria-label="Preview the {{ item.slug }} scoring matrix"
-                           data-tippy-content="Preview the scoring matrix"
-                           data-evidence-modal-title="{{ item.slug }} Scoring Matrix">
-                            <i class="bi bi-eye" aria-hidden="true"></i>
-                        </a>
                         <a href="{{ evidence_url }}" class="evidence-link">{{ item.slug }}</a>
                     </td>
                     <td>
@@ -40,6 +29,20 @@
                         {% endif %}
                     </td>
                     <td>{{ item.score }}</td>
+                    <td>
+                        {# ignoreTitle keeps the evidence page's title out of the tab. #}
+                        <a href="{{ evidence_url }}"
+                           class="evidence-preview"
+                           hx-get="{{ evidence_url }}"
+                           hx-target="#evidence-modal-body"
+                           hx-select="#evidence-body"
+                           hx-swap="innerHTML ignoreTitle:true"
+                           aria-label="Preview the {{ item.slug }} scoring matrix"
+                           data-tippy-content="Preview the scoring matrix"
+                           data-evidence-modal-title="{{ item.slug }} Scoring Matrix">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
+                        </a>
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
