@@ -54,16 +54,32 @@ jobs:
         env:
           BACKUP_KEY: ${{ steps.newest.outputs.key }}
         run: 'uv run manage.py dbrestore --noinput --uncompress -i "$BACKUP_KEY"'
+      # Don't check for any particular rows: prod's data can be anything. But every
+      # database Django has migrated records its migrations, and without this check an
+      # empty backup would pass, since the next step would build it from scratch.
+      - name: "Check that the restored database is intact and was already migrated"
+        working-directory: "src"
+        run: |
+          uv run python - <<'EOF'
+          import sqlite3
+          db = sqlite3.connect("hci.db")
+          integrity = db.execute("PRAGMA integrity_check").fetchone()[0]
+          assert integrity == "ok", f"The integrity check failed: {integrity}"
+          [migrations] = db.execute("SELECT COUNT(*) FROM django_migrations").fetchone()
+          assert migrations > 0, "The restored database has no applied migrations."
+          print(f"The restored database is intact and has {migrations} migrations.")
+          EOF
       # Apply rather than only check migrations: a deploy since the backup may have
       # added some, and restoring on a server runs migrate too.
       - name: "Apply main's migrations to the restored database"
         working-directory: "src"
         run: "uv run manage.py migrate && uv run manage.py check"
-      - name: "Check that the restored database serves the published curations"
+      # Any number of curations, even none, is fine.
+      - name: "Check that the site serves the restored database's curations"
         working-directory: "src"
         run: |
           uv run gunicorn config.wsgi:application --bind 127.0.0.1:8000 --daemon
           curl --fail --silent --show-error --retry 10 --retry-connrefused --retry-delay 1 \
             --header "Host: hci.clinicalgenome.org" \
             http://127.0.0.1:8000/repo/download/all.json \
-            | jq --exit-status '.curations | length > 0'
+            | jq --exit-status '.curations | type == "array"'

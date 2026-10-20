@@ -99,10 +99,12 @@ To take a backup right away, run `sudo systemctl start hci-backup.service`.
 
 Every Monday, the restore check workflow in GitHub Actions
 (`.github/workflows/restore-check.yml`) restores the newest `daily/` prod backup on a
-GitHub runner, applies `main`'s migrations, and checks that the site serves the
-published curations. It fails if the newest backup is more than 48 hours old, which
-catches a timer that stopped. GitHub emails you when it fails. To run it now, open the
-workflow on GitHub's Actions tab and choose Run workflow.
+GitHub runner. It checks that the restored database is intact and was already migrated,
+applies `main`'s migrations, and checks that the site serves the curations download. It
+doesn't assume anything about prod's data, so it passes even with no curations. It fails
+if the newest backup is more than 48 hours old, which catches a timer that stopped.
+GitHub emails you when it fails. To run it now, run `gh workflow run restore-check.yml`,
+or open the workflow on GitHub's Actions tab and choose Run workflow.
 
 The restore check reads prod backups with a separate, read-only user. In the `prod` workspace, read `backup_bucket_name`, `backup_reader_access_key_id`,
 and `backup_reader_secret_access_key`, then add them to the repository's GitHub secrets
