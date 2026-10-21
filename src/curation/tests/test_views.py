@@ -19,6 +19,7 @@ from common.tests import (
 )
 from curation.constants.models.common import Status
 from curation.constants.models.curation import (
+    CURATION_TYPE_CHOICES,
     HLA_CURATION_TASKFORCE_ID,
     TASKFORCE_CHOICES,
     Classification,
@@ -219,7 +220,10 @@ class CurationScoringSummaryTest(ProtectedViewTestMixin, TestCase):
         subject = soup.find(id="scoring-summary-subject")
         disease = soup.find(id="scoring-summary-disease")
         assert subject_type and subject and disease
-        self.assertEqual(subject_type.get_text(strip=True), "Allele")
+        self.assertEqual(
+            subject_type.get_text(strip=True),
+            CURATION_TYPE_CHOICES[CurationTypes.ALLELE],
+        )
         self.assertIn(f"({curation.allele.car_id})", subject.get_text())
         self.assertIn(f"({curation.disease.mondo_id})", disease.get_text())
 

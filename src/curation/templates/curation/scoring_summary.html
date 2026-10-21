@@ -47,7 +47,7 @@
                                 <td class="is-number">
                                     {% if row.points is None %}
                                         &ndash;
-                                    {% elif category.kind == "multiplier" %}
+                                    {% elif category.is_multiplier %}
                                         &times;{{ row.points|stringformat:"g" }}
                                     {% else %}
                                         {{ row.points|stringformat:"g" }}
@@ -63,7 +63,7 @@
                                     </td>
                                 {% endif %}
                                 <td class="is-number is-count">{{ row.count }}</td>
-                                {% if category.kind == "points" %}
+                                {% if category.is_points %}
                                     {% if forloop.first %}
                                         <td rowspan="{{ step.rows|length }}" class="is-number is-points">
                                             {{ step.total|stringformat:"g" }}
@@ -76,7 +76,7 @@
                                     {% endif %}
                                 {% elif forloop.first and forloop.parentloop.first %}
                                     <td rowspan="{{ category.num_rows }}" colspan="2" class="is-points is-note">
-                                        {% if category.kind == "design" %}
+                                        {% if category.is_design %}
                                             No points
                                         {% else %}
                                             {{ category.note }}
