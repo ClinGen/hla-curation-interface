@@ -1,0 +1,16 @@
+{% load static %}
+{# A bare page for one table, so people can print it or save it as a PDF. #}
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <meta name="description" content="{% block description %}{% endblock %}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <link type="text/css" rel="stylesheet" href="{% static 'hci/css/custom.css' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'hci/img/favicon-32x32.png' %}">
+</head>
+<body class="scoring-summary-page">
+{% block main %}{% endblock %}
+</body>
+</html>

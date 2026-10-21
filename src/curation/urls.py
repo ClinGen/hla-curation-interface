@@ -15,6 +15,16 @@ urlpatterns = [
         name="curation-detail",
     ),
     path(
+        "<slug:curation_slug>/scoring-summary",
+        views.CurationScoringSummary.as_view(),
+        name="curation-scoring-summary",
+    ),
+    path(
+        "<slug:curation_slug>/evidence-scoring-summary",
+        views.CurationEvidenceScoringSummary.as_view(),
+        name="curation-evidence-scoring-summary",
+    ),
+    path(
         "list",
         CurationList.as_view(),
         name="curation-list",

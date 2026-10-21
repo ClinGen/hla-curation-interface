@@ -1,6 +1,6 @@
 # `templates`
 
-This directory contains the top-level Django templates shared across the entire application. It includes HTTP error pages, the curator layout (`layouts/base.html`), the public HLArepo layout (`layouts/public.html`), reusable UI partials included by those layouts, and a custom django-tables2 rendering template. App-specific templates live in their respective app directories.
+This directory contains the top-level Django templates shared across the entire application. It includes HTTP error pages, the curator layout (`layouts/base.html`), the public HLArepo layout (`layouts/public.html`), a bare print layout (`layouts/print.html`), reusable UI partials included by those layouts, and a custom django-tables2 rendering template. App-specific templates live in their respective app directories.
 
 ### `400.html`
 
@@ -29,6 +29,10 @@ The curator layout that every HCI page extends. It loads static assets (Bulma CS
 ### `layouts/public.html`
 
 The public layout that HLArepo pages extend. It loads the same assets as `layouts/base.html` minus Choices.js, which no public page uses, and its title prefix is "HLArepo". It includes the environment banner, the public navbar, flash messages, the public footer, and the confirm modal, but not the curator navbar or the account activation notice, so a visitor never sees a link that needs a login.
+
+### `layouts/print.html`
+
+A bare page for one printable table, with no navbar, footer, or Bulma: only `custom.css` and a favicon, with `title`, `description`, and `main` blocks. The scoring summary and evidence scoring summary pages extend it so people can print them or save them as PDFs.
 
 ### `partials/account_activation.html`
 

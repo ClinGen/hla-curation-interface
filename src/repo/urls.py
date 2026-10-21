@@ -19,6 +19,16 @@ urlpatterns = [
         name="repo-detail",
     ),
     path(
+        "<slug:curation_slug>/scoring-summary",
+        views.PublishedScoringSummary.as_view(),
+        name="repo-scoring-summary",
+    ),
+    path(
+        "<slug:curation_slug>/evidence-scoring-summary",
+        views.PublishedEvidenceScoringSummary.as_view(),
+        name="repo-evidence-scoring-summary",
+    ),
+    path(
         "<slug:curation_slug>/download.json",
         views.download_single_json,
         name="repo-download-single",

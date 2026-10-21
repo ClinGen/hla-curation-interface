@@ -70,6 +70,10 @@ Defines the three core database models for the app. `Curation` tracks an allele 
 
 Implements the per-step point-calculation functions (`get_step_1a_points` through `get_step_6b_multiplier`) that are called by the `Evidence` model's score properties. Each function takes an `Evidence` instance and returns the numeric points (or `None` if insufficient data) for its corresponding framework step.
 
+### `scoring_summary.py`
+
+Defines `build_evidence_scoring_summary`, which returns one row per included evidence item with its PMID, its points for each scoring step (`None` when the step has no value), and its score, under the same header fields as the scoring summary. Also defines `build_scoring_summary`, which builds the scoring summary table for a curation's included evidence, laid out like the taskforce's spreadsheet. Its steps and labels come from `FRAMEWORK` in `constants/views.py`, the scoring matrix's rows, grouped into the spreadsheet's evidence categories, with each interval shown as a threshold (such as `<5E-8` or `1000–2499`) formatted with `repo.serializers.format_decimal`. The header names the allele (with its CAR ID) or haplotype and the disease (with its Mondo ID). "Publications scored" counts distinct publications, since one publication can have more than one evidence item. For each framework category it counts the evidence in each row (matched by the step's points, or by GWAS for study design), totals each step's points before multipliers, and totals the points each category counts toward the score after each publication's 6A and 6B multipliers. The multipliers note counts the publications multiplied by 1 and lists the PMIDs of the rest, each once. The total score equals `Curation.score`.
+
 ### `summary.py`
 
 Defines `build_evidence_summary`, which writes the taskforce's evidence summary template for a curation. It fills in what the curation knows (allele or haplotype, disease, Mondo ID, included publications and PMIDs, GWAS and case-control counts, zygosity, typing resolution, significance, score, and classification) and leaves brackets around the parts the reviewer must write, such as which publication first reported the pair. The review form starts with this text when a curation has no evidence summary yet.
@@ -98,6 +102,10 @@ Full-page template for the curation-level evidence editing view. Renders the cur
 
 Reusable partial that renders the inline evidence formset table on the curation edit-evidence page, including columns for ID, publication, needs-review flag, editable status and inclusion fields, and the computed score for each evidence item.
 
+### `templates/curation/evidence_scoring_summary.html`
+
+A standalone page, extending `layouts/print.html`, with only the evidence scoring summary (from `build_evidence_scoring_summary`), laid out like the taskforce's evidence scoring spreadsheet: an "Evidence scoring summary" title over the HLA-disease pair (`partials/scoring_summary_pair.html`), then a table with a PMID column, one column per scoring step, and a blue Total column. The HCI and HLArepo evidence scoring summary views both render it, with `curation` and `summary` in the context.
+
 ### `templates/curation/history.html`
 
 Full-page template for the curation history list view. Renders breadcrumb navigation and delegates the history table body to the shared `common/history/history_body.html` partial.
@@ -114,17 +122,25 @@ Partial that renders the context-sensitive action buttons on the curation detail
 
 Partial that renders a curation's `classification_display`, followed by a light "Suggested" tag when the label is the suggested classification rather than the taskforce's. Expects `curation` in the context. Used by the curation detail table, the HLArepo summary, and the publication detail page.
 
+### `templates/curation/partials/scoring_summary_pair.html`
+
+Partial for the header of the scoring summary pages: the allele (with its CAR ID) or haplotype and the disease (with its Mondo ID), as a definition list. Expects `summary` in the context.
+
 ### `templates/curation/partials/taskforce_review.html`
 
 Partial that renders the taskforce's feedback on a curation as a Bulma message: "Sent Back for Revision" (red, `is-danger`) when the curation is in progress, otherwise "Taskforce Review" (neutral), or a `heading` passed by the caller. Shows the taskforce, review date, classification, suggested classification override reason, evidence summary, and additional notes, each under a small heading, skipping empty ones. Expects `curation` in the context.
 
 ### `templates/curation/partials/curation/detail_table.html`
 
-Partial that renders a summary table for a `Curation` object, showing its allele or haplotype, disease, status badge, classification (via `partials/classification.html`), aggregate score, and timestamps, plus a "View History" button. It leaves out the ID, which every page that includes it shows in its breadcrumb and title.
+Partial that renders a summary table for a `Curation` object, showing its allele or haplotype, disease, status badge, classification (via `partials/classification.html`), aggregate score, and timestamps, plus a "View History" button. The Score row links to the scoring summary and the evidence scoring summary with the linkout include, which opens them in new tabs. It leaves out the ID, which every page that includes it shows in its breadcrumb and title.
 
 ### `templates/curation/partials/evidence/detail_table.html`
 
 Partial that renders a read-only summary table listing all evidence items belonging to a curation, with columns for ID, publication, needs-review flag, status, inclusion checkbox, and score. Only HCI pages use it; HLArepo has its own public evidence table.
+
+### `templates/curation/scoring_summary.html`
+
+A standalone page, extending `layouts/print.html`, with only the scoring summary and the scoring matrix's footnotes (from `scoring_summary.py`), styled like the taskforce's spreadsheet by the `.scoring-summary` styles in `custom.css`, so people can print it or save it as a PDF. The HCI and HLArepo scoring summary views both render it, with `curation` and `summary` in the context.
 
 ### `templates/curation/review.html`
 
@@ -194,6 +210,10 @@ Tests for the data migrations. They use `MigrationExecutor` to migrate between m
 
 Integration tests for the `Curation` and `Evidence` models. Tests cover default field values, curation status transitions, `CurationTable` status tags, score calculation for every scoring step (including GWAS vs. non-GWAS variants and the p-value comparator edge case), suggested classification thresholds, curation copying, and validation rules for publication inclusion, allele resolution minimums, and the significant association/p-value consistency check.
 
+### `tests/test_scoring_summary.py`
+
+Integration tests for `build_evidence_scoring_summary` (header, one column per scoring step, one row per included evidence item, and each row's points and score) and `build_scoring_summary`, covering the header values (allele or haplotype, CAR ID, Mondo ID), the scoring matrix's labels, row counts, step totals, multiplier-weighted category totals, the total matching `Curation.score`, excluded evidence, the threshold formats, step 3C's maximum, and the multipliers note.
+
 ### `tests/test_summary.py`
 
 Integration tests for `build_evidence_summary`, covering each filled-in value, its singular, plural, and partial wording, haplotype wording, the parts left in brackets, and balanced brackets.
@@ -208,7 +228,7 @@ Integration tests for all curation and evidence views, covering HTTP status code
 
 ### `urls.py`
 
-Defines the URL patterns for the curation app, mapping slug-based paths to all curation and evidence views: create, detail, list, edit-evidence, submit, review, publish, copy, evidence create/detail/edit, and history/change views for both curations and evidence items.
+Defines the URL patterns for the curation app, mapping slug-based paths to all curation and evidence views: create, detail, scoring summary, evidence scoring summary, list, edit-evidence, submit, review, publish, copy, evidence create/detail/edit, and history/change views for both curations and evidence items.
 
 ### `validators/__init__.py`
 
@@ -236,4 +256,4 @@ Defines view-layer validation helpers called from `EvidenceEdit.form_valid()` af
 
 ### `views.py`
 
-Implements all view classes and functions for the curation app: `CurationCreate`, `CurationDetail`, `CurationList`, `curation_edit_evidence`, `curation_submit`, `curation_review`, `curation_publish`, `curation_copy`, `EvidenceCreate`, `EvidenceDetail`, `EvidenceEdit`, `CurationHistory`, `CurationChange`, `EvidenceHistory`, and `EvidenceChange`. Views enforce authentication and (where applicable) reviewer permissions, respect the curation locked state, and handle status transitions atomically.
+Implements all view classes and functions for the curation app: `CurationCreate`, `CurationDetail`, `CurationScoringSummary`, `CurationEvidenceScoringSummary`, `CurationList`, `curation_edit_evidence`, `curation_submit`, `curation_review`, `curation_publish`, `curation_copy`, `EvidenceCreate`, `EvidenceDetail`, `EvidenceEdit`, `CurationHistory`, `CurationChange`, `EvidenceHistory`, and `EvidenceChange`. Views enforce authentication and (where applicable) reviewer permissions, respect the curation locked state, and handle status transitions atomically.

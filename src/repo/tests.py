@@ -458,6 +458,84 @@ class PublishedCurationDetailViewTest(TestCase):
         self.assertContains(response, "</a>)")
 
 
+class PublishedScoringSummaryTest(TestCase):
+    fixtures = [
+        "test_alleles.json",
+        "test_diseases.json",
+        "test_publications.json",
+        "test_curations.json",
+        "test_evidence.json",
+    ]
+
+    def setUp(self):
+        self.curation = Curation.objects.get(slug="C000001")
+        Curation.objects.filter(pk=self.curation.pk).update(status=Status.PUBLISHED)
+        user = User.objects.create_user(username="publisher")
+        PublishedCuration.objects.create(curation=self.curation, published_by=user)
+        self.curation.evidence.update(is_included=True)  # type: ignore
+        self.url = reverse("repo-scoring-summary", args=[self.curation.slug])
+
+    def test_shows_the_summary_for_a_published_curation(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "curation/scoring_summary.html")
+        self.assertTemplateNotUsed(response, "layouts/public.html")
+        self.assertContains(response, self.curation.disease.name)
+        soup = BeautifulSoup(response.content, "html.parser")
+        publications = soup.find(id="scoring-summary-publications")
+        assert publications is not None
+        self.assertEqual(
+            publications.get_text(strip=True),
+            str(self.curation.evidence.values("publication").distinct().count()),  # type: ignore
+        )
+
+    def test_unpublished_curation_is_404(self):
+        PublishedCuration.objects.filter(curation=self.curation).delete()
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+        url = reverse("repo-evidence-scoring-summary", args=[self.curation.slug])
+        self.assertEqual(self.client.get(url).status_code, 404)
+
+    def test_shows_the_evidence_scoring_summary(self):
+        url = reverse("repo-evidence-scoring-summary", args=[self.curation.slug])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "curation/evidence_scoring_summary.html")
+        self.assertTemplateNotUsed(response, "layouts/public.html")
+        evidence = self.curation.evidence.get()  # type: ignore
+        self.assertContains(response, evidence.publication.pubmed_id)
+
+    def test_score_row_links_the_evidence_scoring_summary(self):
+        response = self.client.get(reverse("repo-detail", args=[self.curation.slug]))
+        soup = BeautifulSoup(response.content, "html.parser")
+        url = reverse("repo-evidence-scoring-summary", args=[self.curation.slug])
+        link = soup.find("a", href=url)
+        assert link is not None
+        self.assertEqual(link["target"], "_blank")
+        row = link.find_parent("tr")
+        assert row is not None
+        self.assertEqual(row.td.get_text(strip=True), "Score")  # type: ignore
+
+    def test_detail_page_shows_the_score_with_the_link(self):
+        response = self.client.get(reverse("repo-detail", args=[self.curation.slug]))
+        soup = BeautifulSoup(response.content, "html.parser")
+        link = soup.find("a", href=self.url)
+        assert link is not None
+        row = link.find_parent("tr")
+        assert row is not None
+        label, value = row.find_all("td")
+        self.assertEqual(label.get_text(strip=True), "Score")
+        self.assertIn(str(self.curation.score), value.get_text())
+
+    def test_detail_page_links_it_in_a_new_tab(self):
+        response = self.client.get(reverse("repo-detail", args=[self.curation.slug]))
+        soup = BeautifulSoup(response.content, "html.parser")
+        link = soup.find("a", href=self.url)
+        assert link is not None
+        self.assertEqual(link["target"], "_blank")
+        self.assertIsNotNone(link.find("i", class_="bi-box-arrow-up-right"))
+        self.assertNotIn("button", link.get("class") or "")
+
+
 class JSONDownloadViewTest(TestCase):
     fixtures = ["test_alleles.json", "test_diseases.json", "test_haplotypes.json"]
 

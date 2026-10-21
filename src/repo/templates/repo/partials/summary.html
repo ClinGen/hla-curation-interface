@@ -45,6 +45,16 @@
             <td>{% include "curation/partials/classification.html" %}</td>
         </tr>
         <tr>
+            <td>Score</td>
+            <td>
+                {{ curation.score }}
+                {% url "repo-scoring-summary" curation.slug as scoring_summary_url %}
+                {% url "repo-evidence-scoring-summary" curation.slug as evidence_scoring_summary_url %}
+                ({% include "common/linkout.html" with url=scoring_summary_url text="Scoring Summary" %},
+                {% include "common/linkout.html" with url=evidence_scoring_summary_url text="Evidence Scoring Summary" %})
+            </td>
+        </tr>
+        <tr>
             <td>Taskforce</td>
             <td>{{ curation.taskforce_display|default:"------" }}</td>
         </tr>

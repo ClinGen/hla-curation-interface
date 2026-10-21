@@ -1,0 +1,111 @@
+{% extends "layouts/print.html" %}
+{% block title %}{{ curation.slug }} Scoring Summary{% endblock %}
+{% block description %}The scoring summary for {{ curation.slug }}.{% endblock %}
+{% block main %}
+<div class="scoring-summary">
+    <h2 class="scoring-summary-title">Scoring summary</h2>
+    <div class="scoring-summary-meta">
+        {% include "curation/partials/scoring_summary_pair.html" %}
+        <dl>
+            <dt>Publications scored</dt>
+            <dd id="scoring-summary-publications">{{ summary.num_publications }}</dd>
+        </dl>
+    </div>
+    <div class="scoring-summary-scroll">
+        <table id="scoring-summary-table">
+            <thead>
+                <tr>
+                    <th colspan="3"></th>
+                    <th colspan="3">Framework</th>
+                    <th colspan="2" class="is-points">Points</th>
+                </tr>
+                <tr>
+                    <th>Evidence category</th>
+                    <th>Scoring step</th>
+                    <th>Category (GWAS / non-GWAS)</th>
+                    <th>Points</th>
+                    <th>Max</th>
+                    <th>Count</th>
+                    <th class="is-points">Total</th>
+                    <th class="is-points">Counted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in summary.categories %}
+                    {% for step in category.steps %}
+                        {% for row in step.rows %}
+                            <tr>
+                                {% if forloop.first and forloop.parentloop.first %}
+                                    <th rowspan="{{ category.num_rows }}" class="is-category">
+                                        {{ category.name }}
+                                    </th>
+                                {% endif %}
+                                {% if forloop.first %}
+                                    <td rowspan="{{ step.rows|length }}">{{ step.label }}</td>
+                                {% endif %}
+                                <td>{{ row.label }}</td>
+                                <td class="is-number">
+                                    {% if row.points is None %}
+                                        &ndash;
+                                    {% elif category.kind == "multiplier" %}
+                                        &times;{{ row.points|stringformat:"g" }}
+                                    {% else %}
+                                        {{ row.points|stringformat:"g" }}
+                                    {% endif %}
+                                </td>
+                                {% if forloop.first %}
+                                    <td rowspan="{{ step.rows|length }}" class="is-number">
+                                        {% if step.max_points is None %}
+                                            &ndash;
+                                        {% else %}
+                                            {{ step.max_points|stringformat:"g" }}
+                                        {% endif %}
+                                    </td>
+                                {% endif %}
+                                <td class="is-number is-count">{{ row.count }}</td>
+                                {% if category.kind == "points" %}
+                                    {% if forloop.first %}
+                                        <td rowspan="{{ step.rows|length }}" class="is-number is-points">
+                                            {{ step.total|stringformat:"g" }}
+                                        </td>
+                                    {% endif %}
+                                    {% if forloop.first and forloop.parentloop.first %}
+                                        <td rowspan="{{ category.num_rows }}" class="is-number is-points">
+                                            {{ category.counted|stringformat:"g" }}
+                                        </td>
+                                    {% endif %}
+                                {% elif forloop.first and forloop.parentloop.first %}
+                                    <td rowspan="{{ category.num_rows }}" colspan="2" class="is-points is-note">
+                                        {% if category.kind == "design" %}
+                                            No points
+                                        {% else %}
+                                            {{ category.note }}
+                                        {% endif %}
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="6"></td>
+                    <th>Total score</th>
+                    <td id="scoring-summary-total" class="is-number is-points">
+                        {{ summary.total_score|stringformat:"g" }}
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    {# The same notes as the scoring matrix (evidence/partials/score.html). #}
+    <div class="scoring-summary-notes">
+        <p>*OR (Odds Ratio), RR (Relative Risk), CI (Confidence Interval).</p>
+        <p>
+            *Step 3C can award points for both categories (OR/RR/Beta and CI), granting
+            a total of up to 2.
+        </p>
+    </div>
+</div>
+{% endblock %}

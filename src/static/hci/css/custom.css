@@ -56,3 +56,133 @@
   font-family: var(--bulma-family-code);
   white-space: pre;
 }
+
+/* The scoring summary page has no layout or Bulma, so people can print it or save
+   it as a PDF. It copies the taskforce's spreadsheet, so it sets its own colors. */
+.scoring-summary-page {
+  background-color: white;
+  margin: 1rem;
+}
+
+.scoring-summary-scroll {
+  overflow-x: auto;
+}
+
+@media print {
+  .scoring-summary-page {
+    margin: 0;
+  }
+
+  /* Browsers leave out background colors when printing unless asked. */
+  .scoring-summary {
+    print-color-adjust: exact;
+  }
+}
+
+.scoring-summary {
+  background-color: white;
+  color: black;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.5rem 0.5rem;
+}
+
+.scoring-summary-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.scoring-summary-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.scoring-summary-meta dl {
+  display: grid;
+  margin: 0;
+  gap: 0 2rem;
+  grid-template-columns: auto auto;
+}
+
+.scoring-summary-meta dt {
+  font-weight: bold;
+}
+
+.scoring-summary-meta dd {
+  margin: 0;
+}
+
+.scoring-summary table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.scoring-summary th,
+.scoring-summary td {
+  border: 1px solid #b7b7b7;
+  padding: 0.1rem 0.3rem;
+  vertical-align: middle;
+}
+
+.scoring-summary thead th {
+  background-color: #e0e0e0;
+  font-weight: bold;
+  text-align: center;
+}
+
+.scoring-summary th.is-category {
+  background-color: #eeeeee;
+  font-weight: bold;
+  text-align: left;
+}
+
+.scoring-summary-notes {
+  margin-top: 0.5rem;
+}
+
+.scoring-summary-notes p {
+  margin: 0;
+}
+
+/* Like the spreadsheet, the evidence scoring summary's step columns are about as
+   wide as each other. A column still grows to fit its heading. */
+#evidence-scoring-summary-table .is-step {
+  width: 6%;
+}
+
+.scoring-summary thead th.is-bottom {
+  vertical-align: bottom;
+}
+
+.scoring-summary .is-number {
+  text-align: center;
+}
+
+.scoring-summary .is-count {
+  min-width: 4rem;
+}
+
+.scoring-summary thead th.is-points,
+.scoring-summary .is-points {
+  background-color: #dbe8f5;
+}
+
+.scoring-summary .is-note {
+  color: #777777;
+  font-style: italic;
+  text-align: center;
+}
+
+.scoring-summary tfoot td,
+.scoring-summary tfoot th {
+  background-color: #e0e0e0;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.scoring-summary tfoot td.is-points {
+  background-color: #dbe8f5;
+}

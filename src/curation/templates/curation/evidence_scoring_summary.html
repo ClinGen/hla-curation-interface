@@ -1,0 +1,49 @@
+{% extends "layouts/print.html" %}
+{% block title %}{{ curation.slug }} Evidence Scoring Summary{% endblock %}
+{% block description %}Each evidence item's points for {{ curation.slug }}.{% endblock %}
+{% block main %}
+{# Laid out like the taskforce's evidence scoring spreadsheet. #}
+<div class="scoring-summary">
+    <h2 class="scoring-summary-title">Evidence scoring summary</h2>
+    <div class="scoring-summary-meta">
+        {% include "curation/partials/scoring_summary_pair.html" %}
+    </div>
+    <div class="scoring-summary-scroll">
+        <table id="evidence-scoring-summary-table">
+            <thead>
+                <tr>
+                    <th rowspan="2" class="is-bottom">PMID</th>
+                    <th colspan="{{ summary.columns|length }}">
+                        Scoring steps based on the HLA Curation Framework
+                    </th>
+                    <th rowspan="2" class="is-points is-bottom">Total</th>
+                </tr>
+                <tr>
+                    {% for column in summary.columns %}
+                        <th class="is-step">{{ column }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in summary.rows %}
+                    <tr>
+                        <td class="is-number">{{ row.pmid }}</td>
+                        {% for points in row.points %}
+                            <td class="is-number">
+                                {% if points is None %}&ndash;{% else %}{{ points|stringformat:"g" }}{% endif %}
+                            </td>
+                        {% endfor %}
+                        <td class="is-number is-points">{{ row.total|stringformat:"g" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="{{ summary.columns|length|add:2 }}" class="is-note">
+                            No evidence is included in the score.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

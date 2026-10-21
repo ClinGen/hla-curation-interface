@@ -23,6 +23,10 @@ from common.views import SearchListView
 from curation.constants.models.common import Status
 from curation.constants.views import FRAMEWORK
 from curation.models import Evidence
+from curation.scoring_summary import (
+    build_evidence_scoring_summary,
+    build_scoring_summary,
+)
 from repo.lineage import build_lineage
 from repo.models import PublishedCuration
 from repo.serializers import (
@@ -118,6 +122,36 @@ class PublishedCurationDetail(DetailView):
         context["evidence"] = public_evidence(self.object.curation)
         context["lineage"] = build_lineage(self.object)
         return context
+
+
+class PublishedScoringSummary(DetailView):
+    model = PublishedCuration
+    template_name = "curation/scoring_summary.html"
+    build_summary = staticmethod(build_scoring_summary)
+
+    def get_object(self, queryset: QuerySet[Any] | None = None) -> PublishedCuration:  # ruff: ignore[unused-method-argument]
+        return get_object_or_404(
+            PublishedCuration.objects.select_related(
+                "curation__allele", "curation__haplotype", "curation__disease"
+            ),
+            curation__slug=self.kwargs["curation_slug"],
+        )
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        """Adds the curation and its scoring summary.
+
+        Returns:
+            Context dict with curation and summary keys added.
+        """
+        context = super().get_context_data(**kwargs)
+        context["curation"] = self.object.curation
+        context["summary"] = self.build_summary(self.object.curation)
+        return context
+
+
+class PublishedEvidenceScoringSummary(PublishedScoringSummary):
+    template_name = "curation/evidence_scoring_summary.html"
+    build_summary = staticmethod(build_evidence_scoring_summary)
 
 
 class PublishedEvidenceDetail(DetailView):
