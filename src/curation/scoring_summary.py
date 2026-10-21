@@ -9,8 +9,16 @@ count toward the score after each publication's multipliers.
 from dataclasses import dataclass, field
 from typing import Any, cast
 
-from curation.constants.models.curation import CurationTypes
-from curation.constants.views import FRAMEWORK
+from curation.constants.models.curation import CURATION_TYPE_CHOICES, CurationTypes
+from curation.constants.scoring_summary import (
+    EVIDENCE_CATEGORIES,
+    EVIDENCE_COLUMN_CATEGORIES,
+    MULTIPLIER_NOTE,
+    STUDY_DESIGN_CATEGORY,
+    STUDY_DESIGN_STEP,
+    SummaryKind,
+)
+from curation.constants.views import FRAMEWORK, GWAS_LABELS
 from curation.interval import Interval
 from curation.models import Curation, Evidence
 from repo.serializers import format_decimal
@@ -36,32 +44,23 @@ class _StepSpec:
 class _CategorySpec:
     name: str
     steps: tuple[_StepSpec, ...]
-    kind: str = "points"  # "design", "points", or "multiplier"
+    kind: str = SummaryKind.POINTS
 
 
-# The scoring framework's steps, grouped into the spreadsheet's evidence categories
-# by the start of their score attribute's name.
-_EVIDENCE_CATEGORIES = {
-    "score_step_1": "Allele / haplotype",
-    "score_step_2": "Typing method",
-    "score_step_3": "Statistical evidence",
-    "score_step_4": "Cohort",
-    "score_step_5": "Phenotype",
-    "score_step_6": "Multipliers",
-}
+_GWAS_LABEL, _NON_GWAS_LABEL = GWAS_LABELS
 
 _STUDY_DESIGN = _CategorySpec(
-    "Study design",
+    STUDY_DESIGN_CATEGORY,
     (
         _StepSpec(
-            "Sets thresholds used in 3A and 4",
+            STUDY_DESIGN_STEP,
             (
-                _RowSpec("GWAS", "is_gwas", value=True),
-                _RowSpec("Non-GWAS", "is_gwas", value=False),
+                _RowSpec(_GWAS_LABEL, "is_gwas", value=True),
+                _RowSpec(_NON_GWAS_LABEL, "is_gwas", value=False),
             ),
         ),
     ),
-    kind="design",
+    kind=SummaryKind.DESIGN,
 )
 
 
@@ -142,24 +141,18 @@ def _framework() -> tuple[_CategorySpec, ...]:
         if row["points"] == "":
             continue
         steps[-1][1].append(_RowSpec(_category_label(row), row["score"], row["points"]))
-    categories: dict[str, list[_StepSpec]] = {}
+    categories: dict[tuple[str, str], list[_StepSpec]] = {}
     for label, rows in steps:
-        name = _EVIDENCE_CATEGORIES[rows[0].attr[: len("score_step_1")]]
-        is_multiplier = name == _EVIDENCE_CATEGORIES["score_step_6"]
-        categories.setdefault(name, []).append(
+        name, kind = EVIDENCE_CATEGORIES[rows[0].attr[: len("score_step_1")]]
+        is_multiplier = kind == SummaryKind.MULTIPLIER
+        categories.setdefault((name, kind), []).append(
             _StepSpec(label, tuple(rows), None if is_multiplier else _max_points(rows))
         )
     return (
         _STUDY_DESIGN,
         *(
-            _CategorySpec(
-                name,
-                tuple(category_steps),
-                "multiplier"
-                if name == _EVIDENCE_CATEGORIES["score_step_6"]
-                else "points",
-            )
-            for name, category_steps in categories.items()
+            _CategorySpec(name, tuple(category_steps), kind)
+            for (name, kind), category_steps in categories.items()
         ),
     )
 
@@ -193,6 +186,18 @@ class SummaryCategory:
 
     def __post_init__(self) -> None:
         self.num_rows = sum(len(step.rows) for step in self.steps)
+
+    @property
+    def is_design(self) -> bool:
+        return self.kind == SummaryKind.DESIGN
+
+    @property
+    def is_points(self) -> bool:
+        return self.kind == SummaryKind.POINTS
+
+    @property
+    def is_multiplier(self) -> bool:
+        return self.kind == SummaryKind.MULTIPLIER
 
 
 @dataclass
@@ -233,22 +238,29 @@ def build_scoring_summary(curation: Curation) -> ScoringSummary:
     )
 
 
-# The evidence scoring summary's step columns, in the framework's order.
-_EVIDENCE_COLUMNS = (
-    ("1A", "score_step_1a"),
-    ("1B", "score_step_1b"),
-    ("1C", "score_step_1c"),
-    ("1D", "score_step_1d"),
-    ("2", "score_step_2"),
-    ("3A", "score_step_3a"),
-    ("3B", "score_step_3b"),
-    ("3C: OR/RR/Beta", "score_step_3c1"),
-    ("3C: CI", "score_step_3c2"),
-    ("4", "score_step_4"),
-    ("5", "score_step_5"),
-    ("6A", "score_step_6a"),
-    ("6B", "score_step_6b"),
-)
+def _evidence_columns() -> tuple[tuple[str, str], ...]:
+    """Returns the evidence scoring summary's step columns, in the framework's order.
+
+    Each column is named after its score attribute, e.g., "1A" for score_step_1a.
+    Step 3C's two attributes are named after their categories, e.g., "3C: CI".
+
+    Returns:
+        Each column's label and score attribute.
+    """
+    rows = cast("list[dict[str, Any]]", FRAMEWORK)
+    attrs = dict.fromkeys(
+        row["score"] for row in rows if row["score"].startswith("score_step_")
+    )
+    columns = []
+    for attr in attrs:
+        step = attr.removeprefix("score_step_").upper()
+        if category := EVIDENCE_COLUMN_CATEGORIES.get(attr):
+            step = f"{step.rstrip('0123456789')}: {category}"
+        columns.append((step, attr))
+    return tuple(columns)
+
+
+_EVIDENCE_COLUMNS = _evidence_columns()
 
 
 @dataclass
@@ -294,7 +306,7 @@ def _pair(curation: Curation) -> dict[str, str]:
     # Haplotypes have no CAR ID of their own.
     car_id = "" if is_haplotype or not curation.allele else curation.allele.car_id
     return {
-        "subject_type": "Haplotype" if is_haplotype else "Allele",
+        "subject_type": CURATION_TYPE_CHOICES[curation.curation_type],
         "subject": subject.display_name if subject else "",
         "car_id": car_id or "",
         "disease": curation.disease.name,
@@ -317,26 +329,26 @@ def _category(spec: _CategorySpec, evidence: list[Evidence]) -> SummaryCategory:
             rows=[
                 SummaryRow(
                     label=row.label,
-                    points=None if spec.kind == "design" else row.value,
+                    points=None if spec.kind == SummaryKind.DESIGN else row.value,
                     count=sum(getattr(e, row.attr) == row.value for e in evidence),
                 )
                 for row in step.rows
             ],
             max_points=step.max_points,
             total=_sum_points(evidence, _attrs(step))
-            if spec.kind == "points"
+            if spec.kind == SummaryKind.POINTS
             else None,
         )
         for step in spec.steps
     ]
     category = SummaryCategory(name=spec.name, kind=spec.kind, steps=steps)
-    if spec.kind == "points":
+    if spec.kind == SummaryKind.POINTS:
         attrs = [attr for step in spec.steps for attr in _attrs(step)]
         category.counted = sum(
             _sum_points([e], attrs) * e.score_step_6a * e.score_step_6b
             for e in evidence
         )
-    elif spec.kind == "multiplier":
+    elif spec.kind == SummaryKind.MULTIPLIER:
         category.note = _multiplier_note(evidence)
     return category
 
@@ -362,12 +374,12 @@ def _multiplier_note(evidence: list[Evidence]) -> str:
     their PMIDs.
 
     Returns:
-        The note, starting with "Applied per publication".
+        The note, starting with MULTIPLIER_NOTE.
     """
     by_multiplier: dict[float, list[Evidence]] = {}
     for e in evidence:
         by_multiplier.setdefault(e.score_step_6a * e.score_step_6b, []).append(e)
-    parts = ["Applied per publication"]
+    parts = [MULTIPLIER_NOTE]
     for multiplier in sorted(by_multiplier, reverse=True):
         group = by_multiplier[multiplier]
         if multiplier == 1:

@@ -5,9 +5,14 @@ from decimal import Decimal
 from django.test import TestCase
 
 from allele.models import Allele
-from curation.constants.models.curation import CurationTypes
+from curation.constants.models.curation import CURATION_TYPE_CHOICES, CurationTypes
 from curation.constants.models.evidence import NumFields, TypingMethod, Zygosity
 from curation.constants.score import Intervals, Points
+from curation.constants.scoring_summary import (
+    EVIDENCE_CATEGORIES,
+    MULTIPLIER_NOTE,
+    STUDY_DESIGN_CATEGORY,
+)
 from curation.constants.views import FRAMEWORK
 from curation.models import Curation, Evidence
 from curation.scoring_summary import (
@@ -22,6 +27,11 @@ from disease.models import Disease
 from haplotype.models import Haplotype
 from publication.models import Publication
 from repo.serializers import format_decimal
+
+ALLELE = CURATION_TYPE_CHOICES[CurationTypes.ALLELE]
+HAPLOTYPE = CURATION_TYPE_CHOICES[CurationTypes.HAPLOTYPE]
+ALLELE_CATEGORY, _ = EVIDENCE_CATEGORIES["score_step_1"]
+MULTIPLIERS, _ = EVIDENCE_CATEGORIES["score_step_6"]
 
 
 class BuildScoringSummaryTest(TestCase):
@@ -65,7 +75,7 @@ class BuildScoringSummaryTest(TestCase):
         self._add_evidence("111")
         self._add_evidence("222")
         summary = build_scoring_summary(self.curation)
-        self.assertEqual(summary.subject_type, "Allele")
+        self.assertEqual(summary.subject_type, ALLELE)
         self.assertEqual(summary.subject, self.allele.display_name)
         self.assertEqual(summary.car_id, self.allele.car_id)
         self.assertEqual(summary.mondo_id, self.disease.mondo_id)
@@ -81,9 +91,7 @@ class BuildScoringSummaryTest(TestCase):
     def test_multiplier_note_lists_each_pmid_once(self):
         self._add_evidence("333", has_association=False)
         self._add_evidence("333", has_association=False, is_gwas=True)
-        multipliers = self._category(
-            build_scoring_summary(self.curation), "Multipliers"
-        )
+        multipliers = self._category(build_scoring_summary(self.curation), MULTIPLIERS)
         self.assertTrue(multipliers.note.endswith(" in PMID: 333"))
 
     def test_header_uses_the_haplotype_name(self):
@@ -95,7 +103,7 @@ class BuildScoringSummaryTest(TestCase):
             disease=self.disease,
         )
         summary = build_scoring_summary(curation)
-        self.assertEqual(summary.subject_type, "Haplotype")
+        self.assertEqual(summary.subject_type, HAPLOTYPE)
         self.assertEqual(summary.subject, haplotype.display_name)
         self.assertEqual(summary.car_id, "")
 
@@ -103,7 +111,9 @@ class BuildScoringSummaryTest(TestCase):
         self._add_evidence("111", is_gwas=True)
         self._add_evidence("222")
         self._add_evidence("333")
-        design = self._category(build_scoring_summary(self.curation), "Study design")
+        design = self._category(
+            build_scoring_summary(self.curation), STUDY_DESIGN_CATEGORY
+        )
         counts = [row.count for row in design.steps[0].rows]
         self.assertEqual(counts, [1, 2])
         self.assertIsNone(design.counted)
@@ -128,9 +138,7 @@ class BuildScoringSummaryTest(TestCase):
         self._add_evidence("111", num_fields=NumFields.FOUR)
         self._add_evidence("222", num_fields=NumFields.FOUR, has_association=False)
         self._add_evidence("333", num_fields=NumFields.ONE)
-        allele = self._category(
-            build_scoring_summary(self.curation), "Allele / haplotype"
-        )
+        allele = self._category(build_scoring_summary(self.curation), ALLELE_CATEGORY)
         self.assertEqual(
             allele.counted,
             Points.S1B_4_FIELD + Points.S1B_1_FIELD * Points.S6B_1_FIELD,
@@ -201,21 +209,17 @@ class BuildScoringSummaryTest(TestCase):
         self._add_evidence("222")
         self._add_evidence("333", has_association=False)
         self._add_evidence("444", num_fields=NumFields.ONE)
-        multipliers = self._category(
-            build_scoring_summary(self.curation), "Multipliers"
-        )
+        multipliers = self._category(build_scoring_summary(self.curation), MULTIPLIERS)
         self.assertEqual(
             multipliers.note,
-            "Applied per publication; \N{MULTIPLICATION SIGN}1 in 2 studies; "
+            f"{MULTIPLIER_NOTE}; \N{MULTIPLICATION SIGN}1 in 2 studies; "
             "\N{MULTIPLICATION SIGN}0.5 in PMID: 444; \N{MULTIPLICATION SIGN}0 in "
             "PMID: 333",
         )
 
     def test_multiplier_note_without_evidence(self):
-        multipliers = self._category(
-            build_scoring_summary(self.curation), "Multipliers"
-        )
-        self.assertEqual(multipliers.note, "Applied per publication")
+        multipliers = self._category(build_scoring_summary(self.curation), MULTIPLIERS)
+        self.assertEqual(multipliers.note, MULTIPLIER_NOTE)
 
 
 class BuildEvidenceScoringSummaryTest(TestCase):
@@ -245,7 +249,7 @@ class BuildEvidenceScoringSummaryTest(TestCase):
 
     def test_header_names_the_pair(self):
         summary = build_evidence_scoring_summary(self.curation)
-        self.assertEqual(summary.subject_type, "Allele")
+        self.assertEqual(summary.subject_type, ALLELE)
         self.assertEqual(summary.subject, self.allele.display_name)
         self.assertEqual(summary.car_id, self.allele.car_id)
         self.assertEqual(summary.disease, self.disease.name)

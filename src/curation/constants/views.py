@@ -2,6 +2,9 @@
 
 from curation.constants.score import Intervals, Points
 
+# Steps 3A and 4 use different brackets for these two study designs.
+GWAS_LABELS = ("GWAS", "Non-GWAS")
+
 FRAMEWORK = [
     {
         "text": "Step 1A: Allele or Haplotype",
@@ -160,7 +163,7 @@ FRAMEWORK = [
     },
     {
         "text": "Step 3A: Statistics (p-value)",
-        "category": ["GWAS", "Non-GWAS"],
+        "category": GWAS_LABELS,
         "split_horizontal": True,
         "split_vertical": False,
         "score": "score_step_3a",
@@ -268,7 +271,7 @@ FRAMEWORK = [
     },
     {
         "text": "Step 4: Cohort Size",
-        "category": ["GWAS", "Non-GWAS"],
+        "category": GWAS_LABELS,
         "split_horizontal": True,
         "split_vertical": False,
         "score": "score_step_4",

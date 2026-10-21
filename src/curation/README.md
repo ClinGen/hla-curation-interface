@@ -38,9 +38,13 @@ Defines choice classes and dicts used by the `Evidence` model, covering allele r
 
 Defines the `Points` class with all point values for the scoring framework's steps 1A through 6B, and instantiates `Step3AIntervals`, `Step3CIntervals`, and `Step4Intervals` classes that set up `Interval` objects for p-value, effect size, and cohort size scoring thresholds (GWAS and non-GWAS variants). These are collected under the top-level `Intervals` class.
 
+### `constants/scoring_summary.py`
+
+Defines the scoring summary's own strings, which come from the taskforce's spreadsheet and have no equivalent in the scoring matrix: the `SummaryKind` codes (study design, points, and multiplier categories), the study design category and step, the evidence categories and their kinds keyed by score attribute prefix, the names of step 3C's two evidence scoring summary columns, and the multipliers note.
+
 ### `constants/views.py`
 
-Defines the `FRAMEWORK` list, a structured data representation of every row in the HLA scoring matrix (steps 1A–6B). Each entry carries display metadata (step text, category, point value, operator, style, split layout flags) and the name of the `Evidence` property that holds that step's computed score; this list is consumed by the scoring matrix template.
+Defines the `FRAMEWORK` list, a structured data representation of every row in the HLA scoring matrix (steps 1A–6B). Each entry carries display metadata (step text, category, point value, operator, style, split layout flags) and the name of the `Evidence` property that holds that step's computed score; this list is consumed by the scoring matrix template. Also defines `GWAS_LABELS`, the GWAS and non-GWAS labels shared by the matrix and the scoring summary.
 
 ### `fixtures/demographics.json`
 
@@ -72,7 +76,7 @@ Implements the per-step point-calculation functions (`get_step_1a_points` throug
 
 ### `scoring_summary.py`
 
-Defines `build_evidence_scoring_summary`, which returns one row per included evidence item with its PMID, its points for each scoring step (`None` when the step has no value), and its score, under the same header fields as the scoring summary. Also defines `build_scoring_summary`, which builds the scoring summary table for a curation's included evidence, laid out like the taskforce's spreadsheet. Its steps and labels come from `FRAMEWORK` in `constants/views.py`, the scoring matrix's rows, grouped into the spreadsheet's evidence categories, with each interval shown as a threshold (such as `<5E-8` or `1000–2499`) formatted with `repo.serializers.format_decimal`. The header names the allele (with its CAR ID) or haplotype and the disease (with its Mondo ID). "Publications scored" counts distinct publications, since one publication can have more than one evidence item. For each framework category it counts the evidence in each row (matched by the step's points, or by GWAS for study design), totals each step's points before multipliers, and totals the points each category counts toward the score after each publication's 6A and 6B multipliers. The multipliers note counts the publications multiplied by 1 and lists the PMIDs of the rest, each once. The total score equals `Curation.score`.
+Defines `build_evidence_scoring_summary`, which returns one row per included evidence item, under columns named after the framework's score attributes (such as `1A`), with its PMID, its points for each scoring step (`None` when the step has no value), and its score, under the same header fields as the scoring summary. Also defines `build_scoring_summary`, which builds the scoring summary table for a curation's included evidence, laid out like the taskforce's spreadsheet. Its steps and labels come from `FRAMEWORK` in `constants/views.py`, the scoring matrix's rows, grouped into the spreadsheet's evidence categories, with each interval shown as a threshold (such as `<5E-8` or `1000–2499`) formatted with `repo.serializers.format_decimal`. The header names the allele (with its CAR ID) or haplotype and the disease (with its Mondo ID). "Publications scored" counts distinct publications, since one publication can have more than one evidence item. For each framework category it counts the evidence in each row (matched by the step's points, or by GWAS for study design), totals each step's points before multipliers, and totals the points each category counts toward the score after each publication's 6A and 6B multipliers. The multipliers note counts the publications multiplied by 1 and lists the PMIDs of the rest, each once. The total score equals `Curation.score`.
 
 ### `summary.py`
 
