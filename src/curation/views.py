@@ -35,6 +35,10 @@ from curation.models import (
     Curation,
     Evidence,
 )
+from curation.scoring_summary import (
+    build_evidence_scoring_summary,
+    build_scoring_summary,
+)
 from curation.summary import build_evidence_summary
 from curation.tables import CurationTable
 from curation.validators.views import (
@@ -66,6 +70,26 @@ class CurationDetail(ProtectedViewMixin, DetailView):
     template_name = "curation/detail.html"
     slug_field = "slug"
     slug_url_kwarg = "curation_slug"
+
+
+class CurationScoringSummary(ProtectedViewMixin, DetailView):
+    model = Curation
+    template_name = "curation/scoring_summary.html"
+    slug_field = "slug"
+    slug_url_kwarg = "curation_slug"
+    build_summary = staticmethod(build_scoring_summary)
+
+    def get_context_data(self, **kwargs):  # ruff: ignore[missing-return-type-undocumented-public-function]
+        """Returns the context with the curation's scoring summary."""
+        context = super().get_context_data(**kwargs)
+        context["curation"] = self.object
+        context["summary"] = self.build_summary(self.object)
+        return context
+
+
+class CurationEvidenceScoringSummary(CurationScoringSummary):
+    template_name = "curation/evidence_scoring_summary.html"
+    build_summary = staticmethod(build_evidence_scoring_summary)
 
 
 @protected_view

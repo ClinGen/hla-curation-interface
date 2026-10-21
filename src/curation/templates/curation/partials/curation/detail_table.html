@@ -36,7 +36,13 @@
         </tr>
         <tr>
             <td>Score</td>
-            <td>{{ object.score }}</td>
+            <td>
+                {{ object.score }}
+                {% url "curation-scoring-summary" object.slug as scoring_summary_url %}
+                {% url "curation-evidence-scoring-summary" object.slug as evidence_scoring_summary_url %}
+                ({% include "common/linkout.html" with url=scoring_summary_url text="Scoring Summary" %},
+                {% include "common/linkout.html" with url=evidence_scoring_summary_url text="Evidence Scoring Summary" %})
+            </td>
         </tr>
         <tr>
             <td>Added</td>

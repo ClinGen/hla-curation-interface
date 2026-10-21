@@ -180,6 +180,123 @@ class CurationCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(response.status_code, 302)
 
 
+class CurationScoringSummaryTest(ProtectedViewTestMixin, TestCase):
+    fixtures = [
+        "test_alleles.json",
+        "test_diseases.json",
+        "test_publications.json",
+        "test_curations.json",
+        "test_evidence.json",
+    ]
+    url = reverse("curation-scoring-summary", kwargs={"curation_slug": "C000001"})
+    template = "curation/scoring_summary.html"
+    page_name = "Scoring summary"
+    expected_text = [
+        "A*01:02:03",
+        "acute oran berry intoxication",
+        "Publications scored",
+        "Total score",
+    ]
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)
+
+    def test_shows_the_curation_total_score(self):
+        Curation.objects.get(slug="C000001").evidence.update(is_included=True)  # type: ignore
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        total = soup.find(id="scoring-summary-total")
+        assert total is not None
+        score = Curation.objects.get(slug="C000001").score
+        self.assertEqual(total.get_text(strip=True), f"{score:g}")
+
+    def test_header_shows_the_car_and_mondo_ids(self):
+        curation = Curation.objects.get(slug="C000001")
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        subject_type = soup.find(id="scoring-summary-subject-type")
+        subject = soup.find(id="scoring-summary-subject")
+        disease = soup.find(id="scoring-summary-disease")
+        assert subject_type and subject and disease
+        self.assertEqual(subject_type.get_text(strip=True), "Allele")
+        self.assertIn(f"({curation.allele.car_id})", subject.get_text())
+        self.assertIn(f"({curation.disease.mondo_id})", disease.get_text())
+
+    def test_page_has_only_the_scoring_summary(self):
+        response = self.client.get(self.url)
+        self.assertTemplateNotUsed(response, "layouts/base.html")
+        self.assertTemplateNotUsed(response, "partials/navbar.html")
+        soup = BeautifulSoup(response.content, "html.parser")
+        self.assertIsNone(soup.find("nav"))
+        self.assertIsNone(soup.find("footer"))
+        self.assertEqual(
+            [child.name for child in soup.body.find_all(recursive=False)],  # type: ignore
+            ["div"],
+        )
+
+    def test_unknown_curation_is_404(self):
+        url = reverse("curation-scoring-summary", args=["C999999"])
+        self.assertEqual(self.client.get(url).status_code, 404)
+
+
+class CurationEvidenceScoringSummaryTest(ProtectedViewTestMixin, TestCase):
+    fixtures = [
+        "test_alleles.json",
+        "test_diseases.json",
+        "test_publications.json",
+        "test_curations.json",
+        "test_evidence.json",
+    ]
+    url = reverse(
+        "curation-evidence-scoring-summary", kwargs={"curation_slug": "C000001"}
+    )
+    template = "curation/evidence_scoring_summary.html"
+    page_name = "C000001 Evidence Scoring Summary"
+    expected_text = ["A*01:02:03", "acute oran berry intoxication", "PMID", "Total"]
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)
+
+    def test_shows_a_row_per_included_evidence_item(self):
+        curation = Curation.objects.get(slug="C000001")
+        curation.evidence.update(is_included=True)  # type: ignore
+        evidence = curation.evidence.get()  # type: ignore
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        rows = soup.select("#evidence-scoring-summary-table tbody tr")
+        self.assertEqual(len(rows), 1)
+        cells = [td.get_text(strip=True) for td in rows[0].find_all("td")]
+        self.assertEqual(cells[0], evidence.publication.pubmed_id)
+        self.assertEqual(cells[-1], f"{evidence.score:g}")
+
+    def test_title_and_pair_are_above_the_table(self):
+        curation = Curation.objects.get(slug="C000001")
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        title = soup.find("h2")
+        subject = soup.find(id="scoring-summary-subject")
+        disease = soup.find(id="scoring-summary-disease")
+        assert title and subject and disease
+        self.assertEqual(title.get_text(strip=True), "Evidence scoring summary")
+        self.assertIn(curation.allele.display_name, subject.get_text())
+        self.assertIn(f"({curation.disease.mondo_id})", disease.get_text())
+        self.assertIsNone(subject.find_parent("table"))
+        self.assertContains(
+            response, "Scoring steps based on the HLA Curation Framework"
+        )
+
+    def test_says_so_when_no_evidence_is_included(self):
+        Curation.objects.get(slug="C000001").evidence.update(is_included=False)  # type: ignore
+        self.assertContains(self.client.get(self.url), "No evidence is included")
+
+    def test_page_has_no_layout(self):
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, "layouts/print.html")
+        self.assertTemplateNotUsed(response, "layouts/base.html")
+
+
 class CurationDetailTest(ProtectedViewTestMixin, TestCase):
     fixtures = [
         "test_alleles.json",
@@ -224,6 +341,17 @@ class CurationDetailTest(ProtectedViewTestMixin, TestCase):
             kwargs={"curation_slug": "C000001", "evidence_slug": "E000001"},
         )
         self.assertContains(response, f'href="{url}"')
+
+    def test_links_scoring_summaries_in_a_new_tab(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        for name in ["curation-scoring-summary", "curation-evidence-scoring-summary"]:
+            with self.subTest(name=name):
+                link = soup.find("a", href=reverse(name, args=["C000001"]))
+                assert link is not None
+                self.assertEqual(link["target"], "_blank")
+        self.assertIsNotNone(link.find("i", class_="bi-box-arrow-up-right"))
+        self.assertNotIn("button", link.get("class") or "")
 
     def test_shows_taskforce_review_date_when_set(self):
         curation = Curation.objects.get(slug="C000001")

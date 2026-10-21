@@ -1,0 +1,11 @@
+{# The HLA-disease pair a scoring summary page's header names. #}
+<dl>
+    <dt id="scoring-summary-subject-type">{{ summary.subject_type }}</dt>
+    <dd id="scoring-summary-subject">
+        {{ summary.subject }}{% if summary.car_id %} ({{ summary.car_id }}){% endif %}
+    </dd>
+    <dt>Disease</dt>
+    <dd id="scoring-summary-disease">
+        {{ summary.disease }}{% if summary.mondo_id %} ({{ summary.mondo_id }}){% endif %}
+    </dd>
+</dl>
