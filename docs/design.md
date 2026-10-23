@@ -218,7 +218,8 @@ misleading.
 ### Error Monitoring and Uptime
 
 Sentry is initialized at application startup via `config/settings/base.py` and captures
-all unhandled exceptions in both dev and production environments. Sentry was chosen for
+all unhandled exceptions in both dev and production environments. It also forwards
+records at `INFO` and above from Python's `logging` module to Sentry Logs. Sentry was chosen for
 its simple setup and generous free tier; a cloud-native alternative (e.g. AWS
 CloudWatch) would have added cost and operational overhead that is not justified for
 this tool.
