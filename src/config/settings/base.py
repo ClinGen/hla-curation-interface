@@ -4,13 +4,16 @@ import os
 from pathlib import Path
 
 import sentry_sdk
+from sentry_sdk.integrations.logging import LoggingIntegration
 
-# We use Sentry for error monitoring and tracing.
+# We use Sentry for error monitoring, tracing, and logs.
 sentry_sdk.init(
     dsn=os.getenv("SENTRY_DSN"),
     environment=os.getenv("SENTRY_ENV"),
     send_default_pii=True,
     traces_sample_rate=1.0,
+    # Forward records from Python's logging module to Sentry Logs.
+    integrations=[LoggingIntegration(capture_sentry_logs=True)],
 )
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent

@@ -6,6 +6,7 @@ from types import ModuleType
 from unittest.mock import patch
 
 from django.test import SimpleTestCase
+from sentry_sdk.integrations.logging import LoggingIntegration
 
 
 def import_base_settings(environ: dict[str, str]) -> ModuleType:
@@ -79,3 +80,17 @@ class EmptyEnvironmentVariableTest(SimpleTestCase):
             import_base_settings(environ)
             prod = import_prod_settings()
         self.assertEqual(prod.DEFAULT_FROM_EMAIL, "noreply@hci-test.clinicalgenome.org")
+
+
+class SentryLogsTest(SimpleTestCase):
+    def test_forwards_python_logs_to_sentry(self):
+        with patch("sentry_sdk.init") as init:
+            importlib.reload(importlib.import_module("config.settings.base"))
+        integrations = init.call_args.kwargs["integrations"]
+        logging_integrations = [
+            i for i in integrations if isinstance(i, LoggingIntegration)
+        ]
+        self.assertEqual(len(logging_integrations), 1)
+        # The SDK's default is a truthy sentinel, so check for a real bool.
+        self.assertIsInstance(LoggingIntegration.capture_sentry_logs, bool)
+        self.assertTrue(LoggingIntegration.capture_sentry_logs)

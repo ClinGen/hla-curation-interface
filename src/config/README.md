@@ -12,7 +12,7 @@ Empty file that marks `settings` as a Python package.
 
 ### `settings/base.py`
 
-Defines settings shared across all environments, including installed apps, middleware, database (SQLite), static file handling via WhiteNoise, Clerk authentication keys and backends, Sentry initialization, the custom `django-tables2` template, database backups with `django-dbbackup`, the `SUBDOMAIN` setting, and `ALERT_EMAILS`, the comma-separated addresses that alerts go to. It doesn't set `ADMINS`, because that makes Django email every server error, which Sentry already reports. Backups go to the S3 bucket named by `DBBACKUP_BUCKET_NAME` when it's set, using the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables, and to a `backups/` directory next to `src/` otherwise. Backups that `django-dbbackup` names itself go under `daily/` and include `SUBDOMAIN` (`hci`, `hci-test`, or `dev` by default). Environment-specific settings files import from this module.
+Defines settings shared across all environments, including installed apps, middleware, database (SQLite), static file handling via WhiteNoise, Clerk authentication keys and backends, Sentry initialization (including forwarding Python logs to Sentry Logs), the custom `django-tables2` template, database backups with `django-dbbackup`, the `SUBDOMAIN` setting, and `ALERT_EMAILS`, the comma-separated addresses that alerts go to. It doesn't set `ADMINS`, because that makes Django email every server error, which Sentry already reports. Backups go to the S3 bucket named by `DBBACKUP_BUCKET_NAME` when it's set, using the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables, and to a `backups/` directory next to `src/` otherwise. Backups that `django-dbbackup` names itself go under `daily/` and include `SUBDOMAIN` (`hci`, `hci-test`, or `dev` by default). Environment-specific settings files import from this module.
 
 ### `settings/dev.py`
 
@@ -28,7 +28,7 @@ Extends `dev.py` for use during test runs. Keeps email in memory with the locmem
 
 ### `tests.py`
 
-Houses `ProdLoggingTest`, which imports the production settings with Sentry patched out and checks that they log only to the console, with the logger name, and define no log file; `AlertEmailsSettingTest`, which checks how `ALERT_EMAILS` is parsed; and `EmptyEnvironmentVariableTest`, which checks that an empty `SUBDOMAIN` or `DEFAULT_FROM_EMAIL` falls back to its default.
+Houses `ProdLoggingTest`, which imports the production settings with Sentry patched out and checks that they log only to the console, with the logger name, and define no log file; `AlertEmailsSettingTest`, which checks how `ALERT_EMAILS` is parsed; `EmptyEnvironmentVariableTest`, which checks that an empty `SUBDOMAIN` or `DEFAULT_FROM_EMAIL` falls back to its default; and `SentryLogsTest`, which checks that the base settings forward Python logs to Sentry.
 
 ### `urls.py`
 
