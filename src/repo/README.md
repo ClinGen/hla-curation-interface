@@ -56,7 +56,7 @@ Renders the HLArepo Collaborators page, listing partner organizations.
 
 ### `templates/repo/contact.html`
 
-Renders the HLArepo Contact page with the maintainers' email address.
+Renders the HLArepo Contact page, which asks visitors to contact the ClinGen HLA working group and links to its page.
 
 ### `templates/repo/detail.html`
 

@@ -926,19 +926,22 @@ class PublicLayoutTest(TestCase):
                 self.assertNotContains(response, f'href="{reverse("allele-list")}"')
                 self.assertNotContains(response, f'href="{reverse("about")}"')
 
-    def test_pages_link_back_to_the_hci(self):
-        for url in self.urls:
+    def test_pages_have_no_navbar_or_hci_links_when_logged_out(self):
+        urls = [*self.urls, *(reverse(name) for name in REPO_INFO_URL_NAMES)]
+        for url in urls:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertNotContains(response, 'class="navbar"')
+                self.assertNotContains(response, f'href="{reverse("home")}"')
+
+    def test_pages_link_back_to_the_hci_when_logged_in(self):
+        self.client.force_login(User.objects.create_user(username="visitor"))
+        urls = [*self.urls, *(reverse(name) for name in REPO_INFO_URL_NAMES)]
+        for url in urls:
             with self.subTest(url=url):
                 response = self.client.get(url)
                 self.assertContains(response, 'id="hci-link"')
                 self.assertContains(response, f'href="{reverse("home")}"')
-
-    def test_navbar_has_no_hlarepo_link(self):
-        response = self.client.get(self.urls[1])
-        navbar = response.content.decode().split('<nav class="navbar"')[1]
-        navbar = navbar.split("</nav>")[0]
-        self.assertNotIn(f'href="{reverse("repo-search")}"', navbar)
-        self.assertIn('id="hci-link"', navbar)
 
     def test_breadcrumbs_start_at_hlarepo_home(self):
         for url in self.urls:
@@ -1350,7 +1353,15 @@ class RepoContactViewTest(OpenViewTestMixin, TestCase):
     url = reverse("repo-contact")
     template = "repo/contact.html"
     page_name = "Contact"
-    expected_text = ["HLArepo", "hci@clinicalgenome.org"]
+    expected_text = [
+        "HLArepo",
+        "working group",
+        'href="https://clinicalgenome.org/working-groups/60037/"',
+    ]
+
+    def test_has_no_email_address(self):
+        response = self.client.get(self.url)
+        self.assertNotContains(response, "hci@clinicalgenome.org")
 
 
 class RepoHelpViewTest(OpenViewTestMixin, TestCase):
