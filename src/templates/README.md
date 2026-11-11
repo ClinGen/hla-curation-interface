@@ -28,7 +28,7 @@ The curator layout that every HCI page extends. It loads static assets (Bulma CS
 
 ### `layouts/public.html`
 
-The public layout that HLArepo pages extend. It loads the same assets as `layouts/base.html` minus Choices.js, which no public page uses, and its title prefix is "HLArepo". It includes the environment banner, the public navbar, flash messages, the public footer, and the confirm modal, but not the curator navbar or the account activation notice, so a visitor never sees a link that needs a login.
+The public layout that HLArepo pages extend. It loads the same assets as `layouts/base.html` minus Choices.js, which no public page uses, and its title prefix is "HLArepo". It includes the environment banner, flash messages, the public footer, and the confirm modal, plus the public navbar for logged-in users only. It has no curator navbar or account activation notice, so a logged-out visitor never sees a link into the HCI or one that needs a login.
 
 ### `layouts/print.html`
 
@@ -68,7 +68,7 @@ Renders the HLArepo footer: the shared logos, links to the HLArepo info pages (A
 
 ### `partials/public_navbar.html`
 
-Renders the HLArepo navigation bar: a single small, low-emphasis link back to the HCI home page in the upper-right corner. It has no brand link, since the breadcrumb already links to the HLArepo home page, and no burger menu, since there is nothing to collapse.
+Renders the HLArepo navigation bar: a single small, low-emphasis link back to the HCI home page in the upper-right corner. `layouts/public.html` includes it only for logged-in users. It has no brand link, since the breadcrumb already links to the HLArepo home page, and no burger menu, since there is nothing to collapse.
 
 ### `tables.html`
 

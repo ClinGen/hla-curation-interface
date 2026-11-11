@@ -26,9 +26,11 @@
     <div class="container mt-2 mb-2">
         {% include "partials/env_banner.html" %}
     </div>
-    <div class="container">
-        {% include "partials/public_navbar.html" %}
-    </div>
+    {% if user.is_authenticated %}
+        <div class="container">
+            {% include "partials/public_navbar.html" %}
+        </div>
+    {% endif %}
 </header>
 <main>
     <div class="container">
