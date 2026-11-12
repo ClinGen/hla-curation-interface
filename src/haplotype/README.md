@@ -60,7 +60,7 @@ Renders the haplotype search page with a search input, a results table populated
 
 ### `tests.py`
 
-Contains `TestCase` classes for `Haplotype.canonical_name`, `Haplotype.get_or_build`, and the create, detail, and list views, verifying access control, correct template rendering, form validation (including duplicate detection and allele-order normalization), and successful haplotype creation.
+Contains `TestCase` classes for `Haplotype.canonical_name`, `Haplotype.get_or_build`, and the create, detail, and list views, verifying access control, correct template rendering, form validation (including duplicate detection, unknown genes, and gene-order normalization), and successful haplotype creation.
 
 ### `urls.py`
 

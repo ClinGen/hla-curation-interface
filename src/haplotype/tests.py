@@ -49,6 +49,21 @@ class HaplotypeCreateTest(ProtectedViewTestMixin, TestCase):
         assert new_haplotype is not None
         self.assertEqual(new_haplotype.name, "A*01:02:03~B*04:05:06")
 
+    def test_sorts_by_gene_position_not_alphabetically(self):
+        data = {"alleles": ["2", "3"]}  # B is after C on chromosome 6.
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Haplotype.objects.filter(name="C*07:08:09~B*04:05:06").exists())
+
+    def test_unknown_gene_returns_form_error(self):
+        unknown = Allele.objects.create(name="ZZZ*01:01")
+        initial_haplotype_count = Haplotype.objects.count()
+        response = self.client.post(self.url, {"alleles": ["1", str(unknown.pk)]})
+        self.assertEqual(response.status_code, 200)
+        form = response.context["form"]
+        self.assertIn("ZZZ*01:01 has an unknown gene.", form.errors["alleles"])
+        self.assertEqual(Haplotype.objects.count(), initial_haplotype_count)
+
     def test_duplicate_allele_combination_returns_form_error(self):
         self.client.post(self.url, {"alleles": ["1", "2"]})
         initial_haplotype_count = Haplotype.objects.count()
