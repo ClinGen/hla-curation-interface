@@ -16,15 +16,7 @@
                {% if type %}type="{{ type }}"{% endif %}
                {% if field.value %}value="{{ field.value }}"{% endif %}
                {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
-               {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
-               {% if datalist %}list="{{ field.id_for_label }}-options"{% endif %}>
-        {% if datalist %}
-            <datalist id="{{ field.id_for_label }}-options">
-                {% for value, label in datalist %}
-                    <option value="{{ value }}">{{ label|default_if_none:"" }}</option>
-                {% endfor %}
-            </datalist>
-        {% endif %}
+               {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}>
 
     </div>
 </div>
