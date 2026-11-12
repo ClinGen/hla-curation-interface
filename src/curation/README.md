@@ -92,7 +92,7 @@ Full-page template for viewing a single historical change record on a curation. 
 
 ### `templates/curation/create.html`
 
-Full-page template for the "Add Curation" form. Renders radio inputs for curation type, a text input for the allele name, a searchable select for the haplotype, and a text input for the disease's Mondo ID with a Search MONDO linkout. The text inputs suggest existing alleles and diseases with a `<datalist>`. It includes JavaScript that shows or hides the allele and haplotype fields based on the selected curation type. When the pair already has curations, it lists them in a warning box with their status and copies, and shows the confirmation checkbox when a second curation is allowed.
+Full-page template for the "Add Curation" form. Renders radio inputs for curation type, a text input for the allele name, a searchable select for the haplotype, and a text input for the disease's Mondo ID with a Search MONDO linkout. Each field group is a Bulma `block`, so the gaps between them match. It includes JavaScript that shows or hides the allele and haplotype fields based on the selected curation type. When the pair already has curations, it lists them in a warning box with their status and copies, and shows the confirmation checkbox when a second curation is allowed.
 
 ### `templates/curation/detail.html`
 
@@ -260,4 +260,4 @@ Defines view-layer validation helpers called from `EvidenceEdit.form_valid()` af
 
 ### `views.py`
 
-Implements all view classes and functions for the curation app: `CurationCreate` (which passes existing alleles and diseases to the template as suggestions), `CurationDetail`, `CurationScoringSummary`, `CurationEvidenceScoringSummary`, `CurationList`, `curation_edit_evidence`, `curation_submit`, `curation_review`, `curation_publish`, `curation_copy`, `EvidenceCreate`, `EvidenceDetail`, `EvidenceEdit`, `CurationHistory`, `CurationChange`, `EvidenceHistory`, and `EvidenceChange`. Views enforce authentication and (where applicable) reviewer permissions, respect the curation locked state, and handle status transitions atomically.
+Implements all view classes and functions for the curation app: `CurationCreate`, `CurationDetail`, `CurationScoringSummary`, `CurationEvidenceScoringSummary`, `CurationList`, `curation_edit_evidence`, `curation_submit`, `curation_review`, `curation_publish`, `curation_copy`, `EvidenceCreate`, `EvidenceDetail`, `EvidenceEdit`, `CurationHistory`, `CurationChange`, `EvidenceHistory`, and `EvidenceChange`. Views enforce authentication and (where applicable) reviewer permissions, respect the curation locked state, and handle status transitions atomically.

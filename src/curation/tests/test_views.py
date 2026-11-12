@@ -194,21 +194,16 @@ class CurationCreateTest(ProtectedViewTestMixin, TestCase):
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 302)
 
+    def test_spaces_each_field_group_as_a_block(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        blocks = soup.select("form > div.block")
+        self.assertEqual(len(blocks), 4)  # Type, allele, haplotype, disease.
+
     def test_shows_search_mondo_linkout(self):
         response = self.client.get(self.url)
         self.assertContains(response, "https://www.ebi.ac.uk/ols4/ontologies/mondo")
         self.assertContains(response, "Search MONDO")
-
-    def test_suggests_existing_alleles_and_diseases(self):
-        response = self.client.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        allele_options = soup.select("datalist#id_allele-options option")
-        disease_options = soup.select("datalist#id_disease-options option")
-        self.assertIn("A*01:02:03", [o["value"] for o in allele_options])
-        self.assertIn("MONDO:123", [o["value"] for o in disease_options])
-        self.assertIn(
-            "acute oran berry intoxication", [o.text for o in disease_options]
-        )
 
     @patch("disease.models.fetch_disease_data", return_value=OLS_RESPONSE)
     @patch("allele.models.fetch_allele_data", return_value=CAR_RESPONSE)

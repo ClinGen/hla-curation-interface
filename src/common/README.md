@@ -53,7 +53,7 @@ Reusable partial for rendering a radio-button form field using Bulma CSS. Suppor
 
 ### `templates/common/form/input/text.html`
 
-Reusable partial for rendering a text `<input>` form field using Bulma CSS. Accepts context variables for `type`, `autocomplete`, and `placeholder`, plus `datalist`, an iterable of `(value, label)` pairs to suggest as the user types, and supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead.
+Reusable partial for rendering a text `<input>` form field using Bulma CSS. Accepts context variables for `type`, `autocomplete`, and `placeholder`, and supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead.
 
 ### `templates/common/form/section_heading.html`
 
