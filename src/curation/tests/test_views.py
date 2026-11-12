@@ -84,7 +84,11 @@ class CurationCreateTest(ProtectedViewTestMixin, TestCase):
 
     def test_creates_haplotype_curation_with_valid_form_data(self):
         initial_curation_count = Curation.objects.count()
-        data = {"curation_type": "HAP", "haplotype": "1", "disease": "MONDO:123"}
+        data = {
+            "curation_type": "HAP",
+            "haplotype": "A*01:02:03~B*04:05:06",
+            "disease": "MONDO:123",
+        }
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Curation.objects.count(), initial_curation_count + 1)
@@ -118,7 +122,7 @@ class CurationCreateTest(ProtectedViewTestMixin, TestCase):
         if curation_type == CurationTypes.ALLELE:
             target = {"allele": "A*01:02:03"}
         else:
-            target = {"haplotype": "1"}
+            target = {"haplotype": "A*01:02:03~B*04:05:06"}
         return {
             "curation_type": curation_type,
             **target,
@@ -274,6 +278,44 @@ class CurationCreateTest(ProtectedViewTestMixin, TestCase):
         response = self.client.post(self.url, data)  # No haplotype.
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Allele.objects.count(), allele_count)
+        mock_fetch.assert_not_called()
+
+    @patch("allele.models.fetch_allele_data")
+    def test_reuses_existing_haplotype_typed_out_of_order(self, mock_fetch: MagicMock):
+        haplotype_count = Haplotype.objects.count()
+        data = self._data(CurationTypes.HAPLOTYPE, haplotype="B*04:05:06~A*01:02:03")
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Haplotype.objects.count(), haplotype_count)
+        curation = Curation.objects.get(haplotype=Haplotype.objects.get(pk=1))
+        self.assertEqual(curation.disease, Disease.objects.get(pk=1))
+        mock_fetch.assert_not_called()
+
+    @patch("allele.models.fetch_allele_data", return_value=CAR_RESPONSE)
+    def test_saves_new_haplotype_with_new_allele(self, _mock_fetch: MagicMock):
+        data = self._data(CurationTypes.HAPLOTYPE, haplotype="DRB1*15:01~A*01:02:03")
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        haplotype = Haplotype.objects.get(name="A*01:02:03~DRB1*15:01")
+        new_allele = Allele.objects.get(name="DRB1*15:01")
+        self.assertEqual(
+            set(haplotype.alleles.all()),
+            {Allele.objects.get(name="A*01:02:03"), new_allele},
+        )
+        self.assertEqual(haplotype.added_by, self.user4_yes_phi_yes_perms)
+        self.assertEqual(new_allele.added_by, self.user4_yes_phi_yes_perms)
+        self.assertTrue(Curation.objects.filter(haplotype=haplotype).exists())
+
+    @patch("allele.models.fetch_allele_data")
+    def test_malformed_haplotype_is_a_field_error_and_saves_nothing(
+        self, mock_fetch: MagicMock
+    ):
+        counts = (Haplotype.objects.count(), Curation.objects.count())
+        data = self._data(CurationTypes.HAPLOTYPE, haplotype="A*01:02:03~~")
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("~", response.context["form"].errors["haplotype"][0])
+        self.assertEqual((Haplotype.objects.count(), Curation.objects.count()), counts)
         mock_fetch.assert_not_called()
 
 
