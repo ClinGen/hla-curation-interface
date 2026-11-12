@@ -14,6 +14,7 @@ from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, UpdateView
 from django_tables2 import RequestConfig
 
+from allele.models import Allele
 from auth_.permissions import (
     ProtectedViewMixin,
     protected_view,
@@ -50,6 +51,7 @@ from curation.validators.views import (
     validate_odds_ratio,
     validate_relative_risk,
 )
+from disease.models import Disease
 
 
 class CurationCreate(ProtectedViewMixin, CreateView):
@@ -59,6 +61,13 @@ class CurationCreate(ProtectedViewMixin, CreateView):
     slug_field = "slug"
     slug_url_kwarg = "curation_slug"
     success_url = reverse_lazy("curation-list")
+
+    def get_context_data(self, **kwargs: object) -> dict:
+        """Returns the context with existing alleles and diseases to suggest."""
+        context = super().get_context_data(**kwargs)
+        context["allele_options"] = Allele.objects.values_list("name", "car_id")
+        context["disease_options"] = Disease.objects.values_list("mondo_id", "name")
+        return context
 
     def form_valid(self, form: CurationCreateForm) -> HttpResponse:
         form.instance.added_by = self.request.user
