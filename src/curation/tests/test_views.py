@@ -1,7 +1,7 @@
 """Houses tests for the curation app's views."""
 
 from datetime import date, timedelta
-from unittest.mock import PropertyMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 from bs4 import BeautifulSoup
 from django.contrib.auth.models import User
@@ -11,6 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from allele.models import Allele
+from allele.tests import CAR_RESPONSE
 from auth_.models import UserProfile
 from common.tests import (
     ProtectedViewTestMixin,
@@ -39,6 +40,7 @@ from curation.models import (
 )
 from curation.summary import build_evidence_summary
 from disease.models import Disease
+from disease.tests import OLS_RESPONSE
 from haplotype.models import Haplotype
 from publication.models import Publication
 from repo.models import PublishedCuration
@@ -69,7 +71,7 @@ class CurationCreateTest(ProtectedViewTestMixin, TestCase):
 
     def test_creates_allele_curation_with_valid_form_data(self):
         initial_curation_count = Curation.objects.count()
-        data = {"curation_type": "ALL", "allele": "1", "disease": "1"}
+        data = {"curation_type": "ALL", "allele": "A*01:02:03", "disease": "MONDO:123"}
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Curation.objects.count(), initial_curation_count + 1)
@@ -82,7 +84,7 @@ class CurationCreateTest(ProtectedViewTestMixin, TestCase):
 
     def test_creates_haplotype_curation_with_valid_form_data(self):
         initial_curation_count = Curation.objects.count()
-        data = {"curation_type": "HAP", "haplotype": "1", "disease": "1"}
+        data = {"curation_type": "HAP", "haplotype": "1", "disease": "MONDO:123"}
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Curation.objects.count(), initial_curation_count + 1)
@@ -113,8 +115,16 @@ class CurationCreateTest(ProtectedViewTestMixin, TestCase):
         return curation
 
     def _data(self, curation_type: str, **extra) -> dict[str, str]:
-        field = "allele" if curation_type == CurationTypes.ALLELE else "haplotype"
-        return {"curation_type": curation_type, field: "1", "disease": "1", **extra}
+        if curation_type == CurationTypes.ALLELE:
+            target = {"allele": "A*01:02:03"}
+        else:
+            target = {"haplotype": "1"}
+        return {
+            "curation_type": curation_type,
+            **target,
+            "disease": "MONDO:123",
+            **extra,
+        }
 
     def test_one_existing_pair_requires_confirmation(self):
         for curation_type in (CurationTypes.ALLELE, CurationTypes.HAPLOTYPE):
@@ -176,9 +186,100 @@ class CurationCreateTest(ProtectedViewTestMixin, TestCase):
 
     def test_same_allele_with_different_disease_is_not_flagged(self):
         self._make_existing(CurationTypes.ALLELE)
-        data = {"curation_type": CurationTypes.ALLELE, "allele": "1", "disease": "2"}
+        data = {
+            "curation_type": CurationTypes.ALLELE,
+            "allele": "A*01:02:03",
+            "disease": "MONDO:456",
+        }
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 302)
+
+    def test_shows_search_mondo_linkout(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, "https://www.ebi.ac.uk/ols4/ontologies/mondo")
+        self.assertContains(response, "Search MONDO")
+
+    def test_suggests_existing_alleles_and_diseases(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        allele_options = soup.select("datalist#id_allele-options option")
+        disease_options = soup.select("datalist#id_disease-options option")
+        self.assertIn("A*01:02:03", [o["value"] for o in allele_options])
+        self.assertIn("MONDO:123", [o["value"] for o in disease_options])
+        self.assertIn(
+            "acute oran berry intoxication", [o.text for o in disease_options]
+        )
+
+    @patch("disease.models.fetch_disease_data", return_value=OLS_RESPONSE)
+    @patch("allele.models.fetch_allele_data", return_value=CAR_RESPONSE)
+    def test_fetches_and_saves_new_allele_and_disease(
+        self, _mock_fetch_allele: MagicMock, _mock_fetch_disease: MagicMock
+    ):
+        data = {
+            "curation_type": CurationTypes.ALLELE,
+            "allele": "DRB1*15:01",
+            "disease": "MONDO:0005147",
+        }
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        allele = Allele.objects.get(name="DRB1*15:01")
+        disease = Disease.objects.get(mondo_id="MONDO:0005147")
+        self.assertEqual(allele.car_id, "XAHLA999")
+        self.assertEqual(disease.name, "type 1 diabetes mellitus")
+        self.assertEqual(allele.added_by, self.user4_yes_phi_yes_perms)
+        self.assertEqual(disease.added_by, self.user4_yes_phi_yes_perms)
+        curation = Curation.objects.get(allele=allele, disease=disease)
+        self.assertEqual(curation.added_by, self.user4_yes_phi_yes_perms)
+
+    @patch("allele.models.fetch_allele_data")
+    def test_reuses_existing_allele_and_disease_without_fetching(
+        self, mock_fetch_allele: MagicMock
+    ):
+        allele_count, disease_count = Allele.objects.count(), Disease.objects.count()
+        response = self.client.post(self.url, self._data(CurationTypes.ALLELE))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Allele.objects.count(), allele_count)
+        self.assertEqual(Disease.objects.count(), disease_count)
+        mock_fetch_allele.assert_not_called()
+
+    @patch("disease.models.fetch_disease_data", return_value=OLS_RESPONSE)
+    @patch("allele.models.fetch_allele_data", return_value=None)
+    def test_failed_allele_fetch_is_a_field_error_and_saves_nothing(
+        self, _mock_fetch_allele: MagicMock, _mock_fetch_disease: MagicMock
+    ):
+        counts = (Allele.objects.count(), Disease.objects.count())
+        data = {
+            "curation_type": CurationTypes.ALLELE,
+            "allele": "DRB1*15:01",
+            "disease": "MONDO:0005147",
+        }
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            "ClinGen Allele Registry", response.context["form"].errors["allele"][0]
+        )
+        self.assertEqual((Allele.objects.count(), Disease.objects.count()), counts)
+
+    @patch("disease.models.fetch_disease_data")
+    def test_malformed_mondo_id_is_a_field_error(self, mock_fetch: MagicMock):
+        data = self._data(CurationTypes.ALLELE, disease="0005147")
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("MONDO:", response.context["form"].errors["disease"][0])
+        mock_fetch.assert_not_called()
+
+    @patch("allele.models.fetch_allele_data", return_value=CAR_RESPONSE)
+    def test_rejected_curation_saves_no_new_records(self, mock_fetch: MagicMock):
+        allele_count = Allele.objects.count()
+        data = {
+            "curation_type": CurationTypes.HAPLOTYPE,
+            "allele": "DRB1*15:01",
+            "disease": "MONDO:123",
+        }
+        response = self.client.post(self.url, data)  # No haplotype.
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Allele.objects.count(), allele_count)
+        mock_fetch.assert_not_called()
 
 
 class CurationScoringSummaryTest(ProtectedViewTestMixin, TestCase):

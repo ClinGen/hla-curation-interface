@@ -30,7 +30,7 @@
             {% endwith %}
             <div id="allele-div">
                 {% with field=form.allele %}
-                    {% include "common/form/select/search.html" %}
+                    {% include "common/form/input/text.html" with show_help=True datalist=allele_options autocomplete="off" %}
                 {% endwith %}
             </div>
             <div id="haplotype-div">
@@ -39,8 +39,11 @@
                 {% endwith %}
             </div>
             {% with field=form.disease %}
-                {% include "common/form/select/search.html" %}
+                {% include "common/form/input/text.html" with show_help=True datalist=disease_options autocomplete="off" %}
             {% endwith %}
+            <div class="mb-4">
+                {% include "common/linkout.html" with url="https://www.ebi.ac.uk/ols4/ontologies/mondo" text="Search MONDO" %}
+            </div>
             {% if form.existing_pairs %}
                 <div class="notification is-warning">
                     <p><b>Existing curations of this pair:</b></p>

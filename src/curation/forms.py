@@ -1,16 +1,27 @@
 import re
+from collections.abc import Callable
 from datetime import date
 
 from django import forms
+from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.forms import ModelForm, modelformset_factory
 from django.http import QueryDict
 from django.utils import timezone
 
-from curation.constants.models.curation import CLASSIFICATION_CHOICES, TASKFORCE_CHOICES
+from allele.models import Allele
+from curation.constants.models.curation import (
+    CLASSIFICATION_CHOICES,
+    TASKFORCE_CHOICES,
+    CurationTypes,
+)
 from curation.models import Curation, Evidence
+from disease.models import Disease
 
 
 class CurationCreateForm(ModelForm):
+    allele = Allele.name.field.formfield(label="Allele", required=False)
+    disease = Disease.mondo_id.field.formfield(label="Disease")
     confirm_duplicate = forms.BooleanField(
         label="Create another curation for this pair anyway",
         required=False,
@@ -18,7 +29,7 @@ class CurationCreateForm(ModelForm):
 
     class Meta:
         model = Curation
-        fields = ["curation_type", "allele", "haplotype", "disease"]
+        fields = ["curation_type", "haplotype"]
         widgets = {"curation_type": forms.RadioSelect}
 
     def __init__(self, *args, **kwargs) -> None:
@@ -33,19 +44,51 @@ class CurationCreateForm(ModelForm):
             self.existing_pairs[0].evidence_count  # ty: ignore[unresolved-attribute]
         )
 
+    def _get_or_build[T](
+        self, field: str, get_or_build: Callable[[str], T]
+    ) -> T | None:
+        """Returns the typed record, existing or unsaved, or reports why it can't.
+
+        Args:
+            field: The name of the form field with the typed value.
+            get_or_build: The model's get_or_build class method.
+
+        Returns:
+            The record, or None if the field is empty or has an error.
+        """
+        value = self.cleaned_data.get(field)
+        if not value:
+            return None
+        try:
+            return get_or_build(value)
+        except ValidationError as error:
+            self.add_error(field, error.messages)
+            return None
+
     def clean(self) -> dict | None:
         cleaned_data = super().clean()
-        if not cleaned_data or not cleaned_data.get("disease"):
+        if not cleaned_data:
             return cleaned_data
-        # A missing allele or haplotype is reported by Curation.clean().
-        if not cleaned_data.get("allele") and not cleaned_data.get("haplotype"):
+        curation_type = cleaned_data.get("curation_type", "")
+        allele = None
+        if curation_type == CurationTypes.ALLELE:
+            allele = self._get_or_build("allele", Allele.get_or_build)
+            self.instance.allele = allele
+        haplotype = cleaned_data.get("haplotype")
+        disease = self._get_or_build("disease", Disease.get_or_build)
+        if disease:
+            self.instance.disease = disease
+        # A missing allele or haplotype is reported by Curation.clean(), and a new
+        # record has no curations yet.
+        target = allele or haplotype
+        if not disease or not target or disease.pk is None or target.pk is None:
             return cleaned_data
         self.existing_pairs = list(
             Curation.existing_pairs(
-                curation_type=cleaned_data.get("curation_type", ""),
-                allele=cleaned_data.get("allele"),
-                haplotype=cleaned_data.get("haplotype"),
-                disease=cleaned_data["disease"],
+                curation_type=curation_type,
+                allele=allele,
+                haplotype=haplotype,
+                disease=disease,
             )
         )
         # The working group allows one curation for risk evidence and one for
@@ -71,6 +114,19 @@ class CurationCreateForm(ModelForm):
                 "example for evidence in the opposite direction.",
             )
         return cleaned_data
+
+    def save(self, *args, **kwargs) -> Curation:
+        """Saves any new allele or disease with the curation, all or none.
+
+        Returns:
+            The curation.
+        """
+        with transaction.atomic():
+            for record in (self.instance.allele, self.instance.disease):
+                if record is not None and record.pk is None:
+                    record.added_by = self.instance.added_by
+                    record.save()
+            return super().save(*args, **kwargs)
 
 
 class TaskforceReviewForm(forms.Form):
