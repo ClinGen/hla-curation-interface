@@ -36,7 +36,7 @@ Defines `DiseaseForm`, a `ModelForm` for the `Disease` model that exposes only t
 
 ### `models.py`
 
-Defines the `Disease` model with fields for `slug`, `disease_type`, `mondo_id`, `iri`, `name`, `added_by`, `added_at`, and `updated_at`. It auto-generates a human-readable slug on first save, tracks history via `simple_history`, and runs model-level validation via `clean`.
+Defines the `Disease` model with fields for `slug`, `disease_type`, `mondo_id`, `iri`, `name`, `added_by`, `added_at`, and `updated_at`. It auto-generates a human-readable slug on first save, tracks history via `simple_history`, and runs model-level validation via `clean`. The `get_or_build` class method returns the disease with a given Mondo ID, or validates the ID and builds an unsaved disease with its name and IRI fetched from OLS, raising `ValidationError` if the ID is malformed or the fetch fails.
 
 ### `tables.py`
 
@@ -64,7 +64,7 @@ Renders the disease search page, including a search input, a paginated results t
 
 ### `tests.py`
 
-Contains test cases for `DiseaseCreate`, `DiseaseDetail`, and `DiseaseList` views, verifying authentication requirements, correct template rendering, and that valid/invalid form submissions behave as expected (including mocking the OLS API call).
+Contains test cases for `Disease.get_or_build` and the `DiseaseCreate`, `DiseaseDetail`, and `DiseaseList` views, verifying authentication requirements, correct template rendering, and that valid/invalid form submissions behave as expected (including mocking the OLS API call).
 
 ### `urls.py`
 
@@ -80,4 +80,4 @@ Provides two model-level validator functions: `validate_disease_type_mondo` ensu
 
 ### `views.py`
 
-Implements the five class-based views for the disease app: `DiseaseCreate` (fetches OLS data on form submission), `DiseaseDetail` (includes associated curations), `DiseaseHistory` (renders a history table), `DiseaseChange` (shows field-level diffs for a single historical record), and `DiseaseList` (searchable, paginated list).
+Implements the five class-based views for the disease app: `DiseaseCreate` (gets OLS data from `Disease.get_or_build` on form submission), `DiseaseDetail` (includes associated curations), `DiseaseHistory` (renders a history table), `DiseaseChange` (shows field-level diffs for a single historical record), and `DiseaseList` (searchable, paginated list).

@@ -1,13 +1,13 @@
 from typing import cast
 
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView
 from django_tables2 import RequestConfig
 
-from allele.clients import fetch_allele_data, get_car_id
 from allele.forms import AlleleForm
 from allele.models import Allele
 from allele.tables import AlleleTable
@@ -32,17 +32,14 @@ class AlleleCreate(ProtectedViewMixin, CreateView):
              The success page for the allele if the form is valid, or the form with
              errors if the form isn't valid.
         """
-        allele_data = fetch_allele_data(form.instance.name)
-        if allele_data:
-            form.instance.car_id = get_car_id(allele_data)
-            form.instance.added_by = self.request.user
-            return super().form_valid(form)
-        message = (
-            "Oops, something went wrong trying to fetch data from the "
-            "ClinGen Allele Registry. Please try again later."
-        )
-        messages.warning(self.request, message)
-        return redirect("allele-create")
+        try:
+            allele = Allele.get_or_build(form.instance.name)
+        except ValidationError as error:
+            messages.warning(self.request, error.messages[0])
+            return redirect("allele-create")
+        form.instance.car_id = allele.car_id
+        form.instance.added_by = self.request.user
+        return super().form_valid(form)
 
 
 class AlleleDetail(ProtectedViewMixin, DetailView):

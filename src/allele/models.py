@@ -1,8 +1,11 @@
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import HttpResponseBase
 from django.urls import reverse
 from simple_history.models import HistoricalRecords
+
+from allele.clients import fetch_allele_data, get_car_id
 
 
 class Allele(models.Model):
@@ -69,6 +72,35 @@ class Allele(models.Model):
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         return reverse("allele-detail", kwargs={"slug": self.slug})
+
+    @classmethod
+    def get_or_build(cls, name: str) -> "Allele":
+        """Returns the allele with the name, or builds an unsaved one from the CAR.
+
+        Args:
+            name: The name of the allele, e.g., DRB3*03:01:01.
+
+        Returns:
+            The existing allele, or a new unsaved allele with its CAR ID.
+
+        Raises:
+            ValidationError: If the allele isn't in the database and fetching it
+                from the ClinGen Allele Registry fails.
+        """
+        existing = cls.objects.filter(name=name).first()
+        if existing:
+            return existing
+        allele_data = fetch_allele_data(name)
+        if not allele_data:
+            raise ValidationError(
+                {
+                    "name": (
+                        "Oops, something went wrong trying to fetch data from the "
+                        "ClinGen Allele Registry. Please try again later."
+                    )
+                }
+            )
+        return cls(name=name, car_id=get_car_id(allele_data))
 
     @property
     def display_name(self) -> str:

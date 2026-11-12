@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock, patch
 
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 
@@ -26,7 +27,7 @@ class AlleleCreateTest(ProtectedViewTestMixin, TestCase):
         response = self.client.get(self.url)
         self.assertContains(response, "Submit")
 
-    @patch("allele.views.fetch_allele_data")
+    @patch("allele.models.fetch_allele_data")
     def test_creates_allele_with_valid_form_data(
         self, mock_fetch_allele_data: MagicMock
     ):
@@ -117,3 +118,29 @@ class AlleleListTest(ProtectedViewTestMixin, TestCase):
     def setUp(self):
         super().setUp()
         self.client.force_login(self.user4_yes_phi_yes_perms)
+
+
+CAR_RESPONSE = [{"id": "XAHLA999", "type": "hla"}]
+
+
+class AlleleGetOrBuildTest(TestCase):
+    fixtures = ["test_alleles.json"]
+
+    @patch("allele.models.fetch_allele_data")
+    def test_returns_existing_allele_without_fetching(self, mock_fetch: MagicMock):
+        existing = Allele.objects.get(pk=1)
+        self.assertEqual(Allele.get_or_build(existing.name), existing)
+        mock_fetch.assert_not_called()
+
+    @patch("allele.models.fetch_allele_data", return_value=CAR_RESPONSE)
+    def test_builds_unsaved_allele_from_car(self, mock_fetch: MagicMock):
+        allele = Allele.get_or_build("DRB3*03:01:01")
+        self.assertIsNone(allele.pk)
+        self.assertEqual(allele.name, "DRB3*03:01:01")
+        self.assertEqual(allele.car_id, "XAHLA999")
+        mock_fetch.assert_called_once_with("DRB3*03:01:01")
+
+    @patch("allele.models.fetch_allele_data", return_value=None)
+    def test_raises_when_fetch_fails(self, _mock_fetch: MagicMock):
+        with self.assertRaisesMessage(ValidationError, "ClinGen Allele Registry"):
+            Allele.get_or_build("DRB3*03:01:01")
