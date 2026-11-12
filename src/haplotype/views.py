@@ -1,5 +1,6 @@
 from typing import cast
 
+from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import DetailView
@@ -12,7 +13,6 @@ from common.history import resolve_changes
 from common.tables import HistoryTable
 from common.views import SearchListView
 from curation.tables import CurationTable
-from haplotype.constants.models import GENE_LIST
 from haplotype.forms import HaplotypeForm
 from haplotype.models import Haplotype
 from haplotype.tables import HaplotypeTable
@@ -30,13 +30,13 @@ class HaplotypeCreate(ProtectedViewMixin, CreateView):
         Returns:
              The success page if valid or the form with errors if not.
         """
-        unsorted_alleles: list[tuple[str, int]] = []
-        for allele in form.cleaned_data["alleles"]:
-            gene = allele.name.split("*")[0]
-            index = GENE_LIST.index(gene)
-            unsorted_alleles.append((allele.name, index))
-        sorted_alleles = sorted(unsorted_alleles, key=lambda item: item[1])
-        computed_name = "~".join(item[0] for item in sorted_alleles)
+        try:
+            computed_name = Haplotype.canonical_name(
+                allele.name for allele in form.cleaned_data["alleles"]
+            )
+        except ValidationError as error:
+            form.add_error("alleles", error.messages)
+            return self.form_invalid(form)
         if Haplotype.objects.filter(name=computed_name).exists():
             form.add_error("alleles", "A haplotype with these alleles already exists.")
             return self.form_invalid(form)

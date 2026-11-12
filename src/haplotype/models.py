@@ -1,10 +1,14 @@
+from collections.abc import Iterable
+
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import HttpResponseBase
 from django.urls import reverse
 from simple_history.models import HistoricalRecords
 
 from allele.models import Allele
+from haplotype.constants.models import GENE_LIST
 
 
 class Haplotype(models.Model):
@@ -69,6 +73,51 @@ class Haplotype(models.Model):
 
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         return reverse("haplotype-detail", kwargs={"slug": self.slug})
+
+    @staticmethod
+    def canonical_name(allele_names: Iterable[str]) -> str:
+        """Joins allele names with '~' in the order of their genes on chromosome 6.
+
+        Args:
+            allele_names: The constituent allele names, in any order.
+
+        Returns:
+            The haplotype name, e.g., DRB1*15:01~DQB1*06:02.
+
+        Raises:
+            ValidationError: If an allele's gene isn't in GENE_LIST.
+        """
+        genes = {name: name.split("*")[0] for name in allele_names}
+        unknown = [name for name, gene in genes.items() if gene not in GENE_LIST]
+        if unknown:
+            raise ValidationError({"name": f"{unknown[0]} has an unknown gene."})
+        return "~".join(sorted(genes, key=lambda name: GENE_LIST.index(genes[name])))
+
+    @classmethod
+    def get_or_build(cls, name: str) -> tuple["Haplotype", list[Allele]]:
+        """Returns the haplotype with the name, or builds an unsaved one.
+
+        Args:
+            name: The constituent allele names joined by '~', in any order.
+
+        Returns:
+            The existing or new unsaved haplotype, and its alleles in canonical
+            order. Alleles that aren't in the database are fetched and unsaved, so
+            the caller saves them, saves the haplotype, then adds the alleles.
+
+        Raises:
+            ValidationError: If the name is malformed, has an unknown gene, or an
+                allele can't be fetched from the ClinGen Allele Registry.
+        """
+        allele_names = [part.strip() for part in name.split("~")]
+        if not all(allele_names):
+            raise ValidationError(
+                {"name": "Separate allele names with '~', e.g., A*01:01~B*08:01."}
+            )
+        canonical_name = cls.canonical_name(allele_names)
+        haplotype = cls.objects.filter(name=canonical_name).first()
+        alleles = [Allele.get_or_build(part) for part in canonical_name.split("~")]
+        return haplotype or cls(name=canonical_name), alleles
 
     @property
     def display_name(self) -> str:
