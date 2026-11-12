@@ -17,10 +17,12 @@ from curation.constants.models.curation import (
 )
 from curation.models import Curation, Evidence
 from disease.models import Disease
+from haplotype.models import Haplotype
 
 
 class CurationCreateForm(ModelForm):
     allele = Allele.name.field.formfield(label="Allele", required=False)
+    haplotype = Haplotype.name.field.formfield(label="Haplotype", required=False)
     disease = Disease.mondo_id.field.formfield(label="Disease")
     confirm_duplicate = forms.BooleanField(
         label="Create another curation for this pair anyway",
@@ -29,13 +31,14 @@ class CurationCreateForm(ModelForm):
 
     class Meta:
         model = Curation
-        fields = ["curation_type", "haplotype"]
+        fields = ["curation_type"]
         widgets = {"curation_type": forms.RadioSelect}
 
     def __init__(self, *args, **kwargs) -> None:
         """Starts with no existing curations of the pair; clean() finds them."""
         super().__init__(*args, **kwargs)
         self.existing_pairs: list[Curation] = []
+        self.haplotype_alleles: list[Allele] = []
 
     @property
     def can_confirm_duplicate(self) -> bool:
@@ -74,7 +77,11 @@ class CurationCreateForm(ModelForm):
         if curation_type == CurationTypes.ALLELE:
             allele = self._get_or_build("allele", Allele.get_or_build)
             self.instance.allele = allele
-        haplotype = cleaned_data.get("haplotype")
+        haplotype = None
+        if curation_type == CurationTypes.HAPLOTYPE:
+            result = self._get_or_build("haplotype", Haplotype.get_or_build)
+            haplotype, self.haplotype_alleles = result or (None, [])
+            self.instance.haplotype = haplotype
         disease = self._get_or_build("disease", Disease.get_or_build)
         if disease:
             self.instance.disease = disease
@@ -116,16 +123,22 @@ class CurationCreateForm(ModelForm):
         return cleaned_data
 
     def save(self, *args, **kwargs) -> Curation:
-        """Saves any new allele or disease with the curation, all or none.
+        """Saves any new allele, haplotype, or disease with the curation, all or none.
 
         Returns:
             The curation.
         """
+        haplotype = self.instance.haplotype
+        new_haplotype = haplotype is not None and haplotype.pk is None
+        records = [*self.haplotype_alleles, haplotype]
+        records += [self.instance.allele, self.instance.disease]
         with transaction.atomic():
-            for record in (self.instance.allele, self.instance.disease):
+            for record in records:
                 if record is not None and record.pk is None:
                     record.added_by = self.instance.added_by
                     record.save()
+            if new_haplotype:
+                haplotype.alleles.add(*self.haplotype_alleles)
             return super().save(*args, **kwargs)
 
 
