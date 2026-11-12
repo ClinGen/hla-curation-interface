@@ -1,9 +1,11 @@
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import HttpResponseBase
 from django.urls import reverse
 from simple_history.models import HistoricalRecords
 
+from disease.clients import fetch_disease_data, get_iri, get_name
 from disease.constants.models import DISEASE_TYPE_CHOICES, DiseaseTypes
 from disease.validators.models import validate_disease_type_mondo, validate_mondo_id
 
@@ -88,6 +90,39 @@ class Disease(models.Model):
     def get_absolute_url(self) -> HttpResponseBase | str | None:
         """Returns the details page for a specific disease."""
         return reverse("disease-detail", kwargs={"slug": self.slug})
+
+    @classmethod
+    def get_or_build(cls, mondo_id: str) -> "Disease":
+        """Returns the disease with the Mondo ID, or builds an unsaved one from OLS.
+
+        Args:
+            mondo_id: The Mondo Disease Ontology ID, e.g., MONDO:0005052.
+
+        Returns:
+            The existing disease, or a new unsaved disease with its name and IRI.
+
+        Raises:
+            ValidationError: If the Mondo ID is malformed, or the disease isn't in
+                the database and fetching it from the Ontology Lookup Service fails.
+        """
+        existing = cls.objects.filter(mondo_id=mondo_id).first()
+        if existing:
+            return existing
+        disease = cls(mondo_id=mondo_id)
+        disease.clean()
+        disease_data = fetch_disease_data(mondo_id)
+        if not disease_data:
+            raise ValidationError(
+                {
+                    "mondo_id": (
+                        "Oops, something went wrong trying to fetch data from the "
+                        "Ontology Lookup Service. Please try again later."
+                    )
+                }
+            )
+        disease.name = get_name(disease_data)
+        disease.iri = get_iri(disease_data)
+        return disease
 
     def clean(self) -> None:
         """Makes sure the disease is valid."""

@@ -1,6 +1,7 @@
 from typing import cast
 
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
@@ -12,7 +13,6 @@ from common.history import resolve_changes
 from common.tables import HistoryTable
 from common.views import SearchListView
 from curation.tables import CurationTable
-from disease.clients import fetch_disease_data, get_iri, get_name
 from disease.forms import DiseaseForm
 from disease.models import Disease
 from disease.tables import DiseaseTable
@@ -25,18 +25,15 @@ class DiseaseCreate(ProtectedViewMixin, CreateView):
     success_url = reverse_lazy("disease-list")
 
     def form_valid(self, form: DiseaseForm) -> HttpResponse:
-        disease_data = fetch_disease_data(form.instance.mondo_id)
-        if disease_data:
-            form.instance.name = get_name(disease_data)
-            form.instance.iri = get_iri(disease_data)
-            form.instance.added_by = self.request.user
-            return super().form_valid(form)
-        message = (
-            "Oops, something went wrong trying to fetch data from the "
-            "Ontology Lookup Service. Please try again later."
-        )
-        messages.warning(self.request, message)
-        return redirect("disease-create")
+        try:
+            disease = Disease.get_or_build(form.instance.mondo_id)
+        except ValidationError as error:
+            messages.warning(self.request, error.messages[0])
+            return redirect("disease-create")
+        form.instance.name = disease.name
+        form.instance.iri = disease.iri
+        form.instance.added_by = self.request.user
+        return super().form_valid(form)
 
 
 class DiseaseDetail(ProtectedViewMixin, DetailView):

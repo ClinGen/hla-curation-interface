@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock, patch
 
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 
@@ -25,7 +26,7 @@ class DiseaseCreateTest(ProtectedViewTestMixin, TestCase):
         response = self.client.get(self.url)
         self.assertContains(response, "Submit")
 
-    @patch("disease.views.fetch_disease_data")
+    @patch("disease.models.fetch_disease_data")
     def test_creates_disease_with_valid_form_data(
         self, mock_fetch_disease_data: MagicMock
     ):
@@ -96,3 +97,45 @@ class DiseaseListTest(ProtectedViewTestMixin, TestCase):
     def setUp(self):
         super().setUp()
         self.client.force_login(self.user4_yes_phi_yes_perms)
+
+
+OLS_RESPONSE = {
+    "_embedded": {
+        "terms": [
+            {
+                "iri": "http://purl.obolibrary.org/obo/MONDO_0005147",
+                "label": "type 1 diabetes mellitus",
+            }
+        ]
+    }
+}
+
+
+class DiseaseGetOrBuildTest(TestCase):
+    @patch("disease.models.fetch_disease_data")
+    def test_returns_existing_disease_without_fetching(self, mock_fetch: MagicMock):
+        existing = Disease.objects.create(mondo_id="MONDO:0005147")
+        self.assertEqual(Disease.get_or_build("MONDO:0005147"), existing)
+        mock_fetch.assert_not_called()
+
+    @patch("disease.models.fetch_disease_data", return_value=OLS_RESPONSE)
+    def test_builds_unsaved_disease_from_ols(self, mock_fetch: MagicMock):
+        disease = Disease.get_or_build("MONDO:0005147")
+        self.assertIsNone(disease.pk)
+        self.assertEqual(disease.mondo_id, "MONDO:0005147")
+        self.assertEqual(disease.name, "type 1 diabetes mellitus")
+        self.assertEqual(disease.iri, "http://purl.obolibrary.org/obo/MONDO_0005147")
+        mock_fetch.assert_called_once_with("MONDO:0005147")
+
+    @patch("disease.models.fetch_disease_data", return_value=None)
+    def test_raises_when_fetch_fails(self, _mock_fetch: MagicMock):
+        with self.assertRaisesMessage(ValidationError, "Ontology Lookup Service"):
+            Disease.get_or_build("MONDO:0005147")
+
+    @patch("disease.models.fetch_disease_data")
+    def test_raises_for_malformed_mondo_id_without_fetching(
+        self, mock_fetch: MagicMock
+    ):
+        with self.assertRaisesMessage(ValidationError, "MONDO:"):
+            Disease.get_or_build("0005147")
+        mock_fetch.assert_not_called()

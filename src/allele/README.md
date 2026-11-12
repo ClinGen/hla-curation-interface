@@ -28,7 +28,7 @@ Defines `AlleleForm`, a `ModelForm` for the `Allele` model that exposes only the
 
 ### `models.py`
 
-Defines the `Allele` model with fields for a human-readable slug ID, allele name, CAR ID, and audit timestamps. The `save` method auto-generates the slug in the format `A000001`, and `HistoricalRecords` from `django-simple-history` tracks all changes.
+Defines the `Allele` model with fields for a human-readable slug ID, allele name, CAR ID, and audit timestamps. The `save` method auto-generates the slug in the format `A000001`, and `HistoricalRecords` from `django-simple-history` tracks all changes. The `get_or_build` class method returns the allele with a given name, or builds an unsaved one with its CAR ID fetched from the ClinGen Allele Registry, raising `ValidationError` if the fetch fails.
 
 ### `tables.py`
 
@@ -56,7 +56,7 @@ Renders the allele search page with a search input, a paginated results table, a
 
 ### `tests.py`
 
-Contains tests for the allele create, detail, and list views. Covers access protection (via `ProtectedViewTestMixin`), form validation, CAR API integration on creation (using mocks), and correct rendering of related haplotypes and fixture data.
+Contains tests for `Allele.get_or_build` and the allele create, detail, and list views. Covers access protection (via `ProtectedViewTestMixin`), form validation, CAR API integration on creation (using mocks), and correct rendering of related haplotypes and fixture data.
 
 ### `urls.py`
 
@@ -64,4 +64,4 @@ Maps URL patterns for the five allele views: `allele-create`, `allele-detail`, `
 
 ### `views.py`
 
-Implements the five class-based views for alleles, all protected by `ProtectedViewMixin`. `AlleleCreate` fetches the CAR ID on form submission; `AlleleDetail` injects related curation and haplotype tables into context; `AlleleHistory` builds a history table; `AlleleChange` resolves the field-level diff for a single history record; and `AlleleList` provides paginated, searchable results.
+Implements the five class-based views for alleles, all protected by `ProtectedViewMixin`. `AlleleCreate` gets the CAR ID from `Allele.get_or_build` on form submission; `AlleleDetail` injects related curation and haplotype tables into context; `AlleleHistory` builds a history table; `AlleleChange` resolves the field-level diff for a single history record; and `AlleleList` provides paginated, searchable results.
