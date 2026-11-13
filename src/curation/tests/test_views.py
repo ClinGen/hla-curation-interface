@@ -33,6 +33,7 @@ from curation.constants.models.evidence import (
     TypingMethod,
     Zygosity,
 )
+from curation.forms import CurationCreateForm
 from curation.models import (
     Curation,
     Demographic,
@@ -130,63 +131,47 @@ class CurationCreateTest(ProtectedViewTestMixin, TestCase):
             **extra,
         }
 
-    def test_one_existing_pair_requires_confirmation(self):
+    def test_existing_pair_blocks_creation(self):
         for curation_type in (CurationTypes.ALLELE, CurationTypes.HAPLOTYPE):
-            with self.subTest(curation_type=curation_type):
-                existing = self._make_existing(curation_type)
-                count = Curation.objects.count()
-                response = self.client.post(self.url, self._data(curation_type))
-                self.assertEqual(response.status_code, 200)
-                self.assertEqual(Curation.objects.count(), count)
-                self.assertContains(response, existing.slug)
-                self.assertContains(response, 'name="confirm_duplicate"')
+            for with_evidence in (True, False):
+                with self.subTest(
+                    curation_type=curation_type, with_evidence=with_evidence
+                ):
+                    existing = self._make_existing(
+                        curation_type, with_evidence=with_evidence
+                    )
+                    count = Curation.objects.count()
+                    response = self.client.post(self.url, self._data(curation_type))
+                    new_count = Curation.objects.count()
+                    existing.delete()
+                    self.assertEqual(response.status_code, 200)
+                    self.assertEqual(new_count, count)
+                    self.assertContains(response, existing.slug)
+                    self.assertContains(response, "Add evidence to it instead")
+                    self.assertContains(response, "conflicting classifications")
 
-    def test_one_existing_pair_allows_creation_after_confirmation(self):
-        for curation_type in (CurationTypes.ALLELE, CurationTypes.HAPLOTYPE):
-            with self.subTest(curation_type=curation_type):
-                self._make_existing(curation_type)
-                count = Curation.objects.count()
-                data = self._data(curation_type, confirm_duplicate="on")
-                response = self.client.post(self.url, data)
-                self.assertEqual(response.status_code, 302)
-                self.assertEqual(Curation.objects.count(), count + 1)
+    def test_existing_pair_explains_how_to_ask_for_a_separate_curation(self):
+        self._make_existing(CurationTypes.ALLELE)
+        response = self.client.post(self.url, self._data(CurationTypes.ALLELE))
+        soup = BeautifulSoup(response.content, "html.parser")
+        warning = soup.select_one("#existing-pairs")
+        assert warning is not None
+        link = warning.select_one('a[href="mailto:hci@clinicalgenome.org"]')
+        self.assertIsNotNone(link)
+        self.assertIn("separate curation", warning.get_text())
 
-    def test_one_existing_pair_without_evidence_blocks_creation(self):
-        for curation_type in (CurationTypes.ALLELE, CurationTypes.HAPLOTYPE):
-            with self.subTest(curation_type=curation_type):
-                existing = self._make_existing(curation_type, with_evidence=False)
-                count = Curation.objects.count()
-                data = self._data(curation_type, confirm_duplicate="on")
-                response = self.client.post(self.url, data)
-                self.assertEqual(response.status_code, 200)
-                self.assertEqual(Curation.objects.count(), count)
-                self.assertContains(response, existing.slug)
-                self.assertNotContains(response, 'name="confirm_duplicate"')
-                existing.delete()
+    def test_form_has_no_confirm_duplicate_field(self):
+        self.assertNotIn("confirm_duplicate", CurationCreateForm().fields)
+        response = self.client.get(self.url)
+        self.assertNotContains(response, 'name="confirm_duplicate"')
 
-    def test_two_existing_pairs_block_creation(self):
-        for curation_type in (CurationTypes.ALLELE, CurationTypes.HAPLOTYPE):
-            with self.subTest(curation_type=curation_type):
-                first = self._make_existing(curation_type)
-                second = self._make_existing(curation_type)
-                count = Curation.objects.count()
-                data = self._data(curation_type, confirm_duplicate="on")
-                response = self.client.post(self.url, data)
-                self.assertEqual(response.status_code, 200)
-                self.assertEqual(Curation.objects.count(), count)
-                self.assertContains(response, first.slug)
-                self.assertContains(response, second.slug)
-                self.assertNotContains(response, 'name="confirm_duplicate"')
-
-    def test_published_curation_and_its_copy_count_as_one_pair(self):
+    def test_copy_of_a_published_curation_does_not_count_as_another_pair(self):
         published = self._make_existing(CurationTypes.ALLELE, status=Status.PUBLISHED)
         copy = self._make_existing(CurationTypes.ALLELE, copied_from=published)
-        data = self._data(CurationTypes.ALLELE, confirm_duplicate="on")
-        response = self.client.post(self.url, data)
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(
-            Curation.objects.exclude(pk__in=[published.pk, copy.pk]).count(), 1
-        )
+        response = self.client.post(self.url, self._data(CurationTypes.ALLELE))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f"being curated in {published.slug}.")
+        self.assertNotContains(response, f"being curated in {copy.slug}")
 
     def test_same_allele_with_different_disease_is_not_flagged(self):
         self._make_existing(CurationTypes.ALLELE)
@@ -1337,7 +1322,7 @@ class CurationCopyTest(SuppressRequestLoggingMixin, TestCase):
         assert copy is not None
         self.assertEqual(copy.evidence.count(), 1)  # type: ignore
 
-    def test_copy_succeeds_when_two_root_curations_exist(self):
+    def test_copy_succeeds_when_the_pair_has_another_root_curation(self):
         _make_curation(self.allele, self.disease)
         response = self.client.post(self._url())
         self.assertEqual(response.status_code, 302)
