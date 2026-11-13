@@ -243,7 +243,6 @@ class Curation(models.Model):
                 **target,
             )
             .prefetch_related("copies")
-            .annotate(evidence_count=models.Count("evidence"))
             .order_by("added_at")
         )
 

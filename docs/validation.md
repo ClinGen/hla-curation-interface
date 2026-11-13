@@ -38,11 +38,12 @@ are also rejected.
 ### Curation
 
 A curation links one allele or haplotype to one disease. The system makes sure the right
-type of genetic entity is provided for the curation type chosen. A pair can have at most
-two curations, one for risk evidence and one for protective evidence. If one already
-exists, the curator sees it and must confirm before creating a second, and can't create
-a second until the first has evidence. Copies of a published curation don't count as
-separate curations. The system also enforces consistency between a curation's status
+type of genetic entity is provided for the curation type chosen. A pair can have only
+one curation, which holds both its risk and protective evidence. If one already exists,
+the curator sees it and is told to add evidence to it instead, since a duplicate could
+lead to conflicting classifications. A curator whose evidence needs a separate curation
+is asked to email hci@clinicalgenome.org and explain why. Copies of a published
+curation don't count as separate curations. The system also enforces consistency between a curation's status
 and its evidence: a curation cannot be submitted for review ("Provisional") if any of
 its included evidence records are still "In Progress." When a
 classification level is assigned, the system checks that the curation's total score
@@ -162,14 +163,11 @@ always populated from the external API, never from user input.
 
 **Form** (`src/curation/forms.py`): `CurationCreateForm.clean()` looks up root
 curations (`copied_from` is null) of the same allele or haplotype and disease with
-`Curation.existing_pairs()`. The form lists them, with their status and copies, above
-the submit button.
-
-- Two or more: raises a non-field error, whether or not the curator confirmed.
-- One with no evidence: raises a non-field error telling the curator to add evidence to
-  it instead.
-- One with evidence: raises a non-field error unless `confirm_duplicate` is checked. The
-  checkbox is shown only in this case.
+`Curation.existing_pairs()`. If there is one, it raises a non-field error telling the
+curator to add evidence to it instead, and lists it, with its status and copies, above
+the submit button with the email address to write to for a separate curation. A pair
+has one curation, which holds both its risk and protective
+evidence.
 
 `curation_copy` doesn't use this form, so copying is never blocked.
 

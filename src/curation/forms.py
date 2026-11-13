@@ -24,10 +24,6 @@ class CurationCreateForm(ModelForm):
     allele = Allele.name.field.formfield(label="Allele", required=False)
     haplotype = Haplotype.name.field.formfield(label="Haplotype", required=False)
     disease = Disease.mondo_id.field.formfield(label="Disease")
-    confirm_duplicate = forms.BooleanField(
-        label="Create another curation for this pair anyway",
-        required=False,
-    )
 
     class Meta:
         model = Curation
@@ -39,13 +35,6 @@ class CurationCreateForm(ModelForm):
         super().__init__(*args, **kwargs)
         self.existing_pairs: list[Curation] = []
         self.haplotype_alleles: list[Allele] = []
-
-    @property
-    def can_confirm_duplicate(self) -> bool:
-        """Whether the curator may confirm creating a second curation."""
-        return len(self.existing_pairs) == 1 and bool(
-            self.existing_pairs[0].evidence_count  # ty: ignore[unresolved-attribute]
-        )
 
     def _get_or_build[T](
         self, field: str, get_or_build: Callable[[str], T]
@@ -98,27 +87,14 @@ class CurationCreateForm(ModelForm):
                 disease=disease,
             )
         )
-        # The working group allows one curation for risk evidence and one for
-        # protective evidence, so a pair can have at most two.
-        if len(self.existing_pairs) >= 2:
-            slugs = ", ".join(c.slug for c in self.existing_pairs)
-            self.add_error(
-                None,
-                f"This pair already has two curations ({slugs}). "
-                "Add evidence to one of them instead.",
-            )
-        elif self.existing_pairs and not self.can_confirm_duplicate:
-            self.add_error(
-                None,
-                f"This pair is already being curated in {self.existing_pairs[0].slug}, "
-                "which has no evidence yet. Add evidence to it instead.",
-            )
-        elif self.existing_pairs and not cleaned_data.get("confirm_duplicate"):
+        # A pair has one curation, which holds both its risk and protective
+        # evidence. Copies don't count; see existing_pairs().
+        if self.existing_pairs:
             self.add_error(
                 None,
                 f"This pair is already being curated in {self.existing_pairs[0].slug}. "
-                "Review it, then confirm below to create a second curation, for "
-                "example for evidence in the opposite direction.",
+                "Add evidence to it instead of creating a duplicate, which could "
+                "lead to conflicting classifications.",
             )
         return cleaned_data
 

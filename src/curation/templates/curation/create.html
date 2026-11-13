@@ -47,8 +47,8 @@
                 {% include "common/linkout.html" with url="https://www.ebi.ac.uk/ols4/ontologies/mondo" text="Search MONDO" %}
             </div>
             {% if form.existing_pairs %}
-                <div class="notification is-warning">
-                    <p><b>Existing curations of this pair:</b></p>
+                <div id="existing-pairs" class="notification is-warning">
+                    <p><b>Existing curation of this pair:</b></p>
                     <ul>
                         {% for curation in form.existing_pairs %}
                             <li>
@@ -61,12 +61,11 @@
                             </li>
                         {% endfor %}
                     </ul>
-                    {% if form.can_confirm_duplicate %}
-                        <label class="checkbox mt-3">
-                            {{ form.confirm_duplicate }}
-                            {{ form.confirm_duplicate.label }}
-                        </label>
-                    {% endif %}
+                    <p class="mt-3">
+                        If your evidence needs a separate curation, email
+                        <a href="mailto:hci@clinicalgenome.org">hci@clinicalgenome.org</a>
+                        and tell us why the existing curation doesn't fit.
+                    </p>
                 </div>
             {% endif %}
             <button type="submit" class="button is-link">
