@@ -267,6 +267,18 @@ class CurationCreateTest(ProtectedViewTestMixin, TestCase):
                 response = self.client.post(self.url, data)
                 self.assertIn("is required", response.context["form"].errors[field][0])
 
+    def test_allele_input_suggests_existing_alleles(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        allele_input = soup.select_one('input[name="allele"]')
+        assert allele_input is not None
+        self.assertEqual(allele_input["hx-get"], reverse("allele-suggest"))
+        self.assertEqual(allele_input["role"], "combobox")
+        self.assertEqual(allele_input["autocomplete"], "off")
+        listbox = soup.select_one(f"#{allele_input['aria-controls']}")
+        assert listbox is not None
+        self.assertEqual(listbox["role"], "listbox")
+
     def test_haplotype_help_text_explains_separators(self):
         response = self.client.get(self.url)
         self.assertContains(response, "separated by ~, spaces, or commas")

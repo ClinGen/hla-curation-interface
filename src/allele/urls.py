@@ -13,4 +13,5 @@ urlpatterns = [
         name="allele-change",
     ),
     path("list", AlleleList.as_view(), name="allele-list"),
+    path("suggest", views.AlleleSuggest.as_view(), name="allele-suggest"),
 ]

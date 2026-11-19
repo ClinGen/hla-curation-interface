@@ -56,12 +56,12 @@ Renders the allele search page with a search input, a paginated results table, a
 
 ### `tests.py`
 
-Contains tests for `Allele.get_or_build` and the allele create, detail, and list views. Covers access protection (via `ProtectedViewTestMixin`), form validation, CAR API integration on creation (using mocks), and correct rendering of related haplotypes and fixture data.
+Contains tests for `Allele.get_or_build` and the allele create, detail, list, and suggest views. Covers access protection (via `ProtectedViewTestMixin`), form validation, CAR API integration on creation (using mocks), and correct rendering of related haplotypes and fixture data.
 
 ### `urls.py`
 
-Maps URL patterns for the five allele views: `allele-create`, `allele-detail`, `allele-history`, `allele-change`, and `allele-list`.
+Maps URL patterns for the six allele views: `allele-create`, `allele-detail`, `allele-history`, `allele-change`, `allele-list`, and `allele-suggest`.
 
 ### `views.py`
 
-Implements the five class-based views for alleles, all protected by `ProtectedViewMixin`. `AlleleCreate` gets the CAR ID from `Allele.get_or_build` on form submission; `AlleleDetail` injects related curation and haplotype tables into context; `AlleleHistory` builds a history table; `AlleleChange` resolves the field-level diff for a single history record; and `AlleleList` provides paginated, searchable results.
+Implements the six class-based views for alleles, all protected by `ProtectedViewMixin`. `AlleleCreate` gets the CAR ID from `Allele.get_or_build` on form submission; `AlleleDetail` injects related curation and haplotype tables into context; `AlleleHistory` builds a history table; `AlleleChange` resolves the field-level diff for a single history record; `AlleleList` provides paginated, searchable results; and `AlleleSuggest`, a `SuggestView`, suggests existing alleles by name for the Add Curation allele field.

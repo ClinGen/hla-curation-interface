@@ -49,7 +49,7 @@ The Bulma modal card that `hci/js/confirm-modal.js` shows before submitting a fo
 
 ### `templates/common/form/input/radio.html`
 
-Reusable partial for rendering a radio-button form field using Bulma CSS. Supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead.
+Reusable partial for rendering a radio-button form field using Bulma CSS. Supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead. Pass `suggest_url` to suggest existing records as the curator types: the input becomes an ARIA combobox that fetches that URL with HTMX and shows the matches in a Bulma dropdown below it, which `hci/js/suggest.js` opens, closes, and fills the input from. The curator can still type a value that isn't suggested.
 
 ### `templates/common/form/input/text.html`
 
@@ -94,6 +94,10 @@ Renders the live-search text input used on list pages. Uses HTMX to fire a GET r
 ### `templates/common/partials/search_results.html`
 
 Renders the result count and, when results exist, the django-tables2 table inside an HTMX-boosted container targeting `#search-results`. Used as the HTMX partial response for search queries.
+
+### `templates/common/partials/suggestions.html`
+
+The HTMX fragment that `SuggestView` returns: one Bulma `dropdown-item` per suggestion, with `role="option"`, the value to fill the input with in `data-value`, and the text to show. Expects `suggestions`, a list of `(value, label)` pairs.
 
 ### `templates/common/public_badge.html`
 
@@ -153,4 +157,4 @@ Provides reusable test mixins (`OpenViewTestMixin`, `ProtectedViewTestMixin`, `S
 
 ### `views.py`
 
-Defines `BackupDatabaseView`, the view behind the admin's Back up now button, which lets only superusers back up the database under `manual/` with a name that includes their username, and `SearchListView`, a `ListView` subclass that adds case-insensitive multi-field search via a `q` GET parameter, returns only the `search_results` partial when the request carries an `HX-Request` header, and injects `query` and `result_count` into the template context.
+Defines `BackupDatabaseView`, the view behind the admin's Back up now button, which lets only superusers back up the database under `manual/` with a name that includes their username, and `SearchListView`, a `ListView` subclass that adds case-insensitive multi-field search via a `q` GET parameter, returns only the `search_results` partial when the request carries an `HX-Request` header, and injects `query` and `result_count` into the template context. It also defines `SuggestView`, the base for the suggestion endpoints behind `text.html`'s `suggest_url`: subclasses set the model, `search_fields`, and `ordering`, and can override `get_suggestion` to choose the value and label. It renders `partials/suggestions.html` with up to 10 records that contain the `q` GET parameter, case-insensitively, or none when `q` is shorter than two characters.

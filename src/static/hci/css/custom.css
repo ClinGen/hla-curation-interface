@@ -186,3 +186,30 @@
 .scoring-summary tfoot td.is-points {
   background-color: #dbe8f5;
 }
+
+/* Suggestions under a text input (common/form/input/text.html with suggest_url). */
+.suggest.dropdown {
+    display: block;
+}
+
+.suggest .dropdown-menu {
+    width: 50%;
+}
+
+.suggest .dropdown-content {
+    max-height: 20rem;
+    overflow-y: auto;
+}
+
+.suggest .dropdown-item {
+    cursor: pointer;
+}
+
+.suggest .dropdown-item:hover {
+    background-color: var(--bulma-background);
+}
+
+.suggest .dropdown-item.is-active {
+    background-color: var(--bulma-link);
+    color: var(--bulma-link-invert);
+}

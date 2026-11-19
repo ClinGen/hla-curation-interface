@@ -9,14 +9,31 @@
     {% if show_help and field.help_text %}
         <p class="help">{{ field.help_text }}</p>
     {% endif %}
-    <div class="control">
+    <div class="control{% if suggest_url %} suggest dropdown{% endif %}">
         <input class="input column is-half"
                id="{{ field.id_for_label }}"
                name="{{ field.html_name }}"
                {% if type %}type="{{ type }}"{% endif %}
                {% if field.value %}value="{{ field.value }}"{% endif %}
-               {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
+               {% if suggest_url %}
+                   autocomplete="off"
+                   role="combobox"
+                   aria-autocomplete="list"
+                   aria-expanded="false"
+                   aria-controls="{{ field.id_for_label }}-suggestions"
+                   hx-get="{{ suggest_url }}"
+                   hx-trigger="input changed delay:300ms"
+                   hx-target="#{{ field.id_for_label }}-suggestions"
+                   hx-sync="this:replace"
+                   data-suggest
+               {% elif autocomplete %}
+                   autocomplete="{{ autocomplete }}"
+               {% endif %}
                {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}>
-
+        {% if suggest_url %}
+            <div class="dropdown-menu">
+                <div class="dropdown-content" id="{{ field.id_for_label }}-suggestions" role="listbox"></div>
+            </div>
+        {% endif %}
     </div>
 </div>

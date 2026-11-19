@@ -1,4 +1,5 @@
 from unittest.mock import MagicMock, patch
+from urllib.parse import urlencode
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -149,3 +150,43 @@ class AlleleGetOrBuildTest(TestCase):
             "DRB3*03:01:01.",
         ):
             Allele.get_or_build("DRB3*03:01:01")
+
+
+class AlleleSuggestTest(ProtectedViewTestMixin, TestCase):
+    fixtures = ["test_alleles.json"]
+    url = f"{reverse('allele-suggest')}?{urlencode({'q': 'a*01'})}"
+    template = "common/partials/suggestions.html"
+    page_name = "A*01:02:03"
+    expected_text = ['data-value="A*01:02:03"']
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)
+
+    def _suggest(self, q: str) -> list[str]:
+        response = self.client.get(reverse("allele-suggest"), {"q": q})
+        return [value for value, _label in response.context["suggestions"]]
+
+    def test_matches_part_of_the_name_case_insensitively(self):
+        self.assertEqual(self._suggest("b*04"), ["B*04:05:06"])
+        self.assertEqual(
+            self._suggest(":0"), ["A*01:02:03", "B*04:05:06", "C*07:08:09"]
+        )
+
+    def test_suggests_nothing_for_a_one_character_query(self):
+        self.assertEqual(self._suggest("A"), [])
+        self.assertEqual(self._suggest(" A "), [])
+
+    def test_suggests_at_most_ten(self):
+        Allele.objects.bulk_create(
+            Allele(name=f"DRB1*15:{n:02d}", car_id=f"XAHLA9{n:02d}") for n in range(12)
+        )
+        suggestions = self._suggest("DRB1")
+        self.assertEqual(len(suggestions), 10)
+        self.assertEqual(suggestions[0], "DRB1*15:00")
+
+    def test_escapes_names(self):
+        Allele.objects.create(name="A*<b>99</b>", car_id="XAHLA998")
+        response = self.client.get(reverse("allele-suggest"), {"q": "<b>"})
+        self.assertNotContains(response, "<b>99</b>")
+        self.assertContains(response, "&lt;b&gt;99&lt;/b&gt;")

@@ -14,7 +14,7 @@ from allele.tables import AlleleTable
 from auth_.permissions import ProtectedViewMixin
 from common.history import resolve_changes
 from common.tables import HistoryTable
-from common.views import SearchListView
+from common.views import SearchListView, SuggestView
 from curation.tables import CurationTable
 from haplotype.tables import HaplotypeTable
 
@@ -40,6 +40,15 @@ class AlleleCreate(ProtectedViewMixin, CreateView):
         form.instance.car_id = allele.car_id
         form.instance.added_by = self.request.user
         return super().form_valid(form)
+
+
+class AlleleSuggest(ProtectedViewMixin, SuggestView):
+    model = Allele
+    search_fields = ["name"]
+    ordering = ["name"]
+
+    def get_suggestion(self, obj: Allele) -> tuple[str, str]:  # ty: ignore[invalid-method-override]
+        return obj.name, obj.name
 
 
 class AlleleDetail(ProtectedViewMixin, DetailView):
