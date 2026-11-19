@@ -132,7 +132,10 @@ The `UserProfile.can_curate` property returns `True` only when both flags are se
 The UI is fully server-rendered Django templates with no client-side routing. JavaScript
 is used narrowly:
 
-- **HTMX** — partial page updates (e.g. live search on list pages).
+- **HTMX** — partial page updates (e.g. live search on list pages), and suggestions
+  under text inputs given a `SuggestInput` widget (`hci/js/suggest.js`), such as the
+  allele, haplotype, and disease fields on Add Curation and the alleles on Add
+  Haplotype.
 - **Choices.js** — searchable multi-select and single-select inputs (e.g. the allele
   picker on the haplotype creation form).
 - **Tippy.js** — tooltips on icons, such as the globe badge on fields that are public

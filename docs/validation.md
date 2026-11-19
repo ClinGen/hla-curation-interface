@@ -17,11 +17,13 @@ same name or the same registry ID.
 ### Haplotype
 
 A haplotype is a combination of alleles, so the system enforces two things when one is
-created. First, it automatically arranges the selected alleles into a canonical order
-based on their position on chromosome 6, so the same combination always has the same
-name regardless of the order the curator picked them in. Second, it rejects the
-submission if that exact combination already exists in the system. On Add Curation,
-curators type the alleles instead, in any order, separated by `~`, spaces, or commas.
+created. Curators type the alleles in any order, separated by `~`, spaces, or commas.
+First, it automatically arranges them into a canonical order based on their position on
+chromosome 6, so the same combination always has the same name regardless of the order
+the curator typed them in. Second, it rejects the submission if that exact combination
+already exists in the system. Add Haplotype accepts only alleles already in the HCI and
+links to Add Allele for any that aren't; Add Curation fetches new alleles from the
+registry.
 
 ### Disease
 
@@ -98,17 +100,20 @@ check. The name must be recognized by the CAR.
 - `name`: `blank=False`, `unique=True` enforced at DB level
 - No `clean()` method; no custom model validators
 
-**Form** (`HaplotypeForm`): exposes `alleles` as a `SelectMultiple`. Standard
-required-field validation.
+**Form** (`HaplotypeForm.clean_alleles`): `alleles` is a required text field. It:
 
-**View** (`HaplotypeCreate.form_valid`): this is where the substantive logic lives:
+1. Splits the typed text on `~`, whitespace, or commas (`ALLELE_SEPARATORS`) and looks
+   up each allele by name. If one isn't in the HCI, it raises a field error naming it,
+   with a link to Add Allele. Nothing is fetched from the registry.
+2. Sorts the alleles by chromosomal gene order (`Haplotype.canonical_name`, using the
+   `GENE_LIST` constant) to produce a canonical `~`-separated name. An unknown gene is
+   a field error.
+3. Checks for duplicate combinations:
+   `Haplotype.objects.filter(name=computed_name).exists()`. If a duplicate exists, it
+   raises a field error ("A haplotype with these alleles already exists.").
 
-1. Sorts selected alleles by chromosomal gene order (using the `GENE_LIST` constant) to
-   produce a canonical `~`-separated name.
-2. Checks for duplicate combinations:
-   `Haplotype.objects.filter(name=computed_name).exists()`. If a duplicate exists, adds
-   a field error ("A haplotype with these alleles already exists.") and returns
-   `form_invalid`.
+`HaplotypeForm.save` links the alleles after saving, and `HaplotypeCreate.form_valid`
+records who added the haplotype.
 
 The computed canonical name is set on the instance. Users never enter the name directly.
 

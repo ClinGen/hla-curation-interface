@@ -1,7 +1,9 @@
 // Shows suggestions under text inputs marked with data-suggest, which
 // common/form/input/text.html adds for a SuggestInput field. HTMX fetches the
 // suggestions as the curator types; this file sends the typed text as q, opens
-// and closes the list, and fills the input from the mouse or keyboard.
+// and closes the list, and fills the input from the mouse or keyboard. An input
+// that holds a list (data-suggest-separators) suggests and replaces only the item
+// being typed, the text after the last separator.
 
 function suggestionList(input) {
 	return document.getElementById(input.getAttribute("aria-controls"));
@@ -32,8 +34,19 @@ function highlightSuggestion(input, index) {
 	});
 }
 
+// Splits the input into the text before the item being typed and that item.
+function typedItem(input) {
+	const separators = input.dataset.suggestSeparators;
+	if (!separators) {
+		return { before: "", item: input.value };
+	}
+	const parts = input.value.split(new RegExp(separators));
+	const item = parts[parts.length - 1];
+	return { before: input.value.slice(0, input.value.length - item.length), item };
+}
+
 function chooseSuggestion(input, item) {
-	input.value = item.dataset.value;
+	input.value = typedItem(input).before + item.dataset.value;
 	closeSuggestions(input);
 }
 
@@ -45,7 +58,7 @@ document.addEventListener("htmx:configRequest", (event) => {
 	for (const key of Object.keys(event.detail.parameters)) {
 		delete event.detail.parameters[key];
 	}
-	event.detail.parameters.q = input.value;
+	event.detail.parameters.q = typedItem(input).item;
 });
 
 document.addEventListener("htmx:afterSwap", (event) => {
