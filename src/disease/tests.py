@@ -1,4 +1,5 @@
 from unittest.mock import MagicMock, patch
+from urllib.parse import urlencode
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -169,3 +170,36 @@ class ValidateMondoIdTest(TestCase):
 
     def test_accepts_a_complete_id(self):
         validate_mondo_id(Disease(mondo_id="MONDO:0005301"))
+
+
+class DiseaseSuggestTest(ProtectedViewTestMixin, TestCase):
+    fixtures = ["test_diseases.json"]
+    url = f"{reverse('disease-suggest')}?{urlencode({'q': 'oran'})}"
+    template = "common/partials/suggestions.html"
+    page_name = "MONDO:123 — acute oran berry intoxication"
+    expected_text = ['data-value="MONDO:123"']
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)
+
+    def _suggest(self, q: str) -> list[tuple[str, str]]:
+        response = self.client.get(reverse("disease-suggest"), {"q": q})
+        return response.context["suggestions"]
+
+    def test_matches_part_of_the_mondo_id(self):
+        self.assertEqual(
+            self._suggest("mondo:45"),
+            [("MONDO:456", "MONDO:456 — acute cheri berry intoxication")],
+        )
+
+    def test_matches_part_of_the_name(self):
+        values = [value for value, _label in self._suggest("BERRY")]
+        self.assertEqual(values, ["MONDO:123", "MONDO:456", "MONDO:789"])
+
+    def test_suggests_at_most_ten(self):
+        Disease.objects.bulk_create(
+            Disease(mondo_id=f"MONDO:00000{n:02d}", name=f"disease {n}")
+            for n in range(12)
+        )
+        self.assertEqual(len(self._suggest("MONDO:00000")), 10)

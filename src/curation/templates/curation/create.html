@@ -42,8 +42,9 @@
                 {% endwith %}
             </div>
             <div class="block">
+                {% url "disease-suggest" as disease_suggest_url %}
                 {% with field=form.disease %}
-                    {% include "common/form/input/text.html" with show_help=True %}
+                    {% include "common/form/input/text.html" with show_help=True suggest_url=disease_suggest_url %}
                 {% endwith %}
                 {% include "common/linkout.html" with url="https://www.ebi.ac.uk/ols4/ontologies/mondo" text="Search MONDO" %}
             </div>
