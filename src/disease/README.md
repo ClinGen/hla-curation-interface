@@ -64,11 +64,11 @@ Renders the disease search page, including a search input, a paginated results t
 
 ### `tests.py`
 
-Contains test cases for `Disease.get_or_build`, `validate_mondo_id`, and the `DiseaseCreate`, `DiseaseDetail`, and `DiseaseList` views, verifying authentication requirements, correct template rendering, and that valid/invalid form submissions behave as expected (including mocking the OLS API call).
+Contains test cases for `Disease.get_or_build`, `validate_mondo_id`, and the `DiseaseCreate`, `DiseaseDetail`, `DiseaseList`, and `DiseaseSuggest` views, verifying authentication requirements, correct template rendering, and that valid/invalid form submissions behave as expected (including mocking the OLS API call).
 
 ### `urls.py`
 
-Maps URL patterns for the disease app: create, detail, history, change, and list endpoints, all prefixed by the project-level URL configuration.
+Maps URL patterns for the disease app: create, detail, history, change, list, and suggest endpoints, all prefixed by the project-level URL configuration.
 
 ### `validators/__init__.py`
 
@@ -80,4 +80,4 @@ Provides two model-level validator functions: `validate_disease_type_mondo` ensu
 
 ### `views.py`
 
-Implements the five class-based views for the disease app: `DiseaseCreate` (gets OLS data from `Disease.get_or_build` on form submission), `DiseaseDetail` (includes associated curations), `DiseaseHistory` (renders a history table), `DiseaseChange` (shows field-level diffs for a single historical record), and `DiseaseList` (searchable, paginated list).
+Implements the six class-based views for the disease app: `DiseaseCreate` (gets OLS data from `Disease.get_or_build` on form submission), `DiseaseDetail` (includes associated curations), `DiseaseHistory` (renders a history table), `DiseaseChange` (shows field-level diffs for a single historical record), `DiseaseList` (searchable, paginated list), and `DiseaseSuggest`, a `SuggestView` that suggests existing diseases by Mondo ID or name for the Add Curation disease field, showing each as its Mondo ID and name and filling in the Mondo ID.

@@ -13,4 +13,5 @@ urlpatterns = [
         name="disease-change",
     ),
     path("list", DiseaseList.as_view(), name="disease-list"),
+    path("suggest", views.DiseaseSuggest.as_view(), name="disease-suggest"),
 ]

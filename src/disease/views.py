@@ -11,7 +11,7 @@ from django_tables2 import RequestConfig
 from auth_.permissions import ProtectedViewMixin
 from common.history import resolve_changes
 from common.tables import HistoryTable
-from common.views import SearchListView
+from common.views import SearchListView, SuggestView
 from curation.tables import CurationTable
 from disease.forms import DiseaseForm
 from disease.models import Disease
@@ -34,6 +34,15 @@ class DiseaseCreate(ProtectedViewMixin, CreateView):
         form.instance.iri = disease.iri
         form.instance.added_by = self.request.user
         return super().form_valid(form)
+
+
+class DiseaseSuggest(ProtectedViewMixin, SuggestView):
+    model = Disease
+    search_fields = ["mondo_id", "name"]
+    ordering = ["mondo_id"]
+
+    def get_suggestion(self, obj: Disease) -> tuple[str, str]:  # ty: ignore[invalid-method-override]
+        return obj.mondo_id, f"{obj.mondo_id} — {obj.name}"
 
 
 class DiseaseDetail(ProtectedViewMixin, DetailView):
