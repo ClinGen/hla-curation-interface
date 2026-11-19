@@ -28,7 +28,7 @@ Defines `AlleleForm`, a `ModelForm` for the `Allele` model that exposes only the
 
 ### `models.py`
 
-Defines the `Allele` model with fields for a human-readable slug ID, allele name, CAR ID, and audit timestamps. The `save` method auto-generates the slug in the format `A000001`, and `HistoricalRecords` from `django-simple-history` tracks all changes. The `get_or_build` class method returns the allele with a given name, or builds an unsaved one with its CAR ID fetched from the ClinGen Allele Registry, raising `ValidationError` if the fetch fails.
+Defines the `Allele` model with fields for a human-readable slug ID, allele name, CAR ID, and audit timestamps. The `save` method auto-generates the slug in the format `A000001`, and `HistoricalRecords` from `django-simple-history` tracks all changes. The `get_or_build` class method returns the allele with a given name, or builds an unsaved one with its CAR ID fetched from the ClinGen Allele Registry, raising `ValidationError`, which asks the curator to check the name, if the fetch fails.
 
 ### `tables.py`
 

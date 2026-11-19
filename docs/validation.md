@@ -9,7 +9,8 @@ DB-level constraints, model validators, form validators, and view-level checks.
 
 When a curator submits an allele name, the system immediately looks it up in the ClinGen
 Allele Registry. If the registry does not recognize the name (or is temporarily
-unavailable), the allele is not saved. This ensures that every allele in the HCI is a
+unavailable), the allele is not saved, and the curator is asked to check the name. This
+ensures that every allele in the HCI is a
 real, registry-confirmed entry. The system also prevents two records from sharing the
 same name or the same registry ID.
 
@@ -24,9 +25,10 @@ submission if that exact combination already exists in the system.
 ### Disease
 
 Disease entries must use the Mondo Disease Ontology. The system checks that a Mondo ID
-is provided and that it follows the expected format (it must begin with "MONDO:"). It
-then looks the ID up in the EBI Ontology Lookup Service to retrieve the official disease
-name and IRI. If the lookup fails, the disease is not saved.
+is provided and that it follows the expected format ("MONDO:" followed by seven digits),
+so an incomplete ID is caught before any lookup. It then looks the ID up in the EBI
+Ontology Lookup Service to retrieve the official disease name and IRI. If the lookup
+fails, the disease is not saved, and the curator is asked to check the ID.
 
 ### Publication
 
@@ -117,8 +119,8 @@ The computed canonical name is set on the instance. Users never enter the name d
 
 - `validate_disease_type_mondo`: If `disease_type == MONDO` and `mondo_id` is empty,
   raises `ValidationError` (required field by type).
-- `validate_mondo_id`: If `mondo_id` is present but does not start with `MONDO:`, raises
-  `ValidationError` (prefix format check).
+- `validate_mondo_id`: If `mondo_id` is present but does not start with `MONDO:`, or
+  `MONDO:` isn't followed by exactly seven digits, raises `ValidationError`.
 
 **Form** (`DiseaseForm`): exposes only `mondo_id`. Standard required-field validation
 from `blank=False`.

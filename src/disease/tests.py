@@ -6,6 +6,7 @@ from django.urls import reverse
 
 from common.tests import ProtectedViewTestMixin
 from disease.models import Disease
+from disease.validators.models import validate_mondo_id
 
 
 class DiseaseCreateTest(ProtectedViewTestMixin, TestCase):
@@ -31,7 +32,7 @@ class DiseaseCreateTest(ProtectedViewTestMixin, TestCase):
         self, mock_fetch_disease_data: MagicMock
     ):
         initial_disease_count = Disease.objects.count()
-        data = {"mondo_id": "MONDO:123"}
+        data = {"mondo_id": "MONDO:0000123"}
         mock_fetch_disease_data.return_value = {  # Mock the OLS API response.
             "_embedded": {
                 "terms": [
@@ -47,7 +48,7 @@ class DiseaseCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(Disease.objects.count(), initial_disease_count + 1)
         new_disease = Disease.objects.first()
         assert new_disease is not None
-        self.assertEqual(new_disease.mondo_id, "MONDO:123")
+        self.assertEqual(new_disease.mondo_id, "MONDO:0000123")
         self.assertEqual(new_disease.added_by, self.user4_yes_phi_yes_perms)
         self.assertEqual(new_disease.name, "acute oran berry intoxication")
         self.assertEqual(new_disease.iri, "http://purl.obolibrary.org/obo/MONDO_123")
@@ -129,8 +130,20 @@ class DiseaseGetOrBuildTest(TestCase):
 
     @patch("disease.models.fetch_disease_data", return_value=None)
     def test_raises_when_fetch_fails(self, _mock_fetch: MagicMock):
-        with self.assertRaisesMessage(ValidationError, "Ontology Lookup Service"):
+        with self.assertRaisesMessage(
+            ValidationError,
+            "Something went wrong trying to fetch data from the Ontology Lookup "
+            "Service. Please make sure you entered a valid Mondo ID.",
+        ):
             Disease.get_or_build("MONDO:0005147")
+
+    @patch("disease.models.fetch_disease_data")
+    def test_raises_for_incomplete_mondo_id_without_fetching(
+        self, mock_fetch: MagicMock
+    ):
+        with self.assertRaisesMessage(ValidationError, "seven digits"):
+            Disease.get_or_build("MONDO:000530")
+        mock_fetch.assert_not_called()
 
     @patch("disease.models.fetch_disease_data")
     def test_raises_for_malformed_mondo_id_without_fetching(
@@ -139,3 +152,20 @@ class DiseaseGetOrBuildTest(TestCase):
         with self.assertRaisesMessage(ValidationError, "MONDO:"):
             Disease.get_or_build("0005147")
         mock_fetch.assert_not_called()
+
+
+class ValidateMondoIdTest(TestCase):
+    def test_rejects_ids_without_exactly_seven_digits(self):
+        for mondo_id in ("MONDO:000530", "MONDO:00053011", "MONDO:abcdefg", "MONDO:"):
+            with (
+                self.subTest(mondo_id=mondo_id),
+                self.assertRaisesMessage(ValidationError, "seven digits"),
+            ):
+                validate_mondo_id(Disease(mondo_id=mondo_id))
+
+    def test_rejects_ids_without_the_prefix(self):
+        with self.assertRaisesMessage(ValidationError, "MONDO:"):
+            validate_mondo_id(Disease(mondo_id="0005301"))
+
+    def test_accepts_a_complete_id(self):
+        validate_mondo_id(Disease(mondo_id="MONDO:0005301"))

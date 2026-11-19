@@ -64,7 +64,7 @@ Renders the disease search page, including a search input, a paginated results t
 
 ### `tests.py`
 
-Contains test cases for `Disease.get_or_build` and the `DiseaseCreate`, `DiseaseDetail`, and `DiseaseList` views, verifying authentication requirements, correct template rendering, and that valid/invalid form submissions behave as expected (including mocking the OLS API call).
+Contains test cases for `Disease.get_or_build`, `validate_mondo_id`, and the `DiseaseCreate`, `DiseaseDetail`, and `DiseaseList` views, verifying authentication requirements, correct template rendering, and that valid/invalid form submissions behave as expected (including mocking the OLS API call).
 
 ### `urls.py`
 
@@ -76,7 +76,7 @@ Empty file that makes `validators` a Python package.
 
 ### `validators/models.py`
 
-Provides two model-level validator functions: `validate_disease_type_mondo` ensures a Mondo ID is present when the disease type is Mondo, and `validate_mondo_id` enforces that the ID starts with the `MONDO:` prefix.
+Provides two model-level validator functions: `validate_disease_type_mondo` ensures a Mondo ID is present when the disease type is Mondo, and `validate_mondo_id` enforces that the ID is the `MONDO:` prefix followed by exactly seven digits.
 
 ### `views.py`
 
