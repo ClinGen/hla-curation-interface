@@ -72,6 +72,20 @@ class SuggestView(View):
         """
         return str(obj), str(obj)
 
+    def get_matches(self, q: str) -> QuerySet:
+        """Returns the records with q in any of the search fields.
+
+        Args:
+            q: The typed text, at least min_length characters long.
+
+        Returns:
+            The matching records, ordered.
+        """
+        filters = Q()
+        for field in self.search_fields:
+            filters |= Q(**{f"{field}__icontains": q})
+        return self.model.objects.filter(filters).order_by(*self.ordering)
+
     def get(self, request: HttpRequest) -> HttpResponse:
         """Renders up to limit records that match the query in q.
 
@@ -81,10 +95,7 @@ class SuggestView(View):
         q = request.GET.get("q", "").strip()
         suggestions = []
         if len(q) >= self.min_length:
-            filters = Q()
-            for field in self.search_fields:
-                filters |= Q(**{f"{field}__icontains": q})
-            matches = self.model.objects.filter(filters).order_by(*self.ordering)
+            matches = self.get_matches(q)
             suggestions = [self.get_suggestion(obj) for obj in matches[: self.limit]]
         return render(request, self.template_name, {"suggestions": suggestions})
 

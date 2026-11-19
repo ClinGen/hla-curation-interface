@@ -287,6 +287,13 @@ class CurationCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(disease_input["hx-get"], reverse("disease-suggest"))
         self.assertContains(response, "type part of its ID or name")
 
+    def test_haplotype_input_suggests_existing_haplotypes(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        haplotype_input = soup.select_one('input[name="haplotype"]')
+        assert haplotype_input is not None
+        self.assertEqual(haplotype_input["hx-get"], reverse("haplotype-suggest"))
+
     def test_haplotype_help_text_explains_separators(self):
         response = self.client.get(self.url)
         self.assertContains(response, "separated by ~, spaces, or commas")

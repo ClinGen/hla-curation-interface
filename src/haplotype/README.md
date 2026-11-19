@@ -32,7 +32,7 @@ Defines `HaplotypeForm`, a `ModelForm` for the `Haplotype` model that exposes on
 
 ### `models.py`
 
-Defines the `Haplotype` model with a slug-based human-readable ID (e.g., `H000001`), a many-to-many relationship to `Allele`, a unique `name` field, provenance fields (`added_by`, `added_at`, `updated_at`), and full change history via `HistoricalRecords`. The slug is auto-generated from the primary key on first save. `canonical_name` joins allele names with `~` in `GENE_LIST` order, and `get_or_build` parses typed allele names separated by `~`, whitespace, or commas, in any order, and returns the existing or a new unsaved haplotype with its alleles (from `Allele.get_or_build`), raising `ValidationError` for a malformed name, an unknown gene, or a failed allele fetch.
+Defines the `Haplotype` model with a slug-based human-readable ID (e.g., `H000001`), a many-to-many relationship to `Allele`, a unique `name` field, provenance fields (`added_by`, `added_at`, `updated_at`), and full change history via `HistoricalRecords`. The slug is auto-generated from the primary key on first save. `canonical_name` joins allele names with `~` in `GENE_LIST` order, and `get_or_build` parses typed allele names separated by `~`, whitespace, or commas, in any order, and returns the existing or a new unsaved haplotype with its alleles (from `Allele.get_or_build`), raising `ValidationError` for a malformed name, an unknown gene, or a failed allele fetch. `ALLELE_SEPARATORS` is the pattern (`~`, whitespace, or commas) that both `get_or_build` and `HaplotypeSuggest` split typed allele names on.
 
 ### `tables.py`
 
@@ -60,12 +60,12 @@ Renders the haplotype search page with a search input, a results table populated
 
 ### `tests.py`
 
-Contains `TestCase` classes for `Haplotype.canonical_name`, `Haplotype.get_or_build`, and the create, detail, and list views, verifying access control, correct template rendering, form validation (including duplicate detection, unknown genes, and gene-order normalization), and successful haplotype creation.
+Contains `TestCase` classes for `Haplotype.canonical_name`, `Haplotype.get_or_build`, and the create, detail, list, and suggest views, verifying access control, correct template rendering, form validation (including duplicate detection, unknown genes, and gene-order normalization), and successful haplotype creation.
 
 ### `urls.py`
 
-Defines the five URL routes for the app: `create`, `<slug>/detail`, `<slug>/history`, `<slug>/history/<history_id>/change`, and `list`.
+Defines the six URL routes for the app: `create`, `<slug>/detail`, `<slug>/history`, `<slug>/history/<history_id>/change`, `list`, and `suggest`.
 
 ### `views.py`
 
-Implements the five class-based views for the app. `HaplotypeCreate` derives the haplotype name from the selected alleles with `Haplotype.canonical_name` and rejects duplicates. `HaplotypeDetail` populates allele and curation sub-tables. `HaplotypeHistory` and `HaplotypeChange` expose the `django-simple-history` audit trail. `HaplotypeList` provides paginated, searchable listing via `SearchListView`.
+Implements the six class-based views for the app. `HaplotypeCreate` derives the haplotype name from the selected alleles with `Haplotype.canonical_name` and rejects duplicates. `HaplotypeDetail` populates allele and curation sub-tables. `HaplotypeHistory` and `HaplotypeChange` expose the `django-simple-history` audit trail. `HaplotypeList` provides paginated, searchable listing via `SearchListView`. `HaplotypeSuggest`, a `SuggestView`, suggests existing haplotypes for the Add Curation haplotype field: it splits the typed text like `get_or_build` does and matches haplotypes whose names contain every part, in any order.
