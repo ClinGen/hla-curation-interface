@@ -244,6 +244,33 @@ class CurationCreateTest(ProtectedViewTestMixin, TestCase):
         )
         self.assertEqual((Allele.objects.count(), Disease.objects.count()), counts)
 
+    @patch("allele.models.fetch_allele_data", return_value=None)
+    def test_failed_lookup_shows_only_the_lookup_error(self, _mock_fetch: MagicMock):
+        for curation_type, field, typed in [
+            (CurationTypes.ALLELE, "allele", "DRB1*15:01"),
+            (CurationTypes.HAPLOTYPE, "haplotype", "DRB1*15:01 DQB1*06:02"),
+        ]:
+            with self.subTest(curation_type=curation_type):
+                data = self._data(curation_type, **{field: typed})
+                response = self.client.post(self.url, data)
+                errors = response.context["form"].errors[field]
+                self.assertEqual(len(errors), 1)
+                self.assertIn("ClinGen Allele Registry", errors[0])
+
+    def test_still_requires_the_allele_or_haplotype(self):
+        for curation_type, field in [
+            (CurationTypes.ALLELE, "allele"),
+            (CurationTypes.HAPLOTYPE, "haplotype"),
+        ]:
+            with self.subTest(curation_type=curation_type):
+                data = self._data(curation_type, **{field: ""})
+                response = self.client.post(self.url, data)
+                self.assertIn("is required", response.context["form"].errors[field][0])
+
+    def test_haplotype_help_text_explains_separators(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, "separated by ~, spaces, or commas")
+
     @patch("disease.models.fetch_disease_data")
     def test_malformed_mondo_id_is_a_field_error(self, mock_fetch: MagicMock):
         data = self._data(CurationTypes.ALLELE, disease="0005147")
