@@ -49,11 +49,11 @@ The Bulma modal card that `hci/js/confirm-modal.js` shows before submitting a fo
 
 ### `templates/common/form/input/radio.html`
 
-Reusable partial for rendering a radio-button form field using Bulma CSS. Supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead. Pass `suggest_url` to suggest existing records as the curator types: the input becomes an ARIA combobox that fetches that URL with HTMX and shows the matches in a Bulma dropdown below it, which `hci/js/suggest.js` opens, closes, and fills the input from. The curator can still type a value that isn't suggested.
+Reusable partial for rendering a radio-button form field using Bulma CSS. Supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead.
 
 ### `templates/common/form/input/text.html`
 
-Reusable partial for rendering a text `<input>` form field using Bulma CSS. Accepts context variables for `type`, `autocomplete`, and `placeholder`, and supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead.
+Reusable partial for rendering a text `<input>` form field using Bulma CSS. Accepts context variables for `type`, `autocomplete`, and `placeholder`, and supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead. Pass `suggest_url` to suggest existing records as the curator types: the input becomes an ARIA combobox that fetches that URL with HTMX and shows the matches in a Bulma dropdown below it, which `hci/js/suggest.js` opens, closes, and fills the input from. The curator can still type a value that isn't suggested.
 
 ### `templates/common/form/section_heading.html`
 
