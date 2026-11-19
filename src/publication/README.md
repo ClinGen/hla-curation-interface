@@ -92,12 +92,12 @@ Unit tests for the `Publication` model, covering the required PubMed ID and the 
 
 ### `tests/test_views.py`
 
-Integration tests for the publication views covering creation of PubMed publications (with mocked API responses), the absence of preprint inputs, rejection of missing PubMed IDs and preprint submissions, basic rendering checks for the detail and list views, the detail page's author list and its "------" placeholder, publication search matching a non-primary author, and `refresh_from_pubmed` and the refresh view (success, PubMed failure, GET, permissions, and the detail page's button).
+Integration tests for the publication views covering creation of PubMed publications (with mocked API responses), the absence of preprint inputs, rejection of missing PubMed IDs and preprint submissions, basic rendering checks for the detail and list views, the detail page's author list and its "------" placeholder, publication search matching a non-primary author, and `refresh_from_pubmed` and the refresh view (success, PubMed failure, GET, permissions, and the detail page's button), and the suggest view (matching PubMed ID, title, or authors, at most 10).
 
 ### `urls.py`
 
-Maps URL patterns to publication views: `create`, `<slug>/detail`, `<slug>/refresh`, `<slug>/history`, `<slug>/history/<history_id>/change`, and `list`.
+Maps URL patterns to publication views: `create`, `<slug>/detail`, `<slug>/refresh`, `<slug>/history`, `<slug>/history/<history_id>/change`, `list`, and `suggest`.
 
 ### `views.py`
 
-Implements the six publication views: `PublicationCreate` fetches the title, primary author, full author list, and year from PubMed and saves the record; `publication_refresh` (POST only, for curators) updates an existing publication from PubMed, or shows `REFRESH_FAILED_MESSAGE` and changes nothing if PubMed fails; `PublicationDetail` shows a single publication; `PublicationList` searches by ID, title, primary author, any author, and PubMed ID; `PublicationHistory` and `PublicationChange` display the audit trail; and `PublicationList` provides a searchable, paginated table of all publications.
+Implements the seven publication views: `PublicationCreate` fetches the title, primary author, full author list, and year from PubMed and saves the record; `publication_refresh` (POST only, for curators) updates an existing publication from PubMed, or shows `REFRESH_FAILED_MESSAGE` and changes nothing if PubMed fails; `PublicationDetail` shows a single publication; `PublicationList` searches by ID, title, primary author, any author, and PubMed ID; `PublicationHistory` and `PublicationChange` display the audit trail; `PublicationList` provides a searchable, paginated table of all publications; and `PublicationSuggest`, a `SuggestView`, suggests existing publications by PubMed ID, title, or authors for the Add Evidence publication field, newest first, filling in the PubMed ID.

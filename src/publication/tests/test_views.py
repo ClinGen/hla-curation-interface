@@ -1,4 +1,5 @@
 from unittest.mock import MagicMock, patch
+from urllib.parse import urlencode
 
 from bs4 import BeautifulSoup
 from django.contrib.auth.models import User
@@ -258,3 +259,30 @@ class PublicationRefreshTest(SuppressRequestLoggingMixin, TestCase):
         self.assertContains(response, f'action="{self.url}"')
         self.assertContains(response, "data-confirm=")
         self.assertContains(response, "Refresh from PubMed")
+
+
+class PublicationSuggestTest(ProtectedViewTestMixin, TestCase):
+    fixtures = ["test_publications.json"]
+    url = f"{reverse('publication-suggest')}?{urlencode({'q': 'kanto'})}"
+    template = "common/partials/suggestions.html"
+    page_name = "Diseases in grass type Pokémon in the Kanto region (PMID:123)."
+    expected_text = ['data-value="123"']
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)
+
+    def _suggest(self, q: str) -> list[str]:
+        response = self.client.get(reverse("publication-suggest"), {"q": q})
+        return [value for value, _label in response.context["suggestions"]]
+
+    def test_matches_part_of_the_pmid_title_or_authors(self):
+        for q in ["12", "grass type", "juniper"]:
+            with self.subTest(q=q):
+                self.assertEqual(self._suggest(q), ["123"])
+
+    def test_suggests_at_most_ten(self):
+        Publication.objects.bulk_create(
+            Publication(pubmed_id=f"99{n:02d}", title=f"Study {n}") for n in range(12)
+        )
+        self.assertEqual(len(self._suggest("Study")), 10)

@@ -703,7 +703,7 @@ class EvidenceCreateTest(ProtectedViewTestMixin, TestCase):
 
     def test_creates_evidence_with_valid_form_data(self):
         initial_evidence_count = Evidence.objects.count()
-        data = {"publication": "1"}
+        data = {"publication": "123"}
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Evidence.objects.count(), initial_evidence_count + 1)
@@ -715,6 +715,32 @@ class EvidenceCreateTest(ProtectedViewTestMixin, TestCase):
         self.assertTrue(new_evidence.needs_review)
         self.assertEqual(new_evidence.status, Status.IN_PROGRESS)
         self.assertEqual(new_evidence.added_by, self.user4_yes_phi_yes_perms)
+
+    def test_accepts_a_pmid_prefix(self):
+        for typed in ["PMID:123", "pmid: 123", " 123 "]:
+            with self.subTest(typed=typed):
+                response = self.client.post(self.url, {"publication": typed})
+                self.assertEqual(response.status_code, 302)
+                evidence = Evidence.objects.get(publication__pubmed_id="123")
+                evidence.delete()
+
+    @patch("publication.clients.requests.get")
+    def test_unknown_pmid_is_a_field_error_without_fetching(self, mock_get: MagicMock):
+        count = Evidence.objects.count()
+        response = self.client.post(self.url, {"publication": "99999999"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("99999999", response.context["form"].errors["publication"][0])
+        self.assertContains(response, f'href="{reverse("publication-create")}"')
+        self.assertEqual(Evidence.objects.count(), count)
+        mock_get.assert_not_called()
+
+    def test_publication_input_suggests_existing_publications(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        publication_input = soup.select_one('input[name="publication"]')
+        assert publication_input is not None
+        self.assertEqual(publication_input["hx-get"], reverse("publication-suggest"))
+        self.assertIsNone(soup.select_one("select"))
 
 
 class EvidenceDetailTest(ProtectedViewTestMixin, TestCase):
