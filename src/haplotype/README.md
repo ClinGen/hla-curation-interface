@@ -18,6 +18,10 @@ Defines the `HaplotypeConfig` app configuration, setting the app name to `haplot
 
 Empty file that makes `constants` a Python subpackage.
 
+### `constants/forms.py`
+
+Defines `TYPED_HAPLOTYPE_HELP_TEXT`, the help text for a typed haplotype, shared by Add Haplotype and Add Curation.
+
 ### `constants/models.py`
 
 Defines `GENE_LIST`, an ordered list of HLA gene names sorted by their chromosomal position on chromosome 6 (sourced from hla.alleles.org). This list is used when constructing a haplotype's canonical name by sorting constituent alleles into genomic order. It also defines `HAPLOTYPE_NAME_SEPARATOR`, the `~` between allele names in a stored haplotype name, and `ALLELE_SEPARATORS`, the pattern (`~`, whitespace, or commas) that `Haplotype.get_or_build` and `HaplotypeSuggest` split typed allele names on.
@@ -28,7 +32,7 @@ Django fixture containing a single sample `Haplotype` record (`H000001`, `A*01:0
 
 ### `forms.py`
 
-Defines `HaplotypeForm`, a `ModelForm` for the `Haplotype` model that exposes only the `alleles` field rendered as a multi-select widget.
+Defines `HaplotypeForm`, a `ModelForm` for the `Haplotype` model with one typed `alleles` text field. It suggests existing alleles for the one being typed (a `SuggestInput` with `ALLELE_SEPARATORS`), looks the typed alleles up without fetching any, names the haplotype with `Haplotype.canonical_name`, rejects unknown alleles (linking to Add Allele), unknown genes, and duplicates, and links the alleles when saved.
 
 ### `models.py`
 
@@ -44,7 +48,7 @@ Renders the detail view for a single history record on a haplotype, showing what
 
 ### `templates/haplotype/create.html`
 
-Renders the haplotype creation form with a multi-select alleles field and a submit button, under a breadcrumb trail leading back to the home page.
+Renders the haplotype creation form with a typed alleles field (with suggestions) and a submit button, under a breadcrumb trail leading back to the home page.
 
 ### `templates/haplotype/detail.html`
 
@@ -68,4 +72,4 @@ Defines the six URL routes for the app: `create`, `<slug>/detail`, `<slug>/histo
 
 ### `views.py`
 
-Implements the six class-based views for the app. `HaplotypeCreate` derives the haplotype name from the selected alleles with `Haplotype.canonical_name` and rejects duplicates. `HaplotypeDetail` populates allele and curation sub-tables. `HaplotypeHistory` and `HaplotypeChange` expose the `django-simple-history` audit trail. `HaplotypeList` provides paginated, searchable listing via `SearchListView`. `HaplotypeSuggest`, a `SuggestView`, suggests existing haplotypes for the Add Curation haplotype field: it splits the typed text like `get_or_build` does and matches haplotypes whose names contain every part, in any order.
+Implements the six class-based views for the app. `HaplotypeCreate` saves `HaplotypeForm` and records who added the haplotype. `HaplotypeDetail` populates allele and curation sub-tables. `HaplotypeHistory` and `HaplotypeChange` expose the `django-simple-history` audit trail. `HaplotypeList` provides paginated, searchable listing via `SearchListView`. `HaplotypeSuggest`, a `SuggestView`, suggests existing haplotypes for the Add Curation haplotype field: it splits the typed text like `get_or_build` does and matches haplotypes whose names contain every part, in any order.

@@ -27,6 +27,7 @@
                    hx-target="#{{ field.id_for_label }}-suggestions"
                    hx-sync="this:replace"
                    data-suggest
+                   {% if field.field.widget.separators %}data-suggest-separators="{{ field.field.widget.separators }}"{% endif %}
                {% elif autocomplete %}
                    autocomplete="{{ autocomplete }}"
                {% endif %}

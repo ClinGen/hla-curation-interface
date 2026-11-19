@@ -1,6 +1,5 @@
 from typing import cast
 
-from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django.http import HttpResponse
 from django.urls import reverse_lazy
@@ -27,22 +26,11 @@ class HaplotypeCreate(ProtectedViewMixin, CreateView):
     success_url = reverse_lazy("haplotype-list")
 
     def form_valid(self, form: HaplotypeForm) -> HttpResponse:
-        """Sets the haplotype name by sorting the constituent alleles.
+        """Records who added the haplotype.
 
         Returns:
-             The success page if valid or the form with errors if not.
+             The success page.
         """
-        try:
-            computed_name = Haplotype.canonical_name(
-                allele.name for allele in form.cleaned_data["alleles"]
-            )
-        except ValidationError as error:
-            form.add_error("alleles", error.messages)
-            return self.form_invalid(form)
-        if Haplotype.objects.filter(name=computed_name).exists():
-            form.add_error("alleles", "A haplotype with these alleles already exists.")
-            return self.form_invalid(form)
-        form.instance.name = computed_name
         form.instance.added_by = self.request.user
         return super().form_valid(form)
 

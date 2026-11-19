@@ -1,12 +1,14 @@
 from unittest.mock import MagicMock, patch
 from urllib.parse import urlencode
 
+from bs4 import BeautifulSoup
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 
 from allele.models import Allele
 from common.tests import ProtectedViewTestMixin
+from haplotype.constants.models import ALLELE_SEPARATORS
 from haplotype.models import Haplotype
 
 
@@ -15,80 +17,79 @@ class HaplotypeCreateTest(ProtectedViewTestMixin, TestCase):
     url = reverse("haplotype-create")
     template = "haplotype/create.html"
     page_name = "Add Haplotype"
-    expected_text = ["Add Haplotype", "constituent alleles", "Submit"]
+    expected_text = ["Add Haplotype", "Alleles", "separated by ~, spaces", "Submit"]
 
     def setUp(self):
         super().setUp()
         self.client.force_login(self.user4_yes_phi_yes_perms)
 
-    def test_alleles_select_is_in_html(self):
-        response = self.client.get(self.url)
-        self.assertContains(response, "Alleles")
-
-    def test_shows_submit_button(self):
-        response = self.client.get(self.url)
-        self.assertContains(response, "Submit")
-
-    def test_creates_haplotype_with_valid_form_data(self):
-        initial_haplotype_count = Haplotype.objects.count()
-        data = {"alleles": ["1", "2"]}
-        response = self.client.post(self.url, data)
+    def test_creates_haplotype_from_typed_alleles_in_any_order(self):
+        response = self.client.post(self.url, {"alleles": "B*04:05:06 A*01:02:03"})
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(Haplotype.objects.count(), initial_haplotype_count + 1)
-        new_haplotype = Haplotype.objects.first()
-        assert new_haplotype is not None
-        self.assertEqual(new_haplotype.name, "A*01:02:03~B*04:05:06")
-        self.assertEqual(new_haplotype.added_by, self.user4_yes_phi_yes_perms)
+        haplotype = Haplotype.objects.get(name="A*01:02:03~B*04:05:06")
+        self.assertEqual(
+            set(haplotype.alleles.values_list("name", flat=True)),
+            {"A*01:02:03", "B*04:05:06"},
+        )
+        self.assertEqual(haplotype.added_by, self.user4_yes_phi_yes_perms)
 
-    def test_reversed_allele_order_produces_same_sorted_name(self):
-        initial_haplotype_count = Haplotype.objects.count()
-        data = {"alleles": ["2", "1"]}  # B*04:05:06 before A*01:02:03
-        response = self.client.post(self.url, data)
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(Haplotype.objects.count(), initial_haplotype_count + 1)
-        new_haplotype = Haplotype.objects.first()
-        assert new_haplotype is not None
-        self.assertEqual(new_haplotype.name, "A*01:02:03~B*04:05:06")
+    def test_accepts_tildes_and_commas(self):
+        for typed in ["A*01:02:03~B*04:05:06", "B*04:05:06, A*01:02:03"]:
+            with self.subTest(typed=typed):
+                response = self.client.post(self.url, {"alleles": typed})
+                Haplotype.objects.all().delete()
+                self.assertEqual(response.status_code, 302)
 
     def test_sorts_by_gene_position_not_alphabetically(self):
-        data = {"alleles": ["2", "3"]}  # B is after C on chromosome 6.
-        response = self.client.post(self.url, data)
+        response = self.client.post(
+            self.url, {"alleles": "B*04:05:06 C*07:08:09"}
+        )  # B is after C on chromosome 6.
         self.assertEqual(response.status_code, 302)
         self.assertTrue(Haplotype.objects.filter(name="C*07:08:09~B*04:05:06").exists())
 
+    @patch("allele.models.fetch_allele_data")
+    def test_unknown_allele_is_a_field_error_without_fetching(
+        self, mock_fetch: MagicMock
+    ):
+        response = self.client.post(self.url, {"alleles": "A*01:02:03 DRB1*15:01"})
+        self.assertEqual(response.status_code, 200)
+        error = response.context["form"].errors["alleles"][0]
+        self.assertIn("DRB1*15:01", error)
+        self.assertContains(response, f'href="{reverse("allele-create")}"')
+        self.assertFalse(Haplotype.objects.exists())
+        mock_fetch.assert_not_called()
+
     def test_unknown_gene_returns_form_error(self):
-        unknown = Allele.objects.create(name="ZZZ*01:01")
-        initial_haplotype_count = Haplotype.objects.count()
-        response = self.client.post(self.url, {"alleles": ["1", str(unknown.pk)]})
+        Allele.objects.create(name="ZZZ*01:01")
+        response = self.client.post(self.url, {"alleles": "A*01:02:03 ZZZ*01:01"})
         self.assertEqual(response.status_code, 200)
         form = response.context["form"]
         self.assertIn("ZZZ*01:01 has an unknown gene.", form.errors["alleles"])
-        self.assertEqual(Haplotype.objects.count(), initial_haplotype_count)
+        self.assertFalse(Haplotype.objects.exists())
 
     def test_duplicate_allele_combination_returns_form_error(self):
-        self.client.post(self.url, {"alleles": ["1", "2"]})
-        initial_haplotype_count = Haplotype.objects.count()
-        response = self.client.post(self.url, {"alleles": ["2", "1"]})
+        self.client.post(self.url, {"alleles": "A*01:02:03 B*04:05:06"})
+        response = self.client.post(self.url, {"alleles": "B*04:05:06~A*01:02:03"})
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "haplotype/create.html")
-        form = response.context["form"]
-        self.assertFalse(form.is_valid())
-        self.assertIn("alleles", form.errors)
-        self.assertIn("already exists", form.errors["alleles"][0])
-        self.assertEqual(Haplotype.objects.count(), initial_haplotype_count)
+        self.assertIn("already exists", response.context["form"].errors["alleles"][0])
+        self.assertEqual(Haplotype.objects.count(), 1)
 
-    def test_does_not_create_haplotype_with_invalid_form_data(self):
-        initial_haplotype_count = Haplotype.objects.count()
-        data = {"alleles": []}  # The alleles field is required.
-        response = self.client.post(self.url, data)
+    def test_requires_alleles(self):
+        response = self.client.post(self.url, {"alleles": ""})
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "haplotype/create.html")
-        self.assertIn("form", response.context)
-        form = response.context["form"]
-        self.assertFalse(form.is_valid())
-        self.assertIn("alleles", form.errors)
         self.assertContains(response, "This field is required.")
-        self.assertEqual(Haplotype.objects.count(), initial_haplotype_count)
+        self.assertFalse(Haplotype.objects.exists())
+
+    def test_alleles_input_suggests_the_allele_being_typed(self):
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        alleles_input = soup.select_one('input[name="alleles"]')
+        assert alleles_input is not None
+        self.assertEqual(alleles_input["hx-get"], reverse("allele-suggest"))
+        self.assertEqual(
+            alleles_input["data-suggest-separators"], ALLELE_SEPARATORS.pattern
+        )
+        self.assertIsNone(soup.select_one("select"))
 
 
 class HaplotypeDetailTest(ProtectedViewTestMixin, TestCase):

@@ -18,6 +18,7 @@ from curation.constants.models.curation import (
 )
 from curation.models import Curation, Evidence
 from disease.models import Disease
+from haplotype.constants.forms import TYPED_HAPLOTYPE_HELP_TEXT
 from haplotype.models import Haplotype
 
 
@@ -29,11 +30,7 @@ class CurationCreateForm(ModelForm):
         label="Haplotype",
         required=False,
         widget=SuggestInput("haplotype-suggest"),
-        help_text=(
-            "The alleles in the haplotype, in any order, separated by ~, spaces, or "
-            "commas, e.g., DRB1*15:01 DQB1*06:02. (The 'HLA-' part should be "
-            "omitted.)"
-        ),
+        help_text=TYPED_HAPLOTYPE_HELP_TEXT,
     )
     disease = Disease.mondo_id.field.formfield(
         label="Disease",

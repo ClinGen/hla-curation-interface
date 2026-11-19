@@ -161,4 +161,4 @@ Defines `BackupDatabaseView`, the view behind the admin's Back up now button, wh
 
 ### `widgets.py`
 
-Defines `SuggestInput`, a `TextInput` that takes the URL name of a `SuggestView` (e.g., `SuggestInput("allele-suggest")`) and exposes its `suggest_url`. A form declares a field with it, and `templates/common/form/input/text.html` renders that field as a suggestions combobox, so templates don't pass the URL.
+Defines `SuggestInput`, a `TextInput` that takes the URL name of a `SuggestView` (e.g., `SuggestInput("allele-suggest")`) and exposes its `suggest_url`. Pass `separators`, a compiled pattern, for an input that holds a list, such as Add Haplotype's alleles: only the item being typed is then suggested and replaced. A form declares a field with it, and `templates/common/form/input/text.html` renders that field as a suggestions combobox, so templates don't pass the URL.
