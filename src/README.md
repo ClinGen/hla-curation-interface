@@ -86,7 +86,7 @@ See [`repo/README.md`](repo/README.md) for details.
 ### `static/`
 
 Static assets served by Django: vendored CSS and JavaScript libraries (Bulma, Bootstrap
-Icons, Choices.js, htmx), project imagery (logos, favicons, third-party source logos),
+Icons, htmx), project imagery (logos, favicons, third-party source logos),
 web fonts, and the PWA web app manifest. See [`static/README.md`](static/README.md) for
 details.
 

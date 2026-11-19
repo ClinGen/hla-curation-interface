@@ -10,14 +10,6 @@ The Bootstrap Icons icon font stylesheet. It defines CSS classes and `@font-face
 
 The full Bulma CSS framework stylesheet. It provides a modern, flexbox-based layout system and component styles used throughout the application.
 
-### `hci/css/choices.css.map`
-
-The source map for the Choices.js CSS bundle. It maps the minified styles back to their original source locations to aid in browser-based debugging.
-
-### `hci/css/choices.min.css`
-
-The minified Choices.js stylesheet. It provides the styles for the Choices.js custom select/multi-select widget used in the application's forms.
-
 ### `hci/css/custom.css`
 
 Application-specific CSS overrides and utility classes. It defines styles for entity-type logo sizing, footer logo containers, a horizontal scroll container, a wider modal card for the HLArepo evidence modal, and the HLArepo family tree (no list indentation, rows one line tall so the box-drawing lines connect, and horizontal scrolling instead of wrapping), and the standalone scoring summary page, which doesn't load Bulma, sets its own colors to match the taskforce's spreadsheet, and keeps them when printed. It also styles the suggestions dropdown under text inputs (full width like the input, scrolling past 20rem, with hover and keyboard highlight colors).
@@ -93,14 +85,6 @@ An animated "under construction" GIF. It is used as a placeholder on pages or fe
 ### `hci/js/callback.js`
 
 A bundled JavaScript file for handling the Clerk authentication OAuth callback flow. It contains the React and Clerk SDK code required to complete sign-in after redirecting back from an external identity provider.
-
-### `hci/js/choices.js`
-
-The full, unminified source of the Choices.js library (v11.2.3). It provides a customizable, accessible replacement for native `<select>` elements, used in the application's forms.
-
-### `hci/js/choices.min.js`
-
-The minified production build of the Choices.js library. It is the version loaded in production to reduce page load time.
 
 ### `hci/js/evidence-modal.js`
 

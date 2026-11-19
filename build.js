@@ -49,25 +49,6 @@ await copyFile(
   `${CSS_STATIC_DIR}/fonts/bootstrap-icons.woff2`,
 );
 
-// Copy Choices.js JavaScript into our Django static directory.
-const choicesJsPath = "./node_modules/choices.js/public/assets/scripts";
-await copyFile(`${choicesJsPath}/choices.js`, `${JS_STATIC_DIR}/choices.js`);
-await copyFile(
-  `${choicesJsPath}/choices.min.js`,
-  `${JS_STATIC_DIR}/choices.min.js`,
-);
-
-// Copy Choices.js CSS into our Django static directory.
-const choicesCssPath = "./node_modules/choices.js/public/assets/styles";
-await copyFile(
-  `${choicesCssPath}/choices.min.css`,
-  `${CSS_STATIC_DIR}/choices.min.css`,
-);
-await copyFile(
-  `${choicesCssPath}/choices.css.map`,
-  `${CSS_STATIC_DIR}/choices.css.map`,
-);
-
 // Copy Popper and Tippy.js into our Django static directory, with their source
 // maps, which collectstatic requires. Tippy needs Popper loaded first.
 const popperJsPath = "./node_modules/@popperjs/core/dist/umd";
