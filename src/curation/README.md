@@ -92,7 +92,7 @@ Full-page template for viewing a single historical change record on a curation. 
 
 ### `templates/curation/create.html`
 
-Full-page template for the "Add Curation" form. Renders radio inputs for curation type, text inputs for the allele name (suggesting existing alleles as the curator types), the haplotype (allele names in any order, separated by `~`, spaces, or commas, as its help text explains), and the disease's Mondo ID (suggesting existing diseases by Mondo ID or name, shown with both) with a Search MONDO linkout. Each field group is a Bulma `block`, so the gaps between them match. It includes JavaScript that shows or hides the allele and haplotype fields based on the selected curation type. When the pair already has a curation, it lists it in a warning box with its status and copies, and asks curators whose evidence needs a separate curation to email hci@clinicalgenome.org.
+Full-page template for the "Add Curation" form. Renders radio inputs for curation type, text inputs for the allele name (suggesting existing alleles as the curator types), the haplotype (allele names in any order, separated by `~`, spaces, or commas, as its help text explains, suggesting existing haplotypes), and the disease's Mondo ID (suggesting existing diseases by Mondo ID or name, shown with both) with a Search MONDO linkout. Each field group is a Bulma `block`, so the gaps between them match. It includes JavaScript that shows or hides the allele and haplotype fields based on the selected curation type. When the pair already has a curation, it lists it in a warning box with its status and copies, and asks curators whose evidence needs a separate curation to email hci@clinicalgenome.org.
 
 ### `templates/curation/detail.html`
 

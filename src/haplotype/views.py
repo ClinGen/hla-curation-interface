@@ -1,6 +1,7 @@
 from typing import cast
 
 from django.core.exceptions import ValidationError
+from django.db.models import QuerySet
 from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import DetailView
@@ -11,10 +12,10 @@ from allele.tables import AlleleTable
 from auth_.permissions import ProtectedViewMixin
 from common.history import resolve_changes
 from common.tables import HistoryTable
-from common.views import SearchListView
+from common.views import SearchListView, SuggestView
 from curation.tables import CurationTable
 from haplotype.forms import HaplotypeForm
-from haplotype.models import Haplotype
+from haplotype.models import ALLELE_SEPARATORS, Haplotype
 from haplotype.tables import HaplotypeTable
 
 
@@ -43,6 +44,29 @@ class HaplotypeCreate(ProtectedViewMixin, CreateView):
         form.instance.name = computed_name
         form.instance.added_by = self.request.user
         return super().form_valid(form)
+
+
+class HaplotypeSuggest(ProtectedViewMixin, SuggestView):
+    model = Haplotype
+    ordering = ["name"]
+
+    def get_matches(self, q: str) -> QuerySet:
+        """Returns the haplotypes whose names contain every typed allele, in any order.
+
+        Args:
+            q: Allele names or parts of them, separated like on Add Curation.
+
+        Returns:
+            The matching haplotypes, ordered by name.
+        """
+        matches = Haplotype.objects.order_by(*self.ordering)
+        for part in ALLELE_SEPARATORS.split(q):
+            if part:
+                matches = matches.filter(name__icontains=part)
+        return matches
+
+    def get_suggestion(self, obj: Haplotype) -> tuple[str, str]:  # ty: ignore[invalid-method-override]
+        return obj.name, obj.name
 
 
 class HaplotypeDetail(ProtectedViewMixin, DetailView):

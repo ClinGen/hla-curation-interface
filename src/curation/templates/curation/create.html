@@ -37,8 +37,9 @@
                 {% endwith %}
             </div>
             <div id="haplotype-div" class="block">
+                {% url "haplotype-suggest" as haplotype_suggest_url %}
                 {% with field=form.haplotype %}
-                    {% include "common/form/input/text.html" with show_help=True %}
+                    {% include "common/form/input/text.html" with show_help=True suggest_url=haplotype_suggest_url %}
                 {% endwith %}
             </div>
             <div class="block">

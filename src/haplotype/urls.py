@@ -19,4 +19,5 @@ urlpatterns = [
         name="haplotype-change",
     ),
     path("list", HaplotypeList.as_view(), name="haplotype-list"),
+    path("suggest", views.HaplotypeSuggest.as_view(), name="haplotype-suggest"),
 ]

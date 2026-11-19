@@ -11,6 +11,9 @@ from simple_history.models import HistoricalRecords
 from allele.models import Allele
 from haplotype.constants.models import GENE_LIST
 
+# Curators may separate the alleles they type with ~, whitespace, or commas.
+ALLELE_SEPARATORS = re.compile(r"[~,\s]+")
+
 
 class Haplotype(models.Model):
     slug = models.SlugField(
@@ -111,7 +114,7 @@ class Haplotype(models.Model):
             ValidationError: If the name is malformed, has an unknown gene, or an
                 allele can't be fetched from the ClinGen Allele Registry.
         """
-        allele_names = re.split(r"[~,\s]+", name.strip())
+        allele_names = ALLELE_SEPARATORS.split(name.strip())
         if not all(allele_names):
             raise ValidationError(
                 {

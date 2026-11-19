@@ -1,4 +1,5 @@
 from unittest.mock import MagicMock, patch
+from urllib.parse import urlencode
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -193,3 +194,33 @@ class HaplotypeGetOrBuildTest(TestCase):
     def test_raises_when_allele_fetch_fails(self, _mock_fetch: MagicMock):
         with self.assertRaisesMessage(ValidationError, "ClinGen Allele Registry"):
             Haplotype.get_or_build("A*01:02:03~DRB1*15:01")
+
+
+class HaplotypeSuggestTest(ProtectedViewTestMixin, TestCase):
+    fixtures = ["test_alleles.json", "test_haplotypes.json"]
+    url = f"{reverse('haplotype-suggest')}?{urlencode({'q': 'b*04'})}"
+    template = "common/partials/suggestions.html"
+    page_name = "A*01:02:03~B*04:05:06"
+    expected_text = ['data-value="A*01:02:03~B*04:05:06"']
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user4_yes_phi_yes_perms)
+
+    def _suggest(self, q: str) -> list[str]:
+        response = self.client.get(reverse("haplotype-suggest"), {"q": q})
+        return [value for value, _label in response.context["suggestions"]]
+
+    def test_matches_every_part_in_any_order_with_any_separator(self):
+        for q in ["b*04 a*01", "B*04, A*01", "B*04~A*01", "A*01:02:03~B*04:05:06"]:
+            with self.subTest(q=q):
+                self.assertEqual(self._suggest(q), ["A*01:02:03~B*04:05:06"])
+
+    def test_needs_every_part_to_match(self):
+        self.assertEqual(self._suggest("A*01 C*07"), [])
+
+    def test_suggests_at_most_ten(self):
+        Haplotype.objects.bulk_create(
+            Haplotype(name=f"A*01:{n:02d}~B*08:01") for n in range(12)
+        )
+        self.assertEqual(len(self._suggest("B*08")), 10)
