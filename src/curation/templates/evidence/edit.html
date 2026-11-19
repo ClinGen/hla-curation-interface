@@ -97,7 +97,7 @@
                 </div>
                 <div class="box">
                     {% include "common/form/section_heading.html" with id="demographics" text="Demographics" public=form.demographics.name|is_public:"evidence" %}
-                    {% include "common/form/select/search.html" with field=form.demographics public=form.demographics.name|is_public:"evidence" hide_label=True %}
+                    {% include "common/form/input/radio.html" with field=form.demographics public=form.demographics.name|is_public:"evidence" hide_label=True %}
                     {% include "common/form/textarea.html" with field=form.demographics_text_quotes public=form.demographics_text_quotes.name|is_public:"evidence" show_help=True %}
                     {% include "common/form/textarea.html" with field=form.demographics_notes public=form.demographics_notes.name|is_public:"evidence" %}
                 </div>

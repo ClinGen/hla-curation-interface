@@ -393,7 +393,7 @@ class EvidenceEditForm(ModelForm):
             "phase_confirmed_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
             "typing_method_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
             "demographics_text_quotes": forms.Textarea(attrs=TEXTAREA_ATTRS),
-            "demographics": forms.SelectMultiple,
+            "demographics": forms.CheckboxSelectMultiple,
             "demographics_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
             "p_value_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
             "multiple_testing_correction_notes": forms.Textarea(attrs=TEXTAREA_ATTRS),
