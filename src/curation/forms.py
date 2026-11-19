@@ -31,7 +31,13 @@ class CurationCreateForm(ModelForm):
             "omitted.)"
         ),
     )
-    disease = Disease.mondo_id.field.formfield(label="Disease")
+    disease = Disease.mondo_id.field.formfield(
+        label="Disease",
+        help_text=(
+            "The Mondo Disease Ontology ID, e.g., MONDO:0005052. To find a disease "
+            "that's already in the HCI, type part of its ID or name."
+        ),
+    )
 
     class Meta:
         model = Curation
