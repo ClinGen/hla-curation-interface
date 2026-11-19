@@ -1,3 +1,4 @@
+{% with suggest_url=field.field.widget.suggest_url %}
 <div class="field">
     {% if hide_label %}
         <label class="label is-hidden" for="{{ field.id_for_label }}">{{ field.label }}</label>
@@ -37,3 +38,4 @@
         {% endif %}
     </div>
 </div>
+{% endwith %}

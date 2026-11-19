@@ -1,5 +1,5 @@
 // Shows suggestions under text inputs marked with data-suggest, which
-// common/form/input/text.html adds when given a suggest_url. HTMX fetches the
+// common/form/input/text.html adds for a SuggestInput field. HTMX fetches the
 // suggestions as the curator types; this file sends the typed text as q, opens
 // and closes the list, and fills the input from the mouse or keyboard.
 

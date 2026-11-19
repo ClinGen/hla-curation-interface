@@ -31,21 +31,18 @@
                 {% endwith %}
             </div>
             <div id="allele-div" class="block">
-                {% url "allele-suggest" as allele_suggest_url %}
                 {% with field=form.allele %}
-                    {% include "common/form/input/text.html" with show_help=True suggest_url=allele_suggest_url %}
+                    {% include "common/form/input/text.html" with show_help=True %}
                 {% endwith %}
             </div>
             <div id="haplotype-div" class="block">
-                {% url "haplotype-suggest" as haplotype_suggest_url %}
                 {% with field=form.haplotype %}
-                    {% include "common/form/input/text.html" with show_help=True suggest_url=haplotype_suggest_url %}
+                    {% include "common/form/input/text.html" with show_help=True %}
                 {% endwith %}
             </div>
             <div class="block">
-                {% url "disease-suggest" as disease_suggest_url %}
                 {% with field=form.disease %}
-                    {% include "common/form/input/text.html" with show_help=True suggest_url=disease_suggest_url %}
+                    {% include "common/form/input/text.html" with show_help=True %}
                 {% endwith %}
                 {% include "common/linkout.html" with url="https://www.ebi.ac.uk/ols4/ontologies/mondo" text="Search MONDO" %}
             </div>

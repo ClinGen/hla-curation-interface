@@ -13,7 +13,9 @@ from types import SimpleNamespace
 from typing import Any
 from unittest.mock import patch
 
+from bs4 import BeautifulSoup
 from dbbackup import settings as dbbackup_settings
+from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
@@ -29,6 +31,7 @@ from auth_.models import UserProfile
 from common.alerts import send_alert
 from common.tables import HistoryTable
 from common.templatetags.custom_filters import is_public
+from common.widgets import SuggestInput
 
 
 class SuppressRequestLoggingMixin:
@@ -657,3 +660,33 @@ class BackupDbCommandTest(TempBackupStorageMixin, TransactionTestCase):
         self.assertIn("backup failed", subject.lower())
         self.assertIn("hci-lightsail-test", body)
         self.assertIn("disk full", body)
+
+
+class SuggestInputTest(TestCase):
+    class Form(forms.Form):
+        allele = forms.CharField(widget=SuggestInput("allele-suggest"))
+        plain = forms.CharField()
+
+    def _render(self, field_name: str) -> BeautifulSoup:
+        html = render_to_string(
+            "common/form/input/text.html", {"field": self.Form()[field_name]}
+        )
+        return BeautifulSoup(html, "html.parser")
+
+    def test_renders_a_suggest_combobox_for_the_widget_url(self):
+        soup = self._render("allele")
+        field_input = soup.select_one("input")
+        assert field_input is not None
+        self.assertEqual(field_input["hx-get"], reverse("allele-suggest"))
+        self.assertEqual(field_input["role"], "combobox")
+        self.assertEqual(field_input["autocomplete"], "off")
+        listbox = soup.select_one(f"#{field_input['aria-controls']}")
+        assert listbox is not None
+        self.assertEqual(listbox["role"], "listbox")
+
+    def test_renders_a_plain_input_for_other_widgets(self):
+        soup = self._render("plain")
+        field_input = soup.select_one("input")
+        assert field_input is not None
+        self.assertFalse(field_input.has_attr("hx-get"))
+        self.assertIsNone(soup.select_one("[role=listbox]"))
