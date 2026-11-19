@@ -164,7 +164,7 @@ Full-page template for viewing an evidence item's details. Renders the evidence 
 
 ### `templates/evidence/edit.html`
 
-Full-page template for the evidence data editing form. Renders the evidence summary table, a sidebar navigation menu, and sectioned form fields for all scoring steps (GWAS flag, allele resolution, zygosity, phase, typing method, demographics, p-value, multiple testing correction, effect size, confidence interval, cohort size, additional phenotypes, significant association, protective flag, and needs-review flag). Includes JavaScript that shows/hides effect size sub-fields based on the selected statistic type.
+Full-page template for the evidence data editing form. Renders the evidence summary table, a sidebar navigation menu, and sectioned form fields for all scoring steps (GWAS flag, allele resolution, zygosity, phase, typing method, demographics (one checkbox per group), p-value, multiple testing correction, effect size, confidence interval, cohort size, additional phenotypes, significant association, protective flag, and needs-review flag). Includes JavaScript that shows/hides effect size sub-fields based on the selected statistic type.
 
 ### `templates/evidence/history.html`
 

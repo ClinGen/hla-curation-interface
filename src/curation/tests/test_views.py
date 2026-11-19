@@ -914,6 +914,42 @@ class EvidenceEditTest(ProtectedViewTestMixin, TestCase):
             "needs_review_notes": "",
         }
 
+    def _make_demographics(self) -> list[Demographic]:
+        return [
+            Demographic.objects.create(group=group)
+            for group in ("African", "East Asian", "European")
+        ]
+
+    def test_shows_a_checkbox_per_demographic_with_saved_ones_checked(self):
+        african, _east_asian, european = self._make_demographics()
+        Evidence.objects.get(pk=1).demographics.add(african, european)
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        boxes = soup.select('input[type="checkbox"][name="demographics"]')
+        self.assertEqual(len(boxes), Demographic.objects.count())
+        checked = {box["value"] for box in boxes if box.has_attr("checked")}
+        self.assertEqual(checked, {str(african.pk), str(european.pk)})
+        self.assertIsNone(soup.select_one('select[name="demographics"]'))
+
+    def test_saves_exactly_the_checked_demographics(self):
+        african, east_asian, european = self._make_demographics()
+        evidence = Evidence.objects.get(pk=1)
+        evidence.demographics.add(european)
+        data = self._base_evidence_data()
+        data["demographics"] = [african.pk, east_asian.pk]
+        data["demographics_text_quotes"] = "African and East Asian cohorts."
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(set(evidence.demographics.all()), {african, east_asian})
+
+    def test_unchecking_every_demographic_saves_none(self):
+        african, _east_asian, _european = self._make_demographics()
+        evidence = Evidence.objects.get(pk=1)
+        evidence.demographics.add(african)
+        response = self.client.post(self.url, self._base_evidence_data())
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(evidence.demographics.exists())
+
     def test_requires_text_quotes_when_demographics_provided(self):
         demographic = Demographic.objects.create(group="Asian")
         data = self._base_evidence_data()

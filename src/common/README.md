@@ -49,7 +49,7 @@ The Bulma modal card that `hci/js/confirm-modal.js` shows before submitting a fo
 
 ### `templates/common/form/input/radio.html`
 
-Reusable partial for rendering a radio-button form field using Bulma CSS. Supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead.
+Reusable partial for rendering a radio-button or checkbox-group form field (`RadioSelect` or `CheckboxSelectMultiple`) using Bulma CSS, one choice per line. Supports optional label hiding and help-text display. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead.
 
 ### `templates/common/form/input/text.html`
 
