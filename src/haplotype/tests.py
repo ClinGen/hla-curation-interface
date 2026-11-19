@@ -163,9 +163,26 @@ class HaplotypeGetOrBuildTest(TestCase):
         self.assertEqual(alleles[1].car_id, "XAHLA999")
         mock_fetch.assert_called_once_with("DRB1*15:01")
 
+    @patch("allele.models.fetch_allele_data")
+    def test_accepts_spaces_and_commas_between_alleles(self, mock_fetch: MagicMock):
+        for typed in [
+            "A*01:02:03 B*04:05:06",
+            "B*04:05:06, A*01:02:03",
+            "A*01:02:03,B*04:05:06",
+            "B*04:05:06 ~ A*01:02:03",
+            "A*01:02:03~~B*04:05:06",
+        ]:
+            with self.subTest(typed=typed):
+                haplotype, _alleles = Haplotype.get_or_build(typed)
+                self.assertEqual(haplotype, Haplotype.objects.get(pk=1))
+        mock_fetch.assert_not_called()
+
     def test_raises_for_malformed_string(self):
-        for typed in ["", "A*01:02:03~", "A*01:02:03~~B*04:05:06"]:
-            with self.subTest(typed=typed), self.assertRaises(ValidationError):
+        for typed in ["", " ", "A*01:02:03~", ", A*01:02:03"]:
+            with (
+                self.subTest(typed=typed),
+                self.assertRaisesMessage(ValidationError, "spaces, or commas"),
+            ):
                 Haplotype.get_or_build(typed)
 
     def test_raises_for_unknown_gene(self):

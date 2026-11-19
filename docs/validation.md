@@ -20,7 +20,8 @@ A haplotype is a combination of alleles, so the system enforces two things when 
 created. First, it automatically arranges the selected alleles into a canonical order
 based on their position on chromosome 6, so the same combination always has the same
 name regardless of the order the curator picked them in. Second, it rejects the
-submission if that exact combination already exists in the system.
+submission if that exact combination already exists in the system. On Add Curation,
+curators type the alleles instead, in any order, separated by `~`, spaces, or commas.
 
 ### Disease
 

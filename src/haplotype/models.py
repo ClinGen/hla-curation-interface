@@ -1,3 +1,4 @@
+import re
 from collections.abc import Iterable
 
 from django.contrib.auth.models import User
@@ -98,7 +99,8 @@ class Haplotype(models.Model):
         """Returns the haplotype with the name, or builds an unsaved one.
 
         Args:
-            name: The constituent allele names joined by '~', in any order.
+            name: The constituent allele names, in any order, separated by '~',
+                whitespace, or commas.
 
         Returns:
             The existing or new unsaved haplotype, and its alleles in canonical
@@ -109,10 +111,15 @@ class Haplotype(models.Model):
             ValidationError: If the name is malformed, has an unknown gene, or an
                 allele can't be fetched from the ClinGen Allele Registry.
         """
-        allele_names = [part.strip() for part in name.split("~")]
+        allele_names = re.split(r"[~,\s]+", name.strip())
         if not all(allele_names):
             raise ValidationError(
-                {"name": "Separate allele names with '~', e.g., A*01:01~B*08:01."}
+                {
+                    "name": (
+                        "Separate allele names with ~, spaces, or commas, e.g., "
+                        "DRB1*15:01 DQB1*06:02."
+                    )
+                }
             )
         canonical_name = cls.canonical_name(allele_names)
         haplotype = cls.objects.filter(name=canonical_name).first()

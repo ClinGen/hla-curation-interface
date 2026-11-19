@@ -32,7 +32,7 @@ Defines `HaplotypeForm`, a `ModelForm` for the `Haplotype` model that exposes on
 
 ### `models.py`
 
-Defines the `Haplotype` model with a slug-based human-readable ID (e.g., `H000001`), a many-to-many relationship to `Allele`, a unique `name` field, provenance fields (`added_by`, `added_at`, `updated_at`), and full change history via `HistoricalRecords`. The slug is auto-generated from the primary key on first save. `canonical_name` joins allele names with `~` in `GENE_LIST` order, and `get_or_build` parses a typed `~`-joined name in any order and returns the existing or a new unsaved haplotype with its alleles (from `Allele.get_or_build`), raising `ValidationError` for a malformed name, an unknown gene, or a failed allele fetch.
+Defines the `Haplotype` model with a slug-based human-readable ID (e.g., `H000001`), a many-to-many relationship to `Allele`, a unique `name` field, provenance fields (`added_by`, `added_at`, `updated_at`), and full change history via `HistoricalRecords`. The slug is auto-generated from the primary key on first save. `canonical_name` joins allele names with `~` in `GENE_LIST` order, and `get_or_build` parses typed allele names separated by `~`, whitespace, or commas, in any order, and returns the existing or a new unsaved haplotype with its alleles (from `Allele.get_or_build`), raising `ValidationError` for a malformed name, an unknown gene, or a failed allele fetch.
 
 ### `tables.py`
 

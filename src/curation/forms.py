@@ -22,7 +22,15 @@ from haplotype.models import Haplotype
 
 class CurationCreateForm(ModelForm):
     allele = Allele.name.field.formfield(label="Allele", required=False)
-    haplotype = Haplotype.name.field.formfield(label="Haplotype", required=False)
+    haplotype = Haplotype.name.field.formfield(
+        label="Haplotype",
+        required=False,
+        help_text=(
+            "The alleles in the haplotype, in any order, separated by ~, spaces, or "
+            "commas, e.g., DRB1*15:01 DQB1*06:02. (The 'HLA-' part should be "
+            "omitted.)"
+        ),
+    )
     disease = Disease.mondo_id.field.formfield(label="Disease")
 
     class Meta:
@@ -35,6 +43,7 @@ class CurationCreateForm(ModelForm):
         super().__init__(*args, **kwargs)
         self.existing_pairs: list[Curation] = []
         self.haplotype_alleles: list[Allele] = []
+        self.lookup_errors: dict[str, list[str]] = {}
 
     def _get_or_build[T](
         self, field: str, get_or_build: Callable[[str], T]
@@ -54,6 +63,7 @@ class CurationCreateForm(ModelForm):
         try:
             return get_or_build(value)
         except ValidationError as error:
+            self.lookup_errors[field] = error.messages
             self.add_error(field, error.messages)
             return None
 
@@ -97,6 +107,16 @@ class CurationCreateForm(ModelForm):
                 "lead to conflicting classifications.",
             )
         return cleaned_data
+
+    def full_clean(self) -> None:
+        """Shows only the lookup error on a field whose typed record wasn't found.
+
+        Curation.clean() then adds that an allele or haplotype is required, which
+        repeats the lookup error less helpfully.
+        """
+        super().full_clean()
+        for field, messages in self.lookup_errors.items():
+            self.errors[field] = self.error_class(messages)
 
     def save(self, *args, **kwargs) -> Curation:
         """Saves any new allele, haplotype, or disease with the curation, all or none.
