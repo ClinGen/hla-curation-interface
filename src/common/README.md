@@ -63,10 +63,6 @@ A form section's `<h2>` heading. Callers pass `id`, `text`, and `public`; when `
 
 Reusable partial for rendering a standard `<select>` form field using Bulma CSS. Supports optional label visibility, help text, and an extra CSS class on the select wrapper. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead.
 
-### `templates/common/form/select/search.html`
-
-Reusable partial for rendering a `<select>` field enhanced with the Choices.js library for fuzzy search. Initialises the Choices widget on HTMX load with configurable fuse search options and a remove-item button. Pass `public=True` to mark the field as shown in HLArepo: the badge sits in the label. A hidden label gets no badge, so put it on the section heading (`section_heading.html`) instead.
-
 ### `templates/common/form/textarea.html`
 
 Reusable partial for rendering a `<textarea>` form field using Bulma CSS, with a visible label, inline validation errors, and optional help text. Pass `public=True` to put the public badge in the label.

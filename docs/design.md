@@ -78,7 +78,7 @@ research communities.
 - **Error monitoring** — Sentry
 - **Frontend CSS** — Bulma
 - **Partial page updates** — HTMX
-- **Enhanced selects** — Choices.js
+- **Suggestions under text inputs** — HTMX + `suggest.js` (`SuggestInput`)
 - **Tooltips** — Tippy.js (with Popper)
 - **Sortable, searchable tables** — django-tables2 + HTMX
 
@@ -136,8 +136,6 @@ is used narrowly:
   under text inputs given a `SuggestInput` widget (`hci/js/suggest.js`), such as the
   allele, haplotype, and disease fields on Add Curation and the alleles on Add
   Haplotype.
-- **Choices.js** — searchable multi-select and single-select inputs (e.g. the allele
-  picker on the haplotype creation form).
 - **Tippy.js** — tooltips on icons, such as the globe badge on fields that are public
   in HLArepo. `common/tooltip.html` renders an icon with a tooltip and no visible text.
 

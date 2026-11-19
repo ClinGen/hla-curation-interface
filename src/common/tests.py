@@ -690,3 +690,10 @@ class SuggestInputTest(TestCase):
         assert field_input is not None
         self.assertFalse(field_input.has_attr("hx-get"))
         self.assertIsNone(soup.select_one("[role=listbox]"))
+
+
+class NoChoicesJsTest(TestCase):
+    def test_base_layout_does_not_load_choices(self):
+        response = self.client.get(reverse("home"))
+        self.assertTemplateUsed(response, "layouts/base.html")
+        self.assertNotContains(response, "choices")

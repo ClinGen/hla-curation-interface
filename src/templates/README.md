@@ -24,11 +24,11 @@ Extends Django's admin index page. For superusers, it adds a Back up now button 
 
 ### `layouts/base.html`
 
-The curator layout that every HCI page extends. It loads static assets (Bulma CSS, Bootstrap Icons, Choices.js, HTMX, Tippy.js and Popper, the tooltip script, the confirm modal script, and the suggestions script, `suggest.js`), sets up the `<head>` with favicon and meta blocks, and composes the page structure by including the environment banner, navbar, account activation notice, flash messages, and footer partials around a `{% block main %}` content slot, followed by the shared confirm modal (`common/confirm_modal.html`).
+The curator layout that every HCI page extends. It loads static assets (Bulma CSS, Bootstrap Icons, HTMX, Tippy.js and Popper, the tooltip script, the confirm modal script, and the suggestions script, `suggest.js`), sets up the `<head>` with favicon and meta blocks, and composes the page structure by including the environment banner, navbar, account activation notice, flash messages, and footer partials around a `{% block main %}` content slot, followed by the shared confirm modal (`common/confirm_modal.html`).
 
 ### `layouts/public.html`
 
-The public layout that HLArepo pages extend. It loads the same assets as `layouts/base.html` minus Choices.js, which no public page uses, and its title prefix is "HLArepo". It includes the environment banner, flash messages, the public footer, and the confirm modal, plus the public navbar for logged-in users only. It has no curator navbar or account activation notice, so a logged-out visitor never sees a link into the HCI or one that needs a login.
+The public layout that HLArepo pages extend. It loads the same assets as `layouts/base.html` minus `suggest.js`, which no public page uses, and its title prefix is "HLArepo". It includes the environment banner, flash messages, the public footer, and the confirm modal, plus the public navbar for logged-in users only. It has no curator navbar or account activation notice, so a logged-out visitor never sees a link into the HCI or one that needs a login.
 
 ### `layouts/print.html`
 
