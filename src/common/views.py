@@ -7,9 +7,9 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.core.management import call_command
-from django.db.models import Q, QuerySet
+from django.db.models import Model, Q, QuerySet
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views import View
 from django.views.generic import ListView
@@ -44,6 +44,49 @@ class SearchListView(SingleTableMixin, ListView):  # ty: ignore[invalid-method-o
         context["query"] = self.request.GET.get("q", "").strip()
         context["result_count"] = self.object_list.count()
         return context
+
+
+class SuggestView(View):
+    """Suggests existing records as a curator types, for an input with suggest_url.
+
+    Subclasses set the model and the fields to search. The response is the
+    common/partials/suggestions.html fragment, which suggest.js shows under the input.
+    """
+
+    model: type[Model]
+    search_fields: list[str] = []
+    ordering: list[str] = []
+    min_length = 2
+    limit = 10
+    template_name = "common/partials/suggestions.html"
+
+    def get_suggestion(self, obj: Model) -> tuple[str, str]:
+        """Returns what to fill the input with and what to show for a record.
+
+        Args:
+            obj: A matching record.
+
+        Returns:
+            The value for the input and the text to show, both the record's string by
+            default.
+        """
+        return str(obj), str(obj)
+
+    def get(self, request: HttpRequest) -> HttpResponse:
+        """Renders up to limit records that match the query in q.
+
+        Returns:
+            The suggestions fragment, empty if q is shorter than min_length.
+        """
+        q = request.GET.get("q", "").strip()
+        suggestions = []
+        if len(q) >= self.min_length:
+            filters = Q()
+            for field in self.search_fields:
+                filters |= Q(**{f"{field}__icontains": q})
+            matches = self.model.objects.filter(filters).order_by(*self.ordering)
+            suggestions = [self.get_suggestion(obj) for obj in matches[: self.limit]]
+        return render(request, self.template_name, {"suggestions": suggestions})
 
 
 class BackupDatabaseView(View):

@@ -24,7 +24,7 @@ Extends Django's admin index page. For superusers, it adds a Back up now button 
 
 ### `layouts/base.html`
 
-The curator layout that every HCI page extends. It loads static assets (Bulma CSS, Bootstrap Icons, Choices.js, HTMX, Tippy.js and Popper, the tooltip script, and the confirm modal script), sets up the `<head>` with favicon and meta blocks, and composes the page structure by including the environment banner, navbar, account activation notice, flash messages, and footer partials around a `{% block main %}` content slot, followed by the shared confirm modal (`common/confirm_modal.html`).
+The curator layout that every HCI page extends. It loads static assets (Bulma CSS, Bootstrap Icons, Choices.js, HTMX, Tippy.js and Popper, the tooltip script, the confirm modal script, and the suggestions script, `suggest.js`), sets up the `<head>` with favicon and meta blocks, and composes the page structure by including the environment banner, navbar, account activation notice, flash messages, and footer partials around a `{% block main %}` content slot, followed by the shared confirm modal (`common/confirm_modal.html`).
 
 ### `layouts/public.html`
 
