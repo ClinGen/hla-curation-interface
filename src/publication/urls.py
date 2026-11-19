@@ -26,4 +26,5 @@ urlpatterns = [
         name="publication-change",
     ),
     path("list", PublicationList.as_view(), name="publication-list"),
+    path("suggest", views.PublicationSuggest.as_view(), name="publication-suggest"),
 ]

@@ -11,7 +11,7 @@ from django_tables2 import RequestConfig
 from auth_.permissions import ProtectedViewMixin, protected_view
 from common.history import resolve_changes
 from common.tables import HistoryTable
-from common.views import SearchListView
+from common.views import SearchListView, SuggestView
 from publication.clients import refresh_from_pubmed
 from publication.forms import PublicationForm
 from publication.models import Publication
@@ -100,3 +100,12 @@ class PublicationList(ProtectedViewMixin, SearchListView):  # ty: ignore[invalid
     table_class = PublicationTable
     search_fields = ["slug", "title", "author", "authors", "pubmed_id"]
     table_pagination = {"per_page": 25}
+
+
+class PublicationSuggest(ProtectedViewMixin, SuggestView):
+    model = Publication
+    search_fields = ["pubmed_id", "title", "authors"]
+    ordering = ["-publication_year", "title"]
+
+    def get_suggestion(self, obj: Publication) -> tuple[str, str]:  # ty: ignore[invalid-method-override]
+        return obj.pubmed_id, str(obj)

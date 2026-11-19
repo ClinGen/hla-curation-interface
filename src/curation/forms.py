@@ -7,7 +7,9 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.forms import ModelForm, modelformset_factory
 from django.http import QueryDict
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.html import format_html
 
 from allele.models import Allele
 from common.widgets import SuggestInput
@@ -20,6 +22,7 @@ from curation.models import Curation, Evidence
 from disease.models import Disease
 from haplotype.constants.forms import TYPED_HAPLOTYPE_HELP_TEXT
 from haplotype.models import Haplotype
+from publication.models import Publication
 
 
 class CurationCreateForm(ModelForm):
@@ -315,9 +318,41 @@ def _mentions_date(text: str, review_date: date) -> bool:
 
 
 class EvidenceCreateForm(ModelForm):
+    publication = forms.CharField(
+        label="Publication",
+        help_text=(
+            "The PubMed ID, e.g., 12345678. To find a publication that's already in "
+            "the HCI, type part of its PubMed ID, title, or authors."
+        ),
+        widget=SuggestInput("publication-suggest"),
+    )
+
     class Meta:
         model = Evidence
-        fields = ["publication"]
+        fields: list[str] = []
+
+    def clean_publication(self) -> Publication:
+        """Looks up the publication by its typed PubMed ID; nothing is fetched.
+
+        Returns:
+            The publication.
+
+        Raises:
+            ValidationError: If no publication in the HCI has that PubMed ID.
+        """
+        typed = self.cleaned_data["publication"].strip()
+        pubmed_id = re.sub(r"^pmid:\s*", "", typed, flags=re.IGNORECASE)
+        publication = Publication.objects.filter(pubmed_id=pubmed_id).first()
+        if publication is None:
+            message = format_html(
+                'PMID {} isn\'t in the HCI. <a href="{}">Add the publication</a> '
+                "first.",
+                pubmed_id,
+                reverse("publication-create"),
+            )
+            raise ValidationError(message)
+        self.instance.publication = publication
+        return publication
 
 
 class EvidenceTopLevelEditForm(ModelForm):
