@@ -128,7 +128,7 @@ A bundled JavaScript file for rendering the Clerk sign-in component. It contains
 
 ### `hci/js/suggest.js`
 
-Runs the suggestions under text inputs rendered by `common/form/input/text.html` with `suggest_url`. It sends the typed text to the suggestion endpoint as `q`, opens the dropdown when matches arrive, moves through them with the arrow keys, fills the input on Enter or a click, and closes the list on Escape, on blur, and after a choice, cancelling any request still in flight.
+Runs the suggestions under text inputs rendered by `common/form/input/text.html` for a `SuggestInput` field. It sends the typed text to the suggestion endpoint as `q`, opens the dropdown when matches arrive, moves through them with the arrow keys, fills the input on Enter or a click, and closes the list on Escape, on blur, and after a choice, cancelling any request still in flight.
 
 ### `hci/js/tippy.umd.min.js`
 

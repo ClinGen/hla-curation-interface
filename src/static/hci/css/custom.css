@@ -187,7 +187,7 @@
   background-color: #dbe8f5;
 }
 
-/* Suggestions under a text input (common/form/input/text.html with suggest_url). */
+/* Suggestions under a text input (a SuggestInput field in common/form/input/text.html). */
 .suggest.dropdown {
     display: block;
 }

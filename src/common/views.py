@@ -47,7 +47,7 @@ class SearchListView(SingleTableMixin, ListView):  # ty: ignore[invalid-method-o
 
 
 class SuggestView(View):
-    """Suggests existing records as a curator types, for an input with suggest_url.
+    """Suggests existing records as a curator types, for a SuggestInput field.
 
     Subclasses set the model and the fields to search. The response is the
     common/partials/suggestions.html fragment, which suggest.js shows under the input.

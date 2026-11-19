@@ -10,6 +10,7 @@ from django.http import QueryDict
 from django.utils import timezone
 
 from allele.models import Allele
+from common.widgets import SuggestInput
 from curation.constants.models.curation import (
     CLASSIFICATION_CHOICES,
     TASKFORCE_CHOICES,
@@ -21,10 +22,13 @@ from haplotype.models import Haplotype
 
 
 class CurationCreateForm(ModelForm):
-    allele = Allele.name.field.formfield(label="Allele", required=False)
+    allele = Allele.name.field.formfield(
+        label="Allele", required=False, widget=SuggestInput("allele-suggest")
+    )
     haplotype = Haplotype.name.field.formfield(
         label="Haplotype",
         required=False,
+        widget=SuggestInput("haplotype-suggest"),
         help_text=(
             "The alleles in the haplotype, in any order, separated by ~, spaces, or "
             "commas, e.g., DRB1*15:01 DQB1*06:02. (The 'HLA-' part should be "
@@ -33,6 +37,7 @@ class CurationCreateForm(ModelForm):
     )
     disease = Disease.mondo_id.field.formfield(
         label="Disease",
+        widget=SuggestInput("disease-suggest"),
         help_text=(
             "The Mondo Disease Ontology ID, e.g., MONDO:0005052. To find a disease "
             "that's already in the HCI, type part of its ID or name."
