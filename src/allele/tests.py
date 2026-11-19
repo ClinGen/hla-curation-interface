@@ -142,5 +142,10 @@ class AlleleGetOrBuildTest(TestCase):
 
     @patch("allele.models.fetch_allele_data", return_value=None)
     def test_raises_when_fetch_fails(self, _mock_fetch: MagicMock):
-        with self.assertRaisesMessage(ValidationError, "ClinGen Allele Registry"):
+        with self.assertRaisesMessage(
+            ValidationError,
+            "Something went wrong trying to fetch data from the ClinGen Allele "
+            "Registry. Please make sure you entered a valid allele name, such as "
+            "DRB3*03:01:01.",
+        ):
             Allele.get_or_build("DRB3*03:01:01")

@@ -211,7 +211,8 @@ before/after field-level diff.
 
 The HCI depends on three external APIs at record-creation time (CAR, OLS, and PubMed).
 If any of these are unavailable, the creation request fails and the user is shown an
-error. There is no retry logic or fallback; the curator can try again later. This is
+error asking them to check what they entered, since a wrong ID or name looks the same as
+an outage. There is no retry logic or fallback; the curator can try again later. This is
 intentional — a record with missing metadata (e.g. no CAR ID on an allele) would be
 misleading.
 

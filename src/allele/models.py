@@ -95,8 +95,9 @@ class Allele(models.Model):
             raise ValidationError(
                 {
                     "name": (
-                        "Oops, something went wrong trying to fetch data from the "
-                        "ClinGen Allele Registry. Please try again later."
+                        "Something went wrong trying to fetch data from the "
+                        "ClinGen Allele Registry. Please make sure you entered a "
+                        "valid allele name, such as DRB3*03:01:01."
                     )
                 }
             )

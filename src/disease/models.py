@@ -115,8 +115,9 @@ class Disease(models.Model):
             raise ValidationError(
                 {
                     "mondo_id": (
-                        "Oops, something went wrong trying to fetch data from the "
-                        "Ontology Lookup Service. Please try again later."
+                        "Something went wrong trying to fetch data from the "
+                        "Ontology Lookup Service. Please make sure you entered a "
+                        "valid Mondo ID."
                     )
                 }
             )
