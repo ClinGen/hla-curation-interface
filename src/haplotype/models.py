@@ -1,4 +1,3 @@
-import re
 from collections.abc import Iterable
 
 from django.contrib.auth.models import User
@@ -9,10 +8,11 @@ from django.urls import reverse
 from simple_history.models import HistoricalRecords
 
 from allele.models import Allele
-from haplotype.constants.models import GENE_LIST
-
-# Curators may separate the alleles they type with ~, whitespace, or commas.
-ALLELE_SEPARATORS = re.compile(r"[~,\s]+")
+from haplotype.constants.models import (
+    ALLELE_SEPARATORS,
+    GENE_LIST,
+    HAPLOTYPE_NAME_SEPARATOR,
+)
 
 
 class Haplotype(models.Model):
@@ -95,7 +95,9 @@ class Haplotype(models.Model):
         unknown = [name for name, gene in genes.items() if gene not in GENE_LIST]
         if unknown:
             raise ValidationError({"name": f"{unknown[0]} has an unknown gene."})
-        return "~".join(sorted(genes, key=lambda name: GENE_LIST.index(genes[name])))
+        return HAPLOTYPE_NAME_SEPARATOR.join(
+            sorted(genes, key=lambda name: GENE_LIST.index(genes[name]))
+        )
 
     @classmethod
     def get_or_build(cls, name: str) -> tuple["Haplotype", list[Allele]]:
@@ -126,9 +128,13 @@ class Haplotype(models.Model):
             )
         canonical_name = cls.canonical_name(allele_names)
         haplotype = cls.objects.filter(name=canonical_name).first()
-        alleles = [Allele.get_or_build(part) for part in canonical_name.split("~")]
+        alleles = [
+            Allele.get_or_build(part)
+            for part in canonical_name.split(HAPLOTYPE_NAME_SEPARATOR)
+        ]
         return haplotype or cls(name=canonical_name), alleles
 
     @property
     def display_name(self) -> str:
-        return "~".join(f"HLA-{part}" for part in self.name.split("~"))
+        parts = self.name.split(HAPLOTYPE_NAME_SEPARATOR)
+        return HAPLOTYPE_NAME_SEPARATOR.join(f"HLA-{part}" for part in parts)

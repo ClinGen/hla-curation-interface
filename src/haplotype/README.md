@@ -20,7 +20,7 @@ Empty file that makes `constants` a Python subpackage.
 
 ### `constants/models.py`
 
-Defines `GENE_LIST`, an ordered list of HLA gene names sorted by their chromosomal position on chromosome 6 (sourced from hla.alleles.org). This list is used when constructing a haplotype's canonical name by sorting constituent alleles into genomic order.
+Defines `GENE_LIST`, an ordered list of HLA gene names sorted by their chromosomal position on chromosome 6 (sourced from hla.alleles.org). This list is used when constructing a haplotype's canonical name by sorting constituent alleles into genomic order. It also defines `HAPLOTYPE_NAME_SEPARATOR`, the `~` between allele names in a stored haplotype name, and `ALLELE_SEPARATORS`, the pattern (`~`, whitespace, or commas) that `Haplotype.get_or_build` and `HaplotypeSuggest` split typed allele names on.
 
 ### `fixtures/test_haplotypes.json`
 
@@ -32,7 +32,7 @@ Defines `HaplotypeForm`, a `ModelForm` for the `Haplotype` model that exposes on
 
 ### `models.py`
 
-Defines the `Haplotype` model with a slug-based human-readable ID (e.g., `H000001`), a many-to-many relationship to `Allele`, a unique `name` field, provenance fields (`added_by`, `added_at`, `updated_at`), and full change history via `HistoricalRecords`. The slug is auto-generated from the primary key on first save. `canonical_name` joins allele names with `~` in `GENE_LIST` order, and `get_or_build` parses typed allele names separated by `~`, whitespace, or commas, in any order, and returns the existing or a new unsaved haplotype with its alleles (from `Allele.get_or_build`), raising `ValidationError` for a malformed name, an unknown gene, or a failed allele fetch. `ALLELE_SEPARATORS` is the pattern (`~`, whitespace, or commas) that both `get_or_build` and `HaplotypeSuggest` split typed allele names on.
+Defines the `Haplotype` model with a slug-based human-readable ID (e.g., `H000001`), a many-to-many relationship to `Allele`, a unique `name` field, provenance fields (`added_by`, `added_at`, `updated_at`), and full change history via `HistoricalRecords`. The slug is auto-generated from the primary key on first save. `canonical_name` joins allele names with `~` in `GENE_LIST` order, and `get_or_build` parses typed allele names separated by `~`, whitespace, or commas, in any order, and returns the existing or a new unsaved haplotype with its alleles (from `Allele.get_or_build`), raising `ValidationError` for a malformed name, an unknown gene, or a failed allele fetch.
 
 ### `tables.py`
 

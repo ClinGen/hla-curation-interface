@@ -14,8 +14,9 @@ from common.history import resolve_changes
 from common.tables import HistoryTable
 from common.views import SearchListView, SuggestView
 from curation.tables import CurationTable
+from haplotype.constants.models import ALLELE_SEPARATORS
 from haplotype.forms import HaplotypeForm
-from haplotype.models import ALLELE_SEPARATORS, Haplotype
+from haplotype.models import Haplotype
 from haplotype.tables import HaplotypeTable
 
 

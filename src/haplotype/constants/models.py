@@ -1,5 +1,13 @@
 """Houses constants used in the models module of the haplotype app."""
 
+import re
+
+# Separates the allele names in a haplotype's stored name, e.g., A*01:01~B*08:01.
+HAPLOTYPE_NAME_SEPARATOR = "~"
+
+# Curators may separate the alleles they type with ~, whitespace, or commas.
+ALLELE_SEPARATORS = re.compile(r"[~,\s]+")
+
 # Genes on chromosome 6 ordered by location in ascending order.
 # See https://hla.alleles.org/pages/genes/genes_map/.
 GENE_LIST = [
