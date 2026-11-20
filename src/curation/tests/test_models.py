@@ -21,6 +21,7 @@ from curation.constants.models.evidence import (
     AdditionalPhenotypes,
     EffectSizeStatistic,
     MultipleTestingCorrection,
+    NumFields,
     PValueComparator,
     TypingMethod,
     Zygosity,
@@ -200,6 +201,45 @@ class TestCuration(TestCase):
             curation.clean()
 
 
+class TestCurationScore(TestCase):
+    fixtures = ["test_alleles.json", "test_diseases.json", "test_publications.json"]
+
+    def setUp(self):
+        self.curation = Curation.objects.create(
+            curation_type=CurationTypes.ALLELE,
+            allele=Allele.objects.get(pk=1),
+            disease=Disease.objects.get(pk=1),
+        )
+        self.supporting = self._add_evidence(num_fields=NumFields.FOUR)
+
+    def _add_evidence(self, **fields) -> Evidence:
+        defaults = {
+            "publication": Publication.objects.get(pk=1),
+            "is_included": True,
+            "has_association": True,
+        }
+        return Evidence.objects.create(curation=self.curation, **(defaults | fields))
+
+    def test_adds_included_evidence(self):
+        self.assertGreater(self.supporting.score, 0)
+        self.assertAlmostEqual(self.curation.score, self.supporting.score)
+
+    def test_subtracts_included_contradictory_evidence(self):
+        contradictory = self._add_evidence(
+            num_fields=NumFields.TWO, is_contradictory=True
+        )
+        self.assertGreater(contradictory.score, 0)
+        self.assertAlmostEqual(
+            self.curation.score, self.supporting.score - contradictory.score
+        )
+
+    def test_ignores_excluded_contradictory_evidence(self):
+        self._add_evidence(
+            num_fields=NumFields.TWO, is_contradictory=True, is_included=False
+        )
+        self.assertAlmostEqual(self.curation.score, self.supporting.score)
+
+
 class TestCurationClassificationDisplay(TestCase):
     fixtures = ["test_alleles.json", "test_diseases.json"]
 
@@ -371,6 +411,16 @@ class TestEvidence(TestCase):
 
     def test_gwas_is_false_when_created(self):
         self.assertFalse(self.evidence.is_gwas)
+
+    def test_contradictory_is_false_when_created(self):
+        self.assertFalse(self.evidence.is_contradictory)
+
+    def test_copy_to_keeps_contradictory(self):
+        self.evidence.is_contradictory = True
+        self.evidence.save()
+        copy = self.evidence.copy_to(self.curation)
+        copy.refresh_from_db()
+        self.assertTrue(copy.is_contradictory)
 
     def test_is_monoallelic_when_created(self):
         self.assertEqual(self.evidence.zygosity, Zygosity.MONOALLELIC)

@@ -87,6 +87,13 @@
                         {% endfor %}
                     {% endfor %}
                 {% endfor %}
+                <tr id="scoring-summary-contradictory">
+                    <th class="is-category">Contradictory</th>
+                    <td colspan="4">Subtracted from the score</td>
+                    <td class="is-number is-count">{{ summary.contradictory.count }}</td>
+                    <td class="is-number is-points">{{ summary.contradictory.total|stringformat:"g" }}</td>
+                    <td class="is-number is-points">{{ summary.contradictory.counted|stringformat:"g" }}</td>
+                </tr>
             </tbody>
             <tfoot>
                 <tr>

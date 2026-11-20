@@ -157,6 +157,40 @@ class BuildScoringSummaryTest(TestCase):
         self.assertGreater(summary.total_score, 0)
         self.assertAlmostEqual(summary.total_score, self.curation.score)
 
+    def test_total_score_matches_the_curation_score_with_contradictory_evidence(self):
+        self._add_evidence("111", num_fields=NumFields.FOUR, cohort_size=600)
+        self._add_evidence("222", num_fields=NumFields.ONE, is_contradictory=True)
+        summary = build_scoring_summary(self.curation)
+        self.assertGreater(summary.total_score, 0)
+        self.assertAlmostEqual(summary.total_score, self.curation.score)
+
+    def test_contradictory_row_counts_and_subtracts_contradictory_evidence(self):
+        self._add_evidence("111", num_fields=NumFields.FOUR)
+        contradictory = [
+            self._add_evidence("222", num_fields=NumFields.ONE, is_contradictory=True),
+            self._add_evidence("333", num_fields=NumFields.TWO, is_contradictory=True),
+        ]
+        self._add_evidence("444", is_contradictory=True, is_included=False)
+        summary = build_scoring_summary(self.curation)
+        self.assertEqual(summary.contradictory.count, 2)
+        self.assertAlmostEqual(
+            summary.contradictory.counted, -sum(e.score for e in contradictory)
+        )
+
+    def test_categories_leave_out_contradictory_evidence(self):
+        self._add_evidence("111", num_fields=NumFields.FOUR)
+        self._add_evidence("222", num_fields=NumFields.FOUR, is_contradictory=True)
+        summary = build_scoring_summary(self.curation)
+        self.assertEqual(self._row(summary, "1B", Points.S1B_4_FIELD).count, 1)
+        allele = self._category(summary, ALLELE_CATEGORY)
+        self.assertEqual(allele.counted, Points.S1B_4_FIELD)
+
+    def test_contradictory_row_is_empty_without_contradictory_evidence(self):
+        self._add_evidence("111")
+        summary = build_scoring_summary(self.curation)
+        self.assertEqual(summary.contradictory.count, 0)
+        self.assertEqual(summary.contradictory.counted, 0)
+
     def test_leaves_out_excluded_evidence(self):
         self._add_evidence("111", is_included=False)
         summary = build_scoring_summary(self.curation)

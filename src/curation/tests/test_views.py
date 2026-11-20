@@ -389,6 +389,19 @@ class CurationScoringSummaryTest(ProtectedViewTestMixin, TestCase):
         score = Curation.objects.get(slug="C000001").score
         self.assertEqual(total.get_text(strip=True), f"{score:g}")
 
+    def test_shows_the_contradictory_row(self):
+        curation = Curation.objects.get(slug="C000001")
+        curation.evidence.update(is_included=True, is_contradictory=True)  # type: ignore
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        row = soup.find(id="scoring-summary-contradictory")
+        assert row is not None
+        cells = [cell.get_text(strip=True) for cell in row.find_all(["th", "td"])]
+        evidence = list(curation.evidence.all())  # type: ignore
+        self.assertEqual(cells[0], "Contradictory")
+        self.assertEqual(cells[2], str(len(evidence)))
+        self.assertEqual(cells[-1], f"{-sum(e.score for e in evidence):g}")
+
     def test_header_shows_the_car_and_mondo_ids(self):
         curation = Curation.objects.get(slug="C000001")
         response = self.client.get(self.url)

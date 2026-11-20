@@ -104,8 +104,10 @@ Every model carries full change history via `django-simple-history`.
 
 Evidence records are scored across six steps that evaluate the quality and strength of
 the association study. Each step maps field values to a numeric point contribution;
-contributions are summed to produce a total score, which is compared against
-classification thresholds to suggest a final classification.
+contributions are summed to produce an evidence score. A curation's total score adds
+the scores of its included evidence, except contradictory evidence, which counts x -1.
+The total is compared against classification thresholds to suggest a final
+classification.
 
 The framework is defined in HLA framework paper. In the codebase it lives in
 `src/curation/score.py` (per-step scoring functions), `src/curation/constants/score.py`

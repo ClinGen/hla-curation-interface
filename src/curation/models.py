@@ -354,10 +354,16 @@ class Curation(models.Model):
 
     @property
     def score(self) -> float:
-        """The score for the curation."""
+        """The score for the curation.
+
+        Included evidence adds its score, except contradictory evidence, which
+        subtracts it.
+        """
         total = 0.0
         for evidence in self.evidence.all():  # type: ignore
-            if evidence.is_included:
+            if evidence.is_included and evidence.is_contradictory:
+                total -= evidence.score
+            elif evidence.is_included:
                 total += evidence.score
         return total
 
@@ -428,6 +434,14 @@ class Evidence(models.Model):
         default=False,
         verbose_name="Include",
         help_text="Should this evidence be included for scoring?",
+    )
+    is_contradictory = models.BooleanField(
+        default=False,
+        verbose_name="Contradictory",
+        help_text=(
+            "Does this evidence contradict the curation's association? If so, its "
+            "score is subtracted from the curation's score."
+        ),
     )
     is_gwas = models.BooleanField(
         default=False,
