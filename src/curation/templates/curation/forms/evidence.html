@@ -21,12 +21,15 @@
                     {% for hidden in form.hidden_fields %}
                         {{ hidden }}
                     {% endfor %}
-                    <tr>
+                    <tr id="evidence-row-{{ form.instance.slug }}">
                         <td>
                             <a href="{% url 'evidence-detail' curation_slug=object.slug evidence_slug=form.instance.slug %}"
                             >
                                 {{ form.instance.slug }}
                             </a>
+                            {% if form.non_field_errors %}
+                                <div class="has-text-danger">{{ form.non_field_errors }}</div>
+                            {% endif %}
                         </td>
                         <td>
                             <i>{{ form.instance.publication }}</i>
