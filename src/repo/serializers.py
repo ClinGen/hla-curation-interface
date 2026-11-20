@@ -218,6 +218,7 @@ EVIDENCE_COLUMNS = {
     "additional_phenotypes": "Additional Phenotypes",
     "has_association": "Has Association",
     "is_protective": "Protective",
+    "is_contradictory": "Contradictory",
 }
 
 # The evidence columns of a flat row, in order, so a classification without

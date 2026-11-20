@@ -28,6 +28,7 @@ PUBLIC_EVIDENCE_FIELDS = frozenset(
         "demographics",
         "effect_size_statistic",
         "has_association",
+        "is_contradictory",
         "is_gwas",
         "is_protective",
         "multiple_testing_correction",

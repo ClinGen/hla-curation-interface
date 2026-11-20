@@ -1056,6 +1056,11 @@ class PublishedEvidenceDetailTest(TestCase):
             ["Evidence Score", "GWAS"],
         )
 
+    def test_shows_whether_evidence_is_contradictory(self):
+        Evidence.objects.filter(pk=self.evidence.pk).update(is_contradictory=True)
+        response = self.client.get(self.url)
+        self.assertIn(("Contradictory", "Yes"), response.context["evidence_values"])
+
     def test_hides_internal_fields(self):
         response = self.client.get(self.url)
         self.assertNotContains(response, "Needs Review")
@@ -1586,6 +1591,12 @@ class CSVDownloadViewTest(TestCase):
         self.assertEqual(row["Publication Title"], self.publication.title)
         self.assertEqual(row["PubMed ID"], self.publication.pubmed_id)
 
+    def test_has_the_contradictory_column(self):
+        Evidence.objects.filter(pk=self.first_evidence.pk).update(is_contradictory=True)
+        rows = self._rows()
+        self.assertEqual(rows[0]["Contradictory"], "Yes")
+        self.assertEqual(rows[1]["Contradictory"], "No")
+
     def test_decimals_are_written_readably(self):
         Evidence.objects.filter(pk=self.first_evidence.pk).update(
             relative_risk=Decimal("0.60000")
@@ -1711,6 +1722,11 @@ class XLSXDownloadViewTest(TestCase):
         self.assertEqual(str(row["PubMed ID"]), self.publication.pubmed_id)
         groups = [demo.group for demo in self.evidence.demographics.all()]
         self.assertEqual(row["Demographics"], "; ".join(groups))
+
+    def test_evidence_sheet_has_the_contradictory_column(self):
+        Evidence.objects.filter(pk=self.evidence.pk).update(is_contradictory=True)
+        (row,) = self._sheet_rows(self._workbook(), "Evidence")
+        self.assertEqual(row["Contradictory"], "Yes")
 
     def test_values_are_readable_and_decimals_are_numbers(self):
         (row,) = self._sheet_rows(self._workbook(), "Evidence")

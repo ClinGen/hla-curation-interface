@@ -60,7 +60,7 @@ A Django fixture with a single minimal in-progress evidence item (`E000001`) lin
 
 ### `forms.py`
 
-Defines the Django forms used by curation and evidence views: `CurationCreateForm` (create a curation from a typed allele or haplotype and Mondo ID, showing only the lookup error, not a second "required" error, when a typed allele or haplotype can't be found, using the existing records or building new ones with `Allele.get_or_build`, `Haplotype.get_or_build`, and `Disease.get_or_build` and saving them with the curation in one transaction; it blocks a second root curation of the same HLA-disease pair), `TaskforceReviewForm` (taskforce review with decision, classification, notes, and review date; the review date is required when approving and can't be in the future; it takes a `suggested_classification` argument, labels the classification select with it, and requires an override reason when approving with any other classification; it takes an `evidence_summary_template` argument, won't approve a curation whose evidence summary is still that unchanged template, saves an unchanged template as no summary, and when approving requires the summary to mention the review date as the final approval date, in any common format such as "October 13, 2026" or "2026-10-13"), `EvidenceCreateForm` (attach an existing publication by its typed PubMed ID, with or without a `PMID:` prefix, suggesting publications as the curator types; an unknown PubMed ID is an error linking to Add Publication, and nothing is fetched), `EvidenceTopLevelEditForm` / `EvidenceTopLevelEditFormSet` (inline status/inclusion editing from the curation detail page), and `EvidenceEditForm` (the full step-by-step evidence data entry form with cross-field validation).
+Defines the Django forms used by curation and evidence views: `CurationCreateForm` (create a curation from a typed allele or haplotype and Mondo ID, showing only the lookup error, not a second "required" error, when a typed allele or haplotype can't be found, using the existing records or building new ones with `Allele.get_or_build`, `Haplotype.get_or_build`, and `Disease.get_or_build` and saving them with the curation in one transaction; it blocks a second root curation of the same HLA-disease pair), `TaskforceReviewForm` (taskforce review with decision, classification, notes, and review date; the review date is required when approving and can't be in the future; it takes a `suggested_classification` argument, labels the classification select with it, and requires an override reason when approving with any other classification; it takes an `evidence_summary_template` argument, won't approve a curation whose evidence summary is still that unchanged template, saves an unchanged template as no summary, and when approving requires the summary to mention the review date as the final approval date, in any common format such as "October 13, 2026" or "2026-10-13"), `EvidenceCreateForm` (attach an existing publication by its typed PubMed ID, with or without a `PMID:` prefix, suggesting publications as the curator types; an unknown PubMed ID is an error linking to Add Publication, and nothing is fetched), `EvidenceTopLevelEditForm` / `EvidenceTopLevelEditFormSet` (inline status, inclusion, and contradictory editing from the curation detail page), and `EvidenceEditForm` (the full step-by-step evidence data entry form with cross-field validation).
 
 ### `interval.py`
 
@@ -100,11 +100,11 @@ Full-page template for viewing a curation's details. Displays status banners (lo
 
 ### `templates/curation/edit/evidence.html`
 
-Full-page template for the curation-level evidence editing view. Renders the curation detail table, action buttons, and the inline evidence formset partial (`curation/forms/evidence.html`) that allows bulk status and inclusion changes.
+Full-page template for the curation-level evidence editing view. Renders the curation detail table, action buttons, and the inline evidence formset partial (`curation/forms/evidence.html`) that allows bulk status, inclusion, and contradictory changes.
 
 ### `templates/curation/forms/evidence.html`
 
-Reusable partial that renders the inline evidence formset table on the curation edit-evidence page, including columns for ID, publication, needs-review flag, editable status and inclusion fields, and the computed score for each evidence item.
+Reusable partial that renders the inline evidence formset table on the curation edit-evidence page, including columns for ID, publication, needs-review flag, editable status, inclusion, and contradictory fields, and the computed score for each evidence item.
 
 ### `templates/curation/evidence_scoring_summary.html`
 
@@ -140,7 +140,7 @@ Partial that renders a summary table for a `Curation` object, showing its allele
 
 ### `templates/curation/partials/evidence/detail_table.html`
 
-Partial that renders a read-only summary table listing all evidence items belonging to a curation, with columns for ID, publication, needs-review flag, status, inclusion checkbox, and score. Only HCI pages use it; HLArepo has its own public evidence table.
+Partial that renders a read-only summary table listing all evidence items belonging to a curation, with columns for ID, publication, needs-review flag, status, inclusion and contradictory checkboxes, and score. Only HCI pages use it; HLArepo has its own public evidence table.
 
 ### `templates/curation/scoring_summary.html`
 

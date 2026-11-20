@@ -1,6 +1,7 @@
 """Houses tests for the curation app's views."""
 
 from datetime import date, timedelta
+from decimal import Decimal
 from unittest.mock import MagicMock, PropertyMock, patch
 
 from bs4 import BeautifulSoup
@@ -30,6 +31,7 @@ from curation.constants.models.evidence import (
     AdditionalPhenotypes,
     EffectSizeStatistic,
     MultipleTestingCorrection,
+    NumFields,
     TypingMethod,
     Zygosity,
 )
@@ -520,6 +522,17 @@ class CurationDetailTest(ProtectedViewTestMixin, TestCase):
         super().setUp()
         self.client.force_login(self.user4_yes_phi_yes_perms)
 
+    def test_shows_whether_evidence_is_contradictory(self):
+        Evidence.objects.filter(slug="E000001").update(is_contradictory=True)
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        table = soup.find(id="evidence-table")
+        assert table is not None
+        headers = [th.get_text(strip=True) for th in table.find_all("th")]
+        column = headers.index("Contradictory")
+        cell = table.find("tbody").find("tr").find_all("td")[column]  # type: ignore
+        self.assertIsNotNone(cell.find("input", checked=True))
+
     def test_shows_evidence_in_tbody(self):
         response = self.client.get(self.url)
         self.assertContains(response, "E000001")
@@ -654,6 +667,7 @@ class CurationEditEvidenceTest(ProtectedViewTestMixin, TestCase):
         "Edit Evidence",
         "Status",
         "Included",
+        "Contradictory",
         "Save",
         "Cancel",
     ]
@@ -661,6 +675,32 @@ class CurationEditEvidenceTest(ProtectedViewTestMixin, TestCase):
     def setUp(self):
         super().setUp()
         self.client.force_login(self.user4_yes_phi_yes_perms)
+
+    def test_marking_evidence_contradictory_subtracts_its_score(self):
+        evidence = Evidence.objects.get(slug="E000001")
+        evidence.num_fields = NumFields.FOUR
+        evidence.has_association = True
+        evidence.p_value_string = "0.00001"
+        evidence.p_value = Decimal("0.00001")
+        evidence.save()
+        self.assertGreater(evidence.score, 0)
+        response = self.client.post(
+            self.url,
+            {
+                "form-TOTAL_FORMS": "1",
+                "form-INITIAL_FORMS": "1",
+                "form-0-id": str(evidence.pk),
+                "form-0-status": evidence.status,
+                "form-0-is_included": "on",
+                "form-0-is_contradictory": "on",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        evidence.refresh_from_db()
+        self.assertTrue(evidence.is_contradictory)
+        self.assertAlmostEqual(
+            Curation.objects.get(slug="C000001").score, -evidence.score
+        )
 
 
 class CurationListTest(ProtectedViewTestMixin, TestCase):
