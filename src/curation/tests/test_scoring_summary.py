@@ -306,6 +306,19 @@ class BuildEvidenceScoringSummaryTest(TestCase):
         rows = build_evidence_scoring_summary(self.curation).rows
         self.assertEqual([row.pmid for row in rows], ["111", "333"])
 
+    def test_contradictory_rows_are_marked_and_count_against_the_score(self):
+        supporting = self._add_evidence("111")
+        contradictory = self._add_evidence(
+            "222", num_fields=NumFields.TWO, is_contradictory=True
+        )
+        first, second = build_evidence_scoring_summary(self.curation).rows
+        self.assertFalse(first.is_contradictory)
+        self.assertEqual(first.total, supporting.score)
+        self.assertTrue(second.is_contradictory)
+        self.assertGreater(contradictory.score, 0)
+        self.assertEqual(second.total, -contradictory.score)
+        self.assertAlmostEqual(first.total + second.total, self.curation.score)
+
     def test_row_has_each_steps_points_and_the_evidence_score(self):
         evidence = self._add_evidence(
             "111",

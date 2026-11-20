@@ -485,6 +485,19 @@ class CurationEvidenceScoringSummaryTest(ProtectedViewTestMixin, TestCase):
         self.assertEqual(cells[0], evidence.publication.pubmed_id)
         self.assertEqual(cells[-1], f"{evidence.score:g}")
 
+    def test_marks_contradictory_evidence(self):
+        curation = Curation.objects.get(slug="C000001")
+        curation.evidence.update(is_included=True, is_contradictory=True)  # type: ignore
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        table = soup.find(id="evidence-scoring-summary-table")
+        assert table is not None
+        headers = [th.get_text(strip=True) for th in table.select("thead th")]
+        self.assertIn("Contradictory", headers)
+        (row,) = table.select("tbody tr")
+        cells = [td.get_text(strip=True) for td in row.find_all("td")]
+        self.assertEqual(cells[-2], "Yes")
+
     def test_title_and_pair_are_above_the_table(self):
         curation = Curation.objects.get(slug="C000001")
         response = self.client.get(self.url)
