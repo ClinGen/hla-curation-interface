@@ -3,7 +3,9 @@
 The table follows the taskforce's spreadsheet, with the scoring matrix's labels.
 For each category in the scoring framework, it counts the included evidence that
 landed there, totals the points before multipliers, and totals the points that
-count toward the score after each publication's multipliers.
+count toward the score after each publication's multipliers. Contradictory
+evidence is left out of the categories and gets a row of its own, since its
+points are subtracted from the score.
 """
 
 from dataclasses import dataclass, field
@@ -201,6 +203,15 @@ class SummaryCategory:
 
 
 @dataclass
+class ContradictoryRow:
+    """The included contradictory evidence, whose points count against the score."""
+
+    count: int
+    total: float
+    counted: float
+
+
+@dataclass
 class _Pair:
     """The HLA-disease pair a summary's header names."""
 
@@ -215,6 +226,7 @@ class _Pair:
 class ScoringSummary(_Pair):
     num_publications: int
     categories: list[SummaryCategory]
+    contradictory: ContradictoryRow
     total_score: float
 
 
@@ -228,13 +240,22 @@ def build_scoring_summary(curation: Curation) -> ScoringSummary:
         The table's header values, rows, and totals.
     """
     evidence = _included_evidence(curation)
-    categories = [_category(spec, evidence) for spec in _FRAMEWORK]
+    supporting = [e for e in evidence if not e.is_contradictory]
+    contradicting = [e for e in evidence if e.is_contradictory]
+    categories = [_category(spec, supporting) for spec in _FRAMEWORK]
+    contradictory = ContradictoryRow(
+        count=len(contradicting),
+        total=sum(e.score_before_multipliers for e in contradicting),
+        counted=-sum(e.score for e in contradicting),
+    )
     return ScoringSummary(
         **_pair(curation),
         # A publication can have more than one evidence item.
         num_publications=len({e.publication.pk for e in evidence if e.publication}),
         categories=categories,
-        total_score=sum(c.counted for c in categories if c.counted is not None),
+        contradictory=contradictory,
+        total_score=sum(c.counted for c in categories if c.counted is not None)
+        + contradictory.counted,
     )
 
 
