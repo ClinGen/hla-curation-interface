@@ -358,9 +358,10 @@ class EvidenceCreateForm(ModelForm):
 class EvidenceTopLevelEditForm(ModelForm):
     class Meta:
         model = Evidence
-        fields = ["status", "is_included"]
+        fields = ["status", "is_included", "is_contradictory"]
         widgets = {
             "is_included": forms.CheckboxInput(),
+            "is_contradictory": forms.CheckboxInput(),
         }
 
 

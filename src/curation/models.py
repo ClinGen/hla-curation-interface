@@ -785,6 +785,14 @@ class Evidence(models.Model):
         return self.score_before_multipliers * self.score_step_6a * self.score_step_6b
 
     @property
+    def signed_score(self) -> float:
+        """The score as it counts toward the curation: negative if contradictory.
+
+        This is for display. Curation.score does the subtraction itself.
+        """
+        return -self.score if self.is_contradictory else self.score
+
+    @property
     def score_before_multipliers(self) -> float:
         """The score for the evidence before multipliers are applied."""
         return (

@@ -3,7 +3,7 @@
         <summary><b>Evidence</b></summary>
 
         <div class="block table-container mt-4">
-            <table class="table is-fullwidth">
+            <table id="evidence-table" class="table is-fullwidth">
                 <thead>
                 <tr>
                     <th>ID</th>
@@ -11,6 +11,7 @@
                     <th>Needs Review</th>
                     <th>Status</th>
                     <th>Included</th>
+                    <th>Contradictory</th>
                     <th>Score</th>
                 </tr>
                 </thead>
@@ -48,7 +49,16 @@
                                 {% endif %}
                             </label>
                         </td>
-                        <td>{{ evidence.score|default_if_none:"------" }}</td>
+                        <td>
+                            <label class="checkbox" disabled>
+                                {% if evidence.is_contradictory %}
+                                    <input type="checkbox" disabled checked/>
+                                {% else %}
+                                    <input type="checkbox" disabled />
+                                {% endif %}
+                            </label>
+                        </td>
+                        <td>{{ evidence.signed_score|default_if_none:"------" }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
