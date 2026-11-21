@@ -710,6 +710,31 @@ class CurationEditEvidenceTest(ProtectedViewTestMixin, TestCase):
         score = soup.select("#evidence-formset-table tbody tr")[0].find_all("td")[-1]
         self.assertEqual(score.get_text(strip=True), str(-evidence.score))
 
+    def test_shows_model_errors_on_the_row_instead_of_crashing(self):
+        # Significant association needs a p-value, which this form doesn't have.
+        evidence = Evidence.objects.get(slug="E000001")
+        Evidence.objects.filter(pk=evidence.pk).update(has_association=True)
+        response = self.client.post(
+            self.url,
+            {
+                "form-TOTAL_FORMS": "1",
+                "form-INITIAL_FORMS": "1",
+                "form-0-id": str(evidence.pk),
+                "form-0-status": evidence.status,
+                "form-0-is_included": "on",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, "html.parser")
+        row = soup.find(id=f"evidence-row-{evidence.slug}")
+        assert row is not None
+        errors = row.find(class_="has-text-danger")
+        assert errors is not None
+        label = Evidence._meta.get_field("has_association").verbose_name  # type: ignore # ruff: ignore[private-member-access]
+        self.assertIn(f"{label}: No p-value provided.", errors.get_text())
+        evidence.refresh_from_db()
+        self.assertFalse(evidence.is_included)
+
     def test_marking_evidence_contradictory_subtracts_its_score(self):
         evidence = Evidence.objects.get(slug="E000001")
         evidence.num_fields = NumFields.FOUR

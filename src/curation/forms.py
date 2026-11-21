@@ -3,7 +3,11 @@ from collections.abc import Callable
 from datetime import date
 
 from django import forms
-from django.core.exceptions import ValidationError
+from django.core.exceptions import (
+    NON_FIELD_ERRORS,
+    FieldDoesNotExist,
+    ValidationError,
+)
 from django.db import transaction
 from django.forms import ModelForm, modelformset_factory
 from django.http import QueryDict
@@ -363,6 +367,33 @@ class EvidenceTopLevelEditForm(ModelForm):
             "is_included": forms.CheckboxInput(),
             "is_contradictory": forms.CheckboxInput(),
         }
+
+    # error is untyped to match the stubs, whose type for it is private.
+    def add_error(self, field: str | None, error) -> None:  # ruff: ignore[missing-type-function-argument]
+        """Adds an error, moving errors on fields this form lacks to the row.
+
+        Evidence.clean() checks fields that aren't in this form, such as
+        has_association. Django can't add an error to a field the form lacks, so
+        those become errors on the whole form, named after their field.
+        """
+        error_dict = getattr(error, "error_dict", None)
+        if field is None and error_dict:
+            errors: dict[str, list[ValidationError | str]] = {}
+            for name, messages in error_dict.items():
+                if name in self.fields or name == NON_FIELD_ERRORS:
+                    errors.setdefault(name, []).extend(messages)
+                    continue
+                try:
+                    model_field = Evidence._meta.get_field(name)  # ruff: ignore[private-member-access]
+                except FieldDoesNotExist:
+                    model_field = None
+                label = getattr(model_field, "verbose_name", name)
+                errors.setdefault(NON_FIELD_ERRORS, []).extend(
+                    f"{label}: {message}"
+                    for message in ValidationError(messages).messages
+                )
+            error = ValidationError(errors)
+        super().add_error(field, error)
 
 
 EvidenceTopLevelEditFormSet = modelformset_factory(
