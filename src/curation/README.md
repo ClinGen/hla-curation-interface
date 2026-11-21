@@ -68,7 +68,7 @@ Defines the `Interval` class, a small utility that represents a numeric interval
 
 ### `models.py`
 
-Defines the three core database models for the app. `Curation` tracks an allele or haplotype paired with a disease, manages lifecycle status transitions, stores taskforce review fields, and computes an aggregate score from its included evidence, subtracting the score of evidence marked `is_contradictory`. `Curation.existing_pairs()` returns the root curations (not copies) of a given allele or haplotype and disease. Its `classification_display` property gives the taskforce classification's label, else the suggested classification's, else "No Classification Set", and `is_classification_suggested` says whether that label is only a suggestion. `is_classification_overridden` is true when the taskforce classification is set and differs from the suggestion, in which case `taskforce_override_reason` holds the taskforce's reason. `has_taskforce_feedback` is true when any taskforce review field is set, and `taskforce_display` gives the taskforce's name. `Demographic` holds the biogeographic population groups. `Evidence` stores all study-level data fields (typing method, p-value, effect size, cohort size, etc.) and exposes per-step score properties that feed into the HLA scoring framework; all three models use `simple_history` for change tracking.
+Defines the three core database models for the app. `Curation` tracks an allele or haplotype paired with a disease, manages lifecycle status transitions, stores taskforce review fields, and computes an aggregate score from its included evidence, subtracting the score of evidence marked `is_contradictory`. `Evidence.signed_score` is the evidence's score made negative when it's contradictory, for the evidence tables to show; the scoring matrix keeps the positive `score`. `Curation.existing_pairs()` returns the root curations (not copies) of a given allele or haplotype and disease. Its `classification_display` property gives the taskforce classification's label, else the suggested classification's, else "No Classification Set", and `is_classification_suggested` says whether that label is only a suggestion. `is_classification_overridden` is true when the taskforce classification is set and differs from the suggestion, in which case `taskforce_override_reason` holds the taskforce's reason. `has_taskforce_feedback` is true when any taskforce review field is set, and `taskforce_display` gives the taskforce's name. `Demographic` holds the biogeographic population groups. `Evidence` stores all study-level data fields (typing method, p-value, effect size, cohort size, etc.) and exposes per-step score properties that feed into the HLA scoring framework; all three models use `simple_history` for change tracking.
 
 ### `score.py`
 
@@ -104,7 +104,7 @@ Full-page template for the curation-level evidence editing view. Renders the cur
 
 ### `templates/curation/forms/evidence.html`
 
-Reusable partial that renders the inline evidence formset table on the curation edit-evidence page, including columns for ID, publication, needs-review flag, editable status, inclusion, and contradictory fields, and the computed score for each evidence item.
+Reusable partial that renders the inline evidence formset table on the curation edit-evidence page, including columns for ID, publication, needs-review flag, editable status, inclusion, and contradictory fields, and each evidence item's `signed_score`, which is negative for contradictory evidence.
 
 ### `templates/curation/evidence_scoring_summary.html`
 
@@ -140,7 +140,7 @@ Partial that renders a summary table for a `Curation` object, showing its allele
 
 ### `templates/curation/partials/evidence/detail_table.html`
 
-Partial that renders a read-only summary table listing all evidence items belonging to a curation, with columns for ID, publication, needs-review flag, status, inclusion and contradictory checkboxes, and score. Only HCI pages use it; HLArepo has its own public evidence table.
+Partial that renders a read-only summary table listing all evidence items belonging to a curation, with columns for ID, publication, needs-review flag, status, inclusion and contradictory checkboxes, and score (`signed_score`, negative for contradictory evidence). Only HCI pages use it; HLArepo has its own public evidence table.
 
 ### `templates/curation/scoring_summary.html`
 

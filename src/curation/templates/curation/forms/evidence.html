@@ -4,7 +4,7 @@
     <form method="post">{% csrf_token %}
         {{ evidence_formset.management_form }}
         <div class="block table-container mt-4">
-            <table class="table is-fullwidth is-hoverable">
+            <table id="evidence-formset-table" class="table is-fullwidth is-hoverable">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -57,7 +57,7 @@
                             </td>
                         {% endfor %}
                         <td>
-                            {{ form.instance.score }}
+                            {{ form.instance.signed_score }}
                         </td>
                     </tr>
                 {% endfor %}

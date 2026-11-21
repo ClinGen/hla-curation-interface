@@ -49,6 +49,24 @@ from publication.models import Publication
 from repo.models import PublishedCuration
 
 
+def _give_evidence_a_score(slug: str, **fields) -> Evidence:
+    """Gives the evidence a significant association so it scores above zero.
+
+    Returns:
+        The updated evidence.
+    """
+    Evidence.objects.filter(slug=slug).update(
+        num_fields=NumFields.FOUR,
+        has_association=True,
+        p_value=Decimal("0.00001"),
+        p_value_string="0.00001",
+        **fields,
+    )
+    evidence = Evidence.objects.get(slug=slug)
+    assert evidence.score > 0
+    return evidence
+
+
 class CurationCreateTest(ProtectedViewTestMixin, TestCase):
     fixtures = [
         "test_alleles.json",
@@ -533,6 +551,15 @@ class CurationDetailTest(ProtectedViewTestMixin, TestCase):
         cell = table.find("tbody").find("tr").find_all("td")[column]  # type: ignore
         self.assertIsNotNone(cell.find("input", checked=True))
 
+    def test_shows_a_negative_score_for_contradictory_evidence(self):
+        evidence = _give_evidence_a_score("E000001", is_contradictory=True)
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        table = soup.find(id="evidence-table")
+        assert table is not None
+        score = table.select("tbody tr")[0].find_all("td")[-1]
+        self.assertEqual(score.get_text(strip=True), str(-evidence.score))
+
     def test_shows_evidence_in_tbody(self):
         response = self.client.get(self.url)
         self.assertContains(response, "E000001")
@@ -675,6 +702,13 @@ class CurationEditEvidenceTest(ProtectedViewTestMixin, TestCase):
     def setUp(self):
         super().setUp()
         self.client.force_login(self.user4_yes_phi_yes_perms)
+
+    def test_shows_a_negative_score_for_contradictory_evidence(self):
+        evidence = _give_evidence_a_score("E000001", is_contradictory=True)
+        response = self.client.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        score = soup.select("#evidence-formset-table tbody tr")[0].find_all("td")[-1]
+        self.assertEqual(score.get_text(strip=True), str(-evidence.score))
 
     def test_marking_evidence_contradictory_subtracts_its_score(self):
         evidence = Evidence.objects.get(slug="E000001")

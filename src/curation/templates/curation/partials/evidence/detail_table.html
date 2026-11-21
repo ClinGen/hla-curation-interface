@@ -58,7 +58,7 @@
                                 {% endif %}
                             </label>
                         </td>
-                        <td>{{ evidence.score|default_if_none:"------" }}</td>
+                        <td>{{ evidence.signed_score|default_if_none:"------" }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

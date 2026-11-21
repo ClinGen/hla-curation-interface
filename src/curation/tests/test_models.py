@@ -239,6 +239,18 @@ class TestCurationScore(TestCase):
         )
         self.assertAlmostEqual(self.curation.score, self.supporting.score)
 
+    def test_signed_score_is_negative_for_contradictory_evidence(self):
+        self.assertEqual(self.supporting.signed_score, self.supporting.score)
+        for is_included in [True, False]:
+            contradictory = self._add_evidence(
+                num_fields=NumFields.TWO,
+                is_contradictory=True,
+                is_included=is_included,
+            )
+            with self.subTest(is_included=is_included):
+                self.assertGreater(contradictory.score, 0)
+                self.assertEqual(contradictory.signed_score, -contradictory.score)
+
 
 class TestCurationClassificationDisplay(TestCase):
     fixtures = ["test_alleles.json", "test_diseases.json"]
