@@ -288,6 +288,7 @@ _EVIDENCE_COLUMNS = _evidence_columns()
 class EvidenceScoreRow:
     pmid: str
     points: list[float | None]
+    is_contradictory: bool
     total: float
 
 
@@ -299,6 +300,9 @@ class EvidenceScoringSummary(_Pair):
 
 def build_evidence_scoring_summary(curation: Curation) -> EvidenceScoringSummary:
     """Returns each included evidence item's points for each scoring step.
+
+    Each total is the item's signed_score, negative if it's contradictory, so the
+    totals add up to Curation.score.
 
     Args:
         curation: The curation to summarize.
@@ -313,7 +317,8 @@ def build_evidence_scoring_summary(curation: Curation) -> EvidenceScoringSummary
             EvidenceScoreRow(
                 pmid=e.publication.pubmed_id if e.publication else e.slug,
                 points=[getattr(e, attr) for _, attr in _EVIDENCE_COLUMNS],
-                total=e.score,
+                is_contradictory=e.is_contradictory,
+                total=e.signed_score,
             )
             for e in _included_evidence(curation)
         ],

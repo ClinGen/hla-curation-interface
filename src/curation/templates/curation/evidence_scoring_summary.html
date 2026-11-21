@@ -16,6 +16,7 @@
                     <th colspan="{{ summary.columns|length }}">
                         Scoring steps based on the HLA Curation Framework
                     </th>
+                    <th rowspan="2" class="is-bottom">Contradictory</th>
                     <th rowspan="2" class="is-points is-bottom">Total</th>
                 </tr>
                 <tr>
@@ -33,11 +34,12 @@
                                 {% if points is None %}&ndash;{% else %}{{ points|stringformat:"g" }}{% endif %}
                             </td>
                         {% endfor %}
+                        <td>{% if row.is_contradictory %}Yes{% else %}&ndash;{% endif %}</td>
                         <td class="is-number is-points">{{ row.total|stringformat:"g" }}</td>
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="{{ summary.columns|length|add:2 }}" class="is-note">
+                        <td colspan="{{ summary.columns|length|add:3 }}" class="is-note">
                             No evidence is included in the score.
                         </td>
                     </tr>
